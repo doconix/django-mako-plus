@@ -17,8 +17,8 @@ To run this:
 
 1. Prerequisites:
    - Install Python 3+ and ensure you can run "python" at the command prompt.
-   - Run "easy_install django" or otherwise install Django (https://www.djangoproject.com)
-   - Run "easy_install mako" or otherwise install Mako (http://www.makotemplates.org)
+   - Run "easy_install django" or "pip install django" or otherwise install Django (https://www.djangoproject.com)
+   - Run "easy_install mako" or "pip install mako" or otherwise install Mako (http://www.makotemplates.org)
    
 2. Edit the settings.py file and update your database settings (see the Django docs).   
    - If you just want to use sqlite3, set the NAME field to a valid filename on your system.
