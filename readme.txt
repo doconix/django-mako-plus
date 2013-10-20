@@ -7,7 +7,7 @@ This project also includes a number of other benefits:
 
 1. It allows calling views and html pages by convention rather than specific entries in urls.py. Any .html file on your site can be called without new entries in urls.py for every. single. new. page.
 
-2. It introduces the idea of URL parameters (see the running site).  These are great for including model ids in the URL.
+2. It introduces the idea of URL parameters (see the calculator example app in the download). 
 
 3. It separates view functions into different files rather than all-in-one style.  This prevents huge views.py files.
 
