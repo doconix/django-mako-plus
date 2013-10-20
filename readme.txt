@@ -1,24 +1,16 @@
-This archive contains a ready-made Django + Mako web site.  Django comes with its own template system,
-but it's fairly weak (by design).  Mako, on the other hand, is a fantastic template system that allows
-full Python code within HTML pages.   I call this Django Plus because it includes several
-benefits:
+This archive contains a ready-made Django + Mako web site.  Django comes with its own template system, but it's fairly weak (by design).  Mako, on the other hand, is a fantastic template system that allows full Python code within HTML pages.   I call this Django Plus because it includes several benefits:
 
-1. It allows calling views and html pages by convention rather than specific entries in urls.py.
-   Any .html file on your site can be called without new entries in urls.py for every. single.
-   new. page.
+1. It allows calling views and html pages by convention rather than specific entries in urls.py. Any .html file on your site can be called without new entries in urls.py for every. single. new. page.
 
-2. It provides the idea of URL parameters (see the running site).  These are great for including
-   model ids in the URL.
+2. It provides the idea of URL parameters (see the running site).  These are great for including model ids in the URL.
 
-3. It separates view functions into different files rather than all-in-one style.  This prevents
-   huge views.py files.
+3. It separates view functions into different files rather than all-in-one style.  This prevents huge views.py files.
 
-4. It automatically includes CSS and JS files, and it allows Python code within these files.  These
-   static files get connected right into the Mako template inheritance tree.
+4. It automatically includes CSS and JS files, and it allows Python code within these files.  These static files get connected right into the Mako template inheritance tree.
 
-5. It uses the Mako templating engine rather than the weaker Django templating engine.  Why would I
-   want to learn a whole new language for templating when Mako uses my favorite language: Python?
+5. It uses the Mako templating engine rather than the weaker Django templating engine.  Why would I want to learn a whole new language for templating when Mako uses my favorite language: Python?
 
+But don't worry, you'll still get all the Django goodness with ORM, views, forms, etc.
 
 
 To run this:
