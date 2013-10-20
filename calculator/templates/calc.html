@@ -30,14 +30,14 @@
   %endif
 
   <!-- Example use of static url for graphics, css files, scripts, etc. -->
-  <img style="float: right;" src="${ STATIC_URL }calculator/calc.gif"/>
+  <img style="float: right;" src="${ STATIC_URL }calculator/images/calculator-icon.png"/>
   <!-- Calculator -->
   <h2>Calculator Example:</h2>
   %if calc:
     <p>The last calculation was: ${ calc }</p>
   %endif
   
-  <p>New calcuation:</p>
+  <p>New calculation:</p>
   <form action="/calculator/calc/A/B/C/" method="post">
   ${ form.as_p() }
   <input type="submit" value="Submit"/>
@@ -49,19 +49,6 @@
   <p id="calculator-log">Log not loaded yet.</p>
   <button id="load-calculator-log">(Re)Load Log</button>
   <button id="delete-calculator-log">Delete Log</button>
-  <script>
-    $(function() {
-      // load log click
-      $('#load-calculator-log').click(function() {
-        $('#calculator-log').load('/calculator/calc__loadlog/');
-      });//click
-
-      // delete log click
-      $('#delete-calculator-log').click(function() {
-        $('#calculator-log').load('/calculator/calc__deletelog/');
-      });//click
-    });//func
-  </script>
 
   
 </%block>  
