@@ -1,4 +1,7 @@
-This archive contains a front controller that integrates Django with Mako templates.  Django comes with its own template system, but it's fairly weak (by design).  Mako, on the other hand, is a fantastic template system that allows full Python code within HTML pages.   I call this Django Plus because it includes several benefits:
+DESCRIPTION
+===========
+
+This project is a front controller that integrates Django with Mako templates.  Django comes with its own template system, but it's fairly weak (by design).  Mako, on the other hand, is a fantastic template system that allows full Python code within HTML pages.   I call this Django Plus because it includes several benefits:
 
 1. It allows calling views and html pages by convention rather than specific entries in urls.py. Any .html file on your site can be called without new entries in urls.py for every. single. new. page.
 
@@ -14,9 +17,10 @@ But don't worry, you'll still get all the Django goodness with ORM, views, forms
 
 
 
-I've distributed this as a ready-to-run Django project.  I'm hopeful that will make it easier for people to try it out.
-Start by downloading the django-mako-plus .zip file from GitHub.  Unzip it to a directory on your machine.  it's a 
-full, working project.
+QUICK SETUP AND RUN
+===================
+
+I've distributed this as a ready-to-run Django project.  I'm hopeful that will make it easier for people to try it out.  Start by downloading the django-mako-plus .zip file from GitHub.  Unzip it to a directory on your machine.  it's a full, working project.
 
 Then run through the following:
 
@@ -40,8 +44,16 @@ Then run through the following:
 
 
 
-Integrating into an existing Django project:
+INTEGRATING INTO AN EXISTING PROJECT
+====================================
 
 1. Copy the base_app directory into your project.  This is a standard Django application that you should install just like any other Django app.
 
 2. Copy the Mako-specific settings at the end of the settings.py file into your project's settings.py file.  Modify them to fit your setup.
+
+
+
+AUTHOR
+======
+
+This project is maintained by Conan C. Albrecht <ca@byu.edu>.  You can view my blog at http://warp.byu.edu/.
