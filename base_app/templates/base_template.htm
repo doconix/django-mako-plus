@@ -2,7 +2,7 @@
 ## by naming this file with .htm, it can't be viewed directly (urls.py only allows full .html)
 
 ## set up a StaticRenderer object to enable the CSS/JS automatic inclusion magic.
-<%! from base import static_files %>
+<%! from base_app import static_files %>
 <%  static_renderer = static_files.StaticRenderer(self) %>
 
 <html>
