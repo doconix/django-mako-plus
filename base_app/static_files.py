@@ -14,12 +14,12 @@ __doc__ = '''
 
   Because of this chain, the following styles and scripts are automatically included in the rendered page:
 
-    /base/styles/base.css
-    /base/styles/base.cssm (this one can contain dynamic Python code)
+    /base_app/styles/base.css
+    /base_app/styles/base.cssm (this one can contain dynamic Python code)
     /calculator/styles/index.css
     /calculator/styles/index.cssm (this one can contain dynamic Python code)
-    /base/scripts/base.js
-    /base/scripts/base.jsm (this one can contain dynamic Python code)
+    /base_app/scripts/base.js
+    /base_app/scripts/base.jsm (this one can contain dynamic Python code)
     /calculator/scripts/index.js
     /calculator/scripts/index.jsm (yep, you guessed it, this one can contain dynamic Python code)
     
@@ -55,7 +55,7 @@ SERVER_START_MINUTE = int(time.time() / 60)  # minutes since Jan 1, 1970
 
 SCRIPT_RENDERERS = {}
 STYLE_RENDERERS = {}
-for appname in settings.CUSTOM_APPS:
+for appname in settings.MAKO_ENABLED_APPS:
   SCRIPT_RENDERERS[appname] = MakoTemplateRenderer(appname, 'scripts')
   STYLE_RENDERERS[appname] = MakoTemplateRenderer(appname, 'styles')
 
