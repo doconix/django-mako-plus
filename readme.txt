@@ -1,7 +1,9 @@
 DESCRIPTION
 ===========
 
-This project is a front controller that integrates Django with Mako templates.  Django comes with its own template system, but it's fairly weak (by design).  Mako, on the other hand, is a fantastic template system that allows full Python code within HTML pages.   I call this Django Plus because it includes several benefits:
+This project is a front controller that integrates Django with Mako templates.  Django comes with its own template system, but it's fairly weak (by design).  Mako, on the other hand, is a fantastic template system that allows full Python code within HTML pages. 
+
+This project also includes a number of other benefits:
 
 1. It allows calling views and html pages by convention rather than specific entries in urls.py. Any .html file on your site can be called without new entries in urls.py for every. single. new. page.
 
