@@ -1,0 +1,32 @@
+## this is the skeleton of all pages on our site - it defines the basic structure with our menus, sidebars, etc.
+## by naming this file with .htm, it can't be viewed directly (urls.py only allows full .html)
+
+## set up a StaticRenderer object to enable the CSS/JS automatic inclusion magic.
+<%! from base import static_files %>
+<%  static_renderer = static_files.StaticRenderer(self) %>
+
+<html>
+  <head>
+    <title>My Site</title>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.1/jquery.min.js"></script>
+  
+    ## render the css
+    ${ static_renderer.get_template_css(request, context)  }
+  
+  </head>
+  <body>
+  
+    <header>
+      <img src="${ STATIC_URL }base/images/python.png"/>
+      <div id="site_header">My Site</div>
+    </header>
+  
+    <%block name="content">
+      Site content goes here in sub-templates.
+    </%block>  
+  
+    ## render the JS for this page (placed here at the end because browsers apparently load faster when JS is at the end)
+    ${ static_renderer.get_template_js(request, context)  }
+  
+  </body>
+</html>

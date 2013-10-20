@@ -1,0 +1,12 @@
+/* 
+  Static CSS for the base.html page goes here.  Since base.html is the common ancestor of all templates of all apps on our site,
+  CSS included here will be placed on *every* page of the site.
+*/
+
+html, body {
+  background-color: #F4F4F4;
+}
+
+header {
+  text-align: center;
+}
