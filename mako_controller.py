@@ -1,7 +1,7 @@
 #!/usr/bin/python
 #
 #   Author:  Conan Albrecht <ca&byu,edu>
-#   License: Public Domain
+#   License: Apache Open Source License
 #   Version: 2013.10.19
 #
 __doc__ = '''
