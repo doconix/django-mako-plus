@@ -27,8 +27,8 @@ __doc__ = '''
   1. Defines the MakoTemplateRenderer object, which runs a Mako template.  Any view function
      can call this method to render a template.  Example views.py:
 
-     import mako_controller
-     templater = mako_controller.MakoTemplateRenderer('thisappname')  # only need one of these per app
+     import base_app.controller
+     templater = base_app.controller.MakoTemplateRenderer('thisappname')  # only need one of these per app
      
      def myview(request):
        # a bunch of processing here
@@ -45,14 +45,14 @@ __doc__ = '''
      this, add the following to your urls.py file for each app (change appname to your app name):
   
         # matches a totally empty url (goes to default app, default page)
-        (r'^$', 'extensions.mako_controller.route_request' ),
+        (r'^$', 'extensions.base_app.controller.route_request' ),
 
         # matches url with app and page (path, func, urlparams optional):
         #  app/path/to/module/page.func/param1/param2/param3
         #  app/page.func/param1/param2
         #  app/page/param1/param2
         #  app/page
-        (r'^(?P<app>[^/]+?)(?P<page>/[^/]+?)?(?P<func>__[^/]+)?(?P<urlparams>/.*)?$', 'extensions.mako_controller.route_request' ),
+        (r'^(?P<app>[^/]+?)(?P<page>/[^/]+?)?(?P<func>__[^/]+)?(?P<urlparams>/.*)?$', 'extensions.base_app.controller.route_request' ),
 
      URLs are provided in /appname/pagename__funcname/param1/param2/param3/ format.  This has three parts:
        - The path name is everything up to the .html (per the regex in urls.py). The path name specifies the
@@ -127,7 +127,7 @@ log = logging.getLogger('django')
 def route_request(request):
     '''The main router for all calls coming in to the system.'''
     # output the variables so the programmer can debug where this is routing
-    log.debug('mako_controller.py :: HtmlPageServer processing: app=%s, page=%s, funcname=%s, urlparams=%s' % (request.controller_app, request.controller_page, request.controller_funcname, request.urlparams))
+    log.debug('base_app.controller.py :: HtmlPageServer processing: app=%s, page=%s, funcname=%s, urlparams=%s' % (request.controller_app, request.controller_page, request.controller_funcname, request.urlparams))
 
     # first try going to the view function for this request
     # we look for a views/name.py file where name is the same name as the HTML file
@@ -135,33 +135,33 @@ def route_request(request):
     request.controller_view_function = 'process_request%s' % (request.controller_funcname)
     request.controller_view_module = '.'.join([ request.controller_app, 'views', request.controller_page ])
     
-    # this next line assumes that mako_controller.py is one level below the settings.py file (hence the '..')
-    full_module_filename = os.path.normpath(os.path.join(settings.SITE_ROOT, request.controller_view_module.replace('.', '/') + '.py'))
+    # this next line assumes that base_app.controller.py is one level below the settings.py file (hence the '..')
+    full_module_filename = os.path.normpath(os.path.join(settings.MAKO_PROJECT_ROOT, request.controller_view_module.replace('.', '/') + '.py'))
     while True:
       try:
         # look for the module
         if os.path.exists(full_module_filename):
           module_obj = importlib.import_module(request.controller_view_module)
           if hasattr(module_obj, request.controller_view_function):
-            log.debug('mako_controller.py :: calling view function %s.%s' % (request.controller_view_module, request.controller_view_function))
+            log.debug('base_app.controller.py :: calling view function %s.%s' % (request.controller_view_module, request.controller_view_function))
             try: 
               response = getattr(module_obj, request.controller_view_function)(request)
             except RedirectException as e: # redirect to another page
-              log.debug('mako_controller.py :: view function %s.%s redirected processing to %s' % (request.controller_view_module, request.controller_view_function, e.redirect_to))
+              log.debug('base_app.controller.py :: view function %s.%s redirected processing to %s' % (request.controller_view_module, request.controller_view_function, e.redirect_to))
               if e.permanent:
                 return HttpResponsePermanentRedirect(e.redirect_to)
               return HttpResponseRedirect(e.redirect_to)
           else:
-            log.debug('mako_controller.py :: view function %s not in module %s; returning 404 not found' % (request.controller_view_function, request.controller_view_module))
+            log.debug('base_app.controller.py :: view function %s not in module %s; returning 404 not found' % (request.controller_view_function, request.controller_view_module))
             raise Http404
         else:
-          log.debug('mako_controller.py :: module %s not found; sending processing directly to the template' % (request.controller_view_module))
+          log.debug('base_app.controller.py :: module %s not found; sending processing directly to the template' % (request.controller_view_module))
         break
       except InternalViewRedirectException as ivr:
         request.controller_view_module = ivr.redirect_module
         request.controller_view_function = ivr.redirect_function
-        full_module_filename = os.path.normpath(os.path.join(settings.SITE_ROOT, request.controller_view_module.replace('.', '/') + '.py'))
-        log.debug('mako_controller.py :: received an InternalViewRedirect to %s -> %s' % (full_module_filename, request.controller_view_function))
+        full_module_filename = os.path.normpath(os.path.join(settings.MAKO_PROJECT_ROOT, request.controller_view_module.replace('.', '/') + '.py'))
+        log.debug('base_app.controller.py :: received an InternalViewRedirect to %s -> %s' % (full_module_filename, request.controller_view_function))
       
     # if we get here, a matching view wasn't found; look for a matching template
     if response == None and request.controller_app in TEMPLATE_RENDERERS:
@@ -178,7 +178,7 @@ def route_request(request):
     
 
 ###############################################################
-###   Exceptions used to direct the mako_controller
+###   Exceptions used to direct the base_app.controller
 
 class InternalViewRedirectException(Exception):
   '''View functions can throw this exception to indicate that a new view
@@ -216,17 +216,17 @@ class RedirectException(Exception):
 
 class MakoTemplateRenderer:
   '''Renders Mako templates.  Note that the following defaults are used:
-       templates_dir  => project_path/app_path/templates/  (assuming settings.MAKO_CONTROLLER_TEMPLATES_DIR is set to 'templates')
-       cache_dir      => project_path/template_cache/      (assuming settings.MAKO_CONTROLLER_TEMPLATES_CACHE_DIR is set to 'template_cache/applications/)
+       templates_dir  => project_path/app_path/templates/  (assuming settings.base_app.controller_TEMPLATES_DIR is set to 'templates')
+       cache_dir      => project_path/template_cache/      (assuming settings.MAKO_TEMPLATES_CACHE_DIR is set to 'template_cache/applications/)
        cache_size     => 2000
   '''
   def __init__(self, app_path, template_subdir='templates'):
     '''Creates a renderer to the given path (relateive to the project root where settings.STATIC_ROOT points to)'''
-    project_path = os.path.normpath(settings.SITE_ROOT)
+    project_path = os.path.normpath(settings.MAKO_PROJECT_ROOT)
     self.app_path = app_path
-    self.template_search_dirs = [ os.path.abspath(os.path.join(project_path, self.app_path, template_subdir)) ] + settings.MAKO_CONTROLLER_TEMPLATES_DIRS
-    self.cache_root = os.path.abspath(os.path.join(project_path, app_path, settings.MAKO_CONTROLLER_TEMPLATES_CACHE_DIR, template_subdir)) 
-    self.tlookup = TemplateLookup(directories=self.template_search_dirs, imports=settings.MAKO_DEFAULT_TEMPLATE_IMPORTS, module_directory=self.cache_root, collection_size=2000, filesystem_checks=settings.TEMPLATE_DEBUG)
+    self.template_search_dirs = [ os.path.abspath(os.path.join(project_path, self.app_path, template_subdir)) ] + settings.MAKO_TEMPLATES_DIRS
+    self.cache_root = os.path.abspath(os.path.join(project_path, app_path, settings.MAKO_TEMPLATES_CACHE_DIR, template_subdir)) 
+    self.tlookup = TemplateLookup(directories=self.template_search_dirs, imports=settings.MAKO_DEFAULT_TEMPLATE_IMPORTS, module_directory=self.cache_root, collection_size=2000, filesystem_checks=settings.DEBUG)
 
 
   def render(self, request, template, params={}):
@@ -236,7 +236,7 @@ class MakoTemplateRenderer:
        This method raises a TopLevelLookupException if the template is not found.
     
        @request  The context request from Django
-       @template The template file path to render.  This is relative to the app_path/MAKO_CONTROLLER_TEMPLATES_DIR/ directory.
+       @template The template file path to render.  This is relative to the app_path/base_app.controller_TEMPLATES_DIR/ directory.
                  For example, to render app_path/templates/page1, set template="page1.html", assuming you have
                  set up the variables as described in the documentation above.
        @params   A dictionary of name=value variables to send to the template page.
@@ -256,8 +256,8 @@ class MakoTemplateRenderer:
       template_obj.template_full_path = template_obj.filename
     if not hasattr(template_obj, 'mako_template_renderer'):  # if the first time, add a reference to this renderer object
       template_obj.mako_template_renderer = self
-    log.debug('mako_controller.py :: rendering template %s' % template_obj.filename)
-    if settings.TEMPLATE_DEBUG:
+    log.debug('base_app.controller.py :: rendering template %s' % template_obj.filename)
+    if settings.DEBUG:
       try:
         return template_obj.render_unicode(**context_dict)
       except:
@@ -270,7 +270,7 @@ class MakoTemplateRenderer:
     '''Runs a template and returns an HttpRequest object to it. 
     
        @request  The context request from Django
-       @template The template file path to render.  This is relative to the app_path/MAKO_CONTROLLER_TEMPLATES_DIR/ directory.
+       @template The template file path to render.  This is relative to the app_path/base_app.controller_TEMPLATES_DIR/ directory.
                  For example, to render app_path/templates/page1, set template="page1.html", assuming you have
                  set up the variables as described in the documentation above.
        @params   A dictionary of name=value variables to send to the template page.
@@ -280,7 +280,7 @@ class MakoTemplateRenderer:
       content = self.render(request, template, params)
       return HttpResponse(content.encode(settings.DEFAULT_CHARSET), content_type='%s; charset=%s' % (content_type, settings.DEFAULT_CHARSET))
     except TopLevelLookupException: # template file not found    
-      log.debug('mako_controller.py :: template "%s" not found in search path: %s.' % (template, self.template_search_dirs))
+      log.debug('base_app.controller.py :: template "%s" not found in search path: %s.' % (template, self.template_search_dirs))
       raise Http404()
     except RedirectException as e: # redirect to another page
       if e.permanent:
@@ -290,7 +290,7 @@ class MakoTemplateRenderer:
 
 # these are the apps we can render templates for - it is used in route_request at the top
 TEMPLATE_RENDERERS = {}
-for appname in settings.CUSTOM_APPS:
+for appname in settings.MAKO_ENABLED_APPS:
   TEMPLATE_RENDERERS[appname] = MakoTemplateRenderer(appname)
 
 
@@ -298,10 +298,10 @@ for appname in settings.CUSTOM_APPS:
 
 ##########################################################
 ###   Middleware the prepares the request for
-###   use with the mako_controller
+###   use with the base_app.controller
 
 class RequestInitMiddleware:
-  '''Adds several fields to the request that our mako_controller needs.
+  '''Adds several fields to the request that our base_app.controller needs.
   
      This class MUST be included in settings.py -> MIDDLEWARE_CLASSES.
   '''

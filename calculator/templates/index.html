@@ -1,9 +1,9 @@
-## Mako can find this base file because it's in the settings.py -> MAKO_CONTROLLER_TEMPLATES_DIRS list
-<%inherit file="/base/templates/base.htm" />
+## Mako can find this base file because it's in the settings.py -> MAKO_TEMPLATES_DIRS list
+<%inherit file="base_template.htm" />
 
 <%block name="content">
   <p>
-    Welcome to our home page!  This page explores the primary benefits of the mako_controller in Django.
+    Welcome to our home page!  This page explores the primary benefits of the base_app.controller in Django.
   </p>
   <h2>URL Matching by Convention - Sound Pythonic?</h2>
   <p>
@@ -12,16 +12,16 @@
     renders the <tt>/calculator/templates/index.html</tt> file directly.
   </p>    
   <p>
-    In other words, this index page is a great example of the mako_controller.  Instead of putting an entry in urls.py
+    In other words, this index page is a great example of the base_app.controller.  Instead of putting an entry in urls.py
     for every. single. page. on. your. site (the normal Django way), it uses a convention to know which pages can be
     displayed.  
   </p>
   <h2>Automatic CSS and Javascript Inclusion</h2>
   <p>
-    In addition, the parent template of this file (<tt>base/templates/base.htm</tt>) automatically includes styles and scripts
+    In addition, the parent template of this file (<tt>base_app/templates/base_template.htm</tt>) automatically includes styles and scripts
     for each template in the inheritance chain.  For example, this index page has the following inheritance:
     <ol>
-      <li>Base template: <tt>/base/templates/base.htm</tt></li>
+      <li>Base template: <tt>/base_app/templates/base_template.htm</tt></li>
       <li>Child template: <tt>/calculator/templates/index.html</tt></li>
     </ol>
     Because of this chain, the following styles and scripts are automatically included in the rendered page:

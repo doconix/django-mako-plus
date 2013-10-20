@@ -5,11 +5,11 @@
 #   Version: 2013.10.19
 #
 __doc__ = '''
-  This file is used by base/templates/base.htm to automatically include the .css, .cssm, .js, and .jsm
+  This file is used by base_app/templates/base_template.htm to automatically include the .css, .cssm, .js, and .jsm
   files into a template hierarchy.
   
   For example, suppose we have the following template chain:
-    Base template: /base/templates/base.htm
+    Base template: /base_app/templates/base_template.htm
     Child template: /calculator/templates/index.html
 
   Because of this chain, the following styles and scripts are automatically included in the rendered page:
@@ -33,7 +33,7 @@ __doc__ = '''
 '''
 
 from django.conf import settings
-from mako_controller import MakoTemplateRenderer
+from base_app.controller import MakoTemplateRenderer
 import os, os.path, time
 
 

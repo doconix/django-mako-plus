@@ -12,16 +12,16 @@ urls = [
 ]
 
 # items for debug mode only
-if settings.DEVELOPMENT_SERVER:
+if settings.DEBUG:
   urls.extend([
-    # static file on the site - for development server only.  Normally Nginx handles this before Django gets control (Django is proxied)
+    # static file on the site - for development server only.  Normally Apache/Nginx handles this before Django gets control (Django is proxied)
     (r'^static/(?P<path>.*)$', 'django.views.static.serve',  { 'document_root': settings.STATIC_ROOT }),
   ])
 
 # dynamic urls for just about anything - send to the central controller
 urls.extend([
-  # the mako_controller handles every request - this line is the glue that connects Mako to Django
-  (r'^.*$', 'mako_controller.route_request' ),
+  # the base_app.controller handles every request - this line is the glue that connects Mako to Django
+  (r'^.*$', 'base_app.controller.route_request' ),
 
 ])
 

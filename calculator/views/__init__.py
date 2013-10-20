@@ -1,4 +1,4 @@
-import mako_controller
+import base_app.controller
 
 
 ###############################################################
@@ -6,4 +6,4 @@ import mako_controller
 ###   here once and then use it throughout the views
 ###   within this app because we only need one.
 
-templater = mako_controller.MakoTemplateRenderer('calculator')
+templater = base_app.controller.MakoTemplateRenderer('calculator')

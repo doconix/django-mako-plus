@@ -1,9 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
           
-DEVELOPMENT_SERVER = True
-DEBUG = DEVELOPMENT_SERVER           # This one is for Django
-TEMPLATE_DEBUG = DEVELOPMENT_SERVER  # This one is for mako_controller
+DEBUG = True
 
 # The root folder of the entire site - 
 import os.path
@@ -99,8 +97,8 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.locale.LocaleMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    # our custom mako_controller middleware
-    'mako_controller.RequestInitMiddleware',
+    # our custom base_app.controller middleware
+    'base_app.controller.RequestInitMiddleware',
 )
 
 AUTHENTICATION_BACKENDS = (
@@ -109,8 +107,7 @@ AUTHENTICATION_BACKENDS = (
 )
     
 # our django applications
-IMPORTED_APPS = (
-    # the django apps we're using
+INSTALLED_APPS = (
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -119,31 +116,10 @@ IMPORTED_APPS = (
     'django.contrib.staticfiles',
     'django.contrib.admin',
     'django.contrib.admindocs',
-)
-CUSTOM_APPS = (
-    'base',                    # the base templates/css/javascript for all other apps
+    'base_app',                # the base templates/css/javascript for all other apps
     'calculator',              # the calculator app
 )
-INSTALLED_APPS = CUSTOM_APPS + IMPORTED_APPS
 
-
-# the default app/templates/ directory is always included in the template search path
-# define any additional search directories here
-MAKO_CONTROLLER_TEMPLATES_DIRS = [ 
-  os.path.abspath(SITE_ROOT)  # allows templates to inherit from templates in other apps, such as base/templates/base.htm
-]
-
-# identifies where the Mako template cache will be stored, relative to each app
-MAKO_CONTROLLER_TEMPLATES_CACHE_DIR = 'cached_templates/'
-
-# the default page to render in Mako when no path is given
-MAKO_DEFAULT_HTML_PAGE = 'index'  
-
-# these are included in every template by default - if you put your most-used libraries here, you won't have to import them exlicitly in templates
-MAKO_DEFAULT_TEMPLATE_IMPORTS = [
-  'import os, os.path, re',
-  'from calculator import models as cmod',
-]
 
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to
@@ -185,3 +161,40 @@ LOGGING = {
         },
     },
 }
+
+
+
+###############################################################
+###   Specific settings for the base_app Controller
+
+# which of our apps will be used with the Mako engine. 
+# typically this should be all of the custom apps of your project.
+MAKO_ENABLED_APPS = (
+    'base_app',                # the base templates/css/javascript for all other apps
+    'calculator',              # the calculator app
+)
+
+# the app and project root - this code should find it automatically in most cases
+import os.path
+MAKO_PROJECT_ROOT = os.path.dirname(os.path.realpath(__file__))
+
+# the default app/templates/ directory is always included in the template search path
+# define any additional search directories here - this allows inheritance between apps
+# absolute paths are suggested
+MAKO_TEMPLATES_DIRS = [ 
+  os.path.join(MAKO_PROJECT_ROOT, 'base_app', 'templates'),
+]
+
+# identifies where the Mako template cache will be stored, relative to each app
+MAKO_TEMPLATES_CACHE_DIR = 'cached_templates/'
+
+# the default page to render in Mako when no path is given
+MAKO_DEFAULT_HTML_PAGE = 'index'  
+
+# these are included in every template by default - if you put your most-used libraries here, you won't have to import them exlicitly in templates
+MAKO_DEFAULT_TEMPLATE_IMPORTS = [
+  'import os, os.path, re',
+]
+
+###  End of settings for the base_app Controller
+################################################################

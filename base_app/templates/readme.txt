@@ -1,4 +1,4 @@
-Note that base.htm ends with .htm rather than .html.  While either can be rendered by Mako, the mako_controller is
+Note that base.htm ends with .htm rather than .html.  While either can be rendered by Mako, the base_app.controller is
 programmed to only call .html files directly (i.e. without an explicit view).
 
 Therefore, since this ends with .htm instead, it can only be used as a template ancestor.  If the browser tried
