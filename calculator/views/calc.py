@@ -3,7 +3,7 @@ from django.conf import settings
 from django.http import HttpResponse, HttpResponseRedirect, Http404
 from calculator.models import *
 from . import templater
-
+import random
 
 
 ################################################################
@@ -31,7 +31,8 @@ def process_request(request):
   # render the template for this page
   template_vars = {
     'form': form, 
-    'calc': calc
+    'calc': calc,
+    'favcolor': random.choice(['green', 'blue', 'red', 'brown', 'white', 'black']),
   }
   return templater.render_to_response(request, 'calc.html', template_vars)
 
@@ -41,6 +42,7 @@ class CalculatorForm(forms.Form):
   '''A simple example form that adds two numbers'''
   num1 = forms.IntegerField()
   num2 = forms.IntegerField()
+  whatever = forms.CharField(required=False, label="Hey There")
   
   # cleaning methods would normally go here
   

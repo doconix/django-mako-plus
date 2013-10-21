@@ -1,9 +1,9 @@
 DESCRIPTION
 ===========
 
-This project is a front controller that integrates Django with Mako templates.  Django comes with its own template system, but it's fairly weak (by design).  Mako, on the other hand, is a fantastic template system that allows full Python code within HTML pages. 
+This app is a front controller that integrates Django with Mako templates.  Django comes with its own template system, but it's fairly weak (by design).  Mako, on the other hand, is a fantastic template system that allows full Python code within HTML pages. 
 
-This project also includes a number of other benefits:
+This app provides a number of benefits:
 
 1. It allows calling views and html pages by convention rather than specific entries in urls.py. Any .html file on your site can be called without new entries in urls.py for every. single. new. page.
 
@@ -22,7 +22,7 @@ But don't worry, you'll still get all the Django goodness with ORM, views, forms
 QUICK SETUP AND RUN
 ===================
 
-I've distributed this as a ready-to-run Django project.  I'm hopeful that will make it easier for people to try it out.  Start by downloading the django-mako-plus .zip file from GitHub.  Unzip it to a directory on your machine.  it's a full, working project.
+I've distributed this as a ready-to-run Django project.  I'm hopeful that will make it easier for people to try it out.  Start by downloading the django-mako-plus .zip file from GitHub.  Unzip it to a directory on your machine.  it's a full, working project.  I've tested it on Python 3 and Django 1.5, but it should work on Django 1.4 as well.
 
 Then run through the following:
 
@@ -53,6 +53,20 @@ INTEGRATING INTO AN EXISTING PROJECT
 
 2. Copy the Mako-specific settings at the end of the settings.py file into your project's settings.py file.  Modify them to fit your setup.
 
+
+
+HOW DO I CREATE NEW APPS BASED ON THIS?
+=======================================
+
+That's the exact idea!  This should be the base of other apps in your system.  Since the structure is a little different than normal Django apps, do the following to create a new app:
+
+1. Copy (or rename) the 'calculator' directory to a new directory.  Remove or modify the calc.py, calc.html, etc. to your new needs.
+
+2. Add your application to the settings.py INSTALLED_APPS directory.
+
+3. Add your application to the settings.py MAKO_ENABLED_APPS directory.
+
+You should be good to go!
 
 
 AUTHOR
