@@ -5,7 +5,7 @@ This app is a front controller that integrates Django with Mako templates.  Djan
 
 This app provides a number of benefits:
 
-1. It allows calling views and html pages by convention rather than specific entries in urls.py. Any .html file on your site can be called without new entries in urls.py for every. single. new. page.
+1. It allows calling views and html pages by convention rather than specific entries in urls.py. Any .html file on your site can be called without new entries in urls.py for every. single. new. page.  Doesn't Python favor convention over configuration?  
 
 2. It introduces the idea of URL parameters (see the calculator example app in the download). 
 
