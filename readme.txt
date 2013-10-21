@@ -22,7 +22,7 @@ But don't worry, you'll still get all the Django goodness with ORM, views, forms
 QUICK SETUP AND RUN
 ===================
 
-I've distributed this as a ready-to-run Django project.  I'm hopeful that will make it easier for people to try it out.  Start by downloading the django-mako-plus .zip file from GitHub.  Unzip it to a directory on your machine.  it's a full, working project.  I've tested it on Python 3 and Django 1.5, but it should work on Django 1.4 as well.
+I've distributed this as a ready-to-run Django project.  I'm hopeful that will make it easier for people to try it out.  Start by downloading the django-mako-plus.zip file from GitHub.  Unzip it to a directory on your machine.  It's a full, working project rather than just an app.  If you just want the app rather than a full project, see the INTERGRATING... section below.  I've tested it on Python 3 and Django 1.5, but it should work on Django 1.4 as well.
 
 Then run through the following:
 
@@ -49,7 +49,7 @@ Then run through the following:
 INTEGRATING INTO AN EXISTING PROJECT
 ====================================
 
-1. Copy the base_app directory into your project.  This is a standard Django application that you should install just like any other Django app.
+1. Copy the base_app directory into your project.  This is a standard Django application that you should install just like any other Django app.  The rest of the download is really just a demo, so you really only need the base_app app.
 
 2. Copy the Mako-specific settings at the end of the settings.py file into your project's settings.py file.  Modify them to fit your setup.
 
