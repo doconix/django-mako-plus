@@ -42,16 +42,23 @@ Then run through the following:
 
 5. Run "python manage.py runserver" to start the development server.
 
-6. Take your browser to http://localhost:8000/calculator/index.html
+6. Take your browser to http://localhost:8000/calculator/index/
 
 
 
-INTEGRATING INTO AN EXISTING PROJECT
-====================================
+QUICK SETUP FOR INTEGRATING INTO AN EXISTING PROJECT
+====================================================
 
 1. Copy the base_app directory into your project.  This is a standard Django application that you should install just like any other Django app.  The rest of the download is really just a demo, so you really only need the base_app app.
 
 2. Copy the Mako-specific settings at the end of the settings.py file into your project's settings.py file.  Modify them to fit your setup.
+
+3. Include the following URLconf in your urls.py:
+
+     (r'^.*$', 'base_app.controller.route_request' ),
+     
+   Note that this url matches *everything*, so you should place it last in urls.py.  The idea of the base_app is all requests route through the front controller base_app/controller.py -> route_request().  If you want to limit it to something like *.html, modify the URLconf above and the route_request() method accordingly.
+
 
 
 
