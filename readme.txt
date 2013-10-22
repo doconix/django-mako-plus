@@ -53,8 +53,12 @@ QUICK SETUP FOR INTEGRATING INTO AN EXISTING PROJECT
 
 2. Copy the Mako-specific settings at the end of the settings.py file into your project's settings.py file.  Modify them to fit your setup.
 
-3. Include the following URLconf in your urls.py:
+3. Include the following middleware in your settings.py MIDDLEWARE_CLASSES:
 
+    'base_app.controller.RequestInitMiddleware',
+
+4. Include the following URLconf in your urls.py:
+ 
      (r'^.*$', 'base_app.controller.route_request' ),
      
    Note that this url matches *everything*, so you should place it last in urls.py.  The idea of the base_app is all requests route through the front controller base_app/controller.py -> route_request().  If you want to limit it to something like *.html, modify the URLconf above and the route_request() method accordingly.
@@ -67,11 +71,13 @@ HOW DO I CREATE NEW APPS BASED ON THIS?
 
 That's the exact idea!  This should be the base of other apps in your system.  Since the structure is a little different than normal Django apps, do the following to create a new app:
 
-1. Copy (or rename) the 'calculator' directory to a new directory.  Remove or modify the calc.py, calc.html, etc. to your new needs.
+1. Ensure you've done the "quick setup for integrating into an existing project" above.
 
-2. Add your application to the settings.py INSTALLED_APPS directory.
+2. Copy (or rename) the 'calculator' directory to a new directory.  Remove or modify the calc.py, calc.html, etc. to your new needs.
 
-3. Add your application to the settings.py MAKO_ENABLED_APPS directory.
+3. Add your application to the settings.py INSTALLED_APPS directory.
+
+4. Add your application to the settings.py MAKO_ENABLED_APPS directory.
 
 You should be good to go!
 

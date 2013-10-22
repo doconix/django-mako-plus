@@ -189,7 +189,7 @@ MAKO_TEMPLATES_DIRS = [
 MAKO_TEMPLATES_CACHE_DIR = 'cached_templates/'
 
 # the default page to render in Mako when no path is given
-MAKO_DEFAULT_HTML_PAGE = 'index'  
+MAKO_DEFAULT_PAGE = 'index'  
 
 # these are included in every template by default - if you put your most-used libraries here, you won't have to import them exlicitly in templates
 MAKO_DEFAULT_TEMPLATE_IMPORTS = [

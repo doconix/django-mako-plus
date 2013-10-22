@@ -316,19 +316,19 @@ class RequestInitMiddleware:
     '''
     # split the path and ensure we have at least two valid items
     path_parts = request.path[1:].split('/') # remove the leading /
-    if len(path_parts) < 2:
+    if len(path_parts) < 1:
       raise Http404()  # instead of a 404 error, you could specify a default app and page here.
       
     # set up the app, page, and urlparams variables
     request.controller_app = path_parts[0]
-    request.controller_page = path_parts[1]
+    request.controller_page = len(path_parts) >= 2 and path_parts[1] or settings.MAKO_DEFAULT_PAGE
     du_pos = request.controller_page.find('__')
     if du_pos < 0:
       request.controller_funcname = ''
     else:
       request.controller_funcname = request.controller_page[du_pos:]
       request.controller_page = request.controller_page[:du_pos]
-    request.urlparams = URLParamList([ urllib.parse.unquote_plus(s) for s in path_parts[2:] ]) 
+    request.urlparams = URLParamList([ urllib.parse.unquote_plus(s) for s in path_parts[2:] ])
     
         
 
