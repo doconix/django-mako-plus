@@ -1,0 +1,15 @@
+<%inherit file="base_ajax_template.htm" />
+
+<%block name="content">
+  %if calculations.count() == 0:
+    The log is empty.
+    
+  %else:
+    <ol id="calculation-log">
+      %for c in calculations:
+        <li>${ c }</li>
+      %endfor
+    </ol>
+    
+  %endif
+</%block>  

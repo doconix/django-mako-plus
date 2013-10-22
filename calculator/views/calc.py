@@ -58,15 +58,9 @@ class CalculatorForm(forms.Form):
 
 def process_request__loadlog(request):
   '''View method for /calculator/calc__loadlog.html'''
-  # I'll create the html right here (rather than use a template) just to show an alternative way
-  html = []
-  html.append('<ol>')
-  for c in Calculation.objects.order_by('log_date'):
-    html.append('<li>%s</li>' % c)
-  html.append('</ol>')
-  
-  # return the response
-  return HttpResponse('\n'.join(html))
+  return templater.render_to_response(request, 'calc__loadlog.html', {
+    'calculations': Calculation.objects.order_by('log_date')
+  })
   
   
   
@@ -77,8 +71,12 @@ def process_request__loadlog(request):
 
 def process_request__deletelog(request):
   '''View method for /calculator/calc__deletelog.html'''
+  # delete the calculations
   for c in Calculation.objects.all():
     c.delete()
-  return HttpResponse('Log Empty.')
+    
+  # normally we'd call a template here, but this really don't have much to send back.
+  # it's a great example of returning the html directly from the view 
+  return HttpResponse('The log is empty.')
 
   

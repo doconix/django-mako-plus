@@ -1,0 +1,16 @@
+## this is the skeleton of all *ajax* pages on our site - page snippets that are retrieved with Ajax.
+## it's primary function is to insert the CSS and JS for the template hierarchy the ajax return
+## is composed of.
+
+## set up a StaticRenderer object to enable the CSS/JS automatic inclusion magic.
+<%! from base_app import static_files %>
+<%  static_renderer = static_files.StaticRenderer(self) %>
+
+## render the CSS for this template
+${ static_renderer.get_template_css(request, context)  }
+
+## render the ajax content (sub-templates override this)
+<%block name="content"></%block>  
+
+## render the JS for this template (placed here at the end because browsers apparently load faster when JS is at the end)
+${ static_renderer.get_template_js(request, context)  }
