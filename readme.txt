@@ -79,4 +79,4 @@ You should be good to go!
 AUTHOR
 ======
 
-This project is maintained by Conan C. Albrecht <ca@byu.edu>.  You can view my blog at http://warp.byu.edu/.
+This app was developed at MyEducator.com.  It is maintained by Conan C. Albrecht <ca@byu.edu>.  You can view my blog at http://warp.byu.edu/.

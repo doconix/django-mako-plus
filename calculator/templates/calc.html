@@ -28,7 +28,7 @@
   %else:
     <p>There were no url parameters.  Try submitting the form and then looking at the url above.</p>
   %endif
-
+  
   <!-- Example use of static url for graphics, css files, scripts, etc. -->
   <img style="float: right;" src="${ STATIC_URL }calculator/images/calculator-icon.png"/>
   <!-- Calculator -->
@@ -36,8 +36,6 @@
   %if calc:
     <p>The last calculation was: ${ calc }</p>
   %endif
-  
-  <div>My favorite color is ${ favcolor }.</div>
   
   <p>New calculation:</p>
   <form action="/calculator/calc/A/B/C/" method="post">
