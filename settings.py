@@ -188,7 +188,12 @@ MAKO_TEMPLATES_DIRS = [
 # identifies where the Mako template cache will be stored, relative to each app
 MAKO_TEMPLATES_CACHE_DIR = 'cached_templates/'
 
-# the default page to render in Mako when no path is given
+# the default app and page to render in Mako when the url is too short
+# the search will go as follows for the url: http://www.yourserver.com/myurl/
+#  1. /myurl/index       (see the MAKO_DEFAULT_PAGE below, this tries myurl as the app with default page)
+#  2. /calculator/myurl  (see the MAKO_DEFAULT_APP below, this tries the default app with myurl as the page)
+#  3. If none of these are found, a 404 error is returned
+MAKO_DEFAULT_APP = 'calculator'
 MAKO_DEFAULT_PAGE = 'index'  
 
 # these are included in every template by default - if you put your most-used libraries here, you won't have to import them exlicitly in templates

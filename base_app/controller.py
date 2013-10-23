@@ -214,22 +214,34 @@ class RequestInitMiddleware:
        request.controller_funcname  The function within the view module to be called (usually "process_request").
        request.urlparams            A list of the remaining url parts (see the calc.py example).
     '''
-    # split the path and ensure we have at least two valid items
-    path_parts = request.path[1:].split('/') # remove the leading /
-    if len(path_parts) < 1:
-      raise Http404()  # instead of a 404 error, you could specify a default app and page here.
+    # split the path
+    path_parts = request.path[1:].split('/') # [1:] to remove the leading /
       
-    # set up the app, page, and urlparams variables
+    # get the app
+    if len(path_parts) >= 1 and path_parts[0] == '':  # app specified by empty, so revert to default app
+      path_parts[0] = settings.MAKO_DEFAULT_APP
+    elif len(path_parts) < 1 or path_parts[0] not in settings.MAKO_ENABLED_APPS:  # app not specified, or invalid app, so insert the default app into the path_parts
+      path_parts.insert(0, settings.MAKO_DEFAULT_APP)
     request.controller_app = path_parts[0]
-    request.controller_page = len(path_parts) >= 2 and path_parts[1] or settings.MAKO_DEFAULT_PAGE
+      
+    # get the page
+    if len(path_parts) < 2:  # page not specified, so insert the default page into the path_parts (we'll validate later in the controller)
+      path_parts.insert(1, settings.MAKO_DEFAULT_PAGE)
+    elif path_parts[1] == '':  # page specified by empty
+      path_parts[1] = settings.MAKO_DEFAULT_PAGE
+    request.controller_page = path_parts[1]
+    
+    # see if a function is specified with the page (the __ separates a function name)
     du_pos = request.controller_page.find('__')
     if du_pos < 0:
       request.controller_funcname = ''
     else:
       request.controller_funcname = request.controller_page[du_pos:]
       request.controller_page = request.controller_page[:du_pos]
+      
+    # set up the urlparams with the reamining path parts
     request.urlparams = URLParamList([ urllib.parse.unquote_plus(s) for s in path_parts[2:] ])
-    
+      
         
 
 
