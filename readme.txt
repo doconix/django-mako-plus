@@ -1,3 +1,15 @@
+Use this if you've said: 
+
+  "Why does Django make me list every. single. page. in urls.py?"
+  
+  "Why are Django templates weak sauce? Why not just use regular Python in templates?"
+  
+  "I'd like to include Python code in my CSS and Javascript files."
+  
+  "My app's views.py file is getting HUGE.  How can I split it intelligently?"
+  
+  
+
 DESCRIPTION
 ===========
 
@@ -11,7 +23,7 @@ This app provides a number of benefits:
 
 3. It separates view functions into different files rather than all-in-one style.  This prevents huge views.py files.
 
-4. It automatically includes CSS and JS files, and it allows Python code within these files.  These static files get connected right into the Mako template inheritance tree.
+4. It automatically includes CSS and JS files, and it allows Python code within these files.  These static files get connected right into the Mako template inheritance tree.  Yes, you can use Less or Sass, but this feature makes their use less needed.
 
 5. It uses the Mako templating engine rather than the weaker Django templating engine.  Why would I want to learn a whole new language for templating when Mako uses my favorite language: Python?
 
