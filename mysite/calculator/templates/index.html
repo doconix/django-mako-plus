@@ -1,0 +1,55 @@
+## Mako can find this base file because it's in the settings.py -> MAKO_TEMPLATES_DIRS list
+<%inherit file="base_template.htm" />
+
+<%block name="content">
+  <p>
+    Welcome to our home page!  This page explores the primary benefits of the base_app.controller in Django.
+  </p>
+  <h2>URL Matching by Convention - Sound Pythonic?</h2>
+  <p>
+    This file is just a simple HTML file.  There's no view function associated with it.  The controller
+    first looks for <tt>/calculator/views/index.py</tt> -> <tt>process_request()</tt>, and when it doesn't find the function, it
+    renders the <tt>/calculator/templates/index.html</tt> file directly.
+  </p>    
+  <p>
+    In other words, this index page is a great example of the base_app.controller.  Instead of putting an entry in urls.py
+    for every. single. page. on. your. site (the normal Django way), it uses a convention to know which pages can be
+    displayed.  
+  </p>
+  <h2>Automatic CSS and Javascript Inclusion</h2>
+  <p>
+    In addition, the parent template of this file (<tt>base_app/templates/base_template.htm</tt>) automatically includes styles and scripts
+    for each template in the inheritance chain.  For example, this index page has the following inheritance:
+    <ol>
+      <li>Base template: <tt>/base_app/templates/base_template.htm</tt></li>
+      <li>Child template: <tt>/calculator/templates/index.html</tt></li>
+    </ol>
+    Because of this chain, the following styles and scripts are automatically included in the rendered page:
+    <ol>
+      <li><tt>/base_app/styles/base.css</tt></li>
+      <li><tt>/base_app/styles/base.cssm</tt> (this one can contain dynamic Python code)</li>
+      <li><tt>/calculator/styles/index.css</tt></li>
+      <li><tt>/calculator/styles/index.cssm</tt> (this one can contain dynamic Python code)</li>
+      <li><tt>/base_app/scripts/base.js</tt></li>
+      <li><tt>/base_app/scripts/base.jsm</tt> (this one can contain dynamic Python code)</li>
+      <li><tt>/calculator/scripts/index.js</tt></li>
+      <li><tt>/calculator/scripts/index.jsm</tt> (yep, you guessed it, this one can contain dynamic Python code)</li>
+    </ol>
+    Of course, you'd rarely create all the above files.  Just create the ones that you need.  For example, if you have 
+    CSS that affects the dom elements in <tt>base.htm</tt>, place it in <tt>base.css</tt> or <tt>base.cssm</tt>.  If you have Javascript that affects 
+    the dom elements in <tt>index.html</tt>, place it in <tt>index.js</tt> or <tt>index.jsm</tt>.
+  </p>
+  <p>
+    The above "automatic" inclusion of .css and .js files creates a nice separation of HTML, CSS, and JS code, and it 
+    provies a place to attach styles and scripts at the same inheritance level as the HTML they affect.  It also 
+    speeds up browser rendering because all the CSS and JS are included right in the HTML file - circumventing
+    further requests on your system (even though you're really keeping things separate on the coding side).
+  </p>
+  <h2>A More Complete Example</h2>
+  <p>
+    Try out the calculator app for a more complex example.
+  </p>
+  <ul>
+    <li><a href="/calculator/calc/">A calculator app</a></li>
+  </ul>
+</%block>  
