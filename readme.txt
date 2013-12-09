@@ -34,7 +34,7 @@ But don't worry, you'll still get all the Django goodness with ORM, views, forms
 QUICK SETUP AND RUN
 ===================
 
-I've distributed this as a ready-to-run Django project.  I'm hopeful that will make it easier for people to try it out.  Start by downloading the django-mako-plus.zip file from GitHub.  Unzip it to a directory on your machine.  It's a full, working project rather than just an app.  If you just want the app rather than a full project, see the INTERGRATING... section below.  I've tested it on Python 3 and Django 1.5, but it should work on Django 1.4 as well.
+I've distributed this as a ready-to-run Django project.  I'm hopeful that will make it easier for people to try it out.  Start by downloading the django-mako-plus.zip file from GitHub.  Unzip it to a directory on your machine.  It's a full, working project rather than just an app.  If you just want the app rather than a full project, see the INTERGRATING... section below.  I've tested it on Python 3.3 and Django 1.6.
 
 Then run through the following:
 
