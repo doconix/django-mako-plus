@@ -1,20 +1,16 @@
 from django.conf.urls import patterns, include, url
+from django.conf.urls.static import static
+from mysite import settings
 
 from django.contrib import admin
 admin.autodiscover()
 
 # specific urls that go to exact functions
-urls = patterns('',
+urls = [
+    '',
     # the standard admnistrator for django
     url(r'^admin/', include(admin.site.urls)),
 ]
-
-# items for debug mode only
-if settings.DEBUG:
-  urls.extend([
-    # static file on the site - for development server only.  Normally Apache/Nginx handles this before Django gets control (Django is proxied)
-    url(r'^static/(?P<path>.*)$', 'django.views.static.serve',  { 'document_root': settings.STATIC_ROOT }),
-  ])
 
 # dynamic urls for just about anything - send to the central controller
 urls.extend([

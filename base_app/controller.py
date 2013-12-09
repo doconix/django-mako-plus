@@ -36,7 +36,7 @@ def route_request(request):
     request.controller_view_module = '.'.join([ request.controller_app, 'views', request.controller_page ])
     
     # this next line assumes that base_app.controller.py is one level below the settings.py file (hence the '..')
-    full_module_filename = os.path.normpath(os.path.join(settings.MAKO_PROJECT_ROOT, request.controller_view_module.replace('.', '/') + '.py'))
+    full_module_filename = os.path.normpath(os.path.join(settings.BASE_DIR, request.controller_view_module.replace('.', '/') + '.py'))
     while True:
       try:
         # look for the module
@@ -60,7 +60,7 @@ def route_request(request):
       except InternalViewRedirectException as ivr:
         request.controller_view_module = ivr.redirect_module
         request.controller_view_function = ivr.redirect_function
-        full_module_filename = os.path.normpath(os.path.join(settings.MAKO_PROJECT_ROOT, request.controller_view_module.replace('.', '/') + '.py'))
+        full_module_filename = os.path.normpath(os.path.join(settings.BASE_DIR, request.controller_view_module.replace('.', '/') + '.py'))
         log.debug('base_app.controller.py :: received an InternalViewRedirect to %s -> %s' % (full_module_filename, request.controller_view_function))
       
     # if we get here, a matching view wasn't found; look for a matching template
@@ -122,7 +122,7 @@ class MakoTemplateRenderer:
   '''
   def __init__(self, app_path, template_subdir='templates'):
     '''Creates a renderer to the given path (relateive to the project root where settings.STATIC_ROOT points to)'''
-    project_path = os.path.normpath(settings.MAKO_PROJECT_ROOT)
+    project_path = os.path.normpath(settings.BASE_DIR)
     self.app_path = app_path
     self.template_search_dirs = [ os.path.abspath(os.path.join(project_path, self.app_path, template_subdir)) ] + settings.MAKO_TEMPLATES_DIRS
     self.cache_root = os.path.abspath(os.path.join(project_path, app_path, settings.MAKO_TEMPLATES_CACHE_DIR, template_subdir)) 
@@ -241,7 +241,7 @@ class RequestInitMiddleware:
       
     # set up the urlparams with the reamining path parts
     request.urlparams = URLParamList([ urllib.parse.unquote_plus(s) for s in path_parts[2:] ])
-      
+    
         
 
 
