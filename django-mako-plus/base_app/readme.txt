@@ -1,0 +1,2 @@
+This is a special app that holds the base templates plus common images, scripts, and styles for the site.  
+With this base app, we can have multiple apps whose pages all inherit from a common base template.

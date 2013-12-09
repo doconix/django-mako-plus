@@ -1,0 +1,19 @@
+/* 
+  Dynamic CSS for the base.html page goes here.  In other words, Python code can be placed here.
+  
+  Since base.html is the common ancestor of all templates of all apps on our site,
+  CSS included here will be placed on *every* page of the site.
+*/
+<%
+  # just a silly example of embedding Python/Mako code within the .cssm file.
+  import random
+  font_color = ''.join([ random.choice('0123456789ABCDEF') for i in range(6) ])
+%>
+
+#site_header {
+  display: inline-block;
+  margin-left: 12px;
+  font-size: 36px; 
+  color: #${ font_color }; 
+  vertical-align: top;
+}

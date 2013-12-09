@@ -1,0 +1,54 @@
+## Mako can find this base file because it's in the settings.py -> MAKO_TEMPLATES_DIRS list
+<%inherit file="base_template.htm" />
+
+<%block name="content">
+
+  <!-- URL parameters -->
+  <h2>URL Parameters:</h2>
+  <p>
+    Before we do the calculator app, check out the url parameters.  This function provides an alternative way to send data to your view functions.  
+    Instead of using forms or links with 
+    embedded forms, such as /calculator/page?first=A&amp;second=B, you can instead send /calculator/page/A/B/.
+    The Mako controller will add the A and B values to the <tt>request.urlparams</tt> list.  The drawback is you
+    access the parameters by index rather than name.  The benefit is a much prettier URL, plus you have a second way 
+    to send parameters.  In fact, these get really powerful when you need to send values <i>in addition</i> to form values.
+    Instead of having a number of hidden parameters in your form, you can add IDs to the url and use the form POST dict for
+    regular data.
+  </p>
+  <p>
+    These are an optional feature of the Mako controller, but I've found them incredibly useful in creating better &lt;a href&gt; 
+    links and to send values around the pages of the site that don't need full forms.
+  </p>
+  
+  %if len(request.urlparams) > 0:
+    <p>The url parameters sent in were:</p>
+    %for i, param in enumerate(request.urlparams):
+      <div>${ i }: ${ param }</div>
+    %endfor
+  %else:
+    <p>There were no url parameters.  Try submitting the form and then looking at the url above.</p>
+  %endif
+  
+  <!-- Example use of static url for graphics, css files, scripts, etc. -->
+  <img style="float: right;" src="${ STATIC_URL }calculator/images/calculator-icon.png"/>
+  <!-- Calculator -->
+  <h2>Calculator Example:</h2>
+  %if calc:
+    <p>The last calculation was: ${ calc }</p>
+  %endif
+  
+  <p>New calculation:</p>
+  <form action="/calculator/calc/A/B/C/" method="post">
+  ${ form.as_p() }
+  <input type="submit" value="Submit"/>
+  </form>
+  
+  
+  <!-- Ajax buttons -->
+  <h2>Ajax Example:</h2>
+  <p id="calculator-log">Log not loaded yet.</p>
+  <button id="load-calculator-log">(Re)Load Log</button>
+  <button id="delete-calculator-log">Delete Log</button>
+
+  
+</%block>  
