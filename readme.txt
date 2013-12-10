@@ -1,8 +1,8 @@
 Use this if you've said: 
 
-  "Why does Django make me list every. single. page. in urls.py?"
-  
   "Why are Django templates weak sauce? Why not just use regular Python in templates?"
+  
+  "Why does Django make me list every. single. page. in urls.py?"
   
   "I'd like to include Python code in my CSS and Javascript files."
   
@@ -17,15 +17,15 @@ This app is a front controller that integrates Django with Mako templates.  Djan
 
 This app provides a number of benefits:
 
-1. It allows calling views and html pages by convention rather than specific entries in urls.py. Any .html file on your site can be called without new entries in urls.py for every. single. new. page.  Doesn't Python favor convention over configuration?  
+1. It uses the Mako templating engine rather than the weaker Django templating engine.  Why would I want to learn a whole new language for templating when Mako uses my favorite language: Python?
 
-2. It introduces the idea of URL parameters (see the calculator example app in the download). 
+2. It allows calling views and html pages by convention rather than specific entries in urls.py. Any .html file on your site can be called without new entries in urls.py for every. single. new. page.  Doesn't Python favor convention over configuration?  
 
-3. It separates view functions into different files rather than all-in-one style.  This prevents huge views.py files.
+3. It introduces the idea of URL parameters (see the calculator example app in the download). 
 
-4. It automatically includes CSS and JS files, and it allows Python code within these files.  These static files get connected right into the Mako template inheritance tree.  Yes, you can use Less or Sass, but this feature makes their use less needed.
+4. It separates view functions into different files rather than all-in-one style.  This prevents huge views.py files.
 
-5. It uses the Mako templating engine rather than the weaker Django templating engine.  Why would I want to learn a whole new language for templating when Mako uses my favorite language: Python?
+5. It automatically includes CSS and JS files, and it allows Python code within these files.  These static files get connected right into the Mako template inheritance tree.  Yes, you can use Less or Sass, but this feature makes their use less needed.
 
 But don't worry, you'll still get all the Django goodness with ORM, views, forms, etc.
 
@@ -40,14 +40,14 @@ Then run through the following:
 
 1. Prerequisites:
    - Install Python 3+ and ensure you can run "python" at the command prompt.
-   - Run "easy_install django" or "pip install django" or otherwise install Django (https://www.djangoproject.com)
-   - Run "easy_install mako" or "pip install mako" or otherwise install Mako (http://www.makotemplates.org)
+   - Run "easy_install django" or "pip install django" or otherwise install Django (https://www.djangoproject.com).  This is tested against Django 1.6.
+   - Run "easy_install mako" or "pip install mako" or otherwise install Mako (http://www.makotemplates.org).  This is tested against Mako 0.9.
    
-2. Edit the settings.py file and update your settings (see the Django docs).   
+2. Edit the mysite/settings.py file and update your settings (see the Django docs).   
    - If you just want to use sqlite3, set the NAME field to a valid filename on your system.
    - Look through the Mako settings at the end of the file (they should work as is).
    
-3. Open a command prompt or terminal window and "cd" to the django-mako-plus directory.
+3. Open a command prompt or terminal window and "cd" to the django-mako-plus directory.  This is the one that contains manage.py.
 
 4. Run "python manage.py syncdb" to create the database tables.
    - Say "yes" when asked to create a superuser.
