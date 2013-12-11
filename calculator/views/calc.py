@@ -42,7 +42,7 @@ class CalculatorForm(forms.Form):
   num2 = forms.IntegerField()
   
   # cleaning methods would normally go here
-  
+    
   
   
 #################################################################

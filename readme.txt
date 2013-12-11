@@ -44,8 +44,8 @@ Then run through the following:
    - Run "easy_install mako" or "pip install mako" or otherwise install Mako (http://www.makotemplates.org).  This is tested against Mako 0.9.
    
 2. Edit the mysite/settings.py file and update your settings (see the Django docs).   
-   - If you just want to use sqlite3, set the NAME field to a valid filename on your system.
-   - Look through the Mako settings at the end of the file (they should work as is).
+   - If you just want to use sqlite3, set the NAME field to a valid filename on your system.  This might be "c:\python33\db.sqlite3" on Windows or "/tmp/db.sqlite3" on Mac/*nix.
+   - Look through the Mako settings at the end of the file, although they should work as is without changes.
    
 3. Open a command prompt or terminal window and "cd" to the django-mako-plus directory.  This is the one that contains manage.py.
 
