@@ -31,7 +31,7 @@ TEMPLATE_RENDERERS = {}
 def route_request(request):
     '''The main router for all calls coming in to the system.'''
     # output the variables so the programmer can debug where this is routing
-    log.debug('DMP controller :: processing: app=%s, page=%s, funcname=%s, urlparams=%s' % (request.controller_app, request.controller_page, request.controller_funcname, request.urlparams))
+    log.debug('controller :: processing: app=%s, page=%s, funcname=%s, urlparams=%s' % (request.controller_app, request.controller_page, request.controller_funcname, request.urlparams))
 
     # first try going to the view function for this request
     # we look for a views/name.py file where name is the same name as the HTML file
@@ -47,28 +47,28 @@ def route_request(request):
         if os.path.exists(full_module_filename):
           module_obj = importlib.import_module(request.controller_view_module)
           if hasattr(module_obj, request.controller_view_function):
-            log.debug('DMP controller :: calling view function %s.%s' % (request.controller_view_module, request.controller_view_function))
+            log.debug('controller :: calling view function %s.%s' % (request.controller_view_module, request.controller_view_function))
             try: 
               response = getattr(module_obj, request.controller_view_function)(request)
               if not isinstance(response, HttpResponse):
-                log.debug('DMP controller :: view function %s.%s failed to return an HttpResponse.  Returning Http404.' % (request.controller_view_module, request.controller_view_function))
+                log.debug('controller :: view function %s.%s failed to return an HttpResponse.  Returning Http404.' % (request.controller_view_module, request.controller_view_function))
                 raise Http404
             except RedirectException as e: # redirect to another page
-              log.debug('DMP controller :: view function %s.%s redirected processing to %s' % (request.controller_view_module, request.controller_view_function, e.redirect_to))
+              log.debug('controller :: view function %s.%s redirected processing to %s' % (request.controller_view_module, request.controller_view_function, e.redirect_to))
               if e.permanent:
                 return HttpResponsePermanentRedirect(e.redirect_to)
               return HttpResponseRedirect(e.redirect_to)
           else:
-            log.debug('DMP controller :: view function %s not in module %s; returning 404 not found' % (request.controller_view_function, request.controller_view_module))
+            log.debug('controller :: view function %s not in module %s; returning 404 not found' % (request.controller_view_function, request.controller_view_module))
             raise Http404
         else:
-          log.debug('DMP controller :: module %s not found; sending processing directly to the template' % (request.controller_view_module))
+          log.debug('controller :: module %s not found; sending processing directly to the template' % (request.controller_view_module))
         break
       except InternalViewRedirectException as ivr:
         request.controller_view_module = ivr.redirect_module
         request.controller_view_function = ivr.redirect_function
         full_module_filename = os.path.normpath(os.path.join(settings.BASE_DIR, request.controller_view_module.replace('.', '/') + '.py'))
-        log.debug('DMP controller :: received an InternalViewRedirect to %s -> %s' % (full_module_filename, request.controller_view_function))
+        log.debug('controller :: received an InternalViewRedirect to %s -> %s' % (full_module_filename, request.controller_view_function))
       
     # if we get here, a matching view wasn't found; look for a matching template
     if response == None:
@@ -76,7 +76,7 @@ def route_request(request):
         try:
           app_obj = importlib.import_module(request.controller_app)
         except ImportError:
-          log.debug("DMP controller :: can't create a template renderer for nonexistent app %s" % (request.controller_app))
+          log.debug("controller :: can't create a template renderer for nonexistent app %s" % (request.controller_app))
           raise Http404
         TEMPLATE_RENDERERS[request.controller_app] = MakoTemplateRenderer(request.controller_app)
       if request.controller_app in TEMPLATE_RENDERERS:
@@ -167,7 +167,7 @@ class MakoTemplateRenderer:
       template_obj.template_full_path = template_obj.filename
     if not hasattr(template_obj, 'mako_template_renderer'):  # if the first time, add a reference to this renderer object
       template_obj.mako_template_renderer = self
-    log.debug('DMP controller :: rendering template %s' % template_obj.filename)
+    log.debug('controller :: rendering template %s' % template_obj.filename)
     if settings.DEBUG:
       try:
         return template_obj.render_unicode(**context_dict)
@@ -191,7 +191,7 @@ class MakoTemplateRenderer:
       content = self.render(request, template, params)
       return HttpResponse(content.encode(settings.DEFAULT_CHARSET), content_type='%s; charset=%s' % (content_type, settings.DEFAULT_CHARSET))
     except TopLevelLookupException: # template file not found    
-      log.debug('DMP controller :: template "%s" not found in search path: %s.' % (template, self.template_search_dirs))
+      log.debug('controller :: template "%s" not found in search path: %s.' % (template, self.template_search_dirs))
       raise Http404()
     except RedirectException as e: # redirect to another page
       if e.permanent:
