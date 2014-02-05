@@ -1,0 +1,13 @@
+These are hints to remind me (the developer) how to work with github, pypi, etc.
+
+To upload to github, just use regular git commands.  The readme.md file will update on the site automatically.
+
+git add --all
+git commit -am 'message'
+git push origin master
+
+To upload to pypi:
+
+python setup.py sdist upload
+
+Then don't forget to remove the build, dist, MANIFEST, etc.

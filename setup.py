@@ -7,7 +7,7 @@ VERSION = __import__(MODULE_NAME).__version__
 CLASSIFIERS = [
   'Framework :: Django',
   'Intended Audience :: Developers',
-  'License :: OSI Approved :: Apache',
+  'License :: OSI Approved :: Apache Software License',
   'Operating System :: OS Independent',
   'Topic :: Software Development',
 ]
