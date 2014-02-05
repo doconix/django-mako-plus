@@ -305,7 +305,7 @@ Let's use the `now` variable in our index.html template:
             </div>
         </%block>
 
-The `${ varname }` code is Mako syntax and is described more fully on the Mako web site.  Right now, it's most important that you see how to send data from the view to the template.  If you already know Django templates, it's pretty close to the same pattern.  The Django-Mako-Framework tries to improve Django, but with minimal changes in patterns.
+The `${ varname }` code is Mako syntax and is described more fully on the Mako web site.  Right now, it's most important that you see how to send data from the view to the template.  If you already know Django templates, it's pretty close to the same pattern.  The Django-Mako-Framework tries to improve Django, not entirely change it.
 
 Reload your web page and ensure the new view is working correctly.  You should see the server time printed on the screen.  Each time you reload the page, the time should change.
 
