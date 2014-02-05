@@ -55,6 +55,7 @@ print(package_data_files)
 setup(
   name=MODULE_NAME,
   description='Combines Django framework and Mako templating engine, plus a few bonuses.',
+  long_description=open('readme.txt').read(),
   version=VERSION,
   author='Conan Albrecht',
   author_email='ca@byu.edu',
