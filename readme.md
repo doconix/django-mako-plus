@@ -28,29 +28,25 @@ But don't worry, you'll still get all the Django goodness with its fantastic ORM
 # Installation
 
 
-### Prerequisites:
-* Install Python 3+ and ensure you can run "python" at the command prompt.
-* Install Django and Mako.  DMP is currently tested with Django 1.6 and Mako 0.9.
+### Python
+
+Install Python 3+ and ensure you can run "python" at the command prompt.
+
+
+### Install Django, Mako, and DMP
 
   Easy install method:
   
         easy_install django
         easy_install mako
+        easy_install django-mako-plus
         
   or PIP method:
   
         pip install django
         pip install mako
+        pip install django-mako-plus
    
-### Install Django-Mako-Plus
-
-Easy install method:
-
-         easy_install django-mako-plus
-         
-or PIP method:
-
-         pip install django-mako-plus
    
 ### Create a Django project
 
@@ -59,6 +55,7 @@ Create a Django project with the typical:
         python django-admin.py startproject <name>
   
 This step is described in detail in the standard Django tutorial.  In the sections below, I'll assume you called your project `test_dmp`.
+
   
 ### Edit Your `settings.py` File:
 1. Add `django_mako_plus.controller` to the end of your `INSTALLED_APPS` list:
