@@ -49,7 +49,6 @@ for root, dirs, files in os.walk(os.path.join(MODULE_NAME, app_template_dir)):
     if fname.startswith('.') or fname in ( '__pycache__', ): # skip hidden/cache files
       continue
     package_data_files.append(os.path.join(root[len(MODULE_NAME)+1:], fname))
-print(package_data_files)
 
 # run the setup
 setup(

@@ -5,6 +5,10 @@
 * I'd like to include Python code in my CSS and Javascript files.
 * My app's views.py file is getting HUGE.  How can I split it intelligently?
 
+# Hints
+
+See the tutorial at the DMP home page: https://github.com/doconix/django-mako-plus
+
   
 # Description
 
