@@ -37,7 +37,9 @@ But don't worry, you'll still get all the Django goodness with its fantastic ORM
 
 Install with `easy_install django-mako-plus` or `pip install django-mako-plus`.
    
-### Create a normal Django project with the typical `python django-admin.py startproject <name>`.  
+### Create a Django project
+
+Create a Django project with the typical `python django-admin.py startproject <name>`. 
   
 This step is described in detail in the standard Django tutorial.  In the sections below, I'll assume you called your project `test_dmp`.
   
@@ -109,7 +111,9 @@ This step is described in detail in the standard Django tutorial.  In the sectio
          ###  End of settings for the base_app Controller
          ################################################################
          
-### Add the Django-Mako-Plus router as **the last pattern** in your urls.py file:
+### Enable the Django-Mako-Plus Router
+
+Add the Django-Mako-Plus router as **the last pattern** in your urls.py file:
 
           urlpatterns = patterns('',
           
@@ -119,7 +123,7 @@ This step is described in detail in the standard Django tutorial.  In the sectio
               url(r'^.*$', 'django_mako_plus.controller.router.route_request' ),
           ) 
           
-### Create Your First App
+### Create a DMP-Style App
 
 Change to your project directory in the terminal/console, then create a new Django-Mako-Plus app with `python manage.py dmp_startapp <app name>`.  In the sections below, I'll assume you called your app `homepage`.
   
