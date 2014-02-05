@@ -56,9 +56,9 @@ All of the above can be found on numerous Python tutorials and web sites.  They 
 
 Create a Django project with the typical:
 
-        python django-admin.py startproject <name>
+        python django-admin.py startproject test_dmp
   
-This step is described in detail in the standard Django tutorial.  In the sections below, I'll assume you called your project `test_dmp`.
+This step is described in detail in the standard Django tutorial.  You can actually name your project anything you want, but in the sections below, I'll assume you called your project `test_dmp`.
 
   
 ### Edit Your `settings.py` File:
@@ -145,10 +145,8 @@ Add the Django-Mako-Plus router as **the last pattern** in your urls.py file:
 
 Change to your project directory in the terminal/console, then create a new Django-Mako-Plus app with the following:
 
-        python manage.py dmp_startapp <app name>`
+        python manage.py dmp_startapp homepage
         
-In the sections below, I'll assume you called your app `homepage`.
-  
 Congratulations.  You're ready to go!
 
 

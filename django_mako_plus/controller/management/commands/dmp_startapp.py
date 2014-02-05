@@ -44,22 +44,29 @@ class Command(BaseCommand):
     # create the directory structure by copying our app_template
     os.mkdir(app_dir)
     template_dir = os.path.join(os.path.abspath(os.path.dirname(router.__file__)), 'app_template')
-    for root, dirs, files in os.walk(template_dir):
-      relative_root = root[len(template_dir)+1:]
-      
-      # make the directories
-      for name in dirs:
-        os.mkdir(os.path.join(app_dir, relative_root, name))
-        
-      # copy the files in this directory
-      for name in files:
-        fin = open(os.path.join(root, name))
-        fout = open(os.path.join(app_dir, relative_root, name), 'w')
-        fout.write(fin.read() % { 
-          'app_name': app_name 
-        })
-        fin.close()
-        fout.close()
+    def copy_dir(root):
+      for fname in os.listdir(root):
+        # skip certain files
+        if fname.startswith('.') or fname == '__pycache__':
+          continue
+          
+        # process this ile
+        fpath = os.path.join(root, fname)
+        newpath = os.path.join(app_dir, root[len(template_dir)+1:], fname)
+        if os.path.isdir(fpath):
+          os.mkdir(newpath)
+          copy_dir(fpath)
+          
+        elif os.path.isfile(fpath):
+          fin = open(fpath)
+          fout = open(newpath, 'w')
+          fout.write(fin.read() % { 
+            'app_name': app_name 
+          })
+          fin.close()
+          fout.close()          
+    # start the copy process
+    copy_dir(template_dir)
     
     self.stdout.write("App %s successfully created!  Don't forget to add your new app name (%s) to " % (app_name, app_name))
     self.stdout.write("the INSTALLED_APPS list in settings.py.  Once this is done, start your server and")
