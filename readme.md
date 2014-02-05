@@ -28,31 +28,35 @@ But don't worry, you'll still get all the Django goodness with its fantastic ORM
 # Installation
 
 
-1. Prerequisites:
-   * Install Python 3+ and ensure you can run "python" at the command prompt.
-   * Run `easy_install django` or `pip install django` or otherwise install Django (https://www.djangoproject.com).  This is tested against Django 1.6.
-   * Run `easy_install mako` or `pip install mako` or otherwise install Mako (http://www.makotemplates.org).  This is tested against Mako 0.9.
+### Prerequisites:
+* Install Python 3+ and ensure you can run "python" at the command prompt.
+* Run `easy_install django` or `pip install django` or otherwise install Django (https://www.djangoproject.com).  This is tested against Django 1.6.
+* Run `easy_install mako` or `pip install mako` or otherwise install Mako (http://www.makotemplates.org).  This is tested against Mako 0.9.
    
-2. Install Django-Mako-Plus with `easy_install django-mako-plus` or `pip install django-mako-plus`.
+### Install Django-Mako-Plus
+
+Install with `easy_install django-mako-plus` or `pip install django-mako-plus`.
    
-3. Create a normal Django project with the typical `python django-admin.py startproject <name>`.  This is described in detail in the standard Django tutorial.  In the sections below, I'll assume you called your project `test_dmp`.
+### Create a normal Django project with the typical `python django-admin.py startproject <name>`.  
   
-4. In your new project directories, edit `settings.py` file:
-   * Add `django_mako_plus.controller` to the end of your `INSTALLED_APPS` list:
+This step is described in detail in the standard Django tutorial.  In the sections below, I'll assume you called your project `test_dmp`.
+  
+### Edit Your `settings.py` File:
+1. Add `django_mako_plus.controller` to the end of your `INSTALLED_APPS` list:
    
          INSTALLED_APPS = (
              ...
              'django_mako_plus.controller',
          )
          
-   * Add `django_mako_plus.controller.router.RequestInitMiddleware` to the end of your `MIDDLEWARE CLASSES` list:
+2. Add `django_mako_plus.controller.router.RequestInitMiddleware` to the end of your `MIDDLEWARE CLASSES` list:
    
          MIDDLEWARE_CLASSES = (
              ...
              'django_mako_plus.controller.router.RequestInitMiddleware',
          )       
          
-   * Add a logger to help you debug (optional but highly recommended!):
+3. Add a logger to help you debug (optional but highly recommended!):
    
          LOGGING = {
              'version': 1,
@@ -78,7 +82,7 @@ But don't worry, you'll still get all the Django goodness with its fantastic ORM
              },
          }
          
-   * Add the Django-Mako-Plus settings:   
+4. Add the Django-Mako-Plus settings:   
    
          ###############################################################
          ###   Specific settings for the Django-Mako-Plus app
@@ -105,7 +109,7 @@ But don't worry, you'll still get all the Django goodness with its fantastic ORM
          ###  End of settings for the base_app Controller
          ################################################################
          
-5. Add the Django-Mako-Plus router as **the last pattern** in your urls.py file:
+### Add the Django-Mako-Plus router as **the last pattern** in your urls.py file:
 
           urlpatterns = patterns('',
           
@@ -115,7 +119,9 @@ But don't worry, you'll still get all the Django goodness with its fantastic ORM
               url(r'^.*$', 'django_mako_plus.controller.router.route_request' ),
           ) 
           
-6. Change to your project directory in the terminal/console, then create a new Django-Mako-Plus app with `python manage.py dmp_startapp <app name>`.  In the sections below, I'll assume you called your app `homepage`.
+### Create Your First App
+
+Change to your project directory in the terminal/console, then create a new Django-Mako-Plus app with `python manage.py dmp_startapp <app name>`.  In the sections below, I'll assume you called your app `homepage`.
   
 Congratulations.  You're ready to go!
 
