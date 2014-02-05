@@ -30,7 +30,11 @@ But don't worry, you'll still get all the Django goodness with its fantastic ORM
 
 ### Python
 
-Install Python 3+ and ensure you can run "python" at the command prompt.
+* Install Python 3+ and ensure you can run "python" at the command prompt.
+* Install setuptools for `easy_install`
+* Install PIP for `pip` (optional but recommended)
+
+All of the above can be found on numerous Python tutorials and web sites.  They are standard methods of installing modules in Python.
 
 
 ### Install Django, Mako, and DMP
@@ -41,7 +45,7 @@ Install Python 3+ and ensure you can run "python" at the command prompt.
         easy_install mako
         easy_install django-mako-plus
         
-  or PIP method:
+  or PIP method (recommended way):
   
         pip install django
         pip install mako
