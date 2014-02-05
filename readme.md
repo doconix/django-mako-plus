@@ -30,16 +30,33 @@ But don't worry, you'll still get all the Django goodness with its fantastic ORM
 
 ### Prerequisites:
 * Install Python 3+ and ensure you can run "python" at the command prompt.
-* Run `easy_install django` or `pip install django` or otherwise install Django (https://www.djangoproject.com).  This is tested against Django 1.6.
-* Run `easy_install mako` or `pip install mako` or otherwise install Mako (http://www.makotemplates.org).  This is tested against Mako 0.9.
+* Install Django and Mako.  DMP is currently tested with Django 1.6 and Mako 0.9.
+
+  Easy install method:
+  
+        easy_install django
+        easy_install mako
+        
+  or PIP method:
+  
+        pip install django
+        pip install mako
    
 ### Install Django-Mako-Plus
 
-Install with `easy_install django-mako-plus` or `pip install django-mako-plus`.
+Easy install method:
+
+         easy_install django-mako-plus
+         
+or PIP method:
+
+         pip install django-mako-plus
    
 ### Create a Django project
 
-Create a Django project with the typical `python django-admin.py startproject <name>`. 
+Create a Django project with the typical:
+
+        python django-admin.py startproject <name>
   
 This step is described in detail in the standard Django tutorial.  In the sections below, I'll assume you called your project `test_dmp`.
   
@@ -125,7 +142,11 @@ Add the Django-Mako-Plus router as **the last pattern** in your urls.py file:
           
 ### Create a DMP-Style App
 
-Change to your project directory in the terminal/console, then create a new Django-Mako-Plus app with `python manage.py dmp_startapp <app name>`.  In the sections below, I'll assume you called your app `homepage`.
+Change to your project directory in the terminal/console, then create a new Django-Mako-Plus app with the following:
+
+        python manage.py dmp_startapp <app name>`
+        
+In the sections below, I'll assume you called your app `homepage`.
   
 Congratulations.  You're ready to go!
 
