@@ -9,9 +9,10 @@ from django.core.urlresolvers import get_mod_func
 from django.http import HttpResponse, Http404, HttpResponseRedirect, HttpResponsePermanentRedirect
 from django.conf import settings
 from django.template import RequestContext
+from django.utils import importlib
 from mako.exceptions import TopLevelLookupException, html_error_template
 from mako.lookup import TemplateLookup
-import os, os.path, re, mimetypes, importlib
+import os, os.path, re, mimetypes
 import urllib.request, urllib.parse, urllib.error
 
 
@@ -20,7 +21,7 @@ import logging
 log = logging.getLogger('django_mako_plus')
 
 
-# these are the apps we can render templates for - it is used in route_request below
+# these are the apps we can render templates for - it is used in route_request below and populated at the end of this file
 TEMPLATE_RENDERERS = {}
 
 
@@ -71,16 +72,8 @@ def route_request(request):
         log.debug('controller :: received an InternalViewRedirect to %s -> %s' % (full_module_filename, request.controller_view_function))
       
     # if we get here, a matching view wasn't found; look for a matching template
-    if response == None:
-      if request.controller_app not in TEMPLATE_RENDERERS:
-        try:
-          app_obj = importlib.import_module(request.controller_app)
-        except ImportError:
-          log.debug("controller :: can't create a template renderer for nonexistent app %s" % (request.controller_app))
-          raise Http404
-        TEMPLATE_RENDERERS[request.controller_app] = MakoTemplateRenderer(request.controller_app)
-      if request.controller_app in TEMPLATE_RENDERERS:
-        response = TEMPLATE_RENDERERS[request.controller_app].render_to_response(request, '%s.html' % request.controller_page)
+    if response == None and request.controller_app in TEMPLATE_RENDERERS:
+      response = TEMPLATE_RENDERERS[request.controller_app].render_to_response(request, '%s.html' % request.controller_page)
   
     # return the response
     if response == None:
@@ -199,6 +192,15 @@ class MakoTemplateRenderer:
       return HttpResponseRedirect(e.redirect_to)
 
 
+
+
+##########################################################
+###   Populate the available template renderers
+
+for dirname in os.listdir(settings.BASE_DIR):
+  dirpath = os.path.abspath(os.path.join(settings.BASE_DIR, dirname))
+  if os.path.isdir(dirpath) and dirname in settings.INSTALLED_APPS and os.path.isdir(os.path.join(dirpath, 'templates')):
+    TEMPLATE_RENDERERS[dirname] = MakoTemplateRenderer(dirname)
 
 
 
