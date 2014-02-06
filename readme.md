@@ -156,7 +156,7 @@ I assume you've just installed Django-Mako-Plus according to the instructions ab
 
 **Quick Start:** You already have a default page in the new app, so fire up your server with `python manage.py runserver` and go to [http://localhost:8000/homepage/index/](http://localhost:8000/homepage/index/).  
 
-You should see a congratulations page.  If you don't, go back to the installation section and walk through the steps again.  Your console might have valuable error message to help troubleshoot things.  
+You should see a congratulations page.  If you don't, go back to the installation section and walk through the steps again.  Your console might have valuable error message to help troubleshoot things. 
 
 ### The DMP Structure
 
@@ -164,7 +164,7 @@ Let's explore the directory structure of your new app:
 
         homepage/
             __init__.py
-            images/
+            media/
             scripts/
             styles/
             templates/
@@ -174,9 +174,13 @@ Let's explore the directory structure of your new app:
             views/
                 __init__.py
 
-The directories should be fairly self-explanatory, although note they are **different** than a traditional Django app structure.  Put images in images/, Javascript in scripts/, CSS in styles/, html files in templates/, and Django views in views/.
+The directories should be fairly self-explanatory, although note they are **different** than a traditional Django app structure.  Put images in media/, Javascript in scripts/, CSS in styles/, html files in templates/, and Django views in views/.
 
-There's really not much there yet, so let's start with the two primary html template files: `base.htm` and `index.html`.  `index.html` is pretty simple:
+This settings is automatically done when you run `dmp_starartapp`, but FYI, DMP-enabled apps must have the following in the `appname/__init__.py` file:
+
+        DJANGO_MAKO_PLUS = True
+
+Let's start with the two primary html template files: `base.htm` and `index.html`.  `index.html` is pretty simple:
 
         <%inherit file="base.htm" />
 
@@ -349,7 +353,7 @@ The following links now give the time in different formats:
 
 ## A Bit of Style
 
-Modern web pages are made up of three primary parts: html, CSS, and Javascript (images might be a fourth, but we'll go with three for this discussion).  Since all of your pages need these three components, this framework combines them intelligently for you.  All you have to do is name the .html, the css., and the .js file with the same name, and DMP will automatically generate the `<link>` and `<script>` tags for you.  It will even put them in the "right" spot in the html (styles at the beginning, scripts at the end).
+Modern web pages are made up of three primary parts: html, CSS, and Javascript (images and other media might be a fourth, but we'll go with three for this discussion).  Since all of your pages need these three components, this framework combines them intelligently for you.  All you have to do is name the .html, the css., and the .js file with the same name, and DMP will automatically generate the `<link>` and `<script>` tags for you.  It will even put them in the "right" spot in the html (styles at the beginning, scripts at the end).
 
 To style our index.html file, create `homepage/styles/index.css` and copy the following into it:
 
@@ -360,7 +364,7 @@ To style our index.html file, create `homepage/styles/index.css` and copy the fo
 
 When you refresh your page, the server time should be styled with large, red text.  If you view the html source in your browser, you'll see a new `<link...>` near the top of your file.  It's as easy as naming the files the same and placing the .css file in the styles/ directory.
 
-> You might be wondering about the big number after the html source `<link>`.  That's the server start time, in minutes since 1970.  This is included because browsers (especially Chrome) don't automatically download new CSS files.  They use their cached versions until a specified date, often far in the future. By adding a number to the end of the file, browsers will think the CSS files are "new" whenever you restart your server.  Whenever you need to send CSS changes to clients and have them ignore their caches, simply restart your server!  Trixy browsserrs...
+> You might be wondering about the big number after the html source `<link>`.  That's the server start time, in minutes since 1970.  This is included because browsers (especially Chrome) don't automatically download new CSS files.  They use their cached versions until a specified date, often far in the future. By adding a number to the end of the file, browsers will think the CSS files are "new" whenever you restart your server.  Whenever you need to send CSS changes to clients and have them ignore their caches, simply restart your server!  Trixy browserses...
 
 The framework knows how to follow template inheritance.  For example, since `index.html` extends from `base.htm`, we can actually put our CSS in any of **four** different files: `index.css`, `index.cssm`, `base.css`, and `base.cssm` (the .cssm files are explained in the next section).  Place your CSS styles in the appropriate file, depending on where the HTML elements are located.  For example, let's style our header a little.  Since the `<header>` element is in `base.htm`, create `homepage/styles/base.css` and place the following in it:
   
@@ -586,7 +590,7 @@ Unfortunately, doing this isn't as clean as you might expect because the Mako en
         dmptest
             base_app/
                 __init__.py
-                images/
+                media/
                 scripts/
                 styles/
                 templates/
@@ -596,7 +600,7 @@ Unfortunately, doing this isn't as clean as you might expect because the Mako en
                     __init__.py
             homepage/
                 __init__.py
-                images/
+                media/
                 scripts/
                 styles/
                 templates/
@@ -655,25 +659,110 @@ There may be some modules, such as `re` or `decimal` that are so useful you want
 Any entries in this list will be automatically included in templates throughout all apps of your site.  With the above imports, you'll be able to use `re` and `Decimal` and `os` and `os.path` anywhere in any .html, .cssm, and .jsm file.
 
 
-## Collecting Static Files
+## Static Files, Your Web Server, and DMP
 
 Static files are files linked into your html documents like `.css` and `.js` as well as images files like `.png` and `.jpg`.  These are served directly by your web server (Apache, Nginx, etc.) rather than by Django because they don't require any processing.  They are just copied across the Internet.  Serving static files is what web servers were written for, and they are better at it than anything else.
 
-Web servers can be set to directly serve files under a certain directory.  For example, any url starting with `/static/` might be served by Nginx, while the Django framework serves anything else.  Your job is to collect all your image, CSS, and JS files under this single directory.
+Django-Mako-Plus works with static files the same way that traditional Django does, with one difference: the folder structure is different in DMP.  The folllowing subsections describe how you should use static files with DMP.
 
-You could program your site with this structure, but it's easier to develop with all the resources underneath the app they are part of instead of splitting them with an entirely different directory tree that starts with `/static/`.
+> If you read nothing else in this tutorial, be sure to read through the Deployment subsection given shortly.  There's a potential security issue with static files that you need to address before deploying.  Specifically, you need to comment out `BASE_DIR` from the setup shown next.
 
-Django comes with a manage.py command `collectstatic` that creates this /static/ directory for you.  It copies all your static resource files into this subtree so you can easily place them on your web server.  Be sure to read about this capability in the Django documentation.
 
-The Django-Mako-Plus framework has a different layout than traditional Django, so it comes with its own static collection function.  When you are ready to publish your web site, run the following:
+### Static File Setup
+
+In your project's settings.py file, be sure you the following:
+
+        STATIC_URL = '/static/'
+        STATICFILES_DIRS = (
+            BASE_DIR,  
+        )
+        STATIC_ROOT = os.path.join(BASE_DIR, 'static')  
+
+### Development
+
+During development, Django will use the `STATICFILES_DIRS` variable to find the files relative to your project root.  You really don't need to do anything special except ensure that the `django.contrib.staticfiles` app is in your list of `INSTALLED_APPS`.  Django's `staticfiles` app is the engine that statics files during development.
+
+Simply place media files for the homepage app in the homepage/media/ folder.  This includes images, videos, PDF files, etc. -- any static files that aren't Javascript or CSS files.
+
+Reference static files using the `${ STATIC_FILES }` variable.  For example, reference images in your html pages like this: 
+
+        <img src="${ STATIC_URL }homepage/media/image.png" />
+
+By using the `STATIC_URL` variable from settings in your urls rather than hard-coding the `/static/` directory location, you can change the url to your static files easily in the future.
+
+
+
+### Security at Deployment (VERY Important)
+
+At production/deployment, comment out `BASE_DIR` because it essentially makes your entire project available via your static url (a serious security concern):
+
+        STATIC_URL = '/static/'
+        STATICFILES_DIRS = (
+        #    BASE_DIR,  
+        )
+        STATIC_ROOT = os.path.join(BASE_DIR, 'static')  
+
+When you deploy to a web server, run `dmp_collectstatic` to collect your static files into a separate directory (called `/static/` in the settings above).  You should then point your web server (Apache, Nginx, IIS, etc.) to serve this folder directly to browsers.  For example, in Nginx, you'd set the following:
+
+        location /static/ {
+          alias /path/to/your/project/static/;
+          access_log off;
+          expires 30d;
+        }
+
+In Apache, you'd set the following:
+
+Alias /static/ /path/to/your/project/static/
+
+        <Directory /path/to/your/project/static/>
+        Order deny,allow
+        Allow from all
+        </Directory>
+
+        ### Collecting 
+
+
+### Collecting Static Files
+
+DMP comes with a manage.py command `dmp_collectstatic` that copies all your static resource files into a single subtree so you can easily place them on your web server.  At development, your static files reside within the apps they support.  For example, the `homepage/media` directory is a sibling to `homepage/views` and `/homepage/templates`.  This combined layout makes for nice development, but a split layout is more optimal for deployment because you have two web servers active at deployment (a traditional server like Apache doing the static files and a Python server doing the dynamic files).
+
+The Django-Mako-Plus framework has a different layout than traditional Django, so it comes with its own static collection command.  When you are ready to publish your web site, run the following to split out the static files into a single subtree:
 
         python manage.py dmp_collectstatic
         
-TODO: This isn't quite done yet.
+This command will copy of the static directories--`/media/`, `/scripts/`, and `/styles/`--to a common subtree called `/static/` (or whatever `STATIC_ROOT` is set to in your settings).  Everything in those directories, with the exception of dynamic `*.jsm/*.cssm` files, is copied.
+
+> Since this new `/static/` directory tree doesn't contain any of your templates, views, settings, or other files, you can make the entire subtree available via your web server.  This gives you the best combination of speed and security and is the whole point of this exercise.
+
+
+### Django Apps + DMP Apps
+
+You might have some traditional Django apps (like the built-in `/admin` app) and some DMP apps (like our `/homepage` in this tutorial).  Your Django apps need the regular `collectstatic` routine, and your DMP apps need the `dmp_collectstatic` routine.
+
+The solution is to run both commands.  Using the options of the two commands, you can either send the output from each command to *two different* static directories, or you can send them to a single directory and let the files from the second command potentially overwrite the files from the first.  I suggest this second method:
+
+        python manage.py collectstatic
+        python manage.py dmp_collectstatic
+
+The above two commands will use both methods to bring files into your `/static/` folder.  You might get some duplication of files, but the output of the commands are different enough that it should work without issues.
 
 
 
-## Where to Now?
+### Deployment Recommendations
+
+This section has nothing to do with the Django-Mako-Framework, but I want to address a couple issues in hopes that it will save you some headache.  One of the most difficult decisions in Django development is deciding how to deploy your system.  In particular, there are several ways to connect Django to your web server: mod_wsgi, FastCGI, etc.
+
+At MyEducator, we've been through all of them at various levels of testing and production.  By far, we've had the best success with [uWSGI](https://docs.djangoproject.com/en/dev/howto/deployment/wsgi/uwsgi/).  It is a professional server, and it is stable.
+
+One other decision you'll have to make is which database use.  I'm excluding the "big and beefies" like Oracle or DB2.  Those with sites that need these databases already know who they are.  Most of you will be choosing between MySQL, PostgreSQL, and perhaps another mid-level database.  
+
+In choosing between these mid-level databases, you'll find that many, if not most, of the Django developers use PostgreSQL.  The system is likely tested best and first on PG.  We started on MySQL, and we moved to PG after experiencing a few problems.  Since deploying on PG, things have been amazingly smooth.
+
+Your mileage may vary with everything in this section.  Do your own testing and take it all as advice only.  Best of luck. 
+
+
+
+# Where to Now?
 
 This tutorial has been an introduction to the Django-Mako-Plus framework.  The primary purpose of DMP is to combine the excellent Django system with the also excellent Mako templating system.  And, as you've hopefully seen above, this framework offers many other benefits as well.  It's a new way to use the Django system.
 
@@ -682,7 +771,6 @@ I suggest you continue with the following:
 * Go through the [Mako Templates](http://www.makotemplates.org/) documentation.  It will explain all the constructs you can use in your html templates.
 * Read or reread the [Django Tutorial](http://www.djangoproject.com/). Just remember as you see the tutorial's Django template code (usually surrounded by `{{  }}`) that you'll be using Mako syntax instead (`${  }`).
 * Link to this project in your blog or online comments.  I'd love to see the Django people come around to the idea that Python isn't evil inside templates.  Complex Python might be evil, but Python itself is just a tool within templates.
-
 
 
 # AUTHOR
