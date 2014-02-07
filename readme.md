@@ -759,9 +759,9 @@ The above two commands will use both methods to bring files into your `/static/`
 
 
 
-### Deployment Recommendations
+# Deployment Recommendations
 
-This section has nothing to do with the Django-Mako-Framework, but I want to address a couple issues in hopes that it will save you some headache.  One of the most difficult decisions in Django development is deciding how to deploy your system.  In particular, there are several ways to connect Django to your web server: mod_wsgi, FastCGI, etc.
+This section has nothing to do with the Django-Mako-Framework, but I want to address a couple issues in hopes that it will save you some headaches.  One of the most difficult decisions in Django development is deciding how to deploy your system.  In particular, there are several ways to connect Django to your web server: mod_wsgi, FastCGI, etc.
 
 At MyEducator, we've been through all of them at various levels of testing and production.  By far, we've had the best success with [uWSGI](https://docs.djangoproject.com/en/dev/howto/deployment/wsgi/uwsgi/).  It is a professional server, and it is stable.
 
@@ -784,6 +784,6 @@ I suggest you continue with the following:
 * Link to this project in your blog or online comments.  I'd love to see the Django people come around to the idea that Python isn't evil inside templates.  Complex Python might be evil, but Python itself is just a tool within templates.
 
 
-# AUTHOR
+# About DMP
 
 This app was developed at MyEducator.com.  It is maintained by Dr. Conan C. Albrecht <ca@byu.edu>.  You can view my blog at http://warp.byu.edu/.  Please email me if you find errors with this tutorial or have suggestions/fixes for the DMP framework.
