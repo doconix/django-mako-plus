@@ -115,7 +115,7 @@ This step is described in detail in the standard Django tutorial.  You can actua
          ]
 
          # identifies where the Mako template cache will be stored, relative to each app
-         MAKO_TEMPLATES_CACHE_DIR = 'cached_templates/'
+         MAKO_TEMPLATES_CACHE_DIR = 'cached_templates'
 
          # the default app and page to render in Mako when the url is too short
          MAKO_DEFAULT_PAGE = 'index'  
@@ -730,12 +730,23 @@ The Django-Mako-Plus framework has a different layout than traditional Django, s
 
         python manage.py dmp_collectstatic
         
-This command will copy of the static directories--`/media/`, `/scripts/`, and `/styles/`--to a common subtree called `/static/` (or whatever `STATIC_ROOT` is set to in your settings).  Everything in those directories, with the exception of dynamic `*.jsm/*.cssm` files, is copied.
+This command will copy of the static directories--`/media/`, `/scripts/`, and `/styles/`--to a common subtree called `/static/` (or whatever `STATIC_ROOT` is set to in your settings).  Everything in these directories is copied (except dynamic `*.jsm/*.cssm` files, which aren't static).
 
 > Since this new `/static/` directory tree doesn't contain any of your templates, views, settings, or other files, you can make the entire subtree available via your web server.  This gives you the best combination of speed and security and is the whole point of this exercise.
 
+The `dmp_collectstatic` command has the following command-line options:
 
-### Django Apps + DMP Apps
+* The commmand will refuse to overwrite an existing `/static/` directory.  If you already have this directory (either from an earlier run or for another purpose), you can 1) delete it before collecting static files, or 2) specify the overwrite option as follows:
+
+        python manage.py dmp_collectstatic --overwrite
+
+* The command will try to minify your *.js and *.css files using the `rjsmin` and `rcssmin` modules.  If your Python installation contains these modules (`easy_install` or `pip` will install it for you), you'll get minified scripts, ready for deployment.  Note that these modules do fairly simplistic minification using regular expressions.  They are not as full-featured as other minifiers like the popular Yahoo! one.  However, these are linked into DMP because they are pure Python code, and they are incredibly fast.  If you want more complete minification, this probably isn't it.  To disable automatic minification, either don't install these modules, or use the `no-minify` option:
+
+        python manage.py dmp_collectstatic --no-minify
+        
+        
+
+#### Django Apps + DMP Apps
 
 You might have some traditional Django apps (like the built-in `/admin` app) and some DMP apps (like our `/homepage` in this tutorial).  Your Django apps need the regular `collectstatic` routine, and your DMP apps need the `dmp_collectstatic` routine.
 

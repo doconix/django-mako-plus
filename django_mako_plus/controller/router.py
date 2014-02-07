@@ -10,7 +10,7 @@ from django.core.exceptions import ImproperlyConfigured
 from django.http import HttpResponse, Http404, HttpResponseRedirect, HttpResponsePermanentRedirect
 from django.conf import settings
 from django.template import RequestContext
-from django.utils import importlib
+from django.utils.importlib import import_module
 from mako.exceptions import TopLevelLookupException, html_error_template
 from mako.lookup import TemplateLookup
 import os, os.path, re, mimetypes
@@ -47,7 +47,7 @@ def route_request(request):
       try:
         # look for the module
         if os.path.exists(full_module_filename):
-          module_obj = importlib.import_module(request.controller_view_module)
+          module_obj = import_module(request.controller_view_module)
           if hasattr(module_obj, request.controller_view_function):
             log.debug('DMP :: calling view function %s.%s' % (request.controller_view_module, request.controller_view_function))
             try: 
@@ -200,7 +200,7 @@ class MakoTemplateRenderer:
 def get_app_template_dir(appname, template_subdir="templates"):
   '''Checks whether an app seems to be a valid Django-Mako-Plus app, then returns its template directory'''
   try:
-    module_obj = importlib.import_module(appname)
+    module_obj = import_module(appname)
   except ImportError:
     raise ImproperlyConfigured('DMP :: Cannot create MakoTemplateRenderer: App %s does not exist.' % appname)
   try:

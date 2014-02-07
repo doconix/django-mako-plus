@@ -1,13 +1,13 @@
+IMPORTANT: See the tutorial at the DMP home page: https://github.com/doconix/django-mako-plus
+           The tutorial provides a much more detailed description of this project.
+           
+
 # Use This If You've Said:
 
 * Why are Django templates weak sauce? Why not just use regular Python in templates?
 * Why does Django make me list every. single. page. in urls.py?
 * I'd like to include Python code in my CSS and Javascript files.
 * My app's views.py file is getting HUGE.  How can I split it intelligently?
-
-# Hints
-
-See the tutorial at the DMP home page: https://github.com/doconix/django-mako-plus
 
   
 # Description
