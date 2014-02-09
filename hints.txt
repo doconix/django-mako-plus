@@ -8,6 +8,6 @@ git push origin master
 
 To upload to pypi:
 
+- change the __init__.py file -> __version__ = 
 python setup.py sdist upload
-
-Then don't forget to remove the build, dist, MANIFEST, etc.
+- remove the extra files/dirs it created

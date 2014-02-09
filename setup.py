@@ -38,6 +38,7 @@ data_files = []
 # add the readme/license
 data_files.extend([
   ('', [ 'readme.md' ]),
+  ('', [ 'readme.txt' ]),
   ('', [ 'license.txt' ]),
 ])
 
