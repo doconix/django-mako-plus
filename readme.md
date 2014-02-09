@@ -96,8 +96,8 @@ This step is described in detail in the standard Django tutorial.  You can actua
              'loggers': {
                  'django_mako_plus': {
                      'handlers': ['console'],
-                     'level': DEBUG and 'DEBUG' or 'WARNING',
-                     'propagate': True,
+                     'level': 'DEBUG',
+                     'propagate': False,
                  },
              },
          }
@@ -125,6 +125,10 @@ This step is described in detail in the standard Django tutorial.  You can actua
          MAKO_DEFAULT_TEMPLATE_IMPORTS = [
            'import os, os.path, re',
          ]
+         
+         # whether to minify using rjsmin, rcssmin during 1) upload to server, and 2) on the fly as .jsm and .cssm files are rendered
+         # rjsmin and rcssmin are fast enough that doing it on the fly doesn't add much load
+         MAKO_MINIFY_JS_CSS = True
 
          ###  End of settings for the base_app Controller
          ################################################################
@@ -743,13 +747,15 @@ The `dmp_collectstatic` command has the following command-line options:
 
 ### Minification of JS and CSS
 
-DMP will try to minify your *.js and *.css files using the `rjsmin` and `rcssmin` modules if the `settings.MAKO_MINIFY_JS_CSS` is True.  Your Python installation must also have these modules installed 
+DMP will try to minify your *.js and *.css files using the `rjsmin` and `rcssmin` modules if the settings.py `MAKO_MINIFY_JS_CSS` is True.  Your Python installation must also have these modules installed 
 
 These two modules do fairly simplistic minification using regular expressions.  They are not as full-featured as other minifiers like the popular Yahoo! one.  However, these are linked into DMP because they are pure Python code, and they are incredibly fast.  If you want more complete minification, this probably isn't it.  
 
 These two modules might be simplistic, but they *are* fast enough to do minification of dynamic `*.jsm` and `*.cssm` files on the fly.  Setting the `MAKO_MINIFY_JS_CSS` variable to True will not only minify during the `dmp_collectstatic` command, it will minfiy the dynamic files as well.
 
 Again, if you want to disable these minifications procedures, simply set `MAKO_MINIFY_JS_CSS` to False.
+
+Minification of `*.jsm` and `*.cssm` is skipped during development so you can debug your Javascript and CSS.  Even if your set `MAKO_MINIFY_JS_CSS` to True, minification only happens when settings.py `DEBUG` is False.
         
         
 

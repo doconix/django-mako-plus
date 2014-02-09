@@ -210,7 +210,7 @@ def get_app_template_dir(appname, template_subdir="templates"):
     raise ImproperlyConfigured('DMP :: Cannot create MakoTemplateRenderer: App %s must define DJANGO_MAKO_PLUS=True.' % appname)
   template_dir = os.path.abspath(os.path.join(os.path.dirname(module_obj.__file__), template_subdir))
   if not os.path.isdir(template_dir):
-    raise ImproperlyConfigured('DMP :: Cannot create MakoTemplateRenderer: App %s has no templates folder (it needs %s).' % (appname, templatedir))
+    raise ImproperlyConfigured('DMP :: Cannot create MakoTemplateRenderer: App %s has no templates folder (it needs %s).' % (appname, template_dir))
   return template_dir
 
 

@@ -38,17 +38,19 @@ import os, os.path, time
 
 
 # Import minification if requested
-if settings.MAKO_MINIFY_JS_CSS:
+JSMIN = False
+CSSMIN = False
+if settings.MAKO_MINIFY_JS_CSS and not settings.DEBUG:
   try:
     from rjsmin import jsmin
     JSMIN = True
   except ImportError:
-    JSMIN = False
+    pass
   try:
     from rcssmin import cssmin
     CSSMIN = True
   except ImportError:
-    CSSMIN = False
+    pass
 
 
 ######################################################################
