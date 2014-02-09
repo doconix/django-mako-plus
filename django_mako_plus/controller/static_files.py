@@ -37,6 +37,20 @@ from django_mako_plus.controller.router import MakoTemplateRenderer
 import os, os.path, time
 
 
+# Import minification if requested
+if settings.MAKO_MINIFY_JS_CSS:
+  try:
+    from rjsmin import jsmin
+    JSMIN = True
+  except ImportError:
+    JSMIN = False
+  try:
+    from rcssmin import cssmin
+    CSSMIN = True
+  except ImportError:
+    CSSMIN = False
+
+
 ######################################################################
 ###  Get the minute the server started.  On some browsers, new CSS/JS
 ###  doesn't load because the browser waits for 7 (or whatever) days
@@ -112,7 +126,10 @@ class StaticRenderer(object):
       if ti.css:
         ret.append(ti.css)  # the <link> was already created once in the constructor
       if ti.cssm:
-        ret.append('<style type="text/css">%s</style>' % STYLE_RENDERERS[ti.app].render(request, ti.cssm, context.kwargs)) 
+        css_text = STYLE_RENDERERS[ti.app].render(request, ti.cssm, context.kwargs)
+        if settings.MAKO_MINIFY_JS_CSS and JSMIN:
+          css_text = cssmin(css_text)
+        ret.append('<style type="text/css">%s</style>' % css_text) 
     return '\n'.join(ret)
 
 
@@ -123,7 +140,10 @@ class StaticRenderer(object):
       if ti.js:
         ret.append(ti.js)  # the <script> was already created once in the constructor
       if ti.jsm:
-            ret.append('<script>%s</script>' % SCRIPT_RENDERERS[ti.app].render(request, ti.jsm, context.kwargs))
+        js_text = SCRIPT_RENDERERS[ti.app].render(request, ti.jsm, context.kwargs)
+        if settings.MAKO_MINIFY_JS_CSS and JSMIN:
+          js_text = jsmin(js_text)
+        ret.append('<script>%s</script>' % js_text)
     return '\n'.join(ret)
 
 

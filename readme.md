@@ -740,9 +740,16 @@ The `dmp_collectstatic` command has the following command-line options:
 
         python manage.py dmp_collectstatic --overwrite
 
-* The command will try to minify your *.js and *.css files using the `rjsmin` and `rcssmin` modules.  If your Python installation contains these modules (`easy_install` or `pip` will install it for you), you'll get minified scripts, ready for deployment.  Note that these modules do fairly simplistic minification using regular expressions.  They are not as full-featured as other minifiers like the popular Yahoo! one.  However, these are linked into DMP because they are pure Python code, and they are incredibly fast.  If you want more complete minification, this probably isn't it.  To disable automatic minification, either don't install these modules, or use the `no-minify` option:
 
-        python manage.py dmp_collectstatic --no-minify
+### Minification of JS and CSS
+
+DMP will try to minify your *.js and *.css files using the `rjsmin` and `rcssmin` modules if the `settings.MAKO_MINIFY_JS_CSS` is True.  Your Python installation must also have these modules installed 
+
+These two modules do fairly simplistic minification using regular expressions.  They are not as full-featured as other minifiers like the popular Yahoo! one.  However, these are linked into DMP because they are pure Python code, and they are incredibly fast.  If you want more complete minification, this probably isn't it.  
+
+These two modules might be simplistic, but they *are* fast enough to do minification of dynamic `*.jsm` and `*.cssm` files on the fly.  Setting the `MAKO_MINIFY_JS_CSS` variable to True will not only minify during the `dmp_collectstatic` command, it will minfiy the dynamic files as well.
+
+Again, if you want to disable these minifications procedures, simply set `MAKO_MINIFY_JS_CSS` to False.
         
         
 

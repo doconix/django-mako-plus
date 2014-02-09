@@ -50,12 +50,18 @@ for root, dirs, files in os.walk(os.path.join(MODULE_NAME, app_template_dir)):
     if fname.startswith('.') or fname in ( '__pycache__', ): # skip hidden/cache files
       continue
     package_data_files.append(os.path.join(root[len(MODULE_NAME)+1:], fname))
+    
+# read the long description if sdist
+description = 'Combines Django framework and Mako templating engine, plus a few bonuses.'
+long_description = description
+if sys.argv[1] == 'sdist':
+  long_description = open('readme.txt').read()
 
 # run the setup
 setup(
   name=MODULE_NAME,
-  description='Combines Django framework and Mako templating engine, plus a few bonuses.',
-  long_description=open('readme.txt').read(),
+  description=description,
+  long_description=long_description,
   version=VERSION,
   author='Conan Albrecht',
   author_email='ca@byu.edu',

@@ -4,21 +4,24 @@ from django.conf import settings
 from django_mako_plus.controller import router
 from optparse import make_option
 import os, os.path, shutil
-try:
-  from rjsmin import jsmin
-  JSMIN = True
-except ImportError:
-  JSMIN = False
-try:
-  from rcssmin import cssmin
-  CSSMIN = True
-except ImportError:
-  CSSMIN = False
+
+# import minification if requested
+if settings.MAKO_MINIFY_JS_CSS:
+  try:
+    from rjsmin import jsmin
+    JSMIN = True
+  except ImportError:
+    JSMIN = False
+  try:
+    from rcssmin import cssmin
+    CSSMIN = True
+  except ImportError:
+    CSSMIN = False
 
 
 class Command(BaseCommand):
   args = ''
-  help = 'Collects static files, such as media, scripts, and styles, to a common directory root. This is done to prepare for deployment.  If the rjsmin and/or rcssmin modules are available, *.js and *.css files are minified during collection.'
+  help = 'Collects static files, such as media, scripts, and styles, to a common directory root. This is done to prepare for deployment.'
   can_import_settings = True
   option_list = BaseCommand.option_list + (
           make_option(
@@ -27,13 +30,6 @@ class Command(BaseCommand):
             dest='overwrite',
             default=False,
             help='Overwrite existing files in the directory when necessary.'
-          ),
-          make_option(
-            '--no-minify', 
-            action='store_true',
-            dest='nominify',
-            default=False,
-            help='Do not minify *.js and *.css files when they are found.'
           ),
   )# option_list
   
@@ -113,14 +109,14 @@ class Command(BaseCommand):
         pass
       
       # if a regular Javscript file, minify it
-      elif ext == '.js' and JSMIN and self.options['nominify'] == False:
+      elif ext == '.js' and settings.MAKO_MINIFY_JS_CSS and JSMIN:
         fin = open(source_path)
         fout = open(dest_path, 'w')
         fout.write(jsmin(fin.read()))
         fout.close()
         fin.close()
       
-      elif ext == '.css' and CSSMIN and self.options['nominify'] == False:
+      elif ext == '.css' and settings.MAKO_MINIFY_JS_CSS and CSSMIN:
         fin = open(source_path)
         fout = open(dest_path, 'w')
         fout.write(cssmin(fin.read()))
