@@ -3,7 +3,7 @@ from django.utils.importlib import import_module
 from django.conf import settings
 from django_mako_plus.controller import router
 from optparse import make_option
-import os, os.path, shutil
+import os, os.path, shutil, fnmatch
 
 # import minification if requested
 if settings.MAKO_MINIFY_JS_CSS:
@@ -30,6 +30,12 @@ class Command(BaseCommand):
             dest='overwrite',
             default=False,
             help='Overwrite existing files in the directory when necessary.'
+          ),
+          make_option(
+            '--ignore', 
+            action='append',
+            dest='ignore_files',
+            help='Ignore the given file/directory.  Unix-style wildcards are acceptable, such as "*.txt".  This option can be specified more than once.'
           ),
   )# option_list
   
@@ -66,24 +72,38 @@ class Command(BaseCommand):
         module_obj = import_module(appname)
       except ImportError as e:
         raise CommandError('Could not import app %s: %s' % (appname, e))
-      app_root = os.path.abspath(os.path.dirname(module_obj.__file__))
-      self.copy_dir(app_root, dest_root)
+      app_root = os.path.dirname(module_obj.__file__)
+      self.copy_dir(os.path.abspath(app_root), os.path.abspath(os.path.join(dest_root, appname)))
     
-    # tell the user we're done
-    self.stdout.write("Your static files have been successfully copyied into %s" % dest_root)
     
+    
+  def ignore_file(self, fname):
+    '''Returns whether the given filename should be ignored, based on the --ignore options sent into the command'''
+    if self.options['ignore_files']:
+      for pattern in self.options['ignore_files']:
+        if fnmatch.fnmatch(fname, pattern):
+          return True
+    return False
     
     
   def copy_dir(self, source, dest, level=0):
     '''Copies the static files from one directory to another.  If this command is run, we assume the user wants to overwrite any existing files.'''
+    # ensure the destination exists
+    if not os.path.exists(dest):
+      os.mkdir(dest)
+    # go through the files in this directory
     for fname in os.listdir(source):
       source_path = os.path.join(source, fname)
       dest_path = os.path.join(dest, fname)
       ext = os.path.splitext(fname)[1].lower()
     
-      ###  DIRECTORIES FIRST  ###
+      ###  EXPLICIT IGNORE  ###
+      if self.ignore_file(fname):
+        pass
+    
+      ###  DIRECTORIES  ###
       # ignore these directories
-      if os.path.isdir(source_path) and fname in ( 'templates', 'views', settings.MAKO_TEMPLATES_CACHE_DIR, '__pycache__' ):
+      elif os.path.isdir(source_path) and fname in ( 'templates', 'views', settings.MAKO_TEMPLATES_CACHE_DIR, '__pycache__' ):
         pass
         
       # if a directory, create it in the destination and recurse
@@ -95,7 +115,7 @@ class Command(BaseCommand):
           os.mkdir(dest_path)
         self.copy_dir(source_path, dest_path, level+1)
 
-      ###   FILES NEXT   ###
+      ###   FILES   ###
       # we don't do any regular files at the top level      
       elif level == 0:
         pass
@@ -115,7 +135,7 @@ class Command(BaseCommand):
         fout.write(jsmin(fin.read()))
         fout.close()
         fin.close()
-      
+        
       elif ext == '.css' and settings.MAKO_MINIFY_JS_CSS and CSSMIN:
         fin = open(source_path)
         fout = open(dest_path, 'w')

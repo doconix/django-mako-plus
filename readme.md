@@ -744,6 +744,11 @@ The `dmp_collectstatic` command has the following command-line options:
 
         python manage.py dmp_collectstatic --overwrite
 
+* If you need to ignore certain directories or filenames, specify them with the `--ignore` option.  This can be specified more than once, and it accepts Unix-style wildcards:
+
+        python manage.py dmp_collectstatic --ignore=cached_templates --ignore=fixtures --ignore=*.txt
+
+
 
 ### Minification of JS and CSS
 

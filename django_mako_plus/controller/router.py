@@ -73,9 +73,10 @@ def route_request(request):
         log.debug('DMP :: received an InternalViewRedirect to %s -> %s' % (full_module_filename, request.controller_view_function))
       
     # if we get here, a matching view wasn't found; look for a matching template
-    if response == None and request.controller_app in TEMPLATE_RENDERERS:
-      response = TEMPLATE_RENDERERS[request.controller_app].render_to_response(request, '%s.html' % request.controller_page)
-    else:
+    if response == None:
+      if request.controller_app in TEMPLATE_RENDERERS:
+        response = TEMPLATE_RENDERERS[request.controller_app].render_to_response(request, '%s.html' % request.controller_page)
+      else:
         log.debug('DMP :: app %s is not a designated DMP app.' % (request.controller_app))
   
     # return the response
