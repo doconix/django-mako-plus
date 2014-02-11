@@ -180,7 +180,7 @@ Let's explore the directory structure of your new app:
 
 The directories should be fairly self-explanatory, although note they are **different** than a traditional Django app structure.  Put images in media/, Javascript in scripts/, CSS in styles/, html files in templates/, and Django views in views/.
 
-This settings is automatically done when you run `dmp_starartapp`, but FYI, DMP-enabled apps must have the following in the `appname/__init__.py` file:
+This settings is automatically done when you run `dmp_startapp`, but FYI, DMP-enabled apps must have the following in the `appname/__init__.py` file:
 
         DJANGO_MAKO_PLUS = True
 
