@@ -58,10 +58,11 @@ Create a Django project with the typical:
 
         python django-admin.py startproject test_dmp
   
-This step is described in detail in the standard Django tutorial.  You can actually name your project anything you want, but in the sections below, I'll assume you called your project `test_dmp`.
+This step is described in detail in the standard Django tutorial.  You can, of course, name your project anything you want, but in the sections below, I'll assume you called your project `test_dmp`.
 
   
 ### Edit Your `settings.py` File:
+
 1. Add `django_mako_plus.controller` to the end of your `INSTALLED_APPS` list:
    
          INSTALLED_APPS = (
@@ -102,7 +103,7 @@ This step is described in detail in the standard Django tutorial.  You can actua
              },
          }
          
-4. Add the Django-Mako-Plus settings:   
+4. Add the Django-Mako-Plus settings (paste this code at the end of your `settings.py file):   
    
          ###############################################################
          ###   Specific settings for the Django-Mako-Plus app
@@ -126,8 +127,8 @@ This step is described in detail in the standard Django tutorial.  You can actua
            'import os, os.path, re',
          ]
          
-         # whether to minify using rjsmin, rcssmin during 1) upload to server, and 2) on the fly as .jsm and .cssm files are rendered
-         # rjsmin and rcssmin are fast enough that doing it on the fly doesn't add much load
+         # whether to minify using rjsmin, rcssmin during 1) collection of static files, and 2) on the fly as .jsm and .cssm files are rendered
+         # rjsmin and rcssmin are fast enough that doing it on the fly can be done without slowing requests down
          MAKO_MINIFY_JS_CSS = True
 
          ###  End of settings for the base_app Controller
@@ -135,7 +136,7 @@ This step is described in detail in the standard Django tutorial.  You can actua
          
 ### Enable the Django-Mako-Plus Router
 
-Add the Django-Mako-Plus router as **the last pattern** in your urls.py file:
+Add the Django-Mako-Plus router as **the last pattern** in your `urls.py` file:
 
           urlpatterns = patterns('',
           
@@ -151,8 +152,40 @@ Change to your project directory in the terminal/console, then create a new Djan
 
         python manage.py dmp_startapp homepage
         
+As with any Django app, you need to add your new app to the INSTALLED_APPS list in `settings.py`:
+
+        INSTALLED_APPS = (
+            ...
+            'homepage',
+        )
+        
 Congratulations.  You're ready to go!
 
+If DMP tells you that an app you're trying to access "isn't a DMP app", read on to learn how to convert an existing app to DMP.  The list shows you what makes a DMP-enabled app (you're likely missing something in the list).
+
+### Convert Existing Apps to DMP
+
+Already have an app that you'd like to switch over?  Just do the following:
+
+* Create folders within your app so you match the following structure:
+
+        your-app/
+            __init__.py
+            media/
+            scripts/
+            styles/
+            templates/
+            views/
+                __init__.py
+        
+* Add the following to `your-app/__init__.py`.  This signals that your app is meant to be used with DMP.  If you don't have this variable, DMP will complain that your app isn't a 'DMP app'.
+
+        DJANGO_MAKO_PLUS = True
+    
+* Go through your existing `your-app/views.py` file and move the functions to new files in the `your-app/views/` folder.  You need a .py file for *each* web-accessible function in your existing views.py file.  For example, if you have an existing views.py function called `do_something` that you want accessible via the url `/your-app/do_something/`, create a new file `your-app/views/do_something.py`.  Inside this new file, create the function `def process_request(request):`, and copy the contents of the existing function within this function.
+
+* Clean up: once your functions are in new files, you can remove the `your-app/views.py` file.  You can also remove all the entries for your app in `urls.py`.
+      
 
 # Tutorial
 
@@ -178,7 +211,7 @@ Let's explore the directory structure of your new app:
             views/
                 __init__.py
 
-The directories should be fairly self-explanatory, although note they are **different** than a traditional Django app structure.  Put images in media/, Javascript in scripts/, CSS in styles/, html files in templates/, and Django views in views/.
+The directories should be fairly self-explanatory. Note they are **different** than a traditional Django app structure.  Put images and other support files in media/, Javascript in scripts/, CSS in styles/, html files in templates/, and Django views in views/.
 
 This settings is automatically done when you run `dmp_startapp`, but FYI, DMP-enabled apps must have the following in the `appname/__init__.py` file:
 
