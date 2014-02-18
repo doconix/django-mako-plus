@@ -161,11 +161,16 @@ As with any Django app, you need to add your new app to the INSTALLED_APPS list 
         
 Congratulations.  You're ready to go!
 
-If DMP tells you that an app you're trying to access "isn't a DMP app", read on to learn how to convert an existing app to DMP.  The list shows you what makes a DMP-enabled app (you're likely missing something in the list).
+### What's Up With "app homepage is not a designated DMP app"
+
+If DMP tells you that an app you're trying to access "is not a designated DMP app", you missed something above.  Read through the next section on converting existing apps for a summary of everything needed to make a valid DMP app.  You're likely missing something in this list.
+
 
 ### Convert Existing Apps to DMP
 
 Already have an app that you'd like to switch over?  Just do the following:
+
+* Ensure your app is listed in your `settings.py` file's `INSTALLED_APPS` list.
 
 * Create folders within your app so you match the following structure:
 
@@ -355,13 +360,13 @@ Reload your web page and ensure the new view is working correctly.  You should s
 
 Django is all about pretty urls.  In keeping with that philosophy, this framework has URL parameters.  We've already used the first two items in the path: the first specifies the app, the second specifies the view/template.  URL parameters are the third part, fourth part, and so on.
 
-In traditional web links, you'd specify parameters using key=value pairs, as in /homepage/index?first=abc&second=def.  That's ugly, of course, and it's certainly not the Django way (it does still work, though).
+In traditional web links, you'd specify parameters using key=value pairs, as in `/homepage/index?first=abc&second=def`.  That's ugly, of course, and it's certainly not the Django way (it does still work, though).
 
-With DMP, you have another, better option available.  You'll specify parameters as /homepage/index/abc/def/.  The controller makes them available to your view as `request.urlparams[0]` and `request.urlparams[1]`.  
+With DMP, you have another, better option available.  You'll specify parameters as `/homepage/index/abc/def/`.  The controller makes them available to your view as `request.urlparams[0]` and `request.urlparams[1]`.  
 
 Suppose you have a product detail page that needs the SKU number of the product to display.  A nice way to call that page might be `/catalog/product/142233342/`.  The app=catalog, view=product.py, and urlparams[0]=142233342.
 
-These prettier links are much friendlier when users bookmark, include in emails, and write them down.  It's all part of coding a user-friendly web site.
+These prettier links are much friendlier when users bookmark them, include them in emails, and write them down.  It's all part of coding a user-friendly web site.
 
 Note that URL parameters don't take the place of form parameters.  You'll still use GET and POST parameters to submit forms.  URL parameters are best used for object ids and other simple items that pages need to display. 
 
