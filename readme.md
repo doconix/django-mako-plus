@@ -134,6 +134,15 @@ This step is described in detail in the standard Django tutorial.  You can, of c
          ###  End of settings for the base_app Controller
          ################################################################
          
+5. Add the following to serve your static files.  This step is pure Django; you can read about it in the standard Django docs.  These variables are also explained below in the section entitled "Static Files, Your Web Server, and DMP".
+
+         STATIC_URL = '/static/'
+         STATICFILES_DIRS = (
+             BASE_DIR,  
+         )
+         STATIC_ROOT = os.path.join(BASE_DIR, 'static')  
+
+         
 ### Enable the Django-Mako-Plus Router
 
 Add the Django-Mako-Plus router as **the last pattern** in your `urls.py` file:
