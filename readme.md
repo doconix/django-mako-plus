@@ -170,7 +170,7 @@ As with any Django app, you need to add your new app to the INSTALLED_APPS list 
         
 Congratulations.  You're ready to go!
 
-### What's Up With "app homepage is not a designated DMP app"
+### Huh? "app homepage is not a designated DMP app"?
 
 If DMP tells you that an app you're trying to access "is not a designated DMP app", you missed something above.  Read through the next section on converting existing apps for a summary of everything needed to make a valid DMP app.  You're likely missing something in this list.
 
