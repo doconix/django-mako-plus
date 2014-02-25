@@ -632,7 +632,7 @@ Reload your browser page, and the button should still work.  Press it a few time
 
 You may have noticed that this tutorial has focused on a single app.  Most projects consist of many apps.  For example, a sales site might have an app for user management, an app for product management, and an app for the catalog and sales/shopping-cart experience.  All of these apps probably want the same look and feel, and all of them likely want to extend from the **same** `base.htm` file.
 
-When you run `python manage.py dmp_startapp <appname>`, you get **new** `base.htm` and `base_ajax.htm` filess each time.  This is done to get you started on your first app.  On your second, third, and subsequent apps, you probably want to delete these starter files and instead extend your templates from the `base.htm` and `base_ajax.htm` files in your first app.
+When you run `python manage.py dmp_startapp <appname>`, you get **new** `base.htm` and `base_ajax.htm` files each time.  This is done to get you started on your first app.  On your second, third, and subsequent apps, you probably want to delete these starter files and instead extend your templates from the `base.htm` and `base_ajax.htm` files in your first app.
   
 In fact, in my projects, I usually create an app called `base_app` that contains the common `base.htm` html code, site-wide CSS, and site-wide Javascript.  Subsequent apps simply extend from `base_app/templates/base.htm`.  The common `base_app` doesn't really have end-user templates in it -- they are just supertemplates that support other, public apps.
 
