@@ -227,11 +227,13 @@ Let's explore the directory structure of your new app:
 
 The directories should be fairly self-explanatory. Note they are **different** than a traditional Django app structure.  Put images and other support files in media/, Javascript in scripts/, CSS in styles/, html files in templates/, and Django views in views/.
 
-This settings is automatically done when you run `dmp_startapp`, but FYI, DMP-enabled apps must have the following in the `appname/__init__.py` file:
+The following setting is automatically done when you run `dmp_startapp`, but if you created your app structure manually, DMP-enabled apps must have the following in the `appname/__init__.py` file:
 
         DJANGO_MAKO_PLUS = True
 
-Let's start with the two primary html template files: `base.htm` and `index.html`.  `index.html` is pretty simple:
+Let's start with the two primary html template files: `base.htm` and `index.html`.  
+
+`index.html` is pretty simple:
 
         <%inherit file="base.htm" />
 
@@ -307,9 +309,7 @@ For example, the url `/homepage/index/` routes as follows:
   
 The above illustrates the easiest way to show pages: simply place .html files in your templates/ directory.  This is useful for pages that don't have any "work" to do.  Examples might be the "About Us" and "Terms of Service" pages.  There's usually no functionality or permissions issues with these pages, so no view function is required.
 
-What about the case where a page isn't specified, such as `/homepage/`?  If the url doesn't contain two parts, the router goes to the default page as specified in your settings.py `MAKO_DEFAULT_PAGE` variable.  This allows you to have a "default page", similar to the way web servers default to the index.html page.
-
-If the path is entirely empty (i.e. http://www.yourserver.com/ with *no* path parts), the router uses both defaults specified in your settings.py file: `MAKO_DEFAULT_PAGE` and `MAKO_DEFAULT_APP`.
+> What about the case where a page isn't specified, such as `/homepage/`?  If the url doesn't contain two parts, the router goes to the default page as specified in your settings.py `MAKO_DEFAULT_PAGE` variable.  This allows you to have a "default page", similar to the way web servers default to the index.html page.  If the path is entirely empty (i.e. http://www.yourserver.com/ with *no* path parts), the router uses both defaults specified in your settings.py file: `MAKO_DEFAULT_PAGE` and `MAKO_DEFAULT_APP`.
 
 ## Adding a View Function
 
