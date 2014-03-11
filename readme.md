@@ -111,25 +111,29 @@ This step is described in detail in the standard Django tutorial.  You can, of c
          # the default app/templates/ directory is always included in the template search path
          # define any additional search directories here - this allows inheritance between apps
          # absolute paths are suggested
-         MAKO_TEMPLATES_DIRS = [ 
+         DMP_TEMPLATES_DIRS = [ 
            # os.path.join(BASE_DIR, 'base_app', 'templates'),
          ]
 
          # identifies where the Mako template cache will be stored, relative to each app
-         MAKO_TEMPLATES_CACHE_DIR = 'cached_templates'
+         DMP_TEMPLATES_CACHE_DIR = 'cached_templates'
 
          # the default app and page to render in Mako when the url is too short
-         MAKO_DEFAULT_PAGE = 'index'  
-         MAKO_DEFAULT_APP = 'homepage'
+         DMP_DEFAULT_PAGE = 'index'  
+         DMP_DEFAULT_APP = 'homepage'
 
          # these are included in every template by default - if you put your most-used libraries here, you won't have to import them exlicitly in templates
-         MAKO_DEFAULT_TEMPLATE_IMPORTS = [
+         DMP_DEFAULT_TEMPLATE_IMPORTS = [
            'import os, os.path, re',
          ]
          
+         # whether to send the custom DMP signals -- set to False for a slight speed-up in router processing
+         # determines whether DMP will send its custom signals during the process
+         DMP_SIGNALS = True
+         
          # whether to minify using rjsmin, rcssmin during 1) collection of static files, and 2) on the fly as .jsm and .cssm files are rendered
          # rjsmin and rcssmin are fast enough that doing it on the fly can be done without slowing requests down
-         MAKO_MINIFY_JS_CSS = True
+         DMP_MINIFY_JS_CSS = True
 
          ###  End of settings for the base_app Controller
          ################################################################
@@ -309,7 +313,7 @@ For example, the url `/homepage/index/` routes as follows:
   
 The above illustrates the easiest way to show pages: simply place .html files in your templates/ directory.  This is useful for pages that don't have any "work" to do.  Examples might be the "About Us" and "Terms of Service" pages.  There's usually no functionality or permissions issues with these pages, so no view function is required.
 
-> What about the case where a page isn't specified, such as `/homepage/`?  If the url doesn't contain two parts, the router goes to the default page as specified in your settings.py `MAKO_DEFAULT_PAGE` variable.  This allows you to have a "default page", similar to the way web servers default to the index.html page.  If the path is entirely empty (i.e. http://www.yourserver.com/ with *no* path parts), the router uses both defaults specified in your settings.py file: `MAKO_DEFAULT_PAGE` and `MAKO_DEFAULT_APP`.
+> What about the case where a page isn't specified, such as `/homepage/`?  If the url doesn't contain two parts, the router goes to the default page as specified in your settings.py `DMP_DEFAULT_PAGE` variable.  This allows you to have a "default page", similar to the way web servers default to the index.html page.  If the path is entirely empty (i.e. http://www.yourserver.com/ with *no* path parts), the router uses both defaults specified in your settings.py file: `DMP_DEFAULT_PAGE` and `DMP_DEFAULT_APP`.
 
 ## Adding a View Function
 
@@ -663,9 +667,9 @@ I want `homepage/templates/index.html` to extend from `base_app/templates/site_b
 
         <%inherit file="../../base_app/templates/site_base.htm" />
 
-Since Mako doesn't allow this type of relative referencing, the `MAKO_TEMPLATES_DIRS` variable is included in settings.py.  This variable equals a list of directories that contain **global** templates that can be referenced directly from any app on your site.  To include the `base_app/` app above, we'd set this variable as follows:
+Since Mako doesn't allow this type of relative referencing, the `DMP_TEMPLATES_DIRS` variable is included in settings.py.  This variable equals a list of directories that contain **global** templates that can be referenced directly from any app on your site.  To include the `base_app/` app above, we'd set this variable as follows:
 
-        MAKO_TEMPLATES_DIRS = [ 
+        DMP_TEMPLATES_DIRS = [ 
            os.path.join(BASE_DIR, 'base_app', 'templates'),
         ]
 
@@ -700,9 +704,9 @@ or a Python-level block (see the Mako docs for the difference):
           from decimal import Decimal
         %>
 
-There may be some modules, such as `re` or `decimal` that are so useful you want them available in every template of your site.  In settings.py, simply add these to the `MAKO_DEFAULT_TEMPLATES_IMPORTS` variable:
+There may be some modules, such as `re` or `decimal` that are so useful you want them available in every template of your site.  In settings.py, simply add these to the `DMP_DEFAULT_TEMPLATES_IMPORTS` variable:
 
-        MAKO_DEFAULT_TEMPLATE_IMPORTS = [
+        DMP_DEFAULT_TEMPLATE_IMPORTS = [
           'import os, os.path, re',
           'from decimal import Decimal',
         ]
@@ -799,15 +803,15 @@ The `dmp_collectstatic` command has the following command-line options:
 
 ### Minification of JS and CSS
 
-DMP will try to minify your *.js and *.css files using the `rjsmin` and `rcssmin` modules if the settings.py `MAKO_MINIFY_JS_CSS` is True.  Your Python installation must also have these modules installed 
+DMP will try to minify your *.js and *.css files using the `rjsmin` and `rcssmin` modules if the settings.py `DMP_MINIFY_JS_CSS` is True.  Your Python installation must also have these modules installed 
 
 These two modules do fairly simplistic minification using regular expressions.  They are not as full-featured as other minifiers like the popular Yahoo! one.  However, these are linked into DMP because they are pure Python code, and they are incredibly fast.  If you want more complete minification, this probably isn't it.  
 
-These two modules might be simplistic, but they *are* fast enough to do minification of dynamic `*.jsm` and `*.cssm` files on the fly.  Setting the `MAKO_MINIFY_JS_CSS` variable to True will not only minify during the `dmp_collectstatic` command, it will minfiy the dynamic files as well.
+These two modules might be simplistic, but they *are* fast enough to do minification of dynamic `*.jsm` and `*.cssm` files on the fly.  Setting the `DMP_MINIFY_JS_CSS` variable to True will not only minify during the `dmp_collectstatic` command, it will minfiy the dynamic files as well.
 
-Again, if you want to disable these minifications procedures, simply set `MAKO_MINIFY_JS_CSS` to False.
+Again, if you want to disable these minifications procedures, simply set `DMP_MINIFY_JS_CSS` to False.
 
-Minification of `*.jsm` and `*.cssm` is skipped during development so you can debug your Javascript and CSS.  Even if your set `MAKO_MINIFY_JS_CSS` to True, minification only happens when settings.py `DEBUG` is False.
+Minification of `*.jsm` and `*.cssm` is skipped during development so you can debug your Javascript and CSS.  Even if your set `DMP_MINIFY_JS_CSS` to True, minification only happens when settings.py `DEBUG` is False.
         
         
 
@@ -837,6 +841,41 @@ In choosing between these mid-level databases, you'll find that many, if not mos
 Your mileage may vary with everything in this section.  Do your own testing and take it all as advice only.  Best of luck. 
 
 
+
+# DMP Signals
+
+> This is an advanced topic, and it is not required to use DMP.  I suggest you skip this section and come back to it if you ever need Signals.
+
+DMP sends several custom signals through the Django signal dispatcher.  The purpose is to allow you to hook into the router's processing.  Perhaps you need to run code at various points in the process, or perhaps you need to change the request.dmp_* variables to modify the router processing.
+
+Before going further with this section's examples, be sure to read the standard Django signal documentation.  DMP signals are simply additional signals in the same dispatching system, so the following examples should be easy to understand once you know how Django dispatches signals.
+
+## Step 1: Enable DMP Signals
+
+Be sure your settings.py file has the following in it:
+
+        DMP_SIGNALS = True
+        
+## Step 2: Create a Signal Receiver
+
+The following creates two receivers.  The first is called just before the view's process_request function is called.  The second is called just before DMP renders .html templates.
+
+        from django.dispatch import receiver
+        from django_mako_plus.controller import signals
+
+        @receiver(signals.dmp_signal_process_request)
+        def dmp_signal_process_request(sender, **kargs):
+          request = kargs['request']
+          console.log('>>> process_request signal received!')
+  
+        @receiver(signals.dmp_signal_render_template)
+        def dmp_signal_render_template(sender, **kargs):
+          request = kargs['request']
+          context = kargs['context']            # the template variables
+          template_obj = kargs['template_obj']  # the Mako template object that will do the rendering
+          console.log('>>> render_template signal received!')
+
+The above code should be in a code file that is called during Django initialization.  Good locations might be in a `models.py` file or your app's `__init__.py` file.
 
 # Where to Now?
 
