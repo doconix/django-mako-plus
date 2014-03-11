@@ -6,7 +6,7 @@ from optparse import make_option
 import os, os.path, shutil, fnmatch
 
 # import minification if requested
-if settings.MAKO_MINIFY_JS_CSS:
+if settings.DMP_MINIFY_JS_CSS:
   try:
     from rjsmin import jsmin
     JSMIN = True
@@ -103,7 +103,7 @@ class Command(BaseCommand):
     
       ###  DIRECTORIES  ###
       # ignore these directories
-      elif os.path.isdir(source_path) and fname in ( 'templates', 'views', settings.MAKO_TEMPLATES_CACHE_DIR, '__pycache__' ):
+      elif os.path.isdir(source_path) and fname in ( 'templates', 'views', settings.DMP_TEMPLATES_CACHE_DIR, '__pycache__' ):
         pass
         
       # if a directory, create it in the destination and recurse
@@ -129,14 +129,14 @@ class Command(BaseCommand):
         pass
       
       # if a regular Javscript file, minify it
-      elif ext == '.js' and settings.MAKO_MINIFY_JS_CSS and JSMIN:
+      elif ext == '.js' and settings.DMP_MINIFY_JS_CSS and JSMIN:
         fin = open(source_path)
         fout = open(dest_path, 'w')
         fout.write(jsmin(fin.read()))
         fout.close()
         fin.close()
         
-      elif ext == '.css' and settings.MAKO_MINIFY_JS_CSS and CSSMIN:
+      elif ext == '.css' and settings.DMP_MINIFY_JS_CSS and CSSMIN:
         fin = open(source_path)
         fout = open(dest_path, 'w')
         fout.write(cssmin(fin.read()))

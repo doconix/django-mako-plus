@@ -13,7 +13,8 @@ from django.template import RequestContext
 from django.utils.importlib import import_module
 from mako.exceptions import TopLevelLookupException, html_error_template
 from mako.lookup import TemplateLookup
-import os, os.path, re, mimetypes
+from ..controller import signals
+import os, os.path, re, mimetypes, sys
 import urllib.request, urllib.parse, urllib.error
 
 
@@ -26,6 +27,7 @@ log = logging.getLogger('django_mako_plus')
 TEMPLATE_RENDERERS = {}
 
 
+
 ##############################################################
 ###   The front controller of all views on the site.
 ###   urls.py routes everything through this method.
@@ -33,51 +35,62 @@ TEMPLATE_RENDERERS = {}
 def route_request(request):
     '''The main router for all calls coming in to the system.'''
     # output the variables so the programmer can debug where this is routing
-    log.debug('DMP :: processing: app=%s, page=%s, funcname=%s, urlparams=%s' % (request.controller_app, request.controller_page, request.controller_funcname, request.urlparams))
+    log.debug('DMP :: processing: app=%s, page=%s, func=%s, urlparams=%s' % (request.dmp_router_app, request.dmp_router_page, request.dmp_router_function, request.urlparams))
 
     # first try going to the view function for this request
     # we look for a views/name.py file where name is the same name as the HTML file
     response = None
-    request.controller_view_function = 'process_request%s' % (request.controller_funcname)
-    request.controller_view_module = '.'.join([ request.controller_app, 'views', request.controller_page ])
+    request.dmp_router_module = '.'.join([ request.dmp_router_app, 'views', request.dmp_router_page ])
     
     # this next line assumes that controller.py is one level below the settings.py file (hence the '..')
-    full_module_filename = os.path.normpath(os.path.join(settings.BASE_DIR, request.controller_view_module.replace('.', '/') + '.py'))
+    full_module_filename = os.path.normpath(os.path.join(settings.BASE_DIR, request.dmp_router_module.replace('.', '/') + '.py'))
     while True:
       try:
         # look for the module
         if os.path.exists(full_module_filename):
-          module_obj = import_module(request.controller_view_module)
-          if hasattr(module_obj, request.controller_view_function):
-            log.debug('DMP :: calling view function %s.%s' % (request.controller_view_module, request.controller_view_function))
+          module_obj = import_module(request.dmp_router_module)
+          if hasattr(module_obj, request.dmp_router_function):
+            log.debug('DMP :: calling view function %s.%s' % (request.dmp_router_module, request.dmp_router_function))
             try: 
-              response = getattr(module_obj, request.controller_view_function)(request)
+              # send the signal
+              if settings.DMP_SIGNALS:
+                signals.dmp_signal_process_request.send(sender=sys.modules[__name__], request=request)
+              # PRIMARY FUNCTION: call the process_request() function
+              response = getattr(module_obj, request.dmp_router_function)(request)
               if not isinstance(response, HttpResponse):
-                log.debug('DMP :: view function %s.%s failed to return an HttpResponse.  Returning Http404.' % (request.controller_view_module, request.controller_view_function))
+                log.debug('DMP :: view function %s.%s failed to return an HttpResponse.  Returning Http404.' % (request.dmp_router_module, request.dmp_router_function))
                 raise Http404
             except RedirectException as e: # redirect to another page
-              log.debug('DMP :: view function %s.%s redirected processing to %s' % (request.controller_view_module, request.controller_view_function, e.redirect_to))
+              log.debug('DMP :: view function %s.%s redirected processing to %s' % (request.dmp_router_module, request.dmp_router_function, e.redirect_to))
+              # send the signal
+              if settings.DMP_SIGNALS:
+                signals.dmp_signal_redirect_exception.send(sender=sys.modules[__name__], request=request, exc=e)
+              # send the browser the redirect command
               if e.permanent:
                 return HttpResponsePermanentRedirect(e.redirect_to)
               return HttpResponseRedirect(e.redirect_to)
           else:
-            log.debug('DMP :: view function %s not in module %s; returning 404 not found' % (request.controller_view_function, request.controller_view_module))
+            log.debug('DMP :: view function %s not in module %s; returning 404 not found' % (request.dmp_router_function, request.dmp_router_module))
             raise Http404
         else:
-          log.debug('DMP :: module %s not found; sending processing directly to the template' % (request.controller_view_module))
+          log.debug('DMP :: module %s not found; sending processing directly to the template' % (request.dmp_router_module))
         break
-      except InternalViewRedirectException as ivr:
-        request.controller_view_module = ivr.redirect_module
-        request.controller_view_function = ivr.redirect_function
-        full_module_filename = os.path.normpath(os.path.join(settings.BASE_DIR, request.controller_view_module.replace('.', '/') + '.py'))
-        log.debug('DMP :: received an InternalViewRedirect to %s -> %s' % (full_module_filename, request.controller_view_function))
+      except InternalRedirectException as ivr:
+        # send the signal
+        if settings.DMP_SIGNALS:
+          signals.dmp_signal_internal_redirect_exception.send(sender=sys.modules[__name__], request=request, exc=ivr)
+        # do the internal redirect
+        request.dmp_router_module = ivr.redirect_module
+        request.dmp_router_function = ivr.redirect_function
+        full_module_filename = os.path.normpath(os.path.join(settings.BASE_DIR, request.dmp_router_module.replace('.', '/') + '.py'))
+        log.debug('DMP :: received an InternalViewRedirect to %s -> %s' % (full_module_filename, request.dmp_router_function))
       
     # if we get here, a matching view wasn't found; look for a matching template
     if response == None:
-      if request.controller_app in TEMPLATE_RENDERERS:
-        response = TEMPLATE_RENDERERS[request.controller_app].render_to_response(request, '%s.html' % request.controller_page)
+      if request.dmp_router_app in TEMPLATE_RENDERERS:
+        response = TEMPLATE_RENDERERS[request.dmp_router_app].render_to_response(request, '%s.html' % request.dmp_router_page)
       else:
-        log.debug('DMP :: app %s is not a designated DMP app.' % (request.controller_app))
+        log.debug('DMP :: app %s is not a designated DMP app.' % (request.dmp_router_app))
   
     # return the response
     if response == None:
@@ -92,7 +105,7 @@ def route_request(request):
 ###############################################################
 ###   Exceptions used to direct the controller
 
-class InternalViewRedirectException(Exception):
+class InternalRedirectException(Exception):
   '''View functions can throw this exception to indicate that a new view
      should be called by the HtmlPageServer.  The current view function
      will end immediately, and processing will be passed to the new view function.
@@ -133,9 +146,9 @@ class MakoTemplateRenderer:
     project_path = os.path.normpath(settings.BASE_DIR)
     self.app_path = app_path
     template_dir = get_app_template_dir(app_path, template_subdir)  # raises ImproperlyConfigured if error
-    self.template_search_dirs = [ template_dir ] + settings.MAKO_TEMPLATES_DIRS
-    self.cache_root = os.path.abspath(os.path.join(project_path, app_path, settings.MAKO_TEMPLATES_CACHE_DIR, template_subdir)) 
-    self.tlookup = TemplateLookup(directories=self.template_search_dirs, imports=settings.MAKO_DEFAULT_TEMPLATE_IMPORTS, module_directory=self.cache_root, collection_size=2000, filesystem_checks=settings.DEBUG)
+    self.template_search_dirs = [ template_dir ] + settings.DMP_TEMPLATES_DIRS
+    self.cache_root = os.path.abspath(os.path.join(project_path, app_path, settings.DMP_TEMPLATES_CACHE_DIR, template_subdir)) 
+    self.tlookup = TemplateLookup(directories=self.template_search_dirs, imports=settings.DMP_DEFAULT_TEMPLATE_IMPORTS, module_directory=self.cache_root, collection_size=2000, filesystem_checks=settings.DEBUG)
 
 
   def render(self, request, template, params={}):
@@ -166,6 +179,10 @@ class MakoTemplateRenderer:
     if not hasattr(template_obj, 'mako_template_renderer'):  # if the first time, add a reference to this renderer object
       template_obj.mako_template_renderer = self
     log.debug('DMP :: rendering template %s' % template_obj.filename)
+    # send the render signal
+    if settings.DMP_SIGNALS:
+      signals.dmp_signal_render_template.send(sender=self, request=request, context=context, template_obj=template_obj)
+    # PRIMARY FUNCTION: render the template
     if settings.DEBUG:
       try:
         return template_obj.render_unicode(**context_dict)
@@ -239,9 +256,9 @@ class RequestInitMiddleware:
   def process_request(self, request):
     '''Called for each browser request.  This adds the following fields to the request object:
     
-       request.controller_app       The Django application (such as "calculator").
-       request.controller_page      The view module (such as "calc" for calc.py).
-       request.controller_funcname  The function within the view module to be called (usually "process_request").
+       request.dmp_router_app       The Django application (such as "calculator").
+       request.dmp_router_page      The view module (such as "calc" for calc.py).
+       request.dmp_router_function  The function within the view module to be called (usually "process_request").
        request.urlparams            A list of the remaining url parts (see the calc.py example).
     '''
     # split the path
@@ -250,34 +267,34 @@ class RequestInitMiddleware:
     # ensure that we have at least 2 path_parts to work with
     # by adding the default app and/or page as needed
     if len(path_parts) == 0:
-      path_parts.append(settings.MAKO_DEFAULT_APP)
-      path_parts.append(settings.MAKO_DEFAULT_PAGE)
+      path_parts.append(settings.DMP_DEFAULT_APP)
+      path_parts.append(settings.DMP_DEFAULT_PAGE)
       
     elif len(path_parts) == 1: # /app or /page
       if path_parts[0] in TEMPLATE_RENDERERS:  # one of our apps specified, so insert the default page
-        path_parts.append(settings.MAKO_DEFAULT_PAGE)
+        path_parts.append(settings.DMP_DEFAULT_PAGE)
       else:  # not one of our apps, so insert the app and assume path_parts[0] is a page in that app
-        path_parts.insert(0, settings.MAKO_DEFAULT_APP)
+        path_parts.insert(0, settings.DMP_DEFAULT_APP)
         if not path_parts[1]: # was the page empty?
-          path_parts[1] = settings.MAKO_DEFAULT_PAGE
+          path_parts[1] = settings.DMP_DEFAULT_PAGE
     
     else: # at this point in the elif, we know len(path_parts) >= 2
       if path_parts[0] not in TEMPLATE_RENDERERS: # the first part was not one of our apps, so insert the default app
-        path_parts.insert(0, settings.MAKO_DEFAULT_APP)
+        path_parts.insert(0, settings.DMP_DEFAULT_APP)
       if not path_parts[1]:  # is the page empty?
-        path_parts[1] = settings.MAKO_DEFAULT_PAGE
+        path_parts[1] = settings.DMP_DEFAULT_PAGE
         
     # set the app and page in the request
-    request.controller_app = path_parts[0]
-    request.controller_page = path_parts[1]
+    request.dmp_router_app = path_parts[0]
+    request.dmp_router_page = path_parts[1]
     
     # see if a function is specified with the page (the __ separates a function name)
-    du_pos = request.controller_page.find('__')
+    du_pos = request.dmp_router_page.find('__')
     if du_pos < 0:
-      request.controller_funcname = ''
+      request.dmp_router_function = 'process_request'
     else:
-      request.controller_funcname = request.controller_page[du_pos:]
-      request.controller_page = request.controller_page[:du_pos]
+      request.dmp_router_function = 'process_request%s' % (request.dmp_router_page[du_pos:])
+      request.dmp_router_page = request.dmp_router_page[:du_pos]
       
     # set up the urlparams with the reamining path parts
     request.urlparams = URLParamList([ urllib.parse.unquote_plus(s) for s in path_parts[2:] ])

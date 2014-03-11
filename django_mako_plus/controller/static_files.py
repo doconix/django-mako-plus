@@ -40,7 +40,7 @@ import os, os.path, time
 # Import minification if requested
 JSMIN = False
 CSSMIN = False
-if settings.MAKO_MINIFY_JS_CSS and not settings.DEBUG:
+if settings.DMP_MINIFY_JS_CSS and not settings.DEBUG:
   try:
     from rjsmin import jsmin
     JSMIN = True
@@ -129,7 +129,7 @@ class StaticRenderer(object):
         ret.append(ti.css)  # the <link> was already created once in the constructor
       if ti.cssm:
         css_text = STYLE_RENDERERS[ti.app].render(request, ti.cssm, context.kwargs)
-        if settings.MAKO_MINIFY_JS_CSS and JSMIN:
+        if settings.DMP_MINIFY_JS_CSS and JSMIN:
           css_text = cssmin(css_text)
         ret.append('<style type="text/css">%s</style>' % css_text) 
     return '\n'.join(ret)
@@ -143,7 +143,7 @@ class StaticRenderer(object):
         ret.append(ti.js)  # the <script> was already created once in the constructor
       if ti.jsm:
         js_text = SCRIPT_RENDERERS[ti.app].render(request, ti.jsm, context.kwargs)
-        if settings.MAKO_MINIFY_JS_CSS and JSMIN:
+        if settings.DMP_MINIFY_JS_CSS and JSMIN:
           js_text = jsmin(js_text)
         ret.append('<script>%s</script>' % js_text)
     return '\n'.join(ret)
