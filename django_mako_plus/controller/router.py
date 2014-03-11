@@ -52,11 +52,16 @@ def route_request(request):
           if hasattr(module_obj, request.dmp_router_function):
             log.debug('DMP :: calling view function %s.%s' % (request.dmp_router_module, request.dmp_router_function))
             try: 
-              # send the signal
+              # send the pre-signal
               if settings.DMP_SIGNALS:
-                signals.dmp_signal_process_request.send(sender=sys.modules[__name__], request=request)
+                signals.dmp_signal_pre_process_request.send(sender=sys.modules[__name__], request=request)
               # PRIMARY FUNCTION: call the process_request() function
               response = getattr(module_obj, request.dmp_router_function)(request)
+              # send the post-signal
+              if settings.DMP_SIGNALS:
+                for receiver, ret_response in signals.dmp_signal_post_process_request.send(sender=sys.modules[__name__], request=request, response=response):
+                  if ret_response != None:
+                    response = ret_response # sets it to the last non-None in the signal receiver chain
               if not isinstance(response, HttpResponse):
                 log.debug('DMP :: view function %s.%s failed to return an HttpResponse.  Returning Http404.' % (request.dmp_router_module, request.dmp_router_function))
                 raise Http404
@@ -179,17 +184,24 @@ class MakoTemplateRenderer:
     if not hasattr(template_obj, 'mako_template_renderer'):  # if the first time, add a reference to this renderer object
       template_obj.mako_template_renderer = self
     log.debug('DMP :: rendering template %s' % template_obj.filename)
-    # send the render signal
+    # send the pre-render signal
     if settings.DMP_SIGNALS:
-      signals.dmp_signal_render_template.send(sender=self, request=request, context=context, template_obj=template_obj)
+      signals.dmp_signal_pre_render_template.send(sender=self, request=request, context=context, template=template_obj)
     # PRIMARY FUNCTION: render the template
     if settings.DEBUG:
       try:
-        return template_obj.render_unicode(**context_dict)
+        content = template_obj.render_unicode(**context_dict)
       except:
-        return html_error_template().render_unicode()
+        content = html_error_template().render_unicode()
     else:
-      return template_obj.render_unicode(**context_dict)
+      content = template_obj.render_unicode(**context_dict)
+    # send the post-render signal
+    if settings.DMP_SIGNALS:
+      for receiver, ret_content in signals.dmp_signal_post_render_template.send(sender=self, request=request, context=context, template=template_obj, content=content):
+        if ret_content != None:
+          content = ret_content  # sets it to the last non-None return in the signal receiver chain
+    # return
+    return content
     
     
   def render_to_response(self, request, template, params={}):

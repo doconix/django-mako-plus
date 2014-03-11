@@ -863,19 +863,21 @@ The following creates two receivers.  The first is called just before the view's
         from django.dispatch import receiver
         from django_mako_plus.controller import signals
 
-        @receiver(signals.dmp_signal_process_request)
-        def dmp_signal_process_request(sender, **kargs):
+        @receiver(signals.dmp_signal_pre_process_request)
+        def dmp_signal_pre_process_request(sender, **kargs):
           request = kargs['request']
           console.log('>>> process_request signal received!')
   
-        @receiver(signals.dmp_signal_render_template)
-        def dmp_signal_render_template(sender, **kargs):
+        @receiver(signals.dmp_signal_pre_render_template)
+        def dmp_signal_pre_render_template(sender, **kargs):
           request = kargs['request']
           context = kargs['context']            # the template variables
-          template_obj = kargs['template_obj']  # the Mako template object that will do the rendering
+          template = kargs['template']  # the Mako template object that will do the rendering
           console.log('>>> render_template signal received!')
 
 The above code should be in a code file that is called during Django initialization.  Good locations might be in a `models.py` file or your app's `__init__.py` file.
+
+See the `django_mako_plus/controller/signals.py` file for all the available signals you can hook to.
 
 # Where to Now?
 
