@@ -13,7 +13,7 @@ from django.template import RequestContext
 from django.utils.importlib import import_module
 from mako.exceptions import TopLevelLookupException, html_error_template
 from mako.lookup import TemplateLookup
-from ..controller import signals
+from ..controller import signals, view_function, RedirectException, InternalRedirectException
 import os, os.path, re, mimetypes, sys
 import urllib.request, urllib.parse, urllib.error
 
@@ -42,44 +42,52 @@ def route_request(request):
     response = None
     request.dmp_router_module = '.'.join([ request.dmp_router_app, 'views', request.dmp_router_page ])
     
-    # this next line assumes that controller.py is one level below the settings.py file (hence the '..')
-    full_module_filename = os.path.normpath(os.path.join(settings.BASE_DIR, request.dmp_router_module.replace('.', '/') + '.py'))
-    while True:
+    while True: # enables the InternalRedirectExceptions to loop around
+      full_module_filename = os.path.normpath(os.path.join(settings.BASE_DIR, request.dmp_router_module.replace('.', '/') + '.py'))
       try:
-        # look for the module
-        if os.path.exists(full_module_filename):
-          module_obj = import_module(request.dmp_router_module)
-          if hasattr(module_obj, request.dmp_router_function):
-            log.debug('DMP :: calling view function %s.%s' % (request.dmp_router_module, request.dmp_router_function))
-            try: 
-              # send the pre-signal
-              if settings.DMP_SIGNALS:
-                signals.dmp_signal_pre_process_request.send(sender=sys.modules[__name__], request=request)
-              # PRIMARY FUNCTION: call the process_request() function
-              response = getattr(module_obj, request.dmp_router_function)(request)
-              # send the post-signal
-              if settings.DMP_SIGNALS:
-                for receiver, ret_response in signals.dmp_signal_post_process_request.send(sender=sys.modules[__name__], request=request, response=response):
-                  if ret_response != None:
-                    response = ret_response # sets it to the last non-None in the signal receiver chain
-              if not isinstance(response, HttpResponse):
-                log.debug('DMP :: view function %s.%s failed to return an HttpResponse.  Returning Http404.' % (request.dmp_router_module, request.dmp_router_function))
-                raise Http404
-            except RedirectException as e: # redirect to another page
-              log.debug('DMP :: view function %s.%s redirected processing to %s' % (request.dmp_router_module, request.dmp_router_function, e.redirect_to))
-              # send the signal
-              if settings.DMP_SIGNALS:
-                signals.dmp_signal_redirect_exception.send(sender=sys.modules[__name__], request=request, exc=e)
-              # send the browser the redirect command
-              if e.permanent:
-                return HttpResponsePermanentRedirect(e.redirect_to)
-              return HttpResponseRedirect(e.redirect_to)
+        # look for the module, and if not found go straight to template
+        if not os.path.exists(full_module_filename):
+          log.debug('DMP :: module %s not found; sending processing directly to template %s.html' % (request.dmp_router_module, request.dmp_router_page_full))
+          if request.dmp_router_app in TEMPLATE_RENDERERS:
+            return TEMPLATE_RENDERERS[request.dmp_router_app].render_to_response(request, '%s.html' % request.dmp_router_page_full)
           else:
-            log.debug('DMP :: view function %s not in module %s; returning 404 not found' % (request.dmp_router_function, request.dmp_router_module))
+            log.debug('DMP :: app %s is not a designated DMP app.  Template rendering is not possible without DJANGO_MAKO_PLUS=True in its __init__.py file.' % (request.dmp_router_app))
             raise Http404
-        else:
-          log.debug('DMP :: module %s not found; sending processing directly to the template' % (request.dmp_router_module))
-        break
+        module_obj = import_module(request.dmp_router_module)
+        
+        # find the function
+        if not hasattr(module_obj, request.dmp_router_function):
+          log.debug('DMP :: view function %s not in module %s; returning 404 not found.' % (request.dmp_router_function, request.dmp_router_module))
+          raise Http404
+        func_obj = getattr(module_obj, request.dmp_router_function)
+
+        # ensure it is decorated with @view_function - this is for security so only certain functions can be called
+        if not isinstance(func_obj, view_function): 
+          log.debug('DMP :: view function %s found successfully, but it is not decorated with "view_function"; returning 404 not found.' % (request.dmp_router_function))
+          raise Http404
+
+        # send the pre-signal
+        if settings.DMP_SIGNALS:
+          signals.dmp_signal_pre_process_request.send(sender=sys.modules[__name__], request=request)
+
+        # call view function
+        log.debug('DMP :: calling view function %s.%s' % (request.dmp_router_module, request.dmp_router_function))
+        response = getattr(module_obj, request.dmp_router_function)(request)
+              
+        # send the post-signal
+        if settings.DMP_SIGNALS:
+          for receiver, ret_response in signals.dmp_signal_post_process_request.send(sender=sys.modules[__name__], request=request, response=response):
+            if ret_response != None:
+              response = ret_response # sets it to the last non-None in the signal receiver chain
+            
+        # if we didn't get a correct response back, send a 404
+        if not isinstance(response, HttpResponse):
+          log.debug('DMP :: view function %s.%s failed to return an HttpResponse (or the post-signal overwrote it).  Returning Http404.' % (request.dmp_router_module, request.dmp_router_function))
+          raise Http404
+              
+        # return the response
+        return response
+        
       except InternalRedirectException as ivr:
         # send the signal
         if settings.DMP_SIGNALS:
@@ -90,55 +98,18 @@ def route_request(request):
         full_module_filename = os.path.normpath(os.path.join(settings.BASE_DIR, request.dmp_router_module.replace('.', '/') + '.py'))
         log.debug('DMP :: received an InternalViewRedirect to %s -> %s' % (full_module_filename, request.dmp_router_function))
       
-    # if we get here, a matching view wasn't found; look for a matching template
-    if response == None:
-      if request.dmp_router_app in TEMPLATE_RENDERERS:
-        response = TEMPLATE_RENDERERS[request.dmp_router_app].render_to_response(request, '%s.html' % request.dmp_router_page)
-      else:
-        log.debug('DMP :: app %s is not a designated DMP app.' % (request.dmp_router_app))
-  
-    # return the response
-    if response == None:
-      raise Http404
-      
-    return response  
+      except RedirectException as e: # redirect to another page
+        log.debug('DMP :: view function %s.%s redirected processing to %s' % (request.dmp_router_module, request.dmp_router_function, e.redirect_to))
+        # send the signal
+        if settings.DMP_SIGNALS:
+          signals.dmp_signal_redirect_exception.send(sender=sys.modules[__name__], request=request, exc=e)
+        # send the browser the redirect command
+        return e.get_response()
+
+    # the code should never get here
+    raise Exception("Django-Mako-Plus router error: The route_request() function should not have been able to get to this point.  Please notify the owner of the DMP project.  Thanks.")
     
     
-
-    
-
-###############################################################
-###   Exceptions used to direct the controller
-
-class InternalRedirectException(Exception):
-  '''View functions can throw this exception to indicate that a new view
-     should be called by the HtmlPageServer.  The current view function
-     will end immediately, and processing will be passed to the new view function.
-  '''
-  def __init__(self, redirect_module, redirect_function):
-    '''Indicates the new view to be called.  The view should be given relative to the project root.'''
-    super().__init__()
-    self.redirect_module = redirect_module
-    self.redirect_function = redirect_function
-  
-
-class TemplateException(Exception):
-  '''A template exception while rendering Mako templates'''
-  def __init__(self, error, message):
-    self.error = error
-    Exception.__init__(self, message)
-
-
-class RedirectException(Exception):
-  '''Immediately stops processing of a view function or template and redirects to the given page.
-     Note that this exception only works when urls.py routes the call through the classes in this
-     module.  Django should have shipped with this one.  Perhaps it takes a little too much liberty
-     with exceptions, but it makes returning from a huge call stack really nice.'''
-  def __init__(self, redirect_to, permanent=False):
-    self.redirect_to = redirect_to
-    self.permanent = permanent
-
-
 
 
 ##############################################################
@@ -244,6 +215,8 @@ def get_app_template_dir(appname, template_subdir="templates"):
   return template_dir
 
 
+
+
 ##########################################################
 ###   Populate the available template renderers
 
@@ -299,13 +272,14 @@ class RequestInitMiddleware:
     # set the app and page in the request
     request.dmp_router_app = path_parts[0]
     request.dmp_router_page = path_parts[1]
+    request.dmp_router_page_full = path_parts[1]  # might be different from dmp_router_page when split by '.' below
     
-    # see if a function is specified with the page (the __ separates a function name)
-    du_pos = request.dmp_router_page.find('__')
+    # see if a function is specified with the page (the . separates a function name)
+    du_pos = request.dmp_router_page.find('.')
     if du_pos < 0:
       request.dmp_router_function = 'process_request'
     else:
-      request.dmp_router_function = 'process_request%s' % (request.dmp_router_page[du_pos:])
+      request.dmp_router_function = request.dmp_router_page[du_pos+1:]
       request.dmp_router_page = request.dmp_router_page[:du_pos]
       
     # set up the urlparams with the reamining path parts

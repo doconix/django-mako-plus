@@ -200,7 +200,7 @@ Already have an app that you'd like to switch over?  Just do the following:
 
         DJANGO_MAKO_PLUS = True
     
-* Go through your existing `your-app/views.py` file and move the functions to new files in the `your-app/views/` folder.  You need a .py file for *each* web-accessible function in your existing views.py file.  For example, if you have an existing views.py function called `do_something` that you want accessible via the url `/your-app/do_something/`, create a new file `your-app/views/do_something.py`.  Inside this new file, create the function `def process_request(request):`, and copy the contents of the existing function within this function.
+* Go through your existing `your-app/views.py` file and move the functions to new files in the `your-app/views/` folder.  You need a .py file for *each* web-accessible function in your existing views.py file.  For example, if you have an existing views.py function called `do_something` that you want accessible via the url `/your-app/do_something/`, create a new file `your-app/views/do_something.py`.  Inside this new file, create the function `def process_request(request):`, and copy the contents of the existing function within this function.  Decorate each process_request with the `@view_function` decorator.
 
 * Clean up: once your functions are in new files, you can remove the `your-app/views.py` file.  You can also remove all the entries for your app in `urls.py`.
       
@@ -321,10 +321,12 @@ Let's add some "work" to the process by adding the current server time to the in
 
         from django.conf import settings
         from django_mako_plus.controller.router import MakoTemplateRenderer
+        from django_mako_plus.controller import view_function
         from datetime import datetime
 
         templater = MakoTemplateRenderer('homepage')
 
+        @view_function
         def process_request(request):
           template_vars = {
             'now': datetime.now(),
@@ -341,11 +343,11 @@ Let me pause for a minute and talk about log messages.  If you enabled the logge
 
 These debug statements are incredibly helpful in figuring out why pages aren't routing right.  If your page didn't load right, you'll probably see why in these statements.  In my log above, the first line lists what the controller assigned the app and page to be.
 
-The second line tells me the controller found my new `index.py` view, and it called the `process_request` function successfully.  This is important -- view modules **must** have a `process_request` function.  It's hard coded into the DMP framework.
+The second line tells me the controller found my new `index.py` view, and it called the `process_request` function successfully.  This is important -- the `process_request` function is the "default" view function.  Further, the any web-accessible function must be decorated with `@view_function`.
 
->This hard coding is done for security.  If the framework let browsers specify any old function, end users could invoke any function of any module on your system!  By hard coding the name `process_request`, the framework limits end users to one specifically-named function.
+>This decoration with `@view_function` is done for security.  If the framework let browsers specify any old function, end users could invoke any function of any module on your system!  By requiring the decorator, the framework limits end users to one specifically-named function.
 
-> Later in the tutorial, we'll describe another way to call a function by prefixing any name with `process_request__`.  So in reality, you can actually have multiple, callable functions in a module.  But they all must start with the hard-coded `process_request`.
+> Later in the tutorial, we'll describe another way to call other functions within your view  Even though `process_request` is the default function, you can actually have multiple web-accessible functions within a view/*.py file.
 
 As stated earlier, we explicitly call the Mako renderer at the end of the `process_request` function.  The template_vars (the third parameter of the call) is a dictionary containing variable names that will be globally available within the template.
 
@@ -387,10 +389,12 @@ Although this might not be the best use of urlparams, suppose we want to display
   
         from django.conf import settings
         from django_mako_plus.controller.router import MakoTemplateRenderer
+        from django_mako_plus.controller import view_function
         from datetime import datetime
 
         templater = MakoTemplateRenderer('homepage')
 
+        @view_function
         def process_request(request):
           template_vars = {
             'now': datetime.now().strftime(request.urlparams[0] if request.urlparams[0] else '%H:%M'),
@@ -454,11 +458,13 @@ Let's make the color dynamic by adding a new random variable `timecolor` to our 
 
         from django.conf import settings
         from django_mako_plus.controller.router import MakoTemplateRenderer
+        from django_mako_plus.controller import view_function
         from datetime import datetime
         import random
 
         templater = MakoTemplateRenderer('homepage')
 
+        @view_function
         def process_request(request):
           template_vars = {
             'now': datetime.now().strftime(request.urlparams[0] if request.urlparams[0] else '%H:%M'),
@@ -576,11 +582,13 @@ The client side is now ready, so let's create the `/homepage/index_time/` server
 
         from django.conf import settings
         from django_mako_plus.controller.router import MakoTemplateRenderer
+        from django_mako_plus.controller import view_function
         from datetime import datetime
         import random
 
         templater = MakoTemplateRenderer('homepage')
 
+        @view_function
         def process_request(request):
           template_vars = {
             'now': datetime.now(),
@@ -604,32 +612,33 @@ Reload your browser page and try the button.  It should reload the time *from th
 
 ## Really, a Whole New File for Ajax?
 
-All right, there **is** a shortcut, and a good one at that. The last section showed you how to create an ajax endpoint view.  Since modern web pages have many little ajax calls thoughout their pages, the framework allows you to put several process_request() methods **in the same .py file**.  
+All right, there **is** a shortcut, and a good one at that. The last section showed you how to create an ajax endpoint view.  Since modern web pages have many little ajax calls thoughout their pages, the framework allows you to put several web-accessible methods **in the same .py file**.  
 
 Let's get rid of `homepage/views/index_time.py`.  That's right, just delete the file.
 
 Open `homepage/views/index.py` and add the following to the end of the file:
 
-        def process_request__gettime(request):
+        @view_function
+        def gettime(request):
           template_vars = {
             'now': datetime.now(),
           }
           return templater.render_to_response(request, 'index_time.html', template_vars)  
 
-Note the name of this new function is `process_request__time`, and it contains the function body from our now-deleted `index_time.py`.  The framework recognizes **any** function that starts with `process_request...` as available endpoints for urls.  Since getting the server time is essentially "part" of the index page, it makes sense to put the ajax endpoint right in the same file.  Both `process_request` and `process_request__time` serve content for the `/homepage/index/` html page.
+Note the function is decorated with `@view_function`, and it contains the function body from our now-deleted `index_time.py`.  The framework recognizes **any** function with this decorator as an available endpoint for urls.  Since getting the server time is essentially "part" of the index page, it makes sense to put the ajax endpoint right in the same file.  Both `process_request` and `gettime` serve content for the `/homepage/index/` html page.
 
 To take advantage of this new function, let's modify the url in `homepage/scripts/index.jsm`:
 
         // update button
         $('#server-time-button').click(function() {
-          $('.server-time').load('/homepage/index__gettime');
+          $('.server-time').load('/homepage/index.gettime');
         });
 
-The url now points to `index__gettime`, which the framework translates to `index.py -> process_request__gettime()`.  Just as before, `process_request` is hard coded into the function name so users can't call any function in your codebase.  Only methods that start with `process_request` can be called.
+The url now points to `index.gettime`, which the framework translates to `index.py -> gettime()`.  In other words, a dot (.) gives an exact function within the module to be called rather than the default `process_request` function.
 
 Reload your browser page, and the button should still work.  Press it a few times and check out the magic.
 
-> Since ajax calls often return JSON, XML, or simple text, you often only need to add a `process_request__something()` to your view.  At the end of the function, simply `return HttpResponse("json or xml or text")`.  You likely don't need full template, css, or js files.
+> Since ajax calls often return JSON, XML, or simple text, you often only need to add a function to your view.  At the end of the function, simply `return HttpResponse("json or xml or text")`.  You likely don't need full template, css, or js files.
 
 
 ## Template Extension Across Apps
@@ -864,15 +873,15 @@ The following creates two receivers.  The first is called just before the view's
         from django_mako_plus.controller import signals
 
         @receiver(signals.dmp_signal_pre_process_request)
-        def dmp_signal_pre_process_request(sender, **kargs):
-          request = kargs['request']
+        def dmp_signal_pre_process_request(sender, **kwargs):
+          request = kwargs['request']
           console.log('>>> process_request signal received!')
   
         @receiver(signals.dmp_signal_pre_render_template)
-        def dmp_signal_pre_render_template(sender, **kargs):
-          request = kargs['request']
-          context = kargs['context']            # the template variables
-          template = kargs['template']  # the Mako template object that will do the rendering
+        def dmp_signal_pre_render_template(sender, **kwargs):
+          request = kwargs['request']
+          context = kwargs['context']            # the template variables
+          template = kwargs['template']  # the Mako template object that will do the rendering
           console.log('>>> render_template signal received!')
 
 The above code should be in a code file that is called during Django initialization.  Good locations might be in a `models.py` file or your app's `__init__.py` file.
