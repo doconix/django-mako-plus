@@ -133,7 +133,7 @@ class MakoTemplateRenderer:
        
        This method raises a TopLevelLookupException if the template is not found.
     
-       @request  The context request from Django
+       @request  The request context from Django.  This can be None if you need to render a template without a request context.
        @template The template file path to render.  This is relative to the app_path/controller_TEMPLATES_DIR/ directory.
                  For example, to render app_path/templates/page1, set template="page1.html", assuming you have
                  set up the variables as described in the documentation above.
@@ -156,7 +156,7 @@ class MakoTemplateRenderer:
       template_obj.mako_template_renderer = self
     log.debug('DMP :: rendering template %s' % template_obj.filename)
     # send the pre-render signal
-    if settings.DMP_SIGNALS:
+    if settings.DMP_SIGNALS and request != None:
       signals.dmp_signal_pre_render_template.send(sender=self, request=request, context=context, template=template_obj)
     # PRIMARY FUNCTION: render the template
     if settings.DEBUG:
@@ -167,7 +167,7 @@ class MakoTemplateRenderer:
     else:
       content = template_obj.render_unicode(**context_dict)
     # send the post-render signal
-    if settings.DMP_SIGNALS:
+    if settings.DMP_SIGNALS and request != None:
       for receiver, ret_content in signals.dmp_signal_post_render_template.send(sender=self, request=request, context=context, template=template_obj, content=content):
         if ret_content != None:
           content = ret_content  # sets it to the last non-None return in the signal receiver chain
