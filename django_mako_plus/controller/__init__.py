@@ -62,7 +62,7 @@ class RedirectException(Exception):
     self.as_javascript = as_javascript
 
   def get_response(self):
-    if e.as_javascript:
+    if self.as_javascript:
       return HttpResponse('<script>window.location.href="%s";</script>' % self.redirect_to)
     if self.permanent:
       return HttpResponsePermanentRedirect(self.redirect_to)
