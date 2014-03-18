@@ -723,6 +723,19 @@ There may be some modules, such as `re` or `decimal` that are so useful you want
 Any entries in this list will be automatically included in templates throughout all apps of your site.  With the above imports, you'll be able to use `re` and `Decimal` and `os` and `os.path` anywhere in any .html, .cssm, and .jsm file.
 
 
+## Mime Types and Status Codes
+
+The `render_to_response()` function returns the *text/html* mime type and *200* status code.  What if you need to return JSON, CSV, or a 404 not found?  Just wrap the `render` function in a standard Django `HttpResponse` object.  A few examples:
+
+        from django.http import HttpResponse
+        
+        # return CSV
+        return HttpResponse(templater.render(request, 'my_csv.html', {}), mimetype='text/csv')
+        
+        # return a custom error page
+        return HttpResponse(templater.render(request, 'custom_error_page.html', {}), status=404)
+        
+
 ## Static Files, Your Web Server, and DMP
 
 Static files are files linked into your html documents like `.css` and `.js` as well as images files like `.png` and `.jpg`.  These are served directly by your web server (Apache, Nginx, etc.) rather than by Django because they don't require any processing.  They are just copied across the Internet.  Serving static files is what web servers were written for, and they are better at it than anything else.
