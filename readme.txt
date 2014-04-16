@@ -22,7 +22,7 @@ This app is a front controller that integrates the excellent Django framework wi
 
 4. DMP separates view functions into different files rather than all-in-one style.  Anyone who has programmed Django long knows that the single views.py file in each app often gets looooonnng.  Splitting logic into separate files keeps things more orderly.
 
-5. DMP automatically includes CSS and JS files, and it allows Python code within these files.  These static files get included in your web pages without any explicit declaration of `<link>` or `<script>` elements.  Python code within these support files means your CSS can change based on user or database entries.
+5. DMP automatically includes CSS and JS files, and it allows Python code within these files.  These static files get included in your web pages without any explicit declaration of `<link>` or `<script>` elements.   This means that `mypage.css` and `mypage.js` get linked in `mypage.html` automatically.  Python code within these support files means your CSS can change based on user or database entries.
 
 But don't worry, you'll still get all the Django goodness with its fantastic ORM, views, forms, etc.
 
