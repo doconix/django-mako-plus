@@ -56,10 +56,11 @@ All of the above can be found on numerous Python tutorials and web sites.  They 
 
 Create a Django project with the typical:
 
-        python django-admin.py startproject test_dmp
+        django-admin.py startproject test_dmp
   
 This step is described in detail in the standard Django tutorial.  You can, of course, name your project anything you want, but in the sections below, I'll assume you called your project `test_dmp`.
 
+> If the django-admin.py command isn't found, it's probably not in your path.   This is a common problem to people new to Django, and the main Django has an entire page dedicated the problem.  Check it out at [https://docs.djangoproject.com/en/dev/faq/troubleshooting](https://docs.djangoproject.com/en/dev/faq/troubleshooting).
   
 ### Edit Your `settings.py` File:
 

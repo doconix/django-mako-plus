@@ -96,7 +96,7 @@ class TemplateInfo(object):
     # the static templatename.css file
     self.css = None
     if os.path.exists(os.path.join(self.app_dir, 'styles', self.template_name + '.css')):
-      self.css = '<link rel="stylesheet" type="text/css" href="%s?%i" />' % (url_join(settings.STATIC_URL, self.app, 'styles', self.template_name + '.css'), SERVER_START_MINUTE)
+      self.css = '<link rel="stylesheet" type="text/css" href="%s?%i" />' % (os.path.join(settings.STATIC_URL, self.app, 'styles', self.template_name + '.css'), SERVER_START_MINUTE)
     # the mako-rendered templatename.cssm file
     self.cssm = None
     if os.path.exists(os.path.join(self.app_dir, 'styles', self.template_name + '.cssm')):
@@ -104,7 +104,7 @@ class TemplateInfo(object):
     # the static templatename.js file
     self.js = None
     if os.path.exists(os.path.join(self.app_dir, 'scripts', self.template_name + '.js')):
-      self.js = '<script src="%s?%i"></script>' % (url_join(settings.STATIC_URL, self.app, 'scripts', self.template_name + '.js'), SERVER_START_MINUTE)
+      self.js = '<script src="%s?%i"></script>' % (os.path.join(settings.STATIC_URL, self.app, 'scripts', self.template_name + '.js'), SERVER_START_MINUTE)
     # the mako-rendered templatename.jsm file
     self.jsm = None
     if os.path.exists(os.path.join(self.app_dir, 'scripts', self.template_name + '.jsm')):
@@ -149,32 +149,3 @@ class StaticRenderer(object):
     return '\n'.join(ret)
 
 
-
-############################################
-###   Utility methods
-
-def url_join(a, *p):
-    """This is a (near) copy of os.path.join from posixpath.py in Python's source code.
-       urllib.parse.join doesn't work the way I need it to.  os.path.join does work
-       the way I want, but I need to specifically hard code the forward slash for urls,
-       even on Windows.  I'm not importing posixpath because it's an undocumented library.
-    """
-    sep = '/'
-    path = a
-    try:
-        for b in p:
-            if b.startswith(sep):
-                path = b
-            elif not path or path.endswith(sep):
-                path += b
-            else:
-                path += sep + b
-    except TypeError:
-        valid_types = all(isinstance(s, (str, bytes, bytearray))
-                          for s in (a, ) + p)
-        if valid_types:
-            # Must have a mixture of text and binary data
-            raise TypeError("Can't mix strings and bytes in path "
-                            "components.") from None
-        raise
-    return path
