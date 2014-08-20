@@ -7,7 +7,7 @@
 
 from django.core.urlresolvers import get_mod_func
 from django.core.exceptions import ImproperlyConfigured
-from django.http import HttpResponse, Http404, HttpResponseRedirect, HttpResponsePermanentRedirect
+from django.http import HttpResponse, StreamingHttpResponse, Http404, HttpResponseRedirect, HttpResponsePermanentRedirect
 from django.conf import settings
 from django.template import RequestContext
 from django.utils.importlib import import_module
@@ -81,7 +81,7 @@ def route_request(request):
               response = ret_response # sets it to the last non-None in the signal receiver chain
             
         # if we didn't get a correct response back, send a 404
-        if not isinstance(response, HttpResponse):
+        if not isinstance(response, (HttpResponse, StreamingHttpResponse)):
           log.debug('DMP :: view function %s.%s failed to return an HttpResponse (or the post-signal overwrote it).  Returning Http404.' % (request.dmp_router_module, request.dmp_router_function))
           raise Http404
               
