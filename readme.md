@@ -14,7 +14,7 @@ This app is a front controller that integrates the excellent Django framework wi
 
 2. DMP allows calling views and html pages by convention rather than specific entries in urls.py. Any .html file on your site can be called without new entries in urls.py for every. single. new. page.  Doesn't Python favor convention over configuration?  
 
-3. DMP introduces the idea of URL parameters.  These allow you to embed parameters in urls, Django style (but without requiring urls.py definitions). 
+3. DMP introduces the idea of URL parameters.  These allow you to embed parameters in urls, Django style--meaning you can use pretty URLs like http://myserver.com/abc/def/123/ without specific entries in urls.py and without the need for traditional (i.e. ulgy) ?first=abc&second=def&third=123 syntax.
 
 4. DMP separates view functions into different files rather than all-in-one style.  Anyone who has programmed Django long knows that the single views.py file in each app often gets looooonnng.  Splitting logic into separate files keeps things more orderly.
 
