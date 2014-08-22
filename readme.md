@@ -22,7 +22,13 @@ This app is a front controller that integrates the excellent Django framework wi
 
 But don't worry, you'll still get all the Django goodness with its fantastic ORM, views, forms, etc.
 
-> The primary reason Django doesn't allow full Python in its templates is the designers want to encourage you and I to keep template logic simple.  I fully agree with this philosophy.  I just don't agree with the "forced" part of this philosophy.  The Python way is rather to give freedom to the developer but train in the correct way of doing things.  Even though I fully like Python in my templates, I still keep them fairly simple.  Views are where your logic goes.
+> Author's Note: The primary reason Django doesn't allow full Python in its templates is the designers want to encourage you and I to keep template logic simple.  I fully agree with this philosophy.  I just don't agree with the "forced" part of this philosophy.  The Python way is rather to give freedom to the developer but train in the correct way of doing things.  Even though I fully like Python in my templates, I still keep them fairly simple.  Views are where your logic goes.
+
+# Where Is DMP Used?
+
+This app was developed at MyEducator.com, primarily by Dr. Conan C. Albrecht <ca@byu.edu>.  You can view my blog at http://goalbrecht.com/.  Please email me if you find errors with this tutorial or have suggestions/fixes for the DMP framework.  Since I also use the framework yearly in my Django classes at BYU, many students have implemented the framework at their companies upon graduation.  At this point, the framework is quite mature and robust.
+
+I've been by some told that DMP has a lot in common with Rails.  I've actually never used RoR, but good ideas are good wherever they are found, right? :)
 
 
 # Installation
@@ -913,6 +919,3 @@ I suggest you continue with the following:
 * Link to this project in your blog or online comments.  I'd love to see the Django people come around to the idea that Python isn't evil inside templates.  Complex Python might be evil, but Python itself is just a tool within templates.
 
 
-# About DMP
-
-This app was developed at MyEducator.com.  It is maintained by Dr. Conan C. Albrecht <ca@byu.edu>.  You can view my blog at http://warp.byu.edu/.  Please email me if you find errors with this tutorial or have suggestions/fixes for the DMP framework.
