@@ -488,7 +488,7 @@ Now, rename your index.css file to `index.cssm`.  Then set the content of index.
   
 Refresh your browser a few times.  The color should change with each refresh! 
 
-As shown in the example above, the template_var dictionary sent the templating engine in `process_request` are globally available in .html, .cssm, and .jsm files.
+As shown in the example above, the template_vars dictionary sent the templating engine in `process_request` are globally available in .html, .cssm, and .jsm files.
 
 > Note that this behavior is different than CSS engines like Less and Sass. Most developers use Less and Sass for variables at development time.  These variables are rendered and stripped out before upload to the server, and they become static, normal CSS files on the server.  .cssm files should be used for dynamically-generated, per-request CSS.
 
@@ -553,7 +553,7 @@ This all works because the `index.html` template extends from the `base.htm` tem
 
 ## Ajax Calls
 
-What would the modern web be without Ajax?  Well, truthfully, a lot simpler. :)  In fact, if we reinvented the web with today's requirements, we'd probably end up at a very different place than our current web. Even the name ajax implies the use of xml -- most ajax calls return json or html. :) 
+What would the modern web be without Ajax?  Well, truthfully, a lot simpler. :)  In fact, if we reinvented the web with today's requirements, we'd probably end up at a very different place than our current web. Even the name ajax implies the use of xml -- which we don't use much in ajax anymore. Most ajax calls return json or html these days!
 
 But regardless of web history, ajax is required on most pages today.  I assume you understand the basics of ajax and focus specifically on the ways this framework supports it.
 
@@ -632,7 +632,9 @@ Open `homepage/views/index.py` and add the following to the end of the file:
           }
           return templater.render_to_response(request, 'index_time.html', template_vars)  
 
-Note the function is decorated with `@view_function`, and it contains the function body from our now-deleted `index_time.py`.  The framework recognizes **any** function with this decorator as an available endpoint for urls.  Since getting the server time is essentially "part" of the index page, it makes sense to put the ajax endpoint right in the same file.  Both `process_request` and `gettime` serve content for the `/homepage/index/` html page.
+Note the function is decorated with `@view_function`, and it contains the function body from our now-deleted `index_time.py`.  The framework recognizes **any** function with this decorator as an available endpoint for urls, not just the hard-coded `process_request` function.  In other words, you can actually name your view methods any way you like, as long as you follow the pattern described in this section.  
+
+In this case, getting the server time is essentially "part" of the index page, so it makes sense to put the ajax endpoint right in the same file.  Both `process_request` and `gettime` serve content for the `/homepage/index/` html page.  Having two view files is actually more confusing to a reader of your code because they are so related.   Placing two view functions (that are highly related like these are) in the same file keeps everything together and makes your code more concise and easier to understand.
 
 To take advantage of this new function, let's modify the url in `homepage/scripts/index.jsm`:
 
@@ -644,6 +646,8 @@ To take advantage of this new function, let's modify the url in `homepage/script
 The url now points to `index.gettime`, which the framework translates to `index.py -> gettime()`.  In other words, a dot (.) gives an exact function within the module to be called rather than the default `process_request` function.
 
 Reload your browser page, and the button should still work.  Press it a few times and check out the magic.
+
+In other words, a full DMP url is really `/app/view.function/`.  Using `/app/view/` is a shortcut, and the framework translates it as `/app/view.process_request/` internally.
 
 > Since ajax calls often return JSON, XML, or simple text, you often only need to add a function to your view.  At the end of the function, simply `return HttpResponse("json or xml or text")`.  You likely don't need full template, css, or js files.
 
