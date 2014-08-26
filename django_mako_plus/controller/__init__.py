@@ -26,6 +26,10 @@ class view_function(object):
     '''Called when the user calls this "function".'''
     return self.func(*args, **kwargs)
     
+  def __str__(self):
+    '''Debugging view'''
+    return '@view_function: %s' % self.func
+    
 
     
 
