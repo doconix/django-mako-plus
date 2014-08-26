@@ -86,6 +86,7 @@ This step is described in detail in the standard Django tutorial.  You can, of c
          
 3. Add a logger to help you debug (optional but highly recommended!):
    
+         DEBUG_PROPAGATE_EXCEPTIONS = DEBUG  # never set this True on a live site
          LOGGING = {
              'version': 1,
              'disable_existing_loggers': True,
