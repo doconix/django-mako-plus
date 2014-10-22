@@ -15,7 +15,10 @@ from mako.exceptions import TopLevelLookupException, html_error_template
 from mako.lookup import TemplateLookup
 from ..controller import signals, view_function, RedirectException, InternalRedirectException
 import os, os.path, re, mimetypes, sys
-import urllib.request, urllib.parse, urllib.error
+try:
+  from urllib.parse import unquote_plus  # Py3+
+except ImportError:
+  from urllib import unquote_plus        # Py2.7
 
 
 # set up the logger
@@ -88,7 +91,8 @@ def route_request(request):
         # return the response
         return response
         
-      except InternalRedirectException as ivr:
+      except InternalRedirectException:
+        ivr = sys.exc_info()[1] # Py2.7 and Py3+ compliant
         # send the signal
         if settings.DMP_SIGNALS:
           signals.dmp_signal_internal_redirect_exception.send(sender=sys.modules[__name__], request=request, exc=ivr)
@@ -98,7 +102,8 @@ def route_request(request):
         full_module_filename = os.path.normpath(os.path.join(settings.BASE_DIR, request.dmp_router_module.replace('.', '/') + '.py'))
         log.debug('DMP :: received an InternalViewRedirect to %s -> %s' % (full_module_filename, request.dmp_router_function))
       
-      except RedirectException as e: # redirect to another page
+      except RedirectException: # redirect to another page
+        e = sys.exc_info()[1] # Py2.7 and Py3+ compliant
         log.debug('DMP :: view function %s.%s redirected processing to %s' % (request.dmp_router_module, request.dmp_router_function, e.redirect_to))
         # send the signal
         if settings.DMP_SIGNALS:
@@ -191,7 +196,8 @@ class MakoTemplateRenderer:
     except TopLevelLookupException: # template file not found    
       log.debug('DMP :: template "%s" not found in search path: %s.' % (template, self.template_search_dirs))
       raise Http404()
-    except RedirectException as e: # redirect to another page
+    except RedirectException: # redirect to another page
+      e = sys.exc_info()[1] # Py2.7 and Py3+ compliant
       if e.permanent:
         return HttpResponsePermanentRedirect(e.redirect_to)
       return HttpResponseRedirect(e.redirect_to)
@@ -288,7 +294,7 @@ class RequestInitMiddleware:
         request.dmp_router_function = 'process_request'
       
     # set up the urlparams with the reamining path parts
-    request.urlparams = URLParamList([ urllib.parse.unquote_plus(s) for s in path_parts[2:] ])
+    request.urlparams = URLParamList([ unquote_plus(s) for s in path_parts[2:] ])
     
         
 

@@ -34,9 +34,9 @@ I've been by some told that DMP has a lot in common with Rails.  I've actually n
 # Installation
 
 
-### Python
+### Python 2.7+
 
-* Install Python 3+ and ensure you can run "python" at the command prompt.
+* Install Python 2.7+ and ensure you can run "python" at the command prompt.  The framework is developed on Py3, but it will also work if you must use 2.7.
 * Install setuptools for `easy_install`
 * Install PIP for `pip` (optional but recommended)
 
@@ -62,7 +62,7 @@ All of the above can be found on numerous Python tutorials and web sites.  They 
 
 Create a Django project with the typical:
 
-        python3 django-admin.py startproject test_dmp
+        python django-admin.py startproject test_dmp
   
 This step is described in detail in the standard Django tutorial.  You can, of course, name your project anything you want, but in the sections below, I'll assume you called your project `test_dmp`.
 
@@ -171,7 +171,7 @@ Add the Django-Mako-Plus router as **the last pattern** in your `urls.py` file:
 
 Change to your project directory in the terminal/console, then create a new Django-Mako-Plus app with the following:
 
-        python3 manage.py dmp_startapp homepage
+        python manage.py dmp_startapp homepage
         
 As with any Django app, you need to add your new app to the INSTALLED_APPS list in `settings.py`:
 
@@ -184,7 +184,7 @@ Congratulations.  You're ready to go!
 
 ### Huh? "app homepage is not a designated DMP app"?
 
-If DMP tells you that an app you're trying to access "is not a designated DMP app", you missed something above.  Rather than go above and trying again, go on to the next section on converting existing apps for a summary of everything needed to make a valid DMP app.  You're likely missing something in this list, and by going through this next section, you'll ensure all the needed pieces are in place.  I'll bet you don't the `DJANGO_MAKO_PLUS = True` part in your app's init file.
+If DMP tells you that an app you're trying to access "is not a designated DMP app", you missed something above.  Rather than go above and trying again, go on to the next section on converting existing apps for a summary of everything needed to make a valid DMP app.  You're likely missing something in this list, and by going through this next section, you'll ensure all the needed pieces are in place.  I'll bet you don't the `DJANGO_MAKO_PLUS = True` part in your app's init file.  Another possible reason is you didn't list `homepage` as one of your `INSTALLED_APPS` as described above.
 
 
 ### Convert Existing Apps to DMP
@@ -217,7 +217,7 @@ Already have an app that you'd like to switch over?  Just do the following:
 
 I assume you've just installed Django-Mako-Plus according to the instructions above.  You should have a `dmp_test` project directory that contains a `homepage` app.  I'll further assume you know how to open a terminal/console and `cd` to the `dmp_test` directory.  Most of the commands below are typed into the terminal in this directory.
 
-**Quick Start:** You already have a default page in the new app, so fire up your server with `python3 manage.py runserver` and go to [http://localhost:8000/homepage/index/](http://localhost:8000/homepage/index/).  
+**Quick Start:** You already have a default page in the new app, so fire up your server with `python manage.py runserver` and go to [http://localhost:8000/homepage/index/](http://localhost:8000/homepage/index/).  
 
 You should see a congratulations page.  If you don't, go back to the installation section and walk through the steps again.  Your console might have valuable error message to help troubleshoot things. 
 
@@ -657,7 +657,7 @@ In other words, a full DMP url is really `/app/view.function/`.  Using `/app/vie
 
 You may have noticed that this tutorial has focused on a single app.  Most projects consist of many apps.  For example, a sales site might have an app for user management, an app for product management, and an app for the catalog and sales/shopping-cart experience.  All of these apps probably want the same look and feel, and all of them likely want to extend from the **same** `base.htm` file.
 
-When you run `python3 manage.py dmp_startapp <appname>`, you get **new** `base.htm` and `base_ajax.htm` files each time.  This is done to get you started on your first app.  On your second, third, and subsequent apps, you probably want to delete these starter files and instead extend your templates from the `base.htm` and `base_ajax.htm` files in your first app.
+When you run `python manage.py dmp_startapp <appname>`, you get **new** `base.htm` and `base_ajax.htm` files each time.  This is done to get you started on your first app.  On your second, third, and subsequent apps, you probably want to delete these starter files and instead extend your templates from the `base.htm` and `base_ajax.htm` files in your first app.
   
 In fact, in my projects, I usually create an app called `base_app` that contains the common `base.htm` html code, site-wide CSS, and site-wide Javascript.  Subsequent apps simply extend from `base_app/templates/base.htm`.  The common `base_app` doesn't really have end-user templates in it -- they are just supertemplates that support other, public apps.
 
@@ -817,7 +817,7 @@ DMP comes with a manage.py command `dmp_collectstatic` that copies all your stat
 
 The Django-Mako-Plus framework has a different layout than traditional Django, so it comes with its own static collection command.  When you are ready to publish your web site, run the following to split out the static files into a single subtree:
 
-        python3 manage.py dmp_collectstatic
+        python manage.py dmp_collectstatic
         
 This command will copy of the static directories--`/media/`, `/scripts/`, and `/styles/`--to a common subtree called `/static/` (or whatever `STATIC_ROOT` is set to in your settings).  Everything in these directories is copied (except dynamic `*.jsm/*.cssm` files, which aren't static).
 
@@ -827,11 +827,11 @@ The `dmp_collectstatic` command has the following command-line options:
 
 * The commmand will refuse to overwrite an existing `/static/` directory.  If you already have this directory (either from an earlier run or for another purpose), you can 1) delete it before collecting static files, or 2) specify the overwrite option as follows:
 
-        python3 manage.py dmp_collectstatic --overwrite
+        python manage.py dmp_collectstatic --overwrite
 
 * If you need to ignore certain directories or filenames, specify them with the `--ignore` option.  This can be specified more than once, and it accepts Unix-style wildcards:
 
-        python3 manage.py dmp_collectstatic --ignore=cached_templates --ignore=fixtures --ignore=*.txt
+        python manage.py dmp_collectstatic --ignore=cached_templates --ignore=fixtures --ignore=*.txt
 
 
 
@@ -855,8 +855,8 @@ You might have some traditional Django apps (like the built-in `/admin` app) and
 
 The solution is to run both commands.  Using the options of the two commands, you can either send the output from each command to *two different* static directories, or you can send them to a single directory and let the files from the second command potentially overwrite the files from the first.  I suggest this second method:
 
-        python3 manage.py collectstatic
-        python3 manage.py dmp_collectstatic
+        python manage.py collectstatic
+        python manage.py dmp_collectstatic
 
 The above two commands will use both methods to bring files into your `/static/` folder.  You might get some duplication of files, but the output of the commands are different enough that it should work without issues.
 

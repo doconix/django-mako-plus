@@ -44,7 +44,7 @@ class InternalRedirectException(Exception):
   '''
   def __init__(self, redirect_module, redirect_function):
     '''Indicates the new view to be called.  The view should be given relative to the project root.'''
-    super().__init__()
+    super(InternalRedirectException, self).__init__()
     self.redirect_module = redirect_module
     self.redirect_function = redirect_function
   
