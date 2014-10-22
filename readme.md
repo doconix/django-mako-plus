@@ -34,9 +34,9 @@ I've been by some told that DMP has a lot in common with Rails.  I've actually n
 # Installation
 
 
-### Python 2.7+
+### Python 3+ (also 2.7)
 
-* Install Python 2.7+ and ensure you can run "python" at the command prompt.  The framework is developed on Py3, but it will also work if you must use 2.7.
+* Install Python and ensure you can run "python" at the command prompt.  The framework is developed on Python 3.x, but we've ensured it also works with 2.7 for those without a choice.
 * Install setuptools for `easy_install`
 * Install PIP for `pip` (optional but recommended)
 
