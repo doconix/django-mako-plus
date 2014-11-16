@@ -9,7 +9,7 @@ from django.core.urlresolvers import get_mod_func
 from django.core.exceptions import ImproperlyConfigured
 from django.http import HttpResponse, StreamingHttpResponse, Http404, HttpResponseRedirect, HttpResponsePermanentRedirect
 from django.conf import settings
-from django.template import RequestContext
+from django.template import Context, RequestContext
 from django.utils.importlib import import_module
 from mako.exceptions import TopLevelLookupException, html_error_template
 from mako.lookup import TemplateLookup
@@ -132,26 +132,28 @@ class MakoTemplateRenderer:
     self.tlookup = TemplateLookup(directories=self.template_search_dirs, imports=settings.DMP_DEFAULT_TEMPLATE_IMPORTS, module_directory=self.cache_root, collection_size=2000, filesystem_checks=settings.DEBUG)
 
 
-  def render(self, request, template, params={}):
+  def render(self, request, template, params={}, def_name=None):
     '''Runs a template and returns a string.  Normally, you probably want to call render_to_response instead
        because it gives a full HttpResponse or Http404.
        
        This method raises a TopLevelLookupException if the template is not found.
     
-       @request  The request context from Django.  This can be None if you need to render a template without a request context.
+       @request  The request context from Django.  If this is None, any TEMPLATE_CONTEXT_PROCESSORS defined in your settings
+                 file will be ignored but the template will otherwise render fine.
        @template The template file path to render.  This is relative to the app_path/controller_TEMPLATES_DIR/ directory.
                  For example, to render app_path/templates/page1, set template="page1.html", assuming you have
                  set up the variables as described in the documentation above.
        @params   A dictionary of name=value variables to send to the template page.
-       
+       @def_name Limits output to a specific top-level Mako <%block> or <%def> section within the template.
+                 If the section is a <%def>, it must have no parameters.  For example, def_name="foo" will call
+                 <%block name="foo"></%block> or <%def name="foo()"></def> within the template.
     '''
     # must convert the request context to a real dict to use the ** below
     context_dict = { 'request': request, 'settings': settings }  # this allows the template to access the request
-    # Django's RequestContext automatically runs all the TEMPLATE_CONTEXT_PROCESSORS and populates with variables
-    context = RequestContext(request, params) if request is not None else {}
+    context = Context(params) if request == None else RequestContext(request, params)  # Django's RequestContext automatically runs all the TEMPLATE_CONTEXT_PROCESSORS and populates with variables
     for d in context:
       context_dict.update(d)
-    # render the response with the given template and params
+    # get the template and set a few custom attributes
     template_obj = self.tlookup.get_template(template)
     if not hasattr(template_obj, 'template_path'):
       template_obj.template_path = template
@@ -159,6 +161,7 @@ class MakoTemplateRenderer:
       template_obj.template_full_path = template_obj.filename
     if not hasattr(template_obj, 'mako_template_renderer'):  # if the first time, add a reference to this renderer object
       template_obj.mako_template_renderer = self
+    # print to the log
     log.debug('DMP :: rendering template %s' % template_obj.filename)
     # send the pre-render signal
     if settings.DMP_SIGNALS and request != None:
@@ -166,11 +169,11 @@ class MakoTemplateRenderer:
     # PRIMARY FUNCTION: render the template
     if settings.DEBUG:
       try:
-        content = template_obj.render_unicode(**context_dict)
+        content = (template_obj.get_def(def_name) if def_name else template_obj).render_unicode(**context_dict)
       except:
         content = html_error_template().render_unicode()
-    else:
-      content = template_obj.render_unicode(**context_dict)
+    else:  # this is outside the above "try" loop because in non-DEBUG mode, we want to let the exception throw out of here (without having to re-raise it)
+      content = (template_obj.get_def(def_name) if def_name else template_obj).render_unicode(**context_dict)
     # send the post-render signal
     if settings.DMP_SIGNALS and request != None:
       for receiver, ret_content in signals.dmp_signal_post_render_template.send(sender=self, request=request, context=context, template=template_obj, content=content):
@@ -180,18 +183,22 @@ class MakoTemplateRenderer:
     return content
     
     
-  def render_to_response(self, request, template, params={}):
+  def render_to_response(self, request, template, params={}, def_name=None):
     '''Runs a template and returns an HttpRequest object to it. 
     
-       @request  The context request from Django
+       @request  The request context from Django.  If this is None, any TEMPLATE_CONTEXT_PROCESSORS defined in your settings
+                 file will be ignored but the template will otherwise render fine.
        @template The template file path to render.  This is relative to the app_path/controller_TEMPLATES_DIR/ directory.
                  For example, to render app_path/templates/page1, set template="page1.html", assuming you have
                  set up the variables as described in the documentation above.
        @params   A dictionary of name=value variables to send to the template page.
+       @def_name Limits output to a specific top-level Mako <%block> or <%def> section within the template.
+                 If the section is a <%def>, it must have no parameters.  For example, def_name="foo" will call
+                 <%block name="foo"></%block> or <%def name="foo()"></def> within the template.
     '''
     try:
       content_type = mimetypes.types_map.get(os.path.splitext(template)[1].lower(), 'text/html')
-      content = self.render(request, template, params)
+      content = self.render(request, template, params, def_name)
       return HttpResponse(content.encode(settings.DEFAULT_CHARSET), content_type='%s; charset=%s' % (content_type, settings.DEFAULT_CHARSET))
     except TopLevelLookupException: # template file not found    
       log.debug('DMP :: template "%s" not found in search path: %s.' % (template, self.template_search_dirs))
