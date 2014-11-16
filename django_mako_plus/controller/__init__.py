@@ -1,6 +1,28 @@
 from django.http import HttpResponse, Http404, HttpResponseRedirect, HttpResponsePermanentRedirect
 
 
+###############################################################
+###   Returns the template renderer for a given app.
+
+TEMPLATE_RENDERERS = {}
+
+def get_renderer(app_name):
+  '''Retrieves the renderer for the given app.  DMP creates a new
+     renderer object for each DMP-enabled app in your project.
+     This renderer object keeps track of the app's template directory
+     as well as a cached lookup of template objects for speed.
+     
+     If the app_name is not a valid DMP app or is not listed in
+     settings.INSTALLED_APPS, and ImproperlyConfigured exception 
+     is raised.
+  '''
+  try:
+    return TEMPLATE_RENDERERS[app_name]
+  except KeyError:
+    raise ImproperlyConfigured('No template renderer was found for %s.  Are you sure it is a valid DMP app?' % app_name)
+
+
+
    
 ###############################################################
 ###   A decorator that signals that a function is callable

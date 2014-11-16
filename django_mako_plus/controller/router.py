@@ -13,7 +13,7 @@ from django.template import Context, RequestContext
 from django.utils.importlib import import_module
 from mako.exceptions import TopLevelLookupException, html_error_template
 from mako.lookup import TemplateLookup
-from ..controller import signals, view_function, RedirectException, InternalRedirectException
+from ..controller import signals, view_function, RedirectException, InternalRedirectException, TEMPLATE_RENDERERS
 import os, os.path, re, mimetypes, sys
 try:
   from urllib.parse import unquote_plus  # Py3+
@@ -26,8 +26,6 @@ import logging
 log = logging.getLogger('django_mako_plus')
 
 
-# these are the apps we can render templates for - it is used in route_request below and populated at the end of this file
-TEMPLATE_RENDERERS = {}
 
 
 
@@ -240,7 +238,9 @@ class MakoTemplateRenderer:
 
 
 def get_app_template_dir(appname, template_subdir="templates"):
-  '''Checks whether an app seems to be a valid Django-Mako-Plus app, then returns its template directory'''
+  '''Checks whether an app seems to be a valid Django-Mako-Plus app, then returns its template directory
+     Raises an ImproperlyConfigured exception if the app is not set up as a DMP app.
+  '''
   try:
     module_obj = import_module(appname)
   except ImportError:
@@ -260,6 +260,11 @@ def get_app_template_dir(appname, template_subdir="templates"):
 
 ##########################################################
 ###   Populate the available template renderers
+###   It is a little wierd that code in router.py 
+###   populates a dictionary (TEMPLATE_RENDERERS)
+###   which is defined in __init__.py, but I want the
+###   get_renderer() method in the module rather than
+###   in the router.
 
 for appname in settings.INSTALLED_APPS:
   try:
@@ -271,7 +276,7 @@ for appname in settings.INSTALLED_APPS:
 
 ##########################################################
 ###   Middleware the prepares the request for
-###   use with the controller
+###   use with the controller. 
 
 class RequestInitMiddleware:
   '''Adds several fields to the request that our controller needs.
@@ -286,6 +291,9 @@ class RequestInitMiddleware:
        request.dmp_router_page      The view module (such as "calc" for calc.py).
        request.dmp_router_function  The function within the view module to be called (usually "process_request").
        request.urlparams            A list of the remaining url parts (see the calc.py example).
+       
+       This method is run as part of the middleware processing, so it runs long
+       before the route_request() method at the top of this file.
     '''
     # split the path
     path_parts = request.path[1:].split('/') # [1:] to remove the leading /
