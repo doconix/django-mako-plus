@@ -132,11 +132,32 @@ class MakoTemplateRenderer:
     self.tlookup = TemplateLookup(directories=self.template_search_dirs, imports=settings.DMP_DEFAULT_TEMPLATE_IMPORTS, module_directory=self.cache_root, collection_size=2000, filesystem_checks=settings.DEBUG)
 
 
+  def get_template(self, template):
+    '''Retrieve a template object for the given template name, using the app_path and template_subdir
+       settings in this object.
+    '''
+    template_obj = self.tlookup.get_template(template)
+    # if this is the first time the template has been pulled from self.tlookup, add a few extra attributes
+    if not hasattr(template_obj, 'template_path'):
+      template_obj.template_path = template
+    if not hasattr(template_obj, 'template_full_path'):
+      template_obj.template_full_path = template_obj.filename
+    if not hasattr(template_obj, 'mako_template_renderer'):  
+      template_obj.mako_template_renderer = self
+    return template_obj
+
+
   def render(self, request, template, params={}, def_name=None):
     '''Runs a template and returns a string.  Normally, you probably want to call render_to_response instead
        because it gives a full HttpResponse or Http404.
        
-       This method raises a TopLevelLookupException if the template is not found.
+       This method raises a mako.exceptions.TopLevelLookupException if the template is not found.
+    
+       The method throws two signals: 
+         1. dmp_signal_pre_render_template: you can (optionally) return a new Mako Template object from a receiver to replace
+            the normal template object that is used for the render operation.
+         2. dmp_signal_post_render_template: you can (optionally) return a string to replace the string from the normal
+            template object render.
     
        @request  The request context from Django.  If this is None, any TEMPLATE_CONTEXT_PROCESSORS defined in your settings
                  file will be ignored but the template will otherwise render fine.
@@ -153,20 +174,15 @@ class MakoTemplateRenderer:
     context = Context(params) if request == None else RequestContext(request, params)  # Django's RequestContext automatically runs all the TEMPLATE_CONTEXT_PROCESSORS and populates with variables
     for d in context:
       context_dict.update(d)
-    # get the template and set a few custom attributes
-    template_obj = self.tlookup.get_template(template)
-    if not hasattr(template_obj, 'template_path'):
-      template_obj.template_path = template
-    if not hasattr(template_obj, 'template_full_path'):
-      template_obj.template_full_path = template_obj.filename
-    if not hasattr(template_obj, 'mako_template_renderer'):  # if the first time, add a reference to this renderer object
-      template_obj.mako_template_renderer = self
-    # print to the log
-    log.debug('DMP :: rendering template %s' % template_obj.filename)
+    # get the template 
+    template_obj = self.get_template(template)
     # send the pre-render signal
     if settings.DMP_SIGNALS and request != None:
-      signals.dmp_signal_pre_render_template.send(sender=self, request=request, context=context, template=template_obj)
+      for receiver, ret_template_obj in signals.dmp_signal_pre_render_template.send(sender=self, request=request, context=context, template=template_obj):
+        if ret_template_obj != None:  # changes the template object to the received
+          template_obj = ret_template_obj
     # PRIMARY FUNCTION: render the template
+    log.debug('DMP :: rendering template %s' % template_obj.filename)
     if settings.DEBUG:
       try:
         content = (template_obj.get_def(def_name) if def_name else template_obj).render_unicode(**context_dict)
@@ -185,6 +201,18 @@ class MakoTemplateRenderer:
     
   def render_to_response(self, request, template, params={}, def_name=None):
     '''Runs a template and returns an HttpRequest object to it. 
+    
+       This method returns a django.http.Http404 exception if the template is not found.
+       If the template raises a django_mako_plus.controller.RedirectException, the browser is redirected to
+         the given page, and a new request from the browser restarts the entire DMP routing process.
+       If the template raises a django_mako_plus.controller.InternalRedirectException, the entire DMP
+         routing process is restarted internally (the browser doesn't see the redirect).
+    
+       The method throws two signals: 
+         1. dmp_signal_pre_render_template: you can (optionally) return a new Mako Template object from a receiver to replace
+            the normal template object that is used for the render operation.
+         2. dmp_signal_post_render_template: you can (optionally) return a string to replace the string from the normal
+            template object render.
     
        @request  The request context from Django.  If this is None, any TEMPLATE_CONTEXT_PROCESSORS defined in your settings
                  file will be ignored but the template will otherwise render fine.

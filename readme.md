@@ -862,6 +862,34 @@ The above two commands will use both methods to bring files into your `/static/`
 
 
 
+## Redirecting with Exceptions
+
+Suppose your view needs to redirect the user's browser to a different page than the one currently being routed.  For example, the user might not be authenticated correctly or a form might have just been submitted.  In the latter case, web applications often redirect the browser to the *same* page after a form submission (and handling with a view), effectively switching the browser from its current POST request to a regular GET request.  That way, if the user hits the refresh button within his or her browser, the page simply gets refreshed without the form being submitted again.
+
+When you need to redirect the browser to a different page, you should normally use the standard `django.http.HttpResponseRedirect` method.  By returning a redirect object from your view, DMP (and subsequently Django) direct the browser to redirect.  
+
+BUT, suppose you are several levels deep in method calls without direct access to the request or response objects?  How can you direct a method several levels up in the call stack to send a redirect response?  That's where the `django_mako_plus.controller.RedirectException` comes in handy.  Since it is an exception, it bubbles all the way up the stack to the DMP router -- where it is sent directly to the browser.
+
+Is this an abuse of exceptions?  Probably.  But in one possible viewpoint, a redirect can be seen as an exception to normal processing.  It is quite handy to be able to redirect the browser from anywhere in your web code.  If this feels dirty to you, feel free to skip ahead to the next section and ignore this part of DMP.  :)
+
+Two types of redirects are supported by DMP: a standard browser redirect and an internal redirect.  The standard browser redirect, `RedirectException`, uses the HTTP 302 code to initiate a new request.  The internal redirect is simpler and shorter: it restarts the routing process with a different view/template within the *current* request, without changing the browser url.  Internal redirect exceptions are rare and shouldn't be abused; an example might be returning an "upgrade your browser" page to a client.  Since the user has an old browser, a regular 302 redirect might not work the way you expect.  Redirecting internally is much safer.
+
+To initiate the two types of redirects, use the following code:
+
+        from django_mako_plus.controller import RedirectException, InternalRedirectException
+
+        # send a normal, browser-based redirect from anywhere in the call stack
+        # this is effectively the same as: return django.http.HttpResponseRedirect('/some/new/url')
+        raise RedirectException('/some/new/url')
+        
+        # restart the routing process with a new view, as if the browser had done this url
+        # the browser keeps the same url and doesn't know a redirect has happened
+        # the next line is as if the browser went to /homepage/upgrade/
+        raise RedirectException('homepage.views.upgrade', 'process_request')
+
+
+
+
 # Deployment Recommendations
 
 This section has nothing to do with the Django-Mako-Framework, but I want to address a couple issues in hopes that it will save you some headaches.  One of the most difficult decisions in Django development is deciding how to deploy your system.  In particular, there are several ways to connect Django to your web server: mod_wsgi, FastCGI, etc.
