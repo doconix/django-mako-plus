@@ -13,7 +13,7 @@ from django.template import Context, RequestContext
 from django.utils.importlib import import_module
 from mako.exceptions import TopLevelLookupException, html_error_template
 from mako.lookup import TemplateLookup
-from ..controller import signals, view_function, RedirectException, InternalRedirectException, TEMPLATE_RENDERERS
+from ..controller import signals, view_function, RedirectException, InternalRedirectException
 import os, os.path, re, mimetypes, sys
 try:
   from urllib.parse import unquote_plus  # Py3+
@@ -26,6 +26,8 @@ import logging
 log = logging.getLogger('django_mako_plus')
 
 
+# our cache of template renderers - populated down further in this file
+TEMPLATE_RENDERERS = {}
 
 
 
@@ -111,7 +113,6 @@ def route_request(request):
 
     # the code should never get here
     raise Exception("Django-Mako-Plus router error: The route_request() function should not have been able to get to this point.  Please notify the owner of the DMP project.  Thanks.")
-    
     
 
 
@@ -272,6 +273,23 @@ for appname in settings.INSTALLED_APPS:
     TEMPLATE_RENDERERS[appname] = MakoTemplateRenderer(appname)
   except ImproperlyConfigured:
     pass
+
+
+def get_renderer(app_name):
+  '''Retrieves the renderer for the given app.  DMP creates a new
+     renderer object for each DMP-enabled app in your project.
+     This renderer object keeps track of the app's template directory
+     as well as a cached lookup of template objects for speed.
+     
+     If the app_name is not a valid DMP app or is not listed in
+     settings.INSTALLED_APPS, and ImproperlyConfigured exception 
+     is raised.
+  '''
+  try:
+    return TEMPLATE_RENDERERS[app_name]
+  except KeyError:
+    raise ImproperlyConfigured('No template renderer was found for %s.  Are you sure it is a valid DMP app?' % app_name)
+
 
 
 ##########################################################
