@@ -140,21 +140,23 @@ class StaticRenderer(object):
   '''
   def __init__(self, mako_self, cgi_id=SERVER_START_MINUTE):
     self.mako_self = mako_self
+    self.template_chain = []
     self.cgi_id = cgi_id
     # step up the template inheritance chain and ensure each template has a TemplateInfo object
-    # I attach it to the template objects because they are cached by mako
+    # I attach it to the template objects because they are cached by mako (and thus we take 
+    # advantage of that caching).
     while mako_self != None:
       if settings.DEBUG or not hasattr(mako_self.template, DMP_ATTR_NAME):  # always recreate in debug mode
         setattr(mako_self.template, DMP_ATTR_NAME, TemplateInfo(mako_self.template))
+      self.template_chain.append(mako_self.template)  
       mako_self = mako_self.inherits
     
 
   def get_template_css(self, request, context):
     '''Retrives the static and mako-rendered CSS'''
     ret = []
-    mako_self = self.mako_self
-    while mako_self != None:
-      ti = getattr(mako_self.template, DMP_ATTR_NAME)
+    for template in reversed(self.template_chain):  # reverse so lower CSS overrides higher CSS in the inheritance chain
+      ti = getattr(template, DMP_ATTR_NAME)
       if ti.css:
         ret.append(ti.css.format(cgi_id=self.cgi_id))  # the <link> was already created once in the constructor
       if ti.cssm:
@@ -162,16 +164,14 @@ class StaticRenderer(object):
         if settings.DMP_MINIFY_JS_CSS and JSMIN:
           css_text = cssmin(css_text)
         ret.append('<style type="text/css">%s</style>' % css_text) 
-      mako_self = mako_self.inherits
     return '\n'.join(ret)
 
 
   def get_template_js(self, request, context):
     '''Retrieves the static and mako_rendered CSS'''    
     ret = []
-    mako_self = self.mako_self
-    while mako_self != None:
-      ti = getattr(mako_self.template, DMP_ATTR_NAME)
+    for template in self.template_chain:
+      ti = getattr(template, DMP_ATTR_NAME)
       if ti.js:
         ret.append(ti.js.format(cgi_id=self.cgi_id))  # the <script> was already created once in the constructor
       if ti.jsm:
@@ -179,7 +179,6 @@ class StaticRenderer(object):
         if settings.DMP_MINIFY_JS_CSS and JSMIN:
           js_text = jsmin(js_text)
         ret.append('<script>%s</script>' % js_text)
-      mako_self = mako_self.inherits
     return '\n'.join(ret)
 
 
