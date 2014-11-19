@@ -158,8 +158,8 @@ class MakoTemplateRenderer:
          2. dmp_signal_post_render_template: you can (optionally) return a string to replace the string from the normal
             template object render.
     
-       @request  The request context from Django.  If this is None, any TEMPLATE_CONTEXT_PROCESSORS defined in your settings
-                 file will be ignored but the template will otherwise render fine.
+       @request  The request context from Django.  If this is None, 1) any TEMPLATE_CONTEXT_PROCESSORS defined in your settings
+                 file will be ignored and 2) DMP signals will not be sent, but the template will otherwise render fine.
        @template The template file path to render.  This is relative to the app_path/controller_TEMPLATES_DIR/ directory.
                  For example, to render app_path/templates/page1, set template="page1.html", assuming you have
                  set up the variables as described in the documentation above.
@@ -167,33 +167,47 @@ class MakoTemplateRenderer:
        @def_name Limits output to a specific top-level Mako <%block> or <%def> section within the template.
                  If the section is a <%def>, it must have no parameters.  For example, def_name="foo" will call
                  <%block name="foo"></%block> or <%def name="foo()"></def> within the template.
+                 The block/def must be defined in the exact template.  DMP does not support calling defs from 
+                 super-templates.
     '''
     # must convert the request context to a real dict to use the ** below
     context_dict = { 'request': request, 'settings': settings }  # this allows the template to access the request
     context = Context(params) if request == None else RequestContext(request, params)  # Django's RequestContext automatically runs all the TEMPLATE_CONTEXT_PROCESSORS and populates with variables
     for d in context:
       context_dict.update(d)
+
     # get the template 
     template_obj = self.get_template(template)
+
     # send the pre-render signal
     if settings.DMP_SIGNALS and request != None:
       for receiver, ret_template_obj in signals.dmp_signal_pre_render_template.send(sender=self, request=request, context=context, template=template_obj):
         if ret_template_obj != None:  # changes the template object to the received
           template_obj = ret_template_obj
+
+    # do we need to limit down to a specific def?
+    # this only finds within the exact template (won't go up the inheritance tree)
+    # I wish I could make it do so, but can't figure this out
+    render_obj = template_obj  
+    if def_name:  # do we need to limit to just a def?
+      render_obj = template_obj.get_def(def_name)
+
     # PRIMARY FUNCTION: render the template
     log.debug('DMP :: rendering template %s' % template_obj.filename)
     if settings.DEBUG:
       try:
-        content = (template_obj.get_def(def_name) if def_name else template_obj).render_unicode(**context_dict)
+        content = render_obj.render_unicode(**context_dict)
       except:
         content = html_error_template().render_unicode()
     else:  # this is outside the above "try" loop because in non-DEBUG mode, we want to let the exception throw out of here (without having to re-raise it)
-      content = (template_obj.get_def(def_name) if def_name else template_obj).render_unicode(**context_dict)
+      content = render_obj.render_unicode(**context_dict)
+      
     # send the post-render signal
     if settings.DMP_SIGNALS and request != None:
       for receiver, ret_content in signals.dmp_signal_post_render_template.send(sender=self, request=request, context=context, template=template_obj, content=content):
         if ret_content != None:
           content = ret_content  # sets it to the last non-None return in the signal receiver chain
+          
     # return
     return content
     
