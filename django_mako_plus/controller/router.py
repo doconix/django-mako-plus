@@ -246,9 +246,12 @@ class MakoTemplateRenderer:
       raise Http404()
     except RedirectException: # redirect to another page
       e = sys.exc_info()[1] # Py2.7 and Py3+ compliant
-      if e.permanent:
-        return HttpResponsePermanentRedirect(e.redirect_to)
-      return HttpResponseRedirect(e.redirect_to)
+      log.debug('DMP :: view function %s.%s redirected processing to %s' % (request.dmp_router_module, request.dmp_router_function, e.redirect_to))
+      # send the signal
+      if settings.DMP_SIGNALS:
+        signals.dmp_signal_redirect_exception.send(sender=sys.modules[__name__], request=request, exc=e)
+      # send the browser the redirect command
+      return e.get_response()
 
 
 
