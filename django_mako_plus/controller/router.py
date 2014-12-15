@@ -109,7 +109,7 @@ def route_request(request):
         if settings.DMP_SIGNALS:
           signals.dmp_signal_redirect_exception.send(sender=sys.modules[__name__], request=request, exc=e)
         # send the browser the redirect command
-        return e.get_response()
+        return e.get_response(request)
 
     # the code should never get here
     raise Exception("Django-Mako-Plus router error: The route_request() function should not have been able to get to this point.  Please notify the owner of the DMP project.  Thanks.")
@@ -251,7 +251,7 @@ class MakoTemplateRenderer:
       if settings.DMP_SIGNALS:
         signals.dmp_signal_redirect_exception.send(sender=sys.modules[__name__], request=request, exc=e)
       # send the browser the redirect command
-      return e.get_response()
+      return e.get_response(request)
 
 
 

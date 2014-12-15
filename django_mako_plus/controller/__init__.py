@@ -67,8 +67,11 @@ class RedirectException(Exception):
     self.redirect_to = redirect_to
     self.permanent = permanent
     self.as_javascript = as_javascript
+    
 
-  def get_response(self):
+  def get_response(self, request):
+    '''Returns the redirect response for this exception.  DMP passes the current request
+       as a parameter for your convenience in using the user object, session object, etc.'''
     if self.as_javascript:
       return HttpResponse('<script>window.location.href="%s";</script>' % self.redirect_to)
     if self.permanent:
