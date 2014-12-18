@@ -43,7 +43,6 @@ def route_request(request):
     # first try going to the view function for this request
     # we look for a views/name.py file where name is the same name as the HTML file
     response = None
-    request.dmp_router_module = '.'.join([ request.dmp_router_app, 'views', request.dmp_router_page ])
     
     while True: # enables the InternalRedirectExceptions to loop around
       full_module_filename = os.path.normpath(os.path.join(settings.BASE_DIR, request.dmp_router_module.replace('.', '/') + '.py'))
@@ -324,7 +323,9 @@ class RequestInitMiddleware:
     
        request.dmp_router_app       The Django application (such as "calculator").
        request.dmp_router_page      The view module (such as "calc" for calc.py).
+       request.dmp_router_page_full The view module as specified in the URL, including the function name if specified.
        request.dmp_router_function  The function within the view module to be called (usually "process_request").
+       request.dmp_router_module    The module path in Python terms, such as calculator.views.calc.
        request.urlparams            A list of the remaining url parts (see the calc.py example).
        
        This method is run as part of the middleware processing, so it runs long
@@ -370,7 +371,10 @@ class RequestInitMiddleware:
         request.dmp_router_page = request.dmp_router_page[:du_pos]
       else:  # the . not found, and the __ not found, so go to default function name
         request.dmp_router_function = 'process_request'
-      
+
+    # set the full function location
+    request.dmp_router_module = '.'.join([ request.dmp_router_app, 'views', request.dmp_router_page ])
+    
     # set up the urlparams with the reamining path parts
     request.urlparams = URLParamList([ unquote_plus(s) for s in path_parts[2:] ])
     
