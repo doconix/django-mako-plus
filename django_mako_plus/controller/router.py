@@ -40,6 +40,9 @@ def route_request(request):
     # output the variables so the programmer can debug where this is routing
     log.debug('DMP :: processing: app=%s, page=%s, func=%s, urlparams=%s' % (request.dmp_router_app, request.dmp_router_page, request.dmp_router_function, request.urlparams))
 
+    # set the full function location
+    request.dmp_router_module = '.'.join([ request.dmp_router_app, 'views', request.dmp_router_page ])
+    
     # first try going to the view function for this request
     # we look for a views/name.py file where name is the same name as the HTML file
     response = None
@@ -372,9 +375,6 @@ class RequestInitMiddleware:
       else:  # the . not found, and the __ not found, so go to default function name
         request.dmp_router_function = 'process_request'
 
-    # set the full function location
-    request.dmp_router_module = '.'.join([ request.dmp_router_app, 'views', request.dmp_router_page ])
-    
     # set up the urlparams with the reamining path parts
     request.urlparams = URLParamList([ unquote_plus(s) for s in path_parts[2:] ])
     
