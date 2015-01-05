@@ -31,7 +31,7 @@ This app was developed at MyEducator.com, primarily by Dr. Conan C. Albrecht <ca
 
 I've been by some told that DMP has a lot in common with Rails.  I've actually never used RoR, but good ideas are good wherever they are found, right? :)
 
-## Why Mako instead of Jinja2, Cheetah, or <insert template language here>?
+## Why Mako instead of Jinja2, Cheetah, or [insert template language here]?
 
 Python has several mature, excellent templating languages.  Both Mako and Jinja2 are fairly recent yet mature systems.  Both are screaming fast.  Cheetah is an older system but has quite a bit of traction.  It wasn't a clear choice of one over the other.
 
