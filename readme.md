@@ -912,6 +912,11 @@ In choosing between these mid-level databases, you'll find that many, if not mos
 
 Your mileage may vary with everything in this section.  Do your own testing and take it all as advice only.  Best of luck. 
 
+## Deployment Tutorials
+
+The following links contain tutorials for deploying Django with DMP:
+
+* http://blog.tworivershosting.com/2014/11/ubuntu-server-setup-for-django-mako-plus.html
 
 
 # DMP Signals
