@@ -1,5 +1,6 @@
 # Use This If You've Said:
 
+* Is there an alternative template system for Django?
 * Why are Django templates weak sauce? Why not just use regular Python in templates?
 * Why does Django make me list every. single. page. in urls.py?
 * I'd like to include Python code in my CSS and Javascript files.
@@ -24,11 +25,17 @@ But don't worry, you'll still get all the Django goodness with its fantastic ORM
 
 > Author's Note: The primary reason Django doesn't allow full Python in its templates is the designers want to encourage you and I to keep template logic simple.  I fully agree with this philosophy.  I just don't agree with the "forced" part of this philosophy.  The Python way is rather to give freedom to the developer but train in the correct way of doing things.  Even though I fully like Python in my templates, I still keep them fairly simple.  Views are where your logic goes.
 
-# Where Is DMP Used?
+## Where Is DMP Used?
 
 This app was developed at MyEducator.com, primarily by Dr. Conan C. Albrecht <ca@byu.edu>.  You can view my blog at http://goalbrecht.com/.  Please email me if you find errors with this tutorial or have suggestions/fixes for the DMP framework.  Since I also use the framework yearly in my Django classes at BYU, many students have implemented the framework at their companies upon graduation.  At this point, the framework is quite mature and robust.
 
 I've been by some told that DMP has a lot in common with Rails.  I've actually never used RoR, but good ideas are good wherever they are found, right? :)
+
+## Why Mako instead of Jinja2, Cheetah, or <insert template language here>?
+
+Python has several mature, excellent templating languages.  Both Mako and Jinja2 are fairly recent yet mature systems.  Both are screaming fast.  Cheetah is an older system but has quite a bit of traction.  It wasn't a clear choice of one over the other.
+
+The short answer is I liked Mako's approach the best.  It felt the most Pythonic to me.  Jinja2 actually feels more like Django's built-in template system.  But Mako won out because it looked more like Python to me.  Mako supports template inheritance, logic structures (if, for), etc.
 
 
 # Installation
