@@ -44,26 +44,19 @@ The short answer is I liked Mako's approach the best.  It felt the most Pythonic
 
 ### Python 3+ (also 2.7)
 
-* Install Python and ensure you can run "python" at the command prompt.  The framework is developed on Python 3.x, but we've ensured it also works with 2.7 for those without a choice.
-* Install setuptools for `easy_install`
-* Install PIP for `pip` (optional but recommended)
+* Install Python and ensure you can run "python3" at the command prompt.  The framework is developed on Python 3.x, but we've ensured it also works with 2.7 for those without a choice.
+* Install PIP for `pip3` (it comes with Python 3.4+)
 
 All of the above can be found on numerous Python tutorials and web sites.  They are standard methods of installing modules in Python.
 
 
 ### Install Django, Mako, and DMP
 
-  Easy install method:
+Simply use PIP, which comes with Python 3.4+.  If you are on an older Python version, you can install it from https://pip.pypa.io/en/latest/installing.html.
   
-        easy_install django
-        easy_install mako
-        easy_install django-mako-plus
-        
-  or PIP method (recommended way):
-  
-        pip install django
-        pip install mako
-        pip install django-mako-plus
+        pip3 install django
+        pip3 install mako
+        pip3 install django-mako-plus
    
    
 ### Create a Django project
