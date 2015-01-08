@@ -128,7 +128,10 @@ class MakoTemplateRenderer:
     project_path = os.path.normpath(settings.BASE_DIR)
     self.app_path = app_path
     template_dir = get_app_template_dir(app_path, template_subdir)  # raises ImproperlyConfigured if error
-    self.template_search_dirs = [ template_dir ] + settings.DMP_TEMPLATES_DIRS
+    self.template_search_dirs = [ template_dir ]
+    if settings.DMP_TEMPLATES_DIRS:
+      self.template_search_dirs.extend(settings.DMP_TEMPLATES_DIRS)
+    self.template_search_dirs.append(settings.BASE_DIR)
     self.cache_root = os.path.abspath(os.path.join(project_path, app_path, settings.DMP_TEMPLATES_CACHE_DIR, template_subdir)) 
     self.tlookup = TemplateLookup(directories=self.template_search_dirs, imports=settings.DMP_DEFAULT_TEMPLATE_IMPORTS, module_directory=self.cache_root, collection_size=2000, filesystem_checks=settings.DEBUG)
 

@@ -123,13 +123,6 @@ This step is described in detail in the standard Django tutorial.  You can, of c
          ###############################################################
          ###   Specific settings for the Django-Mako-Plus app
 
-         # the default app/templates/ directory is always included in the template search path
-         # define any additional search directories here - this allows inheritance between apps
-         # absolute paths are suggested
-         DMP_TEMPLATES_DIRS = [ 
-           # os.path.join(BASE_DIR, 'base_app', 'templates'),
-         ]
-
          # identifies where the Mako template cache will be stored, relative to each app
          DMP_TEMPLATES_CACHE_DIR = 'cached_templates'
 
@@ -149,6 +142,11 @@ This step is described in detail in the standard Django tutorial.  You can, of c
          # whether to minify using rjsmin, rcssmin during 1) collection of static files, and 2) on the fly as .jsm and .cssm files are rendered
          # rjsmin and rcssmin are fast enough that doing it on the fly can be done without slowing requests down
          DMP_MINIFY_JS_CSS = True
+
+         # see the DMP online tutorial for information about this setting
+         DMP_TEMPLATES_DIRS = [ 
+           # os.path.join(BASE_DIR, 'base_app', 'templates'),
+         ]
 
          ###  End of settings for the base_app Controller
          ################################################################
@@ -656,15 +654,43 @@ In other words, a full DMP url is really `/app/view.function/`.  Using `/app/vie
 > Since ajax calls often return JSON, XML, or simple text, you often only need to add a function to your view.  At the end of the function, simply `return HttpResponse("json or xml or text")`.  You likely don't need full template, css, or js files.
 
 
-## Template Extension Across Apps
+## Templates Located Elsewhere
+
+This likely impacts few users of DMP, so you may want to skip this section for now.  Suppose your templates are located in a directory outside your normal project root.  In other words, for some reason, you don't want to put your templates in the app/templates directory.  
+
+
+### Case 1: Templates Within Your Project Directory
+
+If the templates you need to access are within your project directory, no extra setup is required.  Simply reference those templates relateive to the root project directory.  For example, to access a template located at homepage/mytemplates/sub1/page.html (relative to your project root), use the following:
+
+        return templater.render_to_response(request, '/homepage/mytemplates/sub1/page.html', template_vars)
+        
+### Case 2: Templates Outside Your Project Directory
+
+Suppose your templates are located on a different disk or entirely different directory, relative to your project.  DMP allows you to add extra directories to the template search path through the `DMP_TEMPLATES_DIRS` setting.  This variable contains a list of directories that are searched by DMP regardless of the app being referenced.  To include the `/var/templates/` directory in the search path, set this variable as follows:
+
+        DMP_TEMPLATES_DIRS = [ 
+           '/var/templates/',
+        ]
+
+Suppose, after making the above change, you need to render the '/var/templates/page1.html' template:
+
+        return templater.render_to_response(request, 'page1.html', template_vars)
+        
+DMP will first search the current app's `templates` directory (i.e. the normal way), then it will search the `DMP_TEMPLATES_DIRS` list, which in this case contains `/var/templates/`.  Your `page1.html` template will be found and rendered.
+
+
+## Template Inheritance Across Apps
 
 You may have noticed that this tutorial has focused on a single app.  Most projects consist of many apps.  For example, a sales site might have an app for user management, an app for product management, and an app for the catalog and sales/shopping-cart experience.  All of these apps probably want the same look and feel, and all of them likely want to extend from the **same** `base.htm` file.
 
 When you run `python manage.py dmp_startapp <appname>`, you get **new** `base.htm` and `base_ajax.htm` files each time.  This is done to get you started on your first app.  On your second, third, and subsequent apps, you probably want to delete these starter files and instead extend your templates from the `base.htm` and `base_ajax.htm` files in your first app.
   
-In fact, in my projects, I usually create an app called `base_app` that contains the common `base.htm` html code, site-wide CSS, and site-wide Javascript.  Subsequent apps simply extend from `base_app/templates/base.htm`.  The common `base_app` doesn't really have end-user templates in it -- they are just supertemplates that support other, public apps.
+In fact, in my projects, I usually create an app called `base_app` that contains the common `base.htm` html code, site-wide CSS, and site-wide Javascript.  Subsequent apps simply extend from `/base_app/templates/base.htm`.  The common `base_app` doesn't really have end-user templates in it -- they are just supertemplates that support other, public apps.
 
-Unfortunately, doing this isn't as clean as you might expect because the Mako engine disallows inheritance with relative paths.  Suppose I have the following app structure:
+DMP supports cross-app inheritance by including your project root (e.g. `settings.BASE_DIR`) in the template lookup path.  All you need to do is use the full path (relative to the project root) to the template in the inherits statement.
+
+Suppose I have the following app structure:
 
         dmptest
             base_app/
@@ -687,29 +713,13 @@ Unfortunately, doing this isn't as clean as you might expect because the Mako en
                 views/
                     __init__.py
 
-I want `homepage/templates/index.html` to extend from `base_app/templates/site_base.htm`.  The following code in `index.html` is likely what you'd expect, **but it doesn't work**:
+I want `homepage/templates/index.html` to extend from `base_app/templates/site_base.htm`.  The following code in `index.html` sets up the inheritance:
 
-        <%inherit file="../../base_app/templates/site_base.htm" />
-
-Since Mako doesn't allow this type of relative referencing, the `DMP_TEMPLATES_DIRS` variable is included in settings.py.  This variable equals a list of directories that contain **global** templates that can be referenced directly from any app on your site.  To include the `base_app/` app above, we'd set this variable as follows:
-
-        DMP_TEMPLATES_DIRS = [ 
-           os.path.join(BASE_DIR, 'base_app', 'templates'),
-        ]
-
-Then in `index.html`, we'd reference the file like this:
-
-        <%inherit file="site_base.htm" />
-
-No paths, either absolute or relative, are required on the `site_base.htm` file pointer.  The `base_app` templates directory is global across your entire project.
-
-You may have noticed that I've renamed the file from `base.htm` to `site_base.htm`.  Since this name is now global to all templates on the site, I've used a name that is not likely to conflict with other template names on the site.  
+        <%inherit file="/base_app/templates/site_base.htm" />
 
 > In fact, my pages are often three inheritance levels deep: `base_app/templates/site_base.htm -> homepage/templates/base.htm -> homepage/templates/index.html` to provide for site-wide page code, app-wide page code, and specific page code.
 
-Again, this global referencing of templates isn't as clean as I'd like it to be, but it's a limitation of the Mako engine.  Such is life.
 
-> The Mako project actually used to allow relative inheritance.  It was disallowed for a very good reason.  So I'm not really faulting the library -- I'm just stating the limitation.
 
 
 ## Importing Python Modules into Templates
