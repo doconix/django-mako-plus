@@ -155,6 +155,7 @@ This step is described in detail in the standard Django tutorial.  You can, of c
 
          STATIC_URL = '/static/'
          STATICFILES_DIRS = (
+             # SECURITY WARNING: this next line must be commented out at deployment
              BASE_DIR,  
          )
          STATIC_ROOT = os.path.join(BASE_DIR, 'static')  
