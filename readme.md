@@ -31,11 +31,12 @@ This app was developed at MyEducator.com, primarily by Dr. Conan C. Albrecht <ca
 
 I've been by some told that DMP has a lot in common with Rails.  I've actually never used RoR, but good ideas are good wherever they are found, right? :)
 
+
 ## Why Mako instead of Jinja2, Cheetah, or [insert template language here]?
 
 Python has several mature, excellent templating languages.  Both Mako and Jinja2 are fairly recent yet mature systems.  Both are screaming fast.  Cheetah is an older system but has quite a bit of traction.  It wasn't a clear choice of one over the rest.
 
-The short answer is I liked Mako's approach the best.  It felt the most Pythonic to me.  Jinja2 actually feels more like Django's built-in template system.  But Mako won out because it looked more like Python to me. 
+The short answer is I liked Mako's approach the best.  It felt the most Pythonic to me.  Jinja2 may feel more like Django's built-in template system, but Mako won out because it looked more like Python--and the points of DMP is to include Python in templates. 
 
 
 # Installation
@@ -69,7 +70,7 @@ All of the above can be found on numerous Python tutorials and web sites.  They 
 
 Create a Django project with the typical:
 
-        python django-admin.py startproject test_dmp
+        python3 django-admin.py startproject test_dmp
   
 This step is described in detail in the standard Django tutorial.  You can, of course, name your project anything you want, but in the sections below, I'll assume you called your project `test_dmp`.
 
@@ -177,7 +178,7 @@ Add the Django-Mako-Plus router as **the last pattern** in your `urls.py` file:
 
 Change to your project directory in the terminal/console, then create a new Django-Mako-Plus app with the following:
 
-        python manage.py dmp_startapp homepage
+        python3 manage.py dmp_startapp homepage
         
 As with any Django app, you need to add your new app to the INSTALLED_APPS list in `settings.py`:
 
@@ -223,7 +224,7 @@ Already have an app that you'd like to switch over?  Just do the following:
 
 I assume you've just installed Django-Mako-Plus according to the instructions above.  You should have a `dmp_test` project directory that contains a `homepage` app.  I'll further assume you know how to open a terminal/console and `cd` to the `dmp_test` directory.  Most of the commands below are typed into the terminal in this directory.
 
-**Quick Start:** You already have a default page in the new app, so fire up your server with `python manage.py runserver` and go to [http://localhost:8000/homepage/index/](http://localhost:8000/homepage/index/).  
+**Quick Start:** You already have a default page in the new app, so fire up your server with `python3 manage.py runserver` and go to [http://localhost:8000/homepage/index/](http://localhost:8000/homepage/index/).  
 
 You should see a congratulations page.  If you don't, go back to the installation section and walk through the steps again.  Your console might have valuable error message to help troubleshoot things. 
 
@@ -685,7 +686,7 @@ DMP will first search the current app's `templates` directory (i.e. the normal w
 
 You may have noticed that this tutorial has focused on a single app.  Most projects consist of many apps.  For example, a sales site might have an app for user management, an app for product management, and an app for the catalog and sales/shopping-cart experience.  All of these apps probably want the same look and feel, and all of them likely want to extend from the **same** `base.htm` file.
 
-When you run `python manage.py dmp_startapp <appname>`, you get **new** `base.htm` and `base_ajax.htm` files each time.  This is done to get you started on your first app.  On your second, third, and subsequent apps, you probably want to delete these starter files and instead extend your templates from the `base.htm` and `base_ajax.htm` files in your first app.
+When you run `python3 manage.py dmp_startapp <appname>`, you get **new** `base.htm` and `base_ajax.htm` files each time.  This is done to get you started on your first app.  On your second, third, and subsequent apps, you probably want to delete these starter files and instead extend your templates from the `base.htm` and `base_ajax.htm` files in your first app.
   
 In fact, in my projects, I usually create an app called `base_app` that contains the common `base.htm` html code, site-wide CSS, and site-wide Javascript.  Subsequent apps simply extend from `/base_app/templates/base.htm`.  The common `base_app` doesn't really have end-user templates in it -- they are just supertemplates that support other, public apps.
 
@@ -845,7 +846,7 @@ DMP comes with a manage.py command `dmp_collectstatic` that copies all your stat
 
 The Django-Mako-Plus framework has a different layout than traditional Django, so it comes with its own static collection command.  When you are ready to publish your web site, run the following to split out the static files into a single subtree:
 
-        python manage.py dmp_collectstatic
+        python3 manage.py dmp_collectstatic
         
 This command will copy of the static directories--`/media/`, `/scripts/`, and `/styles/`--to a common subtree called `/static/` (or whatever `STATIC_ROOT` is set to in your settings).  Everything in these directories is copied (except dynamic `*.jsm/*.cssm` files, which aren't static).
 
@@ -855,11 +856,11 @@ The `dmp_collectstatic` command has the following command-line options:
 
 * The commmand will refuse to overwrite an existing `/static/` directory.  If you already have this directory (either from an earlier run or for another purpose), you can 1) delete it before collecting static files, or 2) specify the overwrite option as follows:
 
-        python manage.py dmp_collectstatic --overwrite
+        python3 manage.py dmp_collectstatic --overwrite
 
 * If you need to ignore certain directories or filenames, specify them with the `--ignore` option.  This can be specified more than once, and it accepts Unix-style wildcards:
 
-        python manage.py dmp_collectstatic --ignore=cached_templates --ignore=fixtures --ignore=*.txt
+        python3 manage.py dmp_collectstatic --ignore=cached_templates --ignore=fixtures --ignore=*.txt
 
 
 
@@ -883,8 +884,8 @@ You might have some traditional Django apps (like the built-in `/admin` app) and
 
 The solution is to run both commands.  Using the options of the two commands, you can either send the output from each command to *two different* static directories, or you can send them to a single directory and let the files from the second command potentially overwrite the files from the first.  I suggest this second method:
 
-        python manage.py collectstatic
-        python manage.py dmp_collectstatic
+        python3 manage.py collectstatic
+        python3 manage.py dmp_collectstatic
 
 The above two commands will use both methods to bring files into your `/static/` folder.  You might get some duplication of files, but the output of the commands are different enough that it should work without issues.
 
