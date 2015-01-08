@@ -335,7 +335,8 @@ The above illustrates the easiest way to show pages: simply place .html files in
 Let's add some "work" to the process by adding the current server time to the index page.  Create a new file `homepage/views/index.py` and copy this code into it:
 
         from django.conf import settings
-        from django_mako_plus.controller import view_function, get_renderer
+        from django_mako_plus.controller import view_function,
+        from django_mako_plus.controller.router import get_renderer
         from datetime import datetime
 
         templater = get_renderer('homepage')
