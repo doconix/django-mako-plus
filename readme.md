@@ -328,7 +328,8 @@ The above illustrates the easiest way to show pages: simply place .html files in
 Let's add some "work" to the process by adding the current server time to the index page.  Create a new file `homepage/views/index.py` and copy this code into it:
 
         from django.conf import settings
-        from django_mako_plus.controller import view_function, get_renderer
+        from django_mako_plus.controller import view_function
+        from django_mako_plus.controller.router import get_renderer
         from datetime import datetime
 
         templater = get_renderer('homepage')
@@ -395,7 +396,8 @@ Note that URL parameters don't take the place of form parameters.  You'll still 
 Although this might not be the best use of urlparams, suppose we want to display our server time with user-specified format.  On a different page of our site, we might present several different `<a href>` links to the user that contain different formats (we wouldn't expect users to come up with these urls on their own -- we'd create links for the user to click on).  Change your `index.py` file to use a url-specified format for the date:
   
         from django.conf import settings
-        from django_mako_plus.controller import view_function, get_renderer
+        from django_mako_plus.controller import view_function
+        from django_mako_plus.controller.router import get_renderer
         from datetime import datetime
 
         templater = get_renderer('homepage')
@@ -463,7 +465,8 @@ The style of a web page is often dependent upon the user, such as a user-definab
 Let's make the color dynamic by adding a new random variable `timecolor` to our index.py view:
 
         from django.conf import settings
-        from django_mako_plus.controller import view_function, get_renderer
+        from django_mako_plus.controller import view_function
+        from django_mako_plus.controller.router import get_renderer
         from datetime import datetime
         import random
 
@@ -555,7 +558,7 @@ What would the modern web be without Ajax?  Well, truthfully, a lot simpler. :) 
 
 But regardless of web history, ajax is required on most pages today.  I assume you understand the basics of ajax and focus specifically on the ways this framework supports it.
 
-Suppose we want to reload the server time every 5 seconds, but we don't want to reload the entire page.  Let's start with the client side of things.  Let's place a refresh button in `homepage/templates/index.html`:
+Suppose we want to reload the server time every few seconds, but we don't want to reload the entire page.  Let's start with the client side of things.  Let's place a refresh button in `homepage/templates/index.html`:
 
         <%inherit file="base.htm" />
 
@@ -572,7 +575,7 @@ Suppose we want to reload the server time every 5 seconds, but we don't want to 
 Note the new `<button>` element in the above html.  Next, we'll add Javascript to the `homepage/scripts/index.jsm` file that runs when the button is clicked:
 
         $(function() {
-          // update the time every 1 seconds
+          // update the time every n seconds
           window.setInterval(function() {
             $('.browser-time').text('The current browser time is ' + new Date());
           }, ${ request.urlparams[1] });
@@ -586,7 +589,8 @@ Note the new `<button>` element in the above html.  Next, we'll add Javascript t
 The client side is now ready, so let's create the `/homepage/index_time/` server endpoint.  Create a new `homepage/views/index_time.py` file:
 
         from django.conf import settings
-        from django_mako_plus.controller import view_function, get_renderer
+        from django_mako_plus.controller import view_function
+        from django_mako_plus.controller.router import get_renderer
         from datetime import datetime
         import random
 
@@ -888,7 +892,7 @@ The above two commands will use both methods to bring files into your `/static/`
 
 Suppose your view needs to redirect the user's browser to a different page than the one currently being routed.  For example, the user might not be authenticated correctly or a form might have just been submitted.  In the latter case, web applications often redirect the browser to the *same* page after a form submission (and handling with a view), effectively switching the browser from its current POST request to a regular GET request.  That way, if the user hits the refresh button within his or her browser, the page simply gets refreshed without the form being submitted again.
 
-When you need to redirect the browser to a different page, you should normally use the standard `django.http.HttpResponseRedirect` method.  By returning a redirect object from your view, DMP (and subsequently Django) direct the browser to redirect.  
+When you need to redirect the browser to a different page, you should normally use the standard `django.http.HttpResponseRedirect` object.  By returning a redirect object from your view, DMP (and subsequently Django) direct the browser to redirect.  
 
 BUT, suppose you are several levels deep in method calls without direct access to the request or response objects?  How can you direct a method several levels up in the call stack to send a redirect response?  That's where the `django_mako_plus.controller.RedirectException` comes in handy.  Since it is an exception, it bubbles all the way up the stack to the DMP router -- where it is sent directly to the browser.
 
