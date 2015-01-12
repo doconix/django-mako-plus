@@ -226,16 +226,16 @@ All of the above can be found on numerous Python tutorials and web sites.  They 
 
 Simply use PIP, which comes with Python 3.4+.  If you are on an older Python version, you can install it from https://pip.pypa.io/en/latest/installing.html.
   
-    pip3 install django
-    pip3 install mako
-    pip3 install django-mako-plus
+        pip3 install django
+        pip3 install mako
+        pip3 install django-mako-plus
    
    
 ### Create a Django project
 
 Create a Django project with the typical:
 
-    python3 django-admin.py startproject test_dmp
+        python3 django-admin.py startproject test_dmp
   
 This step is described in detail in the standard Django tutorial.  You can, of course, name your project anything you want, but in the sections below, I'll assume you called your project `test_dmp`.
 
@@ -245,100 +245,100 @@ This step is described in detail in the standard Django tutorial.  You can, of c
 
 1. Add `django_mako_plus.controller` to the end of your `INSTALLED_APPS` list:
    
-    INSTALLED_APPS = (
-        ...
-        'django_mako_plus.controller',
-    )
-    
+         INSTALLED_APPS = (
+             ...
+             'django_mako_plus.controller',
+         )
+         
 2. Add `django_mako_plus.controller.router.RequestInitMiddleware` to the end of your `MIDDLEWARE CLASSES` list:
    
-    MIDDLEWARE_CLASSES = (
-        ...
-        'django_mako_plus.controller.router.RequestInitMiddleware',
-    )       
-    
+         MIDDLEWARE_CLASSES = (
+             ...
+             'django_mako_plus.controller.router.RequestInitMiddleware',
+         )       
+         
 3. Add a logger to help you debug (optional but highly recommended!):
    
-    DEBUG_PROPAGATE_EXCEPTIONS = DEBUG  # never set this True on a live site
-    LOGGING = {
-        'version': 1,
-        'disable_existing_loggers': True,
-        'formatters': {
-            'simple': {
-                'format': '%(levelname)s %(message)s'
-            },
-        },
-        'handlers': {
-            'console':{
-                'level':'DEBUG',
-                'class':'logging.StreamHandler',
-                'formatter': 'simple'
-            },
-        },
-        'loggers': {
-            'django_mako_plus': {
-                'handlers': ['console'],
-                'level': 'DEBUG',
-                'propagate': False,
-            },
-        },
-    }
-    
+         DEBUG_PROPAGATE_EXCEPTIONS = DEBUG  # never set this True on a live site
+         LOGGING = {
+             'version': 1,
+             'disable_existing_loggers': True,
+             'formatters': {
+                 'simple': {
+                     'format': '%(levelname)s %(message)s'
+                 },
+             },
+             'handlers': {
+                 'console':{
+                     'level':'DEBUG',
+                     'class':'logging.StreamHandler',
+                     'formatter': 'simple'
+                 },
+             },
+             'loggers': {
+                 'django_mako_plus': {
+                     'handlers': ['console'],
+                     'level': 'DEBUG',
+                     'propagate': False,
+                 },
+             },
+         }
+         
 4. Add the Django-Mako-Plus settings (paste this code at the end of your `settings.py` file):   
    
-    ###############################################################
-    ###   Specific settings for the Django-Mako-Plus app
+         ###############################################################
+         ###   Specific settings for the Django-Mako-Plus app
 
-    # identifies where the Mako template cache will be stored, relative to each app
-    DMP_TEMPLATES_CACHE_DIR = 'cached_templates'
+         # identifies where the Mako template cache will be stored, relative to each app
+         DMP_TEMPLATES_CACHE_DIR = 'cached_templates'
 
-    # the default app and page to render in Mako when the url is too short
-    DMP_DEFAULT_PAGE = 'index'  
-    DMP_DEFAULT_APP = 'homepage'
+         # the default app and page to render in Mako when the url is too short
+         DMP_DEFAULT_PAGE = 'index'  
+         DMP_DEFAULT_APP = 'homepage'
 
-    # these are included in every template by default - if you put your most-used libraries here, you won't have to import them exlicitly in templates
-    DMP_DEFAULT_TEMPLATE_IMPORTS = [
-      'import os, os.path, re',
-    ]
-    
-    # whether to send the custom DMP signals -- set to False for a slight speed-up in router processing
-    # determines whether DMP will send its custom signals during the process
-    DMP_SIGNALS = True
-    
-    # whether to minify using rjsmin, rcssmin during 1) collection of static files, and 2) on the fly as .jsm and .cssm files are rendered
-    # rjsmin and rcssmin are fast enough that doing it on the fly can be done without slowing requests down
-    DMP_MINIFY_JS_CSS = True
+         # these are included in every template by default - if you put your most-used libraries here, you won't have to import them exlicitly in templates
+         DMP_DEFAULT_TEMPLATE_IMPORTS = [
+           'import os, os.path, re',
+         ]
+         
+         # whether to send the custom DMP signals -- set to False for a slight speed-up in router processing
+         # determines whether DMP will send its custom signals during the process
+         DMP_SIGNALS = True
+         
+         # whether to minify using rjsmin, rcssmin during 1) collection of static files, and 2) on the fly as .jsm and .cssm files are rendered
+         # rjsmin and rcssmin are fast enough that doing it on the fly can be done without slowing requests down
+         DMP_MINIFY_JS_CSS = True
 
-    # see the DMP online tutorial for information about this setting
-    DMP_TEMPLATES_DIRS = [ 
-      # os.path.join(BASE_DIR, 'base_app', 'templates'),
-    ]
+         # see the DMP online tutorial for information about this setting
+         DMP_TEMPLATES_DIRS = [ 
+           # os.path.join(BASE_DIR, 'base_app', 'templates'),
+         ]
 
-    ###  End of settings for the base_app Controller
-    ################################################################
-    
+         ###  End of settings for the base_app Controller
+         ################################################################
+         
 5. Add the following to serve your static files.  This step is pure Django; you can read about it in the standard Django docs.  These variables are also explained below in the section entitled "Static Files, Your Web Server, and DMP".
 
-    STATIC_URL = '/static/'
-    STATICFILES_DIRS = (
-        # SECURITY WARNING: this next line must be commented out at deployment
-        BASE_DIR,  
-    )
-    STATIC_ROOT = os.path.join(BASE_DIR, 'static')  
+         STATIC_URL = '/static/'
+         STATICFILES_DIRS = (
+             # SECURITY WARNING: this next line must be commented out at deployment
+             BASE_DIR,  
+         )
+         STATIC_ROOT = os.path.join(BASE_DIR, 'static')  
 
-    
+         
 ### Enable the Django-Mako-Plus Router
 
 Add the Django-Mako-Plus router as **the last pattern** in your `urls.py` file:
 
-     urlpatterns = patterns('',
-     
-         ...
+          urlpatterns = patterns('',
+          
+              ...
 
-         # the django_mako_plus controller handles every request - this line is the glue that connects Mako to Django
-         url(r'^.*$', 'django_mako_plus.controller.router.route_request' ),
-     ) 
-     
+              # the django_mako_plus controller handles every request - this line is the glue that connects Mako to Django
+              url(r'^.*$', 'django_mako_plus.controller.router.route_request' ),
+          ) 
+          
 ### Create a DMP-Style App
 
 Change to your project directory in the terminal/console, then create a new Django-Mako-Plus app with the following:
@@ -348,8 +348,8 @@ Change to your project directory in the terminal/console, then create a new Djan
 As with any Django app, you need to add your new app to the INSTALLED_APPS list in `settings.py`:
 
         INSTALLED_APPS = (
-       ...
-       'homepage',
+            ...
+            'homepage',
         )
         
 Congratulations.  You're ready to go!
@@ -368,13 +368,13 @@ Already have an app that you'd like to switch over?  Just do the following:
 * Create folders within your app so you match the following structure:
 
         your-app/
-       __init__.py
-       media/
-       scripts/
-       styles/
-       templates/
-       views/
-           __init__.py
+            __init__.py
+            media/
+            scripts/
+            styles/
+            templates/
+            views/
+                __init__.py
         
 * Add the following to `your-app/__init__.py`.  This signals that your app is meant to be used with DMP.  If you don't have this variable, DMP will complain that your app isn't a 'DMP app'.
 
@@ -398,16 +398,16 @@ You should see a congratulations page.  If you don't, go back to the installatio
 Let's explore the directory structure of your new app:
 
         homepage/
-       __init__.py
-       media/
-       scripts/
-       styles/
-       templates/
-           base_ajax.htm
-           base.htm
-           index.html
-       views/
-           __init__.py
+            __init__.py
+            media/
+            scripts/
+            styles/
+            templates/
+                base_ajax.htm
+                base.htm
+                index.html
+            views/
+                __init__.py
 
 The directories should be fairly self-explanatory. Note they are **different** than a traditional Django app structure.  Put images and other support files in media/, Javascript in scripts/, CSS in styles/, html files in templates/, and Django views in views/.
 
@@ -422,10 +422,10 @@ Let's start with the two primary html template files: `base.htm` and `index.html
         <%inherit file="base.htm" />
 
         <%block name="content">
-       <div class="content">
-         <h3>Congratulations -- you've successfully created a new django-mako-plus app!</h3>
-         <h4>Next Up: Go through the django-mako-plus tutorial and add Javascript, CSS, and urlparams to this page.</h4>
-       </div>
+            <div class="content">
+              <h3>Congratulations -- you've successfully created a new django-mako-plus app!</h3>
+              <h4>Next Up: Go through the django-mako-plus tutorial and add Javascript, CSS, and urlparams to this page.</h4>
+            </div>
         </%block>
 
 If you are familiar with Django templates, you'll recognize the template inheritance in the `<%inherit/>` tag.  However, this is Mako code, not Django code, so the syntax is a little different.  The file defines a single block, called `content`, that is plugged into the block by the same name in the code below.
@@ -440,32 +440,32 @@ The real HTML is kept in the `base.htm` file.  It looks like this:
 
         <!DOCTYPE html>
         <html>
-     <meta charset="UTF-8">
-     <head>
+          <meta charset="UTF-8">
+          <head>
     
-       <title>homepage</title>
+            <title>homepage</title>
     
-       ## add any site-wide scripts or CSS here; for example, jquery:
-       <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+            ## add any site-wide scripts or CSS here; for example, jquery:
+            <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
   
-       ## render the css with the same name as this page
-       ${ static_renderer.get_template_css(request, context)  }
+            ## render the css with the same name as this page
+            ${ static_renderer.get_template_css(request, context)  }
   
-     </head>
-     <body>
+          </head>
+          <body>
   
-       <header>
-         Welcome to the homepage app!
-       </header>
+            <header>
+              Welcome to the homepage app!
+            </header>
   
-       <%block name="content">
-         Site content goes here in sub-templates.
-       </%block>  
+            <%block name="content">
+              Site content goes here in sub-templates.
+            </%block>  
   
-       ## render the JS with the same name as this page
-       ${ static_renderer.get_template_js(request, context)  }
+            ## render the JS with the same name as this page
+            ${ static_renderer.get_template_js(request, context)  }
   
-     </body>
+          </body>
         </html>
 
 Pay special attention to the `<%block name="content">` section, which is overridden in `index.html`.  The page given to the browser will look exactly like `base.htm`, but the `content` block will come from `index.html` rather than the one defined in the supertemplate.
@@ -508,18 +508,18 @@ Let's add some "work" to the process by adding the current server time to the in
 
         @view_function
         def process_request(request):
-     template_vars = {
-       'now': datetime.now(),
-     }
-     return templater.render_to_response(request, 'index.html', template_vars)
+          template_vars = {
+            'now': datetime.now(),
+          }
+          return templater.render_to_response(request, 'index.html', template_vars)
   
 Reload your server and browser page, and you should see the exact same page.  It might look the same, but something very important happened in the routing.  Rather than going straight to the `index.html` page, processing went to your new `index.py` file.  At the end of the `process_request` function above, we manually render the `index.html` file.  In other words, we're now doing extra "work" before the rendering.  This is the place to do database connections, modify objects, prepare and handle forms, etc.  It keeps complex code out of your html pages.
 
 Let me pause for a minute and talk about log messages.  If you enabled the logger in the installation, you should see the following in your console:
 
-     DEBUG controller :: processing: app=homepage, page=index, funcname=, urlparams=['']
-     DEBUG controller :: calling view function homepage.views.index.process_request
-     DEBUG controller :: rendering template .../dmptest/homepage/templates/index.html  
+          DEBUG controller :: processing: app=homepage, page=index, funcname=, urlparams=['']
+          DEBUG controller :: calling view function homepage.views.index.process_request
+          DEBUG controller :: rendering template .../dmptest/homepage/templates/index.html  
 
 These debug statements are incredibly helpful in figuring out why pages aren't routing right.  If your page didn't load right, you'll probably see why in these statements.  In my log above, the first line lists what the controller assigned the app and page to be.
 
@@ -536,12 +536,12 @@ Let's use the `now` variable in our index.html template:
         <%inherit file="base.htm" />
 
         <%block name="content">
-       <div class="content">
-         <h3>Congratulations -- you've successfully created a new django-mako-plus app!</h3>
-         <h4>Next Up: Go through the django-mako-plus tutorial and add Javascript, CSS, and urlparams to this page.</h4>
-         <p class="server-time">The current server time is ${ now }.</p>
-         <p class="browser-time">The current browser time is...</p>
-       </div>
+            <div class="content">
+              <h3>Congratulations -- you've successfully created a new django-mako-plus app!</h3>
+              <h4>Next Up: Go through the django-mako-plus tutorial and add Javascript, CSS, and urlparams to this page.</h4>
+              <p class="server-time">The current server time is ${ now }.</p>
+              <p class="browser-time">The current browser time is...</p>
+            </div>
         </%block>
 
 The `${ varname }` code is Mako syntax and is described more fully on the Mako web site.  Right now, it's most important that you see how to send data from the view to the template.  If you already know Django templates, it's pretty close to the same pattern.  The Django-Mako-Framework tries to improve Django, not entirely change it.
@@ -576,10 +576,10 @@ Although this might not be the best use of urlparams, suppose we want to display
 
         @view_function
         def process_request(request):
-     template_vars = {
-       'now': datetime.now().strftime(request.urlparams[0] if request.urlparams[0] else '%H:%M'),
-     }
-     return templater.render_to_response(request, 'index.html', template_vars)
+          template_vars = {
+            'now': datetime.now().strftime(request.urlparams[0] if request.urlparams[0] else '%H:%M'),
+          }
+          return templater.render_to_response(request, 'index.html', template_vars)
 
 The following links now give the time in different formats:
 
@@ -597,8 +597,8 @@ Modern web pages are made up of three primary parts: html, CSS, and Javascript (
 To style our index.html file, create `homepage/styles/index.css` and copy the following into it:
 
         .server-time {
-     font-size: 2em;
-     color: red;
+          font-size: 2em;
+          color: red;
         }
 
 When you refresh your page, the server time should be styled with large, red text.  If you view the html source in your browser, you'll see a new `<link...>` near the top of your file.  It's as easy as naming the files the same and placing the .css file in the styles/ directory.
@@ -608,16 +608,16 @@ When you refresh your page, the server time should be styled with large, red tex
 The framework knows how to follow template inheritance.  For example, since `index.html` extends from `base.htm`, we can actually put our CSS in any of **four** different files: `index.css`, `index.cssm`, `base.css`, and `base.cssm` (the .cssm files are explained in the next section).  Place your CSS styles in the appropriate file, depending on where the HTML elements are located.  For example, let's style our header a little.  Since the `<header>` element is in `base.htm`, create `homepage/styles/base.css` and place the following in it:
   
         html, body {
-     margin: 0;
-     padding: 0;
+          margin: 0;
+          padding: 0;
         }
 
         header {
-     padding: 36px 0;
-     text-align: center;
-     font-size: 2.5em;
-     color: #F4F4F4;
-     background-color: #0088CC;
+          padding: 36px 0;
+          text-align: center;
+          font-size: 2.5em;
+          color: #F4F4F4;
+          background-color: #0088CC;
         }  
 
 Reload your browser, and you should have a nice white on blue header. If you view source in the browser, you'll see the CSS files were included as follows:
@@ -646,17 +646,17 @@ Let's make the color dynamic by adding a new random variable `timecolor` to our 
 
         @view_function
         def process_request(request):
-     template_vars = {
-       'now': datetime.now().strftime(request.urlparams[0] if request.urlparams[0] else '%H:%M'),
-       'timecolor': random.choice([ 'red', 'blue', 'green', 'brown' ]),
-     }
-     return templater.render_to_response(request, 'index.html', template_vars)
+          template_vars = {
+            'now': datetime.now().strftime(request.urlparams[0] if request.urlparams[0] else '%H:%M'),
+            'timecolor': random.choice([ 'red', 'blue', 'green', 'brown' ]),
+          }
+          return templater.render_to_response(request, 'index.html', template_vars)
 
 Now, rename your index.css file to `index.cssm`.  Then set the content of index.cssm to the following:
 
         .server-time {
-     font-size: 2em;
-     color: ${ timecolor };
+          font-size: 2em;
+          color: ${ timecolor };
         }
   
 Refresh your browser a few times.  The color should change with each refresh! 
@@ -673,10 +673,10 @@ Javascript files work the same way as CSS files, so if you skipped the two CSS s
 Let's add a client-side, Javascript-based timer.  Create the file `homepage/scripts/index.js` and place the following JQuery code into it:
 
         $(function() {
-     // update the time every 1 seconds
-     window.setInterval(function() {
-       $('.browser-time').text('The current browser time is ' + new Date() + '.');
-     }, 1000);
+          // update the time every 1 seconds
+          window.setInterval(function() {
+            $('.browser-time').text('The current browser time is ' + new Date() + '.');
+          }, 1000);
         });
 
 Refresh your browser page, and you should see the browser time updating each second.  Congratulations, you've now got a modern, HTML5 web page. :)
@@ -688,10 +688,10 @@ First, **be sure to change the name of the file from `index.js` to `index.jsm`.*
 Update your `homepage/scripts/index.jsm` file to the following:
 
         $(function() {
-     // update the time every 1 seconds
-     window.setInterval(function() {
-       $('.browser-time').text('The current browser time is ' + new Date() + '.');
-     }, ${ request.urlparams[1] });
+          // update the time every 1 seconds
+          window.setInterval(function() {
+            $('.browser-time').text('The current browser time is ' + new Date() + '.');
+          }, ${ request.urlparams[1] });
         });
 
 Save the changes and take your browser to [http://localhost:8000/homepage/index/%Y/3000/](http://localhost:8000/homepage/index/%Y/3000/).  Since urlparams[1] is 3000 in this link, you should see the date change every three seconds.  Feel free to try different intervals, but out of concern for the innocent (e.g. your browser), I'd suggest keeping the interval above 200 ms.
@@ -735,27 +735,27 @@ Suppose we want to reload the server time every few seconds, but we don't want t
         <%inherit file="base.htm" />
 
         <%block name="content">
-       <div class="content">
-         <h3>Congratulations -- you've successfully created a new django-mako-plus app!</h3>
-         <h4>Next Up: Go through the django-mako-plus tutorial and add Javascript, CSS, and urlparams to this page.</h4>
-         <p class="server-time">The current server time is ${ now }.</p>
-         <button id="server-time-button">Refresh Server Time</button>
-         <p class="browser-time">The current browser time is .</p>
-       </div>
+            <div class="content">
+              <h3>Congratulations -- you've successfully created a new django-mako-plus app!</h3>
+              <h4>Next Up: Go through the django-mako-plus tutorial and add Javascript, CSS, and urlparams to this page.</h4>
+              <p class="server-time">The current server time is ${ now }.</p>
+              <button id="server-time-button">Refresh Server Time</button>
+              <p class="browser-time">The current browser time is .</p>
+            </div>
         </%block>
 
 Note the new `<button>` element in the above html.  Next, we'll add Javascript to the `homepage/scripts/index.jsm` file that runs when the button is clicked:
 
         $(function() {
-     // update the time every n seconds
-     window.setInterval(function() {
-       $('.browser-time').text('The current browser time is ' + new Date());
-     }, ${ request.urlparams[1] });
+          // update the time every n seconds
+          window.setInterval(function() {
+            $('.browser-time').text('The current browser time is ' + new Date());
+          }, ${ request.urlparams[1] });
   
-     // update server time button
-     $('#server-time-button').click(function() {
-       $('.server-time').load('/homepage/index_time/');
-     });
+          // update server time button
+          $('#server-time-button').click(function() {
+            $('.server-time').load('/homepage/index_time/');
+          });
         });
 
 The client side is now ready, so let's create the `/homepage/index_time/` server endpoint.  Create a new `homepage/views/index_time.py` file:
@@ -770,17 +770,17 @@ The client side is now ready, so let's create the `/homepage/index_time/` server
 
         @view_function
         def process_request(request):
-     template_vars = {
-       'now': datetime.now(),
-     }
-     return templater.render_to_response(request, 'index_time.html', template_vars)
+          template_vars = {
+            'now': datetime.now(),
+          }
+          return templater.render_to_response(request, 'index_time.html', template_vars)
   
 Finally, create the `/homepage/templates/index_time.html` template, which is rendered at the end of `process_request()` above:
 
         <%inherit file="base_ajax.htm" />
 
         <%block name="content">
-     The current server time is ${ now }.
+          The current server time is ${ now }.
         </%block>
 
 Note that this template inherits from `base_ajax.htm`.  If you open `base_ajax.htm`, you'll see it doesn't have the normal `<html>`, `<body>`, etc. tags in it.  This supertemplate is meant for snippets of html rather than entire pages.  What it **does** contain is the calls to the `static_renderer` -- the real reason we inherit rather than just have a standalone template snippet.  By calling `static_renderer` in the supertemplate, any CSS or JS files are automatically included with our template snippet.  Styling the ajax response is as easy as creating a `homepage/styles/index_time.css` file.
@@ -800,10 +800,10 @@ Open `homepage/views/index.py` and add the following to the end of the file:
 
         @view_function
         def gettime(request):
-     template_vars = {
-       'now': datetime.now(),
-     }
-     return templater.render_to_response(request, 'index_time.html', template_vars)  
+          template_vars = {
+            'now': datetime.now(),
+          }
+          return templater.render_to_response(request, 'index_time.html', template_vars)  
 
 Note the function is decorated with `@view_function`, and it contains the function body from our now-deleted `index_time.py`.  The framework recognizes **any** function with this decorator as an available endpoint for urls, not just the hard-coded `process_request` function.  In other words, you can actually name your view methods any way you like, as long as you follow the pattern described in this section.  
 
@@ -813,7 +813,7 @@ To take advantage of this new function, let's modify the url in `homepage/script
 
         // update button
         $('#server-time-button').click(function() {
-     $('.server-time').load('/homepage/index.gettime');
+          $('.server-time').load('/homepage/index.gettime');
         });
 
 The url now points to `index.gettime`, which the framework translates to `index.py -> gettime()`.  In other words, a dot (.) gives an exact function within the module to be called rather than the default `process_request` function.
@@ -841,7 +841,7 @@ If the templates you need to access are within your project directory, no extra 
 Suppose your templates are located on a different disk or entirely different directory, relative to your project.  DMP allows you to add extra directories to the template search path through the `DMP_TEMPLATES_DIRS` setting.  This variable contains a list of directories that are searched by DMP regardless of the app being referenced.  To include the `/var/templates/` directory in the search path, set this variable as follows:
 
         DMP_TEMPLATES_DIRS = [ 
-      '/var/templates/',
+           '/var/templates/',
         ]
 
 Suppose, after making the above change, you need to render the '/var/templates/page1.html' template:
@@ -864,25 +864,25 @@ DMP supports cross-app inheritance by including your project root (e.g. `setting
 Suppose I have the following app structure:
 
         dmptest
-       base_app/
-           __init__.py
-           media/
-           scripts/
-           styles/
-           templates/
-               site_base_ajax.htm
-               site_base.htm
-           views/
-               __init__.py
-       homepage/
-           __init__.py
-           media/
-           scripts/
-           styles/
-           templates/
-               index.html
-           views/
-               __init__.py
+            base_app/
+                __init__.py
+                media/
+                scripts/
+                styles/
+                templates/
+                    site_base_ajax.htm
+                    site_base.htm
+                views/
+                    __init__.py
+            homepage/
+                __init__.py
+                media/
+                scripts/
+                styles/
+                templates/
+                    index.html
+                views/
+                    __init__.py
 
 I want `homepage/templates/index.html` to extend from `base_app/templates/site_base.htm`.  The following code in `index.html` sets up the inheritance:
 
@@ -898,22 +898,22 @@ I want `homepage/templates/index.html` to extend from `base_app/templates/site_b
 It's easy to import Python modules into your Mako templates.  Simply use a module-level block:
 
         <%!
-     import datetime
-     from decimal import Decimal
+          import datetime
+          from decimal import Decimal
         %>
 
 or a Python-level block (see the Mako docs for the difference):
 
         <%
-     import datetime
-     from decimal import Decimal
+          import datetime
+          from decimal import Decimal
         %>
 
 There may be some modules, such as `re` or `decimal` that are so useful you want them available in every template of your site.  In settings.py, simply add these to the `DMP_DEFAULT_TEMPLATES_IMPORTS` variable:
 
         DMP_DEFAULT_TEMPLATE_IMPORTS = [
-     'import os, os.path, re',
-     'from decimal import Decimal',
+          'import os, os.path, re',
+          'from decimal import Decimal',
         ]
 
 Any entries in this list will be automatically included in templates throughout all apps of your site.  With the above imports, you'll be able to use `re` and `Decimal` and `os` and `os.path` anywhere in any .html, .cssm, and .jsm file.
@@ -961,7 +961,7 @@ In your project's settings.py file, be sure you the following:
 
         STATIC_URL = '/static/'
         STATICFILES_DIRS = (
-       BASE_DIR,  
+            BASE_DIR,  
         )
         STATIC_ROOT = os.path.join(BASE_DIR, 'static')  
 
@@ -992,9 +992,9 @@ At production/deployment, comment out `BASE_DIR` because it essentially makes yo
 When you deploy to a web server, run `dmp_collectstatic` to collect your static files into a separate directory (called `/static/` in the settings above).  You should then point your web server (Apache, Nginx, IIS, etc.) to serve this folder directly to browsers.  For example, in Nginx, you'd set the following:
 
         location /static/ {
-     alias /path/to/your/project/static/;
-     access_log off;
-     expires 30d;
+          alias /path/to/your/project/static/;
+          access_log off;
+          expires 30d;
         }
 
 In Apache, you'd set the following:
@@ -1130,15 +1130,15 @@ The following creates two receivers.  The first is called just before the view's
 
         @receiver(signals.dmp_signal_pre_process_request)
         def dmp_signal_pre_process_request(sender, **kwargs):
-     request = kwargs['request']
-     console.log('>>> process_request signal received!')
+          request = kwargs['request']
+          console.log('>>> process_request signal received!')
   
         @receiver(signals.dmp_signal_pre_render_template)
         def dmp_signal_pre_render_template(sender, **kwargs):
-     request = kwargs['request']
-     context = kwargs['context']            # the template variables
-     template = kwargs['template']  # the Mako template object that will do the rendering
-     console.log('>>> render_template signal received!')
+          request = kwargs['request']
+          context = kwargs['context']            # the template variables
+          template = kwargs['template']  # the Mako template object that will do the rendering
+          console.log('>>> render_template signal received!')
 
 The above code should be in a code file that is called during Django initialization.  Good locations might be in a `models.py` file or your app's `__init__.py` file.
 
