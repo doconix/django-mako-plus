@@ -45,90 +45,13 @@ If you have read through the Django Tutorial, you've seen examples for templatin
 
 Note in the examples how the DMP column normally uses standard Python syntax, with no extra language to learn:
 
+- Output the value of the question variable:
 <table>
   <tr>
-    <th>Description</th>
-    <th>Django Syntax</th>
-    <th>DMP (Mako) Syntax</th>
-  </tr><tr>
-    <td>Output the value of the question variable</td>
     <td nowrap><pre><code>{{ question }}</code></pre></td>
     <td nowrap><pre><code>${ question }</code></pre></td>
-  </tr><tr>
-    <td>Output a user's full name (a method on User)</td>
-    <td nowrap><pre><code>{{ user.get_full_name }}</code></pre></td>
-    <td nowrap><pre><code>${ user.get_full_name() }</code></pre></td>
-  </tr><tr>
-    <td>Iterate through a relationship</td>
-    <td nowrap>
-<pre><code>&lt;ul&gt;
-  {% for choice in question.choice_set.all %}
-    &lt;li&gt;{{ choice.choice_text }}&lt;/li&gt;
-  {% endfor %}
-&lt;/ul&gt;</code></pre>
-    </td>
-    <td nowrap>
-<pre><code>&lt;ul&gt;
-  %for choice in question.choice_set.all():
-    &lt;li&gt;${ choice.choice_text }&lt;/li&gt;
-  %endfor
-&lt;/ul&gt;</code></pre>
-  </tr><tr>
-    <td>Set a variable</td>
-    <td nowrap><pre><code>{% with name="Sam" %}</code></pre></td>
-    <td nowrap><pre><code>&lt;% name = &quot;Sam&quot; %&gt;</code></pre></td>
-  </tr><tr>
-    <td>Format a date</td>
-    <td nowrap><pre><code>{{ value|date:"D d M Y" }}</code></pre></td>
-    <td nowrap><pre><code>${ value.strftime('%D %d %M %Y') }</code></pre></td>
-  </tr><tr>
-    <td>Join a list</td>
-    <td nowrap><pre><code>{{ mylist | join:', ' }}</code></pre></td>
-    <td nowrap><pre><code>${ ', '.join(mylist) }</code></pre></td>
-  </tr><tr>
-    <td>Use the /static prefix</td>
-    <td nowrap><pre><code>{% load static %}
-&lt;img src=&quot;{% get_static_prefix %}images/hi.jpg&quot;/&gt;</code></pre>
-    </td>
-    <td nowrap><pre><code>&lt;img src=&quot;${ settings.STATIC_ROOT }images/hi.jpg&quot;/&gt;</code></pre></td>
-  </tr><tr>
-    <td>Call a Python method</td>
-    <td>Requires a custom tag, unless a built-in tag provides the behavior</td>
-    <td nowrap>Any Python method can be called:
-<pre><code>&lt;%! import random %&gt;
-${ random.randint(1, 10) }      
-</code></pre>
-    </td>
-  </tr><tr>
-    <td>Output a default if empty</td>
-    <td nowrap><pre><code>{{ value | default:"nothing" }}</code></pre></td>
-    <td nowrap><pre><code>${ value or "nothing" }</code></pre></td>
-  </tr><tr>
-    <td>Output a default if empty (alternative)</td>
-    <td nowrap><pre><code>{{ value | default:"nothing" }}</code></pre></td>
-    <td nowrap><pre><code>${ value if value != None else "nothing" }</code></pre></td>
-  </tr><tr>
-    <td>Run arbitrary Python (keep complex Python in your view, though)</td>
-    <td>Requires a custom tag</td>
-    <td nowrap>
-<pre><code>&lt;%
-i = 1
-while i &lt; 10:
-  context.write('<p>Testing {0}</p>'.format(i))
-  i += 1
-%&gt;</code></pre>
-    </td>
-  </tr><tr>
-    <td>Inherit another template</td>
-    <td nowrap><pre><code>{% extends "base.html" %}</code></pre></td>
-    <td nowrap><pre><code>&lt;%inherit file=&quot;base.htm&quot; /&gt;</code></pre></td>
-  </tr><tr>
-    <td>Override a block</td>
-    <td nowrap><pre><code>{% block title %}My amazing blog{% endblock %}</code></pre></td>
-    <td nowrap><pre><code>&lt;%block name="title"&gt;My amazing blog&lt;/%block&gt;</code></pre></td>
   </tr>
 </table>
-
 
 # Installation
 
