@@ -387,11 +387,11 @@ Already have an app that you'd like to switch over?  Just do the following:
 
 # Tutorial
 
-I assume you've just installed Django-Mako-Plus according to the instructions above.  You should have a `dmp_test` project directory that contains a `homepage` app.  I'll further assume you know how to open a terminal/console and `cd` to the `dmp_test` directory.  Most of the commands below are typed into the terminal in this directory.
+I'll assume you've just installed Django-Mako-Plus according to the instructions above.  You should have a `dmp_test` project directory that contains a `homepage` app.  I'll further assume you know how to open a terminal/console and `cd` to the `dmp_test` directory.  Most of the commands below are typed into the terminal in this directory.
 
 **Quick Start:** You already have a default page in the new app, so fire up your server with `python3 manage.py runserver` and go to [http://localhost:8000/homepage/index/](http://localhost:8000/homepage/index/).  
 
-You should see a congratulations page.  If you don't, go back to the installation section and walk through the steps again.  Your console might have valuable error message to help troubleshoot things. 
+You should see a congratulations page.  If you don't, go back to the installation section and walk through the steps again.  Your console might have valuable error messages to help troubleshoot things. 
 
 ### The DMP Structure
 
@@ -728,7 +728,7 @@ This all works because the `index.html` template extends from the `base.htm` tem
 
 What would the modern web be without Ajax?  Well, truthfully, a lot simpler. :)  In fact, if we reinvented the web with today's requirements, we'd probably end up at a very different place than our current web. Even the name ajax implies the use of xml -- which we don't use much in ajax anymore. Most ajax calls return json or html these days!
 
-But regardless of web history, ajax is required on most pages today.  I assume you understand the basics of ajax and focus specifically on the ways this framework supports it.
+But regardless of web history, ajax is required on most pages today.  I'll assume you understand the basics of ajax and focus specifically on the ways this framework supports it.
 
 Suppose we want to reload the server time every few seconds, but we don't want to reload the entire page.  Let's start with the client side of things.  Let's place a refresh button in `homepage/templates/index.html`:
 
