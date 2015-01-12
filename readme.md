@@ -72,9 +72,23 @@ If you have read through the Django Tutorial, you've seen examples for templatin
   %endfor
 &lt;/ul&gt;</code></pre>
   </tr><tr>
+    <td>Set a variable</td>
+    <td nowrap><pre><code>{% with name="Sam" %}</code></pre></td>
+    <td nowrap><pre><code>&lt;% name = &quot;Sam&quot; %&gt;</code></pre></td>
+  </tr><tr>
+    <td>Format a date</td>
+    <td nowrap><pre><code>{{ value|date:"D d M Y" }}</code></pre></td>
+    <td nowrap><pre><code>${ value.strftime('%D %d %M %Y') }</code></pre></td>
+  </tr><tr>
     <td>Join a list</td>
     <td nowrap><pre><code>{{ mylist | join:', ' }}</code></pre></td>
     <td nowrap><pre><code>${ ', '.join(mylist) }</code></pre></td>
+  </tr><tr>
+    <td>Use the /static prefix</td>
+    <td nowrap><pre><code>{% load static %}
+&lt;img src=&quot;{% get_static_prefix %}images/hi.jpg&quot; alt=&quot;Hi!&quot; /&gt;</code></pre>
+    </td>
+    <td nowrap><pre><code>&lt;img src=&quot;${ settings.STATIC_ROOT }images/hi.jpg&quot; alt=&quot;Hi!&quot; /&gt;</code></pre></td>
   </tr><tr>
     <td>Call a Python method</td>
     <td nowrap><pre><code>Generally requires a custom tag</code></pre></td>
@@ -96,13 +110,9 @@ ${ random.randint(1, 10) }
     <td nowrap><pre><code>{% extends "base.html" %}</code></pre></td>
     <td nowrap><pre><code>&lt;%inherit file=&quot;base.htm&quot; /&gt;</code></pre></td>
   </tr><tr>
-    <td>Override a blocks</td>
+    <td>Override a block</td>
     <td nowrap><pre><code>{% block title %}My amazing blog{% endblock %}</code></pre></td>
     <td nowrap><pre><code>&lt;%block name="title"&gt;My amazing blog&lt;/%block&gt;</code></pre></td>
-  </tr><tr>
-    <td>Output a default if empty (alternative)</td>
-    <td nowrap><pre><code>{{ value | default:"nothing" }}</code></pre></td>
-    <td nowrap><pre><code>${ value if value != None else "nothing" }</code></pre></td>
   </tr>
 </table>
 
