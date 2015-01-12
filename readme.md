@@ -58,6 +58,11 @@ If you have read through the Django Tutorial, you've seen examples for templatin
     <td><code>${ user.get_full_name() }</code></td>
   </tr>
 </table>
+| Description                                         | Django Syntax                                       | DMP (Mako) Syntax                                   |
+| --------------------------------------------------- | --------------------------------------------------- | --------------------------------------------------- |
+| Output the value of the question variable           | ``{{ question }}``                                  | ``${ question }``                                   |
+| Output a user's full name (a method on User)        | ``{{ user.get_full_name }}``                        | ``${ user.get_full_name() }``                       |
+| Iterate through the choices of a question           | ``{{ for choice in question.choice_set_}}
 
 
 # Installation
