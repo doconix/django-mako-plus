@@ -186,7 +186,26 @@ ${ random.randint(1, 10) }</code></pre></td>
     <td nowrap><pre><code>&lt;%block name="title"&gt;My amazing blog&lt;/%block&gt;</code></pre></td>
   </tr>
 </table>
-
+- Link to a CSS file:
+<table>
+  <tr>
+    <th>Django Templates</th>
+    <th>DMP (Mako) Templates</th>
+  </tr><tr>
+    <td nowrap><pre><code>&lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;...&quot;&gt;</code></pre></td>
+    <td nowrap>Simply name the .css/.js file the same name as your .html template.  DMP will include the link automatically.</td>
+  </tr>
+</table>
+- Perform per-request logic in CSS or JS files:
+<table>
+  <tr>
+    <th>Django Templates</th>
+    <th>DMP (Mako) Templates</th>
+  </tr><tr>
+    <td nowrap>Create an entry in ``urls.py``, create a view, and render a template for the CSS or JS.</td>
+    <td nowrap>Simply name the .css file as name.cssm for each name.html template.  DMP will render the template and include it automatically.</td>
+  </tr>
+</table>
 
 
 
