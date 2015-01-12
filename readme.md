@@ -86,9 +86,9 @@ If you have read through the Django Tutorial, you've seen examples for templatin
   </tr><tr>
     <td>Use the /static prefix</td>
     <td nowrap><pre><code>{% load static %}
-&lt;img src=&quot;{% get_static_prefix %}images/hi.jpg&quot; alt=&quot;Hi!&quot; /&gt;</code></pre>
+&lt;img src=&quot;{% get_static_prefix %}images/hi.jpg&quot;/&gt;</code></pre>
     </td>
-    <td nowrap><pre><code>&lt;img src=&quot;${ settings.STATIC_ROOT }images/hi.jpg&quot; alt=&quot;Hi!&quot; /&gt;</code></pre></td>
+    <td nowrap><pre><code>&lt;img src=&quot;${ settings.STATIC_ROOT }images/hi.jpg&quot;/&gt;</code></pre></td>
   </tr><tr>
     <td>Call a Python method</td>
     <td nowrap><code>Generally requires a custom tag, unless a built-in tag provides the behavior</code></td>
