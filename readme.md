@@ -58,13 +58,13 @@ If you have read through the Django Tutorial, you've seen examples for templatin
     <td nowrap><code>${ user.get_full_name() }</code></td>
   </tr><tr>
     <td>Iterate through a relationship</td>
-    <td nowrap>
-<pre><code>&lt;ul&gt;
+    <td nowrap><code><pre>
+&lt;ul&gt;
   {% for choice in question.choice_set.all %}
     &lt;li&gt;{{ choice.choice_text }}&lt;/li&gt;
   {% endfor %}
-&lt;/ul&gt;</code></pre>
-    </td>
+&lt;/ul&gt;
+      </pre></code></td>
     <td nowrap><code>${ user.get_full_name() }</code></td>
   </tr>
 </table>
