@@ -46,7 +46,7 @@ If you have read through the Django Tutorial, you've seen examples for templatin
 Note in the examples how the DMP column normally uses standard Python syntax, with no extra language to learn:
 
 - Output the value of the question variable:
-<table width="100%">
+<table>
   <tr>
     <th>Django Templates</th>
     <th>DMP (Mako) Templates</th>
@@ -56,7 +56,7 @@ Note in the examples how the DMP column normally uses standard Python syntax, wi
   </tr>
 </table>
 - Output a user's full name (a method on User):
-<table width="100%">
+<table>
   <tr>
     <th>Django Templates</th>
     <th>DMP (Mako) Templates</th>
@@ -66,7 +66,7 @@ Note in the examples how the DMP column normally uses standard Python syntax, wi
   </tr>
 </table>
 - Iterate through a relationship:
-<table width="100%">
+<table>
   <tr>
     <th>Django Templates</th>
     <th>DMP (Mako) Templates</th>
@@ -84,7 +84,7 @@ Note in the examples how the DMP column normally uses standard Python syntax, wi
   </tr>
 </table>
 - Set a variable:
-<table width="100%">
+<table>
   <tr>
     <th>Django Templates</th>
     <th>DMP (Mako) Templates</th>
@@ -94,7 +94,7 @@ Note in the examples how the DMP column normally uses standard Python syntax, wi
   </tr>
 </table>
 - Format a date:
-<table width="100%">
+<table>
   <tr>
     <th>Django Templates</th>
     <th>DMP (Mako) Templates</th>
@@ -104,7 +104,7 @@ Note in the examples how the DMP column normally uses standard Python syntax, wi
   </tr>
 </table>
 - Join a list:
-<table width="100%">
+<table>
   <tr>
     <th>Django Templates</th>
     <th>DMP (Mako) Templates</th>
@@ -114,7 +114,7 @@ Note in the examples how the DMP column normally uses standard Python syntax, wi
   </tr>
 </table>
 - Use the /static prefix:
-<table width="100%">
+<table>
   <tr>
     <th>Django Templates</th>
     <th>DMP (Mako) Templates</th>
@@ -125,7 +125,7 @@ Note in the examples how the DMP column normally uses standard Python syntax, wi
   </tr>
 </table>
 - Call a Python method:
-<table width="100%">
+<table>
   <tr>
     <th>Django Templates</th>
     <th>DMP (Mako) Templates</th>
@@ -137,7 +137,7 @@ ${ random.randint(1, 10) }</code></pre></td>
   </tr>
 </table>
 - Output a default if empty:
-<table width="100%">
+<table>
   <tr>
     <th>Django Templates</th>
     <th>DMP (Mako) Templates</th>
@@ -152,7 +152,7 @@ ${ random.randint(1, 10) }</code></pre></td>
   </tr>
 </table>
 - Run arbitrary (but simple) Python:
-<table width="100%">
+<table>
   <tr>
     <th>Django Templates</th>
     <th>DMP (Mako) Templates</th>
@@ -167,7 +167,7 @@ ${ random.randint(1, 10) }</code></pre></td>
   </tr>
 </table>
 - Inherit another template:
-<table width="100%">
+<table>
   <tr>
     <th>Django Templates</th>
     <th>DMP (Mako) Templates</th>
@@ -177,7 +177,7 @@ ${ random.randint(1, 10) }</code></pre></td>
   </tr>
 </table>
 - Override a block:
-<table width="100%">
+<table>
   <tr>
     <th>Django Templates</th>
     <th>DMP (Mako) Templates</th>
@@ -187,17 +187,17 @@ ${ random.randint(1, 10) }</code></pre></td>
   </tr>
 </table>
 - Link to a CSS file:
-<table width="100%">
+<table>
   <tr>
     <th>Django Templates</th>
     <th>DMP (Mako) Templates</th>
   </tr><tr>
-    <td nowrap><pre><code>&lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;...&quot;&gt;</code></pre></td>
+    <td nowrap>Place in each template: <pre><code>&lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;...&quot;&gt;</code></pre></td>
     <td>Simply name the .css/.js file the same name as your .html template.  DMP will include the link automatically.</td>
   </tr>
 </table>
 - Perform per-request logic in CSS or JS files:
-<table width="100%">
+<table>
   <tr>
     <th>Django Templates</th>
     <th>DMP (Mako) Templates</th>
