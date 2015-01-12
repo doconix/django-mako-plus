@@ -71,7 +71,38 @@ If you have read through the Django Tutorial, you've seen examples for templatin
     &lt;li&gt;${ choice.choice_text }&lt;/li&gt;
   %endfor
 &lt;/ul&gt;</code></pre>
+  </tr><tr>
+    <td>Join a list</td>
+    <td nowrap><pre><code>{{ mylist | join:', ' }}</code></pre></td>
+    <td nowrap><pre><code>${ ', '.join(mylist) }</code></pre></td>
+  </tr><tr>
+    <td>Call a Python method</td>
+    <td nowrap><pre><code>Generally requires a custom tag</code></pre></td>
+    <td nowrap>
+<pre><code><%! import random %>
+${ random.randint(1, 10) }      
+</code></pre>
     </td>
+  </tr><tr>
+    <td>Output a default if empty</td>
+    <td nowrap><pre><code>{{ value | default:"nothing" }}</code></pre></td>
+    <td nowrap><pre><code>${ value or "nothing" }</code></pre></td>
+  </tr><tr>
+    <td>Output a default if empty (alternative)</td>
+    <td nowrap><pre><code>{{ value | default:"nothing" }}</code></pre></td>
+    <td nowrap><pre><code>${ value if value != None else "nothing" }</code></pre></td>
+  </tr><tr>
+    <td>Inherit another template</td>
+    <td nowrap><pre><code>{% extends "base.html" %}</code></pre></td>
+    <td nowrap><pre><code>&lt;%inherit file=&quot;base.htm&quot; /&gt;</code></pre></td>
+  </tr><tr>
+    <td>Override a blocks</td>
+    <td nowrap><pre><code>{% block title %}My amazing blog{% endblock %}</code></pre></td>
+    <td nowrap><pre><code>&lt;%block name="title"&gt;My amazing blog&lt;/%block&gt;</code></pre></td>
+  </tr><tr>
+    <td>Output a default if empty (alternative)</td>
+    <td nowrap><pre><code>{{ value | default:"nothing" }}</code></pre></td>
+    <td nowrap><pre><code>${ value if value != None else "nothing" }</code></pre></td>
   </tr>
 </table>
 
