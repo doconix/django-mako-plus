@@ -197,7 +197,17 @@ ${ random.randint(1, 10) }</code></pre></td>
   </tr>
 </table>
 - Perform per-request logic in CSS or JS files:
-<table>
+<style type="text/css">
+table.example {
+  width: 100%;
+}
+table.example th,
+table.example td {
+  width: 50%;
+  overflow-x: auto;
+}
+</style>
+<table class="example">
   <tr>
     <th>Django Templates</th>
     <th>DMP (Mako) Templates</th>
