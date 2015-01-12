@@ -41,11 +41,23 @@ The short answer is I liked Mako's approach the best.  It felt the most Pythonic
 
 ## Comparison with Django Syntax
 
-If you have read through the Django Tutorial, you've seen examples for templating in Django.  While the rest of Django, such as models, settings, migrations, etc., is the same (with or without DMP), the way you do templates will obviously change with DMP.  The following table should help you translate those examples:
+If you have read through the Django Tutorial, you've seen examples for templating in Django.  While the rest of Django, such as models, settings, migrations, etc., is the same (with or without DMP), the way you do templates will obviously change with DMP.  The following examples should help you understand the different between standard Django and DMP template syntax:
 
-| Description                                         | Django Syntax                                       | DMP (Mako) Syntax                                   |
-| --------------------------------------------------- | --------------------------------------------------- | --------------------------------------------------- |
-| Output the value of the question variable           | ``{{ question }}``                                  | ``${ question }``                                   |
+<table>
+  <tr>
+    <th>Description</th>
+    <th>Django Syntax</th>
+    <th>DMP (Mako) Syntax</th>
+  </tr><tr>
+    <td>Output the value of the question variable</td>
+    <td><code>{{ question }}</code></td>
+    <td><code>${ question }</code></td>
+  </tr><tr>
+    <td>Output a user's full name (a method on User)</td>
+    <td><code>{{ user.get_full_name }}</code></td>
+    <td><code>${ user.get_full_name() }</code></td>
+  </tr>
+</table>
 
 
 # Installation
