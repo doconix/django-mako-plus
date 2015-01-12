@@ -91,7 +91,7 @@ If you have read through the Django Tutorial, you've seen examples for templatin
     <td nowrap><pre><code>&lt;img src=&quot;${ settings.STATIC_ROOT }images/hi.jpg&quot;/&gt;</code></pre></td>
   </tr><tr>
     <td>Call a Python method</td>
-    <td nowrap><code>Generally requires a custom tag, unless a built-in tag provides the behavior</code></td>
+    <td nowrap>Generally requires a custom tag, unless a built-in tag provides the behavior</td>
     <td nowrap>Any Python method can be called:
 <pre><code>&lt;%! import random %&gt;
 ${ random.randint(1, 10) }      
