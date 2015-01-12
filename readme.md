@@ -153,7 +153,7 @@ ${ random.randint(1, 10) }</code></pre></td>
     </td>
   </tr>
 </table>
-- Run arbitrary (but simple) Python:
+- Run arbitrary Python (keep it simple, Tex!):
 <table>
   <tr>
     <th>Django Templates</th>
