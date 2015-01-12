@@ -132,7 +132,7 @@ Note in the examples how the DMP column normally uses standard Python syntax, wi
     <th>Django Templates</th>
     <th>DMP (Mako) Templates</th>
   </tr><tr>
-    <td nowrap>Requires a custom tag, unless a built-in tag provides the behavior.</td>
+    <td>Requires a custom tag, unless a built-in tag provides the behavior.</td>
     <td nowrap>Any Python method can be called:
 <pre><code>&lt;%! import random %&gt;
 ${ random.randint(1, 10) }</code></pre></td>
