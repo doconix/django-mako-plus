@@ -48,10 +48,147 @@ Note in the examples how the DMP column normally uses standard Python syntax, wi
 - Output the value of the question variable:
 <table>
   <tr>
+    <th>Django Templates</th>
+    <th>DMP (Mako) Templates</th>
+  </tr><tr>
     <td nowrap><pre><code>{{ question }}</code></pre></td>
     <td nowrap><pre><code>${ question }</code></pre></td>
   </tr>
 </table>
+- Output a user's full name (a method on User):
+<table>
+  <tr>
+    <th>Django Templates</th>
+    <th>DMP (Mako) Templates</th>
+  </tr><tr>
+    <td nowrap><pre><code>{{ user.get_full_name }}</code></pre></td>
+    <td nowrap><pre><code>${ user.get_full_name() }</code></pre></td>
+  </tr>
+</table>
+- Iterate through a relationship:
+<table>
+  <tr>
+    <th>Django Templates</th>
+    <th>DMP (Mako) Templates</th>
+  </tr><tr>
+    <td nowrap><pre><code>&lt;ul&gt;
+  {% for choice in question.choice_set.all %}
+    &lt;li&gt;{{ choice.choice_text }}&lt;/li&gt;
+  {% endfor %}
+&lt;/ul&gt;</code></pre></td>
+    <td nowrap><pre><code>&lt;ul&gt;
+  %for choice in question.choice_set.all():
+    &lt;li&gt;${ choice.choice_text }&lt;/li&gt;
+  %endfor
+&lt;/ul&gt;</code></pre></td>
+  </tr>
+</table>
+- Set a variable:
+<table>
+  <tr>
+    <th>Django Templates</th>
+    <th>DMP (Mako) Templates</th>
+  </tr><tr>
+    <td nowrap><pre><code>{% with name="Sam" %}</code></pre></td>
+    <td nowrap><pre><code>&lt;% name = &quot;Sam&quot; %&gt;</code></pre></td>
+  </tr>
+</table>
+- Format a date:
+<table>
+  <tr>
+    <th>Django Templates</th>
+    <th>DMP (Mako) Templates</th>
+  </tr><tr>
+    <td nowrap><pre><code>{{ value|date:"D d M Y" }}</code></pre></td>
+    <td nowrap><pre><code>${ value.strftime('%D %d %M %Y') }</code></pre></td>
+  </tr>
+</table>
+- Join a list:
+<table>
+  <tr>
+    <th>Django Templates</th>
+    <th>DMP (Mako) Templates</th>
+  </tr><tr>
+    <td nowrap><pre><code>{{ mylist | join:', ' }}</code></pre></td>
+    <td nowrap><pre><code>${ ', '.join(mylist) }</code></pre></td>
+  </tr>
+</table>
+- Use the /static prefix:
+<table>
+  <tr>
+    <th>Django Templates</th>
+    <th>DMP (Mako) Templates</th>
+  </tr><tr>
+    <td nowrap><pre><code>{% load static %}
+&lt;img src=&quot;{% get_static_prefix %}images/hi.jpg&quot;/&gt;</code></pre></td>
+    <td nowrap><pre><code>&lt;img src=&quot;${ settings.STATIC_ROOT }images/hi.jpg&quot;/&gt;</code></pre></td>
+  </tr>
+</table>
+- Call a Python method:
+<table>
+  <tr>
+    <th>Django Templates</th>
+    <th>DMP (Mako) Templates</th>
+  </tr><tr>
+    <td nowrap>Requires a custom tag, unless a built-in tag provides the behavior.</td>
+    <td nowrap>Any Python method can be called:
+<pre><code>&lt;%! import random %&gt;
+${ random.randint(1, 10) }</code></pre></td>
+  </tr>
+</table>
+- Output a default if empty:
+<table>
+  <tr>
+    <th>Django Templates</th>
+    <th>DMP (Mako) Templates</th>
+  </tr><tr>
+    <td nowrap><pre><code>{{ value | default:"nothing" }}</code></pre></td>
+    <td nowrap>
+      Use a boolean:
+      <pre><code>${ value or "nothing" }</code></pre>
+      or use a Python if statement:
+      <pre><code>${ value if value != None else "nothing" }</code></pre>
+    </td>
+  </tr>
+</table>
+- Run arbitrary (but simple) Python:
+<table>
+  <tr>
+    <th>Django Templates</th>
+    <th>DMP (Mako) Templates</th>
+  </tr><tr>
+    <td nowrap><pre><code>Requires a custom tag</code></pre></td>
+    <td nowrap><pre><code>&lt;%
+  i = 1
+  while i &lt; 10:
+    context.write(&#x27;&lt;p&gt;Testing {0}&lt;/p&gt;&#x27;.format(i))
+    i += 1
+%&gt;</code></pre></td>
+  </tr>
+</table>
+- Inherit another template:
+<table>
+  <tr>
+    <th>Django Templates</th>
+    <th>DMP (Mako) Templates</th>
+  </tr><tr>
+    <td nowrap><pre><code>{% extends "base.html" %}</code></pre></td>
+    <td nowrap><pre><code>&lt;%inherit file=&quot;base.htm&quot; /&gt;</code></pre></td>
+  </tr>
+</table>
+- Override a block:
+<table>
+  <tr>
+    <th>Django Templates</th>
+    <th>DMP (Mako) Templates</th>
+  </tr><tr>
+    <td nowrap><pre><code>{% block title %}My amazing blog{% endblock %}</code></pre></td>
+    <td nowrap><pre><code>&lt;%block name="title"&gt;My amazing blog&lt;/%block&gt;</code></pre></td>
+  </tr>
+</table>
+
+
+
 
 # Installation
 
