@@ -56,6 +56,16 @@ If you have read through the Django Tutorial, you've seen examples for templatin
     <td>Output a user's full name (a method on User)</td>
     <td nowrap><code>{{ user.get_full_name }}</code></td>
     <td nowrap><code>${ user.get_full_name() }</code></td>
+  </tr><tr>
+    <td>Iterate through a relationship</td>
+    <td nowrap>
+<code><ul>
+  {% for choice in question.choice_set.all %}
+    <li>{{ choice.choice_text }}</li>
+  {% endfor %}
+</ul></code>
+    </td>
+    <td nowrap><code>${ user.get_full_name() }</code></td>
   </tr>
 </table>
 
