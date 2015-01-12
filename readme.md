@@ -79,7 +79,7 @@ If you have read through the Django Tutorial, you've seen examples for templatin
     <td>Call a Python method</td>
     <td nowrap><pre><code>Generally requires a custom tag</code></pre></td>
     <td nowrap>
-<pre><code><%! import random %>
+<pre><code>&lt;%! import random %&gt;
 ${ random.randint(1, 10) }      
 </code></pre>
     </td>
