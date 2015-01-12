@@ -9,7 +9,11 @@
   
 # Description
 
-This app is a front controller that integrates the excellent Django framework with the also excellent Mako templating engine.  Django comes with its own template system, but it's fairly weak (by design).  Mako, on the other hand, is a fantastic template system that allows full Python code within HTML pages. But the framework doesn't stop there (that's the "plus" part of the name).  Django-Mako-Plus adds the following features:
+This app is a front controller that integrates the excellent Django framework with the also excellent Mako templating engine.  Django comes with its own template system, but it's fairly weak (by design).  Mako, on the other hand, is a fantastic template system that allows full Python code within HTML pages. 
+
+> Author's Note: The primary reason Django doesn't allow full Python in its templates is the designers want to encourage you and I to keep template logic simple.  I fully agree with this philosophy.  I just don't agree with the "forced" part of this philosophy.  The Python way is rather to give freedom to the developer but train in the correct way of doing things.  Even though I fully like Python in my templates, I still keep them fairly simple.  Views are where your logic goes.
+
+But wait, there's more! :)  Django-Mako-Plus adds the following features:
 
 1. DMP uses the Mako templating engine rather than the weaker Django templating engine.  Why would I want to learn a whole new language for templating when Mako uses my favorite language: Python?
 
@@ -22,8 +26,6 @@ This app is a front controller that integrates the excellent Django framework wi
 5. DMP automatically includes CSS and JS files, and it allows Python code within these files.  These static files get included in your web pages without any explicit declaration of `<link>` or `<script>` elements.  This means that `mypage.css` and `mypage.js` get linked in `mypage.html` automatically.  Python code within these support files means your CSS can change based on user or database entries.
 
 But don't worry, you'll still get all the Django goodness with its fantastic ORM, views, forms, etc.
-
-> Author's Note: The primary reason Django doesn't allow full Python in its templates is the designers want to encourage you and I to keep template logic simple.  I fully agree with this philosophy.  I just don't agree with the "forced" part of this philosophy.  The Python way is rather to give freedom to the developer but train in the correct way of doing things.  Even though I fully like Python in my templates, I still keep them fairly simple.  Views are where your logic goes.
 
 ## Where Is DMP Used?
 
