@@ -1,6 +1,6 @@
 # Use This If You've Said:
 
-* Is there an alternative template system for Django?
+* Is there an alternative to Django templates?
 * Why are Django templates weak sauce? Why not just use regular Python in templates?
 * Why does Django make me list every. single. page. in urls.py?
 * I'd like to include Python code in my CSS and Javascript files.
