@@ -43,28 +43,28 @@ The short answer is I liked Mako's approach the best.  It felt the most Pythonic
 
 If you have read through the Django Tutorial, you've seen examples for templating in Django.  While the rest of Django, such as models, settings, migrations, etc., is the same (with or without DMP), the way you do templates will obviously change with DMP.  The following examples should help you understand the different between standard Django and DMP template syntax:
 
-<table style="font-size: .8em !important;">
+<table>
   <tr>
     <th>Description</th>
     <th>Django Syntax</th>
     <th>DMP (Mako) Syntax</th>
   </tr><tr>
     <td>Output the value of the question variable</td>
-    <td nowrap><code>{{ question }}</code></td>
-    <td nowrap><code>${ question }</code></td>
+    <td nowrap><pre><code>{{ question }}</code></pre></td>
+    <td nowrap><pre><code>${ question }</code></pre></td>
   </tr><tr>
     <td>Output a user's full name (a method on User)</td>
-    <td nowrap><code>{{ user.get_full_name }}</code></td>
-    <td nowrap><code>${ user.get_full_name() }</code></td>
+    <td nowrap><pre><code>{{ user.get_full_name }}</code></pre></td>
+    <td nowrap><pre><code>${ user.get_full_name() }</code></pre></td>
   </tr><tr>
     <td>Iterate through a relationship</td>
-    <td nowrap><code><pre>
-&lt;ul&gt;
+    <td nowrap>
+<pre><code>&lt;ul&gt;
   {% for choice in question.choice_set.all %}
     &lt;li&gt;{{ choice.choice_text }}&lt;/li&gt;
   {% endfor %}
-&lt;/ul&gt;
-      </pre></code></td>
+&lt;/ul&gt;</code></pre>
+    </td>
     <td nowrap><code>${ user.get_full_name() }</code></td>
   </tr>
 </table>
