@@ -39,6 +39,15 @@ Python has several mature, excellent templating languages.  Both Mako and Jinja2
 The short answer is I liked Mako's approach the best.  It felt the most Pythonic to me.  Jinja2 may feel more like Django's built-in template system, but Mako won out because it looked more like Python--and the point of DMP is to include Python in templates. 
 
 
+## Comparison with Django Syntax
+
+If you have read through the Django Tutorial, you've seen examples for templating in Django.  While the rest of Django, such as models, settings, migrations, etc., is the same (with or without DMP), the way you do templates will obviously change with DMP.  The following table should help you translate those examples:
+
+| Description                                         | Django Syntax                                       | DMP (Mako) Syntax                                   |
+| --------------------------------------------------- | --------------------------------------------------- | --------------------------------------------------- |
+| Output the value of the question variable           | ``{{ question }}``                                  | ``${ question }``                                   |
+
+
 # Installation
 
 
