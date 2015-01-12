@@ -41,7 +41,9 @@ The short answer is I liked Mako's approach the best.  It felt the most Pythonic
 
 ## Comparison with Django Syntax
 
-If you have read through the Django Tutorial, you've seen examples for templating in Django.  While the rest of Django, such as models, settings, migrations, etc., is the same (with or without DMP), the way you do templates will obviously change with DMP.  The following examples should help you understand the different between standard Django and DMP template syntax:
+If you have read through the Django Tutorial, you've seen examples for templating in Django.  While the rest of Django, such as models, settings, migrations, etc., is the same (with or without DMP), the way you do templates will obviously change with DMP.  The following examples should help you understand the different between standard Django and DMP template syntax.
+
+Note in the examples how the DMP column normally uses standard Python syntax, with no extra language to learn:
 
 <table>
   <tr>
@@ -91,7 +93,7 @@ If you have read through the Django Tutorial, you've seen examples for templatin
     <td nowrap><pre><code>&lt;img src=&quot;${ settings.STATIC_ROOT }images/hi.jpg&quot;/&gt;</code></pre></td>
   </tr><tr>
     <td>Call a Python method</td>
-    <td>Generally requires a custom tag, unless a built-in tag provides the behavior</td>
+    <td>Requires a custom tag, unless a built-in tag provides the behavior</td>
     <td nowrap>Any Python method can be called:
 <pre><code>&lt;%! import random %&gt;
 ${ random.randint(1, 10) }      
@@ -105,6 +107,17 @@ ${ random.randint(1, 10) }
     <td>Output a default if empty (alternative)</td>
     <td nowrap><pre><code>{{ value | default:"nothing" }}</code></pre></td>
     <td nowrap><pre><code>${ value if value != None else "nothing" }</code></pre></td>
+  </tr><tr>
+    <td>Run arbitrary Python (keep complex Python in your view, though)</td>
+    <td>Requires a custom tag</td>
+    <td nowrap>
+<pre><code>&lt;%
+i = 1
+while i &lt; 10:
+  context.write('<p>Testing {0}</p>'.format(i))
+  i += 1
+%&gt;</code></pre>
+    </td>
   </tr><tr>
     <td>Inherit another template</td>
     <td nowrap><pre><code>{% extends "base.html" %}</code></pre></td>
