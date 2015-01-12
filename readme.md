@@ -197,23 +197,13 @@ ${ random.randint(1, 10) }</code></pre></td>
   </tr>
 </table>
 - Perform per-request logic in CSS or JS files:
-<style type="text/css">
-table.example {
-  width: 100%;
-}
-table.example th,
-table.example td {
-  width: 50%;
-  overflow-x: auto;
-}
-</style>
-<table class="example">
+<table style="width: 100%">
   <tr>
-    <th>Django Templates</th>
-    <th>DMP (Mako) Templates</th>
+    <th style="width: 50%; overflow-x: auto;">Django Templates</th>
+    <th style="width: 50%; overflow-x: auto;">DMP (Mako) Templates</th>
   </tr><tr>
-    <td>Create an entry in ``urls.py``, create a view, and render a template for the CSS or JS.</td>
-    <td>Simply name the .css file as name.cssm for each name.html template.  DMP will render the template and include it automatically.</td>
+    <td style="width: 50%; overflow-x: auto;">Create an entry in ``urls.py``, create a view, and render a template for the CSS or JS.</td>
+    <td style="width: 50%; overflow-x: auto;">Simply name the .css file as name.cssm for each name.html template.  DMP will render the template and include it automatically.</td>
   </tr>
 </table>
 
