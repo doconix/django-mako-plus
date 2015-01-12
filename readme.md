@@ -59,11 +59,11 @@ If you have read through the Django Tutorial, you've seen examples for templatin
   </tr><tr>
     <td>Iterate through a relationship</td>
     <td nowrap>
-<code>&lt;ul&gt;
+<pre><code>&lt;ul&gt;
   {% for choice in question.choice_set.all %}
     &lt;li&gt;{{ choice.choice_text }}&lt;/li&gt;
   {% endfor %}
-&lt;/ul&gt;</code>
+&lt;/ul&gt;</code></pre>
     </td>
     <td nowrap><code>${ user.get_full_name() }</code></td>
   </tr>
