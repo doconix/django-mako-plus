@@ -565,7 +565,7 @@ If relative imports (the double dot) bother you, use an absolute one instead:
         
 By using one of the above import lines, you'll always get a template renderer that is app-aware and that processes template inheritance, includes, CSS, and JS files correctly.
         
-> Some Python programmers have strong feelings about the relative vs. absolute import argument.  They were once strongly discouraged in PEP-8 and other places.  In recent years, Guido and others seem to have softened on their use.  But regardless of your take on the issue, DMP supports both ways.
+> Some Python programmers have strong feelings about relative vs. absolute imports.  They were once strongly discouraged in PEP-8 and other places.  In recent years, Guido and others seem to have softened and suggested that relative imports have a place.  But regardless of your take on the issue, DMP can be used with either relative or absolute import statements.
 
 > This tutorial uses the relative import method for a specific reason: view files are often copied across apps.  In my experience, new view files aren't started from scratch very often; instead, programmers copy an existing view, clear it out, and write new python code.  If absolute imports were used (e.g. homepage was explicitly specified in the import), the wrong render object would be used when this code line was copied to a view in another app.  Since views are *always* placed in the app/views/ folder, relative imports solve the "copying" issue without any additional problems.  My $0.02.
 
