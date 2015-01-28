@@ -586,7 +586,7 @@ If you need to process templates across apps within a single view.py file (likel
         
 Once you've imported the functions with aliases, simply use the appropriate function for templates in the two apps.
 
-Suppose you need to put your templates in a directory named something other than `app/templates/`.  Or perhaps you have a non-traditional app path.  The two above methods are really just convenience methods to make rendering easier.  If you need more control, create the template renderer yourself and use it directly:
+Suppose you need to put your templates in a directory named something other than `/appname/templates/`.  Or perhaps you have a non-traditional app path.  The two above methods are really just convenience methods to make rendering easier.  If you need more control, create the template renderer yourself and use it directly:
 
         from django.conf import settings
         from django_mako_plus.controller import view_function
@@ -600,7 +600,7 @@ Suppose you need to put your templates in a directory named something other than
           }
           
           # this syntax is only needed if you need to customize the way template rendering works
-          templater = MakoTemplateRenderer('app/path/', template_subdir="my_templates")
+          templater = MakoTemplateRenderer('/app/path/', template_subdir="my_templates")
           return templater.render_to_response(request, 'index.html', template_vars)
 
 
