@@ -501,17 +501,15 @@ Let's add some "work" to the process by adding the current server time to the in
 
         from django.conf import settings
         from django_mako_plus.controller import view_function
-        from django_mako_plus.controller.router import get_renderer
         from datetime import datetime
-
-        templater = get_renderer('homepage')
+        from homepage import dmp_render, dmp_render_to_response
 
         @view_function
         def process_request(request):
           template_vars = {
             'now': datetime.now(),
           }
-          return templater.render_to_response(request, 'index.html', template_vars)
+          return dmp_render_to_response(request, 'index.html', template_vars)
   
 Reload your server and browser page, and you should see the exact same page.  It might look the same, but something very important happened in the routing.  Rather than going straight to the `index.html` page, processing went to your new `index.py` file.  At the end of the `process_request` function above, we manually render the `index.html` file.  In other words, we're now doing extra "work" before the rendering.  This is the place to do database connections, modify objects, prepare and handle forms, etc.  It keeps complex code out of your html pages.
 

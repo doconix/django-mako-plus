@@ -3,6 +3,11 @@ from django.http import HttpResponse, Http404, HttpResponseRedirect, HttpRespons
 
 
 
+# Django looks for this variable to know which AppConfig to use
+default_app_config = 'django_mako_plus.controller.router.DMPAppConfig'
+
+
+
    
 ###############################################################
 ###   A decorator that signals that a function is callable

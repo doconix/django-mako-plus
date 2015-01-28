@@ -67,7 +67,7 @@ class Command(BaseCommand):
       os.makedirs(dest_root)
 
     # go through the DMP apps and collect the static files
-    for appname in router.TEMPLATE_RENDERERS:  # this map holds the DMP-enabled apps
+    for appname in router.TEMPLATE_RENDERERS:  # this set holds the DMP-enabled apps
       try:
         module_obj = import_module(appname)
       except ImportError as e:

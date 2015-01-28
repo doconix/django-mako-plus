@@ -1,10 +1,6 @@
-#!/usr/bin/python
-#
-#   Author:  Conan Albrecht <ca&byu,edu>
-#   License: Apache Open Source License
-#   Version: 2013.10.19
-#
+#!/usr/bin/env python3
 
+from django.apps import AppConfig
 from django.core.urlresolvers import get_mod_func
 from django.core.exceptions import ImproperlyConfigured
 from django.http import HttpResponse, StreamingHttpResponse, Http404, HttpResponseRedirect, HttpResponsePermanentRedirect
@@ -25,9 +21,6 @@ except ImportError:
 import logging 
 log = logging.getLogger('django_mako_plus')
 
-
-# our cache of template renderers - populated down further in this file
-TEMPLATE_RENDERERS = {}
 
 
 
@@ -53,14 +46,15 @@ def route_request(request):
         # look for the module, and if not found go straight to template
         if not os.path.exists(full_module_filename):
           log.debug('DMP :: module %s not found; sending processing directly to template %s.html' % (request.dmp_router_module, request.dmp_router_page_full))
-          if request.dmp_router_app in TEMPLATE_RENDERERS:
-            return TEMPLATE_RENDERERS[request.dmp_router_app].render_to_response(request, '%s.html' % request.dmp_router_page_full)
-          else:
-            log.debug('DMP :: app %s is not a designated DMP app.  Template rendering is not possible without DJANGO_MAKO_PLUS=True in its __init__.py file.' % (request.dmp_router_app))
+          try:
+            dmp_renderer = get_renderer(request.dmp_router_app)
+          except ImproperlyConfigured as e: 
+            log.debug('DMP :: %s' % (e))
             raise Http404
-        module_obj = import_module(request.dmp_router_module)
+          return dmp_renderer.render_to_response(request, '%s.html' % request.dmp_router_page_full)
         
         # find the function
+        module_obj = import_module(request.dmp_router_module)
         if not hasattr(module_obj, request.dmp_router_function):
           log.debug('DMP :: view function %s not in module %s; returning 404 not found.' % (request.dmp_router_function, request.dmp_router_module))
           raise Http404
@@ -260,41 +254,38 @@ class MakoTemplateRenderer:
 
 
 
-def get_app_template_dir(appname, template_subdir="templates"):
+def get_app_template_dir(app_name, template_subdir="templates"):
   '''Checks whether an app seems to be a valid Django-Mako-Plus app, then returns its template directory
      Raises an ImproperlyConfigured exception if the app is not set up as a DMP app.
   '''
   try:
-    module_obj = import_module(appname)
+    module_obj = import_module(app_name)
   except ImportError:
-    raise ImproperlyConfigured('DMP :: Cannot create MakoTemplateRenderer: App %s does not exist.' % appname)
+    raise ImproperlyConfigured('DMP :: Cannot create MakoTemplateRenderer: App %s does not exist.' % app_name)
   try:
     if not module_obj.DJANGO_MAKO_PLUS:
-      raise ImproperlyConfigured('DMP :: Cannot create MakoTemplateRenderer: %s.DJANGO_MAKO_PLUS must be True.' % appname)
+      raise ImproperlyConfigured('DMP :: Cannot create MakoTemplateRenderer: %s.DJANGO_MAKO_PLUS must be True.' % app_name)
   except AttributeError:
-    raise ImproperlyConfigured('DMP :: Cannot create MakoTemplateRenderer: App %s must define DJANGO_MAKO_PLUS=True.' % appname)
+    raise ImproperlyConfigured('DMP :: Cannot create MakoTemplateRenderer: App %s must define DJANGO_MAKO_PLUS=True.' % app_name)
   template_dir = os.path.abspath(os.path.join(os.path.dirname(module_obj.__file__), template_subdir))
   if not os.path.isdir(template_dir):
-    raise ImproperlyConfigured('DMP :: Cannot create MakoTemplateRenderer: App %s has no templates folder (it needs %s).' % (appname, template_dir))
+    raise ImproperlyConfigured('DMP :: Cannot create MakoTemplateRenderer: App %s has no templates folder (it needs %s).' % (app_name, template_dir))
   return template_dir
 
 
 
 
-##########################################################
-###   Populate the available template renderers
-###   It is a little wierd that code in router.py 
-###   populates a dictionary (TEMPLATE_RENDERERS)
-###   which is defined in __init__.py, but I want the
-###   get_renderer() method in the module rather than
-###   in the router.
 
-for appname in settings.INSTALLED_APPS:
-  try:
-    get_app_template_dir(appname) # just to check it
-    TEMPLATE_RENDERERS[appname] = MakoTemplateRenderer(appname)
-  except ImproperlyConfigured:
-    pass
+
+################################################################
+###   get_renderer - provides easy access to singleton
+###   templates, one per app
+
+
+# a cache of template renderers for the apps
+# this is populated by DMPAppConfig at the bottom
+# of this file.
+TEMPLATE_RENDERERS = {}
 
 
 def get_renderer(app_name):
@@ -303,6 +294,10 @@ def get_renderer(app_name):
      This renderer object keeps track of the app's template directory
      as well as a cached lookup of template objects for speed.
      
+     This renderer object is available in two ways:
+       1. Primarily, through the myapp.dmp_renderer object; see the tutorial for more information.
+       2. Secondarily, through this method: django_mako_plus.controller.router.get_renderer('myapp').
+     
      If the app_name is not a valid DMP app or is not listed in
      settings.INSTALLED_APPS, and ImproperlyConfigured exception 
      is raised.
@@ -310,7 +305,10 @@ def get_renderer(app_name):
   try:
     return TEMPLATE_RENDERERS[app_name]
   except KeyError:
-    raise ImproperlyConfigured('No template renderer was found for %s.  Are you sure it is a valid DMP app?' % app_name)
+    raise ImproperlyConfigured('App %s is not a designated DMP app.  Template rendering is not possible without DJANGO_MAKO_PLUS=True in its __init__.py file.' % (app_name))
+
+
+
 
 
 
@@ -397,3 +395,54 @@ class URLParamList(list):
     # else do the regular list function (for int, splice types, etc.)
     return list.__getitem__(self, idx)
   
+
+
+
+  
+###########################################################
+###   Our custom app config object - this initializes
+###   template renderers and performs other setup for DMP
+
+
+class DMPAppConfig(AppConfig):
+  name = 'django_mako_plus'
+  verbose_name = "Django Mako Plus"
+
+  def ready(self):
+    '''Called when Django is starting up.  This is the place to do setup.'''
+    # go through each app in INSTALLED_APPS and find the DMP-enabled apps
+    for app_name in settings.INSTALLED_APPS:
+      try:
+        # get the module so we can add the shortcuts
+        module_obj = import_module(app_name)
+        # this method checks whether it's a valid DMP app
+        get_app_template_dir(app_name)
+        # add a renderer to the cache
+        TEMPLATE_RENDERERS[app_name] = MakoTemplateRenderer(app_name)
+        # add two shortcut "functions" to the app module object to make rendering more accessible in each app
+        module_obj.dmp_render = RenderShortcut(app_name, 'render')
+        module_obj.dmp_render_to_response = RenderShortcut(app_name, 'render_to_response')
+      except (ImproperlyConfigured, ImportError):
+        pass # we'll handle these exceptions below in get_renderer() since the app doesn't get added to the TEMPLATE_RENDERERS map
+
+
+
+class RenderShortcut(object):
+  '''A shortcut way to call render() for an app's template renderer.
+     The code in this class is a bit convoluted, but it makes it possible
+     to call each app's renderer with a function rather than having to get
+     an object reference.  This allows DMP to mimick the way Django's native
+     render() and render_to_response() methods work.
+  '''
+  def __init__(self, app_name, method_name):
+    self.app_name = app_name
+    self.method_name = method_name
+    
+  def __call__(self, *args, **kwargs):
+    '''Allows instances of this class to act like functions.'''
+    # I use get_renderer to essentially do "late binding" to the map, just in
+    # case the TEMPLATE_RENDERERS map must be modified after its initial creation
+    # below.  This way I don't have a direct (and permanent) pointer to the renderer.
+    return getattr(get_renderer(self.app_name), self.method_name)(*args, **kwargs)
+    
+   
