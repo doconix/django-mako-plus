@@ -572,6 +572,7 @@ By using one of the above import lines, you'll always get a template renderer th
 
 DMP provides a second function, `dmp_render`, which is a simplified version of `dmp_render_to_response`.  Both functions process your template, but `dmp_render` returns a string rather than an `HttpResponse` object.  If you need a custom response, or if you simply need the rendered string, `dmp_render` is the ticket.  Most of the time, `dmp_render_to_response` is the appropriate method because Django expects the full response object (not just the content string) returned from your views.
 
+For an example of `dmp_render`, scroll lower in this tutorial to the "Mime Types and Status Codes" section.
 
 ## URL Parameters
 
