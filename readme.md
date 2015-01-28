@@ -551,6 +551,8 @@ Reload your web page and ensure the new view is working correctly.  You should s
 
 ### The Render Functions
 
+> This section explains the two render functions included with DMP.  If you just want to get things working, skip over this section.  You can always come back later for an explanation of how things are put together.
+
 In the example above, we used the `dmp_render_to_response` function to render our template.  It's the DMP equivalent of Django's `render_to_response` function.  The primary difference between the two functions (other than, obviously, the names) is DMP's function must be **connected to an app**.  Since Django puts all templates in a single directory tree, it can use a single, generic function for all templates in the system.  DMP's structure is more app-based: each of your apps contains a `templates` directory. 
 
 Therefore, DMP doesn't just have a single "render" function -- it has one per app.  In other words, DMP adds the function *to each of your apps*.  You'll have one version of `dmp_render_to_response` in your homepage app, another version of `dmp_render_to_response` in your catalog app, and so forth through your apps.
@@ -583,6 +585,23 @@ If you need to process templates across apps within a single view.py file (likel
         import catalog.dmp_render_to_response as catalog_render_to_response
         
 Once you've imported the functions with aliases, simply use the appropriate function for templates in the two apps.
+
+Suppose you need to put your templates in a directory named something other than `app/templates/`.  Or perhaps you have a non-traditional app path.  The two above methods are really just convenience methods to make rendering easier.  If you need more control, create the template renderer yourself and use it directly:
+
+        from django.conf import settings
+        from django_mako_plus.controller import view_function
+        from django_mako_plus.controller.router import MakoTemplateRenderer
+        from datetime import datetime
+        
+        @view_function
+        def process_request(request):
+          template_vars = {
+            'now': datetime.now(),
+          }
+          
+          # this syntax is only needed if you need to customize the way template rendering works
+          templater = MakoTemplateRenderer('app/path/', template_subdir="my_templates")
+          return templater.render_to_response(request, 'index.html', template_vars)
 
 
 ## URL Parameters
