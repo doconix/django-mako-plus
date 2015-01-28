@@ -577,7 +577,7 @@ DMP provides a second function, `dmp_render`, which is a simplified version of `
 
 For an example of `dmp_render`, scroll lower in this tutorial to the "Mime Types and Status Codes" section.
 
-If you need to process templates across apps (likely a rare case), use absolute imports and give an alias to the functions as you import them:
+If you need to process templates across apps within a single view.py file (likely a rare case), use absolute imports and give an alias to the functions as you import them:
 
         import homepage.dmp_render_to_response as homepage_render_to_response
         import catalog.dmp_render_to_response as catalog_render_to_response
