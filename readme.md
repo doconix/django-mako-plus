@@ -551,11 +551,11 @@ Reload your web page and ensure the new view is working correctly.  You should s
 
 ### The Render Functions
 
-In the example above, we used the `dmp_render_to_response` function to render our template.  It's the DMP equivalent of Django's `render_to_response` function.  The primary difference between the two functions (other than, obviously, the names) is DMP's function msut be *connected to an app*.  Since Django puts all templates in a single directory tree, it can use a single, generic function for all templates in the system.  DMP's structure is more app-based: each of your apps contains a `templates` directory. 
+In the example above, we used the `dmp_render_to_response` function to render our template.  It's the DMP equivalent of Django's `render_to_response` function.  The primary difference between the two functions (other than, obviously, the names) is DMP's function must be **connected to an app**.  Since Django puts all templates in a single directory tree, it can use a single, generic function for all templates in the system.  DMP's structure is more app-based: each of your apps contains a `templates` directory. 
 
-Therefore, DMP doesn't just have a single "render" function -- it has one per app.  In other words, DMP adds the function *to each of your apps*.  You'll have one edition of `dmp_render_to_response` in your homepage app, another edition of `dmp_render_to_response` in your catalog app, and so forth through your apps.
+Therefore, DMP doesn't just have a single "render" function -- it has one per app.  In other words, DMP adds the function *to each of your apps*.  You'll have one version of `dmp_render_to_response` in your homepage app, another version of `dmp_render_to_response` in your catalog app, and so forth through your apps.
 
-Practically, you don't need to worry about any of this.  You just need to import the function in a very specific way.  In each of your views, use the following:
+**Practically, you don't need to worry about any of this.  You just need to import the function in a very specific way.**  In each of your views, use the following:
 
         from .. import dmp_render, dmp_render_to_response
 
