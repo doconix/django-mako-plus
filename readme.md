@@ -557,10 +557,12 @@ Therefore, DMP doesn't just have a single "render" function -- it has one per ap
 
 **Practically, you don't need to worry about any of this.  You just need to import the function in a very specific way.**  In each of your views, use the following:
 
+        # this works in any app/views/*.py file:
         from .. import dmp_render, dmp_render_to_response
 
 If relative imports (the double dot) bother you, use an absolute one instead:
 
+        # this works in any directory of your project:
         from homepage import dmp_render, dmp_render_to_response
         
 By using one of the above import lines, you'll always get a template renderer that is app-aware and that processes template inheritance, includes, CSS, and JS files correctly.
