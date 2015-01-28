@@ -502,7 +502,7 @@ Let's add some "work" to the process by adding the current server time to the in
         from django.conf import settings
         from django_mako_plus.controller import view_function
         from datetime import datetime
-        from homepage import dmp_render, dmp_render_to_response
+        from .. import dmp_render, dmp_render_to_response
 
         @view_function
         def process_request(request):
@@ -549,6 +549,30 @@ Reload your web page and ensure the new view is working correctly.  You should s
 > You might be wondering about the incomplete sentence under the .browser_time paragraph.  Just hold tight.  We'll be using this later in the tutorial.
 
 
+### The Render Functions
+
+In the example above, we used the `dmp_render_to_response` function to render our template.  It's the DMP equivalent of Django's `render_to_response` function.  The primary difference between the two functions (other than, obviously, the names) is DMP's function msut be *connected to an app*.  Since Django puts all templates in a single directory tree, it can use a single, generic function for all templates in the system.  DMP's structure is more app-based: each of your apps contains a `templates` directory. 
+
+Therefore, DMP doesn't just have a single "render" function -- it has one per app.  In other words, DMP adds the function *to each of your apps*.  You'll have one edition of `dmp_render_to_response` in your homepage app, another edition of `dmp_render_to_response` in your catalog app, and so forth through your apps.
+
+Practically, you don't need to worry about any of this.  You just need to import the function in a very specific way.  In each of your views, use the following:
+
+        from .. import dmp_render, dmp_render_to_response
+
+If relative imports (the double dot) bother you, use an absolute one instead:
+
+        from homepage import dmp_render, dmp_render_to_response
+        
+By using one of the above import lines, you'll always get a template renderer that is app-aware and that processes template inheritance, includes, CSS, and JS files correctly.
+        
+> Some Python programmers have strong feelings about the relative vs. absolute import argument.  They were once strongly discouraged in PEP-8 and other places.  In recent years, Guido and others seem to have softened on their use.  But regardless of your take on the issue, DMP supports both ways.
+
+> This tutorial uses the relative import method for a specific reason: view files are often copied across apps.  In my experience, new view files aren't started from scratch very often; instead, programmers copy an existing view, clear it out, and write new python code.  If absolute imports were used (e.g. homepage was explicitly specified in the import), the wrong render object would be used when this code line was copied to a view in another app.  Since views are *always* placed in the app/views/ folder, relative imports solve the "copying" issue without any additional problems.  My $0.02.
+
+
+DMP provides a second function, `dmp_render`, which is a simplified version of `dmp_render_to_response`.  Both functions process your template, but `dmp_render` returns a string rather than an `HttpResponse` object.  If you need a custom response, or if you simply need the rendered string, `dmp_render` is the ticket.  Most of the time, `dmp_render_to_response` is the appropriate method because Django expects the full response object (not just the content string) returned from your views.
+
+
 ## URL Parameters
 
 Django is all about pretty urls.  In keeping with that philosophy, this framework has URL parameters.  We've already used the first two items in the path: the first specifies the app, the second specifies the view/template.  URL parameters are the third part, fourth part, and so on.
@@ -567,17 +591,15 @@ Although this might not be the best use of urlparams, suppose we want to display
   
         from django.conf import settings
         from django_mako_plus.controller import view_function
-        from django_mako_plus.controller.router import get_renderer
+        from .. import dmp_render, dmp_render_to_response
         from datetime import datetime
-
-        templater = get_renderer('homepage')
 
         @view_function
         def process_request(request):
           template_vars = {
             'now': datetime.now().strftime(request.urlparams[0] if request.urlparams[0] else '%H:%M'),
           }
-          return templater.render_to_response(request, 'index.html', template_vars)
+          return dmp_render_to_response(request, 'index.html', template_vars)
 
 The following links now give the time in different formats:
 
@@ -636,11 +658,9 @@ Let's make the color dynamic by adding a new random variable `timecolor` to our 
 
         from django.conf import settings
         from django_mako_plus.controller import view_function
-        from django_mako_plus.controller.router import get_renderer
+        from .. import dmp_render, dmp_render_to_response
         from datetime import datetime
         import random
-
-        templater = get_renderer('homepage')
 
         @view_function
         def process_request(request):
@@ -648,7 +668,7 @@ Let's make the color dynamic by adding a new random variable `timecolor` to our 
             'now': datetime.now().strftime(request.urlparams[0] if request.urlparams[0] else '%H:%M'),
             'timecolor': random.choice([ 'red', 'blue', 'green', 'brown' ]),
           }
-          return templater.render_to_response(request, 'index.html', template_vars)
+          return dmp_render_to_response(request, 'index.html', template_vars)
 
 Now, rename your index.css file to `index.cssm`.  Then set the content of index.cssm to the following:
 
@@ -760,18 +780,16 @@ The client side is now ready, so let's create the `/homepage/index_time/` server
 
         from django.conf import settings
         from django_mako_plus.controller import view_function
-        from django_mako_plus.controller.router import get_renderer
+        from .. import dmp_render, dmp_render_to_response
         from datetime import datetime
         import random
-
-        templater = get_renderer('homepage')
 
         @view_function
         def process_request(request):
           template_vars = {
             'now': datetime.now(),
           }
-          return templater.render_to_response(request, 'index_time.html', template_vars)
+          return dmp_render_to_response(request, 'index_time.html', template_vars)
   
 Finally, create the `/homepage/templates/index_time.html` template, which is rendered at the end of `process_request()` above:
 
@@ -801,7 +819,7 @@ Open `homepage/views/index.py` and add the following to the end of the file:
           template_vars = {
             'now': datetime.now(),
           }
-          return templater.render_to_response(request, 'index_time.html', template_vars)  
+          return dmp_render_to_response(request, 'index_time.html', template_vars)  
 
 Note the function is decorated with `@view_function`, and it contains the function body from our now-deleted `index_time.py`.  The framework recognizes **any** function with this decorator as an available endpoint for urls, not just the hard-coded `process_request` function.  In other words, you can actually name your view methods any way you like, as long as you follow the pattern described in this section.  
 
@@ -832,7 +850,7 @@ This likely impacts few users of DMP, so you may want to skip this section for n
 
 If the templates you need to access are within your project directory, no extra setup is required.  Simply reference those templates relateive to the root project directory.  For example, to access a template located at homepage/mytemplates/sub1/page.html (relative to your project root), use the following:
 
-        return templater.render_to_response(request, '/homepage/mytemplates/sub1/page.html', template_vars)
+        return dmp_render_to_response(request, '/homepage/mytemplates/sub1/page.html', template_vars)
         
 ### Case 2: Templates Outside Your Project Directory
 
@@ -844,7 +862,7 @@ Suppose your templates are located on a different disk or entirely different dir
 
 Suppose, after making the above change, you need to render the '/var/templates/page1.html' template:
 
-        return templater.render_to_response(request, 'page1.html', template_vars)
+        return dmp_render_to_response(request, 'page1.html', template_vars)
         
 DMP will first search the current app's `templates` directory (i.e. the normal way), then it will search the `DMP_TEMPLATES_DIRS` list, which in this case contains `/var/templates/`.  Your `page1.html` template will be found and rendered.
 
@@ -919,15 +937,15 @@ Any entries in this list will be automatically included in templates throughout 
 
 ## Mime Types and Status Codes
 
-The `render_to_response()` function returns the *text/html* mime type and *200* status code.  What if you need to return JSON, CSV, or a 404 not found?  Just wrap the `render` function in a standard Django `HttpResponse` object.  A few examples:
+The `dmp_render_to_response()` function returns the *text/html* mime type and *200* status code.  What if you need to return JSON, CSV, or a 404 not found?  Just wrap the `render` function in a standard Django `HttpResponse` object.  A few examples:
 
         from django.http import HttpResponse
         
         # return CSV
-        return HttpResponse(templater.render(request, 'my_csv.html', {}), mimetype='text/csv')
+        return HttpResponse(dmp_render(request, 'my_csv.html', {}), mimetype='text/csv')
         
         # return a custom error page
-        return HttpResponse(templater.render(request, 'custom_error_page.html', {}), status=404)
+        return HttpResponse(dmp_render(request, 'custom_error_page.html', {}), status=404)
         
 
 ## Useful Variables
