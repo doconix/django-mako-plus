@@ -405,7 +405,8 @@ class URLParamList(list):
 
 
 class DMPAppConfig(AppConfig):
-  name = 'django_mako_plus'
+  label = 'django_mako_plus.controller'  # management commands don't show up without this
+  name = 'django_mako_plus.controller'
   verbose_name = "Django Mako Plus"
 
   def ready(self):
