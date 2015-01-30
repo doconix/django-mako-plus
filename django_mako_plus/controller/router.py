@@ -67,7 +67,9 @@ def route_request(request):
 
         # send the pre-signal
         if settings.DMP_SIGNALS:
-          signals.dmp_signal_pre_process_request.send(sender=sys.modules[__name__], request=request)
+          for receiver, ret_response in signals.dmp_signal_pre_process_request.send(sender=sys.modules[__name__], request=request):
+            if isinstance(ret_response, (HttpResponse, StreamingHttpResponse)):
+              return ret_response
 
         # call view function
         log.debug('DMP :: calling view function %s.%s' % (request.dmp_router_module, request.dmp_router_function))

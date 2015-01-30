@@ -22,8 +22,8 @@ default_app_config = 'django_mako_plus.controller.router.DMPAppConfig'
     
 class view_function(object):    
   '''A decorator to signify which view functions are "callable" by web browsers.  
-     I'm using a class (rather than the more common inner function) so the above 
-     router_request can call isinstance().
+     I'm using a class (rather than the more common inner function) so the 
+     router_request function can call isinstance().
   '''
   def __init__(self, func):
     '''Constructor.  This is called by adding the @view_function decorator to any function'''
