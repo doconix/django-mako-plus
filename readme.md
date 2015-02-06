@@ -525,6 +525,13 @@ The second line tells me the controller found my new `index.py` view, and it cal
 
 >This decoration with `@view_function` is done for security.  If the framework let browsers specify any old function, end users could invoke any function of any module on your system!  By requiring the decorator, the framework limits end users to one specifically-named function.
 
+If you have multiple decorators on your function, such as a permissions check and `view_function`, you **must list `view_function` first**.  For example:
+
+          @view_function                    # must be listed first
+          @permission_required('can_vote')
+          def process_request(request):
+            ...
+
 > Later in the tutorial, we'll describe another way to call other functions within your view  Even though `process_request` is the default function, you can actually have multiple web-accessible functions within a view/*.py file.
 
 As stated earlier, we explicitly call the Mako renderer at the end of the `process_request` function.  The template_vars (the third parameter of the call) is a dictionary containing variable names that will be globally available within the template.

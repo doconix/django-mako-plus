@@ -62,7 +62,7 @@ def route_request(request):
 
         # ensure it is decorated with @view_function - this is for security so only certain functions can be called
         if not isinstance(func_obj, view_function): 
-          log.debug('DMP :: view function %s found successfully, but it is not decorated with "view_function"; returning 404 not found.' % (request.dmp_router_function))
+          log.debug('DMP :: view function %s found successfully, but it is not decorated with @view_function; returning 404 not found.  Note that if you have multiple decorators on a function, the @view_function decorator must be listed first.' % (request.dmp_router_function))
           raise Http404
 
         # send the pre-signal
