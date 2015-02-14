@@ -648,6 +648,42 @@ The following links now give the time in different formats:
 > If a urlparam doesn't exist, it always returns the empty string ''.  This is slightly different than a regular Python list, which throws an exception when an index is too large.  This means that request.urlparams[50] returns the empty string rather than an exception.  The `if` statement in the code above can be used to determine if a urlparam exists or not.  Another way to code a default value for a urlparam is `request.urlparam[2] or 'some default value'`.  
 
 
+## Class-Based Views
+
+Django-Mako-Plus fully supports Django's class-based view concept.  You can read more about this pattern at https://docs.djangoproject.com/en/dev/topics/class-based-views/.  If you are using view classes, DMP automatically detects and adjusts accordingly.  If you are using regular function-based views (my preference, btw), skip this section for now.
+
+With DMP, your class-based view will be discovered via request url, so you have to name your class accordingly.  In keeping with the rest of DMP, the default class name in a file should be named `class process_request()`.  The `get()`, `post()`, etc. methods of this class must be decorated with with `@view_function`.  Consider the following `index.py` file:
+
+        from django.conf import settings
+        from django.views.generic import View
+        from django_mako_plus.controller import view_function
+        from .. import dmp_render, dmp_render_to_response
+        from datetime import datetime
+
+        class process_request(View):
+        
+          @view_function
+          def get(request):
+            template_vars = {
+              'now': datetime.now().strftime(request.urlparams[0] if request.urlparams[0] else '%H:%M'),
+            }
+            return dmp_render_to_response(request, 'index.html', template_vars)
+
+        class discovery(View):
+          @view_function
+          def get(request):
+            return HttpResponse('Get was called.')
+            
+          @view_function
+          def post(request):
+            return HttpResponse('Post was called.')
+
+In the above `index.py` file, two class-based views are defined.  The first is called with the url `/homepage/index/`.  The second is called with the url `/homepage/index.discovery/`.
+
+> Python programmers usually use CamelCase (e.g. start with an uppercase letter) for class names.  In the above classes, I'm naming them all lowercase so my URL doesn't have uppercase characters in it.  If you'd rather use CamelCase, just be sure to use CamelCase in your URL.
+
+
+
 ## A Bit of Style
 
 Modern web pages are made up of three primary parts: html, CSS, and Javascript (images and other media might be a fourth, but we'll go with three for this discussion).  Since all of your pages need these three components, this framework combines them intelligently for you.  All you have to do is name the .html, the css., and the .js file with the same name, and DMP will automatically generate the `<link>` and `<script>` tags for you.  It will even put them in the "right" spot in the html (styles at the beginning, scripts at the end).
@@ -997,6 +1033,7 @@ are available throughout the request:
 * `request.dmp_router_page_full`: The exact module name specified in the URL, including the function name if specified.  In the URL `http://www.server.com/calculator/index/1/2/3`, the `dmp_router_page_full` is the string "index".  In the URL `http://www.server.com/calculator/index.somefunc/1/2/3`, the `dmp_router_page` is the string "index.somefunc".  Note the difference in this last example to what `dmp_router_page` reports.
 * `request.dmp_router_function`: The name of the function within the module that will be called, even if it is not specified in the URL.  In the URL `http://www.server.com/calculator/index/1/2/3`, the `dmp_router_function` is the string "process_request" (the default function).  In the URL `http://www.server.com/calculator/index.somefunc/1/2/3`, the `dmp_router_page` is the string "somefunc".  
 * `request.dmp_router_module`: The name of the real Python module specified in the URL, as it will be imported into the runtime module space.  In the URL `http://www.server.com/calculator/index/1/2/3`, the `dmp_router_module` is the string "calculator.views.index". 
+* `request.dmp_router_class`: The name of the class if the router sees that the "function" is actually a class-based view.  None otherwise.
 * `request.urlparams`: A list of parameters specified in the URL.  See the section entitled "URL Parameters" above for more information.
 
 

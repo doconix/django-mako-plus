@@ -16,23 +16,32 @@ from django.http import HttpResponse, Http404, HttpResponseRedirect, HttpRespons
 ###           ...   
 
     
-class view_function(object):    
-  '''A decorator to signify which view functions are "callable" by web browsers.  
-     I'm using a class (rather than the more common inner function) so the 
-     router_request function can call isinstance().
+# class view_function(object):
+#   '''A decorator to signify which view functions are "callable" by web browsers.
+#      I'm using a class (rather than the more common inner function) so the
+#      router_request function can call isinstance().
+#   '''
+#   def __init__(self, func):
+#     '''Constructor.  This is called by adding the @view_function decorator to any function'''
+#     self.func = func
+#
+#   def __call__(self, *args, **kwargs):
+#     '''Called when the user calls this "function".'''
+#     return self.func(*args, **kwargs)
+#
+#   def __str__(self):
+#     '''Debugging view'''
+#     return '@view_function: %s' % self.func
+
+def view_function(f):    
+  '''A decorator to signify which view functions are "callable" by web browsers.
+     This decorator is more of an annotation on functions than a decorator.
+     Rather than the usual inner function pattern, I'm simply setting a flag on the
+     function to signify that it is callable.  The router checks this flag
+     before calling the function.
   '''
-  def __init__(self, func):
-    '''Constructor.  This is called by adding the @view_function decorator to any function'''
-    self.func = func
-  
-  def __call__(self, *args, **kwargs):
-    '''Called when the user calls this "function".'''
-    return self.func(*args, **kwargs)
-    
-  def __str__(self):
-    '''Debugging view'''
-    return '@view_function: %s' % self.func
-    
+  f.dmp_view_function = True
+  return f
 
     
 
@@ -46,7 +55,9 @@ class InternalRedirectException(Exception):
      will end immediately, and processing will be passed to the new view function.
   '''
   def __init__(self, redirect_module, redirect_function):
-    '''Indicates the new view to be called.  The view should be given relative to the project root.'''
+    '''Indicates the new view to be called.  The view should be given relative to the project root.
+       The parameters should be strings, not the actual module or function reference.
+    '''
     super(InternalRedirectException, self).__init__()
     self.redirect_module = redirect_module
     self.redirect_function = redirect_function
