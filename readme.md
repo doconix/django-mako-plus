@@ -655,6 +655,7 @@ Django-Mako-Plus fully supports Django's class-based view concept.  You can read
 With DMP, your class-based view will be discovered via request url, so you have to name your class accordingly.  In keeping with the rest of DMP, the default class name in a file should be named `class process_request()`.  The `get()`, `post()`, etc. methods of this class must be decorated with with `@view_function`.  Consider the following `index.py` file:
 
         from django.conf import settings
+        from django.http import HttpResponse
         from django.views.generic import View
         from django_mako_plus.controller import view_function
         from .. import dmp_render, dmp_render_to_response
