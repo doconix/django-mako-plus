@@ -455,20 +455,37 @@ def get_app_template_dir(app_name, template_subdir="templates"):
 
 
 
+#################################################
+###   Utility functions not meant to be used
+###   outside this package.
+
+def _get_dmp_apps():
+  '''Gets the DMP-enabled apps.  This is a generator.'''
+  # go through each app in INSTALLED_APPS and find the DMP-enabled apps
+  for app_name in settings.INSTALLED_APPS:
+    try:
+      # get the module so we can add the shortcuts
+      module_obj = import_module(app_name)
+      # this method checks whether it's a valid DMP app
+      get_app_template_dir(app_name)
+      # yield the app name
+      yield app_name
+    except (ImproperlyConfigured, ImportError):
+      pass # we'll handle these exceptions below in get_renderer() since the app doesn't get added to the TEMPLATE_RENDERERS map
+  
+  
    
 # go through each app in INSTALLED_APPS and find the DMP-enabled apps
-for app_name in settings.INSTALLED_APPS:
+for app_name in _get_dmp_apps():
   try:
     # get the module so we can add the shortcuts
     module_obj = import_module(app_name)
-    # this method checks whether it's a valid DMP app
-    get_app_template_dir(app_name)
     # add a renderer to the cache
     TEMPLATE_RENDERERS[app_name] = MakoTemplateRenderer(app_name)
     # add two shortcut "functions" to the app module object to make rendering more accessible in each app
     module_obj.dmp_render = RenderShortcut(app_name, 'render')
     module_obj.dmp_render_to_response = RenderShortcut(app_name, 'render_to_response')
-  except (ImproperlyConfigured, ImportError):
+  except (ImportError):
     pass # we'll handle these exceptions below in get_renderer() since the app doesn't get added to the TEMPLATE_RENDERERS map
 
 
