@@ -1,3 +1,4 @@
+from django import VERSION as django_version
 from django.core.management.base import BaseCommand, CommandError
 from django.utils.importlib import import_module
 from django.core.management.commands.makemessages import Command as MakeMessagesCommand
@@ -13,6 +14,10 @@ class Command(MakeMessagesCommand):
 
 
   def handle(self, *args, **options):
+    # ensure that we have the necessary version of django
+    if django_version[0] + django_version[1]/10 <= 1.7:
+      raise CommandError('The dmp_makemessages command requires Django 1.8+ (the rest of DMP will work fine - this message is just for dmp_makemessages).')
+    
     # go through each dmp_enabled app and compile its mako templates
     for app_name in _get_dmp_apps():
       self.compile_mako_files(app_name)
