@@ -1236,6 +1236,33 @@ The above code should be in a code file that is called during Django initializat
 
 See the `django_mako_plus/controller/signals.py` file for all the available signals you can hook to.
 
+# Translation (Internationalization)
+
+
+If your site needs to be translated into other languages, this section is for you.  I'm sure you are aware that Django has full support for translation to other languages.  If not, you should first read the standard Translation documentation at https://docs.djangoproject.com/en/dev/topics/i18n/translation/.
+
+DMP supports Django's translation functions--with one caveat.  Since Django doesn't know about Mako, it can't translate strings in your Mako files.  DMP fixes this with the `dmp_makemessages` command.  Instead of running `python3 manage.py makemessages` like the Django tutorial shows, run `python3 manage.py dmp_makemessages`.  Since the DMP version is an extension of the standard version, the same command line options apply to both.
+
+> Internally, `dmp_makemessages` literally extends the `makemessages` class.  Since Mako templates are compiled into .py files at runtime (which makes them discoverable by `makemessages`), the DMP version of the command simply finds all your templates, compiles them, and calls the standard command.  Django finds your translatable strings within the cached_templates directory (which holds the compiled Mako templates).
+
+Suppose you have a template with a header you want translated.  Simply use the following in your template:
+
+          <%! from django.utils.translation import ugettext as _ %>
+          <p>${ _("World History") }</p>
+          
+Run the following at the command line:
+
+          python3 manage.py dmp_makemessages
+
+Assuming you have translations set up the way Django's documentation tells you to, you'll get a new language.po file.  Edit this file and add the translation.  Then compile your translations:
+
+          python3 manage.py compilemessages
+          
+Your translation file (language.mo) is now ready, and assuming you've set the language in your session, you'll now see the translations in your template.
+
+> FYI, the `dmp_makemessages` command does everything the regular command does, so it will also find translatable strings in your regular view files as well.  You don't need to run both `dmp_makemessages` and `makemessages`
+
+
 # Where to Now?
 
 This tutorial has been an introduction to the Django-Mako-Plus framework.  The primary purpose of DMP is to combine the excellent Django system with the also excellent Mako templating system.  And, as you've hopefully seen above, this framework offers many other benefits as well.  It's a new way to use the Django system.
