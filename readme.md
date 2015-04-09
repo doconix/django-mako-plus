@@ -610,6 +610,17 @@ Suppose you need to put your templates in a directory named something other than
           templater = MakoTemplateRenderer('/app/path/', template_subdir="my_templates")
           return templater.render_to_response(request, 'index.html', template_vars)
 
+### Why Not the Normal Django API?
+
+Starting with version 1.8, Django has support for multiple template engines.  You might be wondering why DMP doesn't plug into this new way of doing things.
+
+The short answer is Django's standard templating API doesn't do what DMP needs.  In particular, despite supporting multiple engines (like Django, Jinja2, etc.), the standard get_template() and render() functions don't have any sense of the "current app" where the function is being called.  Another need Django doesn't support is DMP's idea of rendering single `def`s in a page.
+
+Rather than fitting a square peg into a round hole, DMP has kept its `dmp_render` and `dmp_render_to_response` functions.  These ensure that you'll get all the DMP goodness.
+
+> It actually *is* possible to introspect the current app from the standard Django functions by inspecting the call stack.  However, this is a "hacktastic" way to do it (a.k.a. not a good thing). Better to keep the separate API than to hack things together.
+
+
 
 ## URL Parameters
 

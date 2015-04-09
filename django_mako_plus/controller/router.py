@@ -190,7 +190,13 @@ class MakoTemplateRenderer:
                  super-templates.
     '''
     # must convert the request context to a real dict to use the ** below
-    context_dict = { 'request': request, 'settings': settings }  # this allows the template to access the request
+    context_dict = {}
+    context_dict['request'] = request
+    context_dict['settings'] = settings
+    try:
+      context_dict['STATIC_URL'] = settings.STATIC_URL  # this is used so much in templates, it's useful to have it always available
+    except AttributeError:
+      pass
     context = Context(params) if request == None else RequestContext(request, params)  # Django's RequestContext automatically runs all the TEMPLATE_CONTEXT_PROCESSORS and populates with variables
     for d in context:
       context_dict.update(d)
