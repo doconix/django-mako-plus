@@ -56,13 +56,6 @@ if settings.DMP_MINIFY_JS_CSS and not settings.DEBUG:
     pass
 
 
-######################################################################
-###  Used as the default cgi_id.  See the documentation for
-###  StaticRenderer below for more information.
-
-SERVER_START_MINUTE = int(time.time() / 60)  # minutes since Jan 1, 1970
-
-
 #######################################################################
 ###   A dict of template renderers for scripts and styles in our apps.
 ###   These are created as needed in TemplateInfo below and cached here.
@@ -81,33 +74,46 @@ class TemplateInfo(object):
      object below creates a TemplateInfo object for each level in the Mako template inheritance
      chain.
   '''
-  def __init__(self, template):
+  def __init__(self, template, cgi_id=None):
     # set up the directories so we can go through them fast on render
     self.template_dir, self.template_name = os.path.split(os.path.splitext(template.filename)[0])
     self.app_dir = os.path.dirname(self.template_dir)
     self.app = os.path.split(self.app_dir)[1]
-    # ensure we have renderers for this page
+    
+    # ensure we have renderers for this template
     if self.app not in SCRIPT_RENDERERS:
       SCRIPT_RENDERERS[self.app] = MakoTemplateRenderer(self.app, 'scripts')
     if self.app not in STYLE_RENDERERS:
       STYLE_RENDERERS[self.app] = MakoTemplateRenderer(self.app, 'styles')
+
     # the static templatename.css file
-    self.css = None
-    if os.path.exists(os.path.join(self.app_dir, 'styles', self.template_name + '.css')):
-      self.css = '<link rel="stylesheet" type="text/css" href="%s?{cgi_id}" />' % os.path.join(settings.STATIC_URL, self.app, 'styles', self.template_name + '.css')
+    try:
+      fstat = os.stat(os.path.join(self.app_dir, 'styles', self.template_name + '.css'))
+      self.css = '<link rel="stylesheet" type="text/css" href="%s?%s" />' % (os.path.join(settings.STATIC_URL, self.app, 'styles', self.template_name + '.css'), cgi_id if cgi_id != None else int(fstat.st_mtime))
+    except FileNotFoundError:
+      self.css = None
+
     # the mako-rendered templatename.cssm file
-    self.cssm = None
-    if os.path.exists(os.path.join(self.app_dir, 'styles', self.template_name + '.cssm')):
+    try:
+      fstat = os.stat(os.path.join(self.app_dir, 'styles', self.template_name + '.cssm'))
       self.cssm = self.template_name + '.cssm'
+    except FileNotFoundError:
+      self.cssm = None
+
     # the static templatename.js file
-    self.js = None
-    if os.path.exists(os.path.join(self.app_dir, 'scripts', self.template_name + '.js')):
-      self.js = '<script src="%s?{cgi_id}"></script>' % os.path.join(settings.STATIC_URL, self.app, 'scripts', self.template_name + '.js')
+    try:
+      fstat = os.stat(os.path.join(self.app_dir, 'scripts', self.template_name + '.js'))
+      self.js = '<script src="%s?%s"></script>' % (os.path.join(settings.STATIC_URL, self.app, 'scripts', self.template_name + '.js'), cgi_id if cgi_id != None else int(fstat.st_mtime))
+    except FileNotFoundError:
+      self.js = None
+
     # the mako-rendered templatename.jsm file
-    self.jsm = None
-    if os.path.exists(os.path.join(self.app_dir, 'scripts', self.template_name + '.jsm')):
+    try:
+      fstat = os.stat(os.path.join(self.app_dir, 'scripts', self.template_name + '.jsm'))
       self.jsm = self.template_name + '.jsm'
-    
+    except FileNotFoundError:
+      self.jsm = None
+
 
 class StaticRenderer(object):
   '''Renders the styles and scripts for a given template. 
@@ -127,21 +133,11 @@ class StaticRenderer(object):
 
      By adding an arbitrary id to the end of the .css and .js files, browsers will
      see the files as *new* anytime that id changes.  The default method 
-     for calculating the id is the server start time (minutes since 1970). This
-     id automatically increments and never repeats as you restart your server.
-
-     This id works well in most installations, but it refreshes more than
-     necessary when servers restart themselves at given intervals
-     (such as uwsgi's max-requests option where the server restarts
-     after a specific number of requests).  If you are in this situation,
-     you'll have to send in the cgi_id.  When you want to signal that browsers
-     should redownload CSS/JS files from your site, change the id.  The way
-     you create and change the id is different in each situation.
+     for calculating the id is the file modification time (minutes since 1970). 
   '''
-  def __init__(self, mako_self, cgi_id=SERVER_START_MINUTE):
+  def __init__(self, mako_self, cgi_id=None):
     self.mako_self = mako_self
     self.template_chain = []
-    self.cgi_id = cgi_id
     # step up the template inheritance chain and ensure each template has a TemplateInfo object
     # I attach it to the template objects because they are cached by mako (and thus we take 
     # advantage of that caching).
@@ -158,7 +154,7 @@ class StaticRenderer(object):
     for template in reversed(self.template_chain):  # reverse so lower CSS overrides higher CSS in the inheritance chain
       ti = getattr(template, DMP_ATTR_NAME)
       if ti.css:
-        ret.append(ti.css.format(cgi_id=self.cgi_id))  # the <link> was already created once in the constructor
+        ret.append(ti.css)  # the <link> was already created once in the constructor
       if ti.cssm:
         css_text = STYLE_RENDERERS[ti.app].render(request, ti.cssm, context.kwargs)
         if settings.DMP_MINIFY_JS_CSS and JSMIN:
@@ -173,7 +169,7 @@ class StaticRenderer(object):
     for template in self.template_chain:
       ti = getattr(template, DMP_ATTR_NAME)
       if ti.js:
-        ret.append(ti.js.format(cgi_id=self.cgi_id))  # the <script> was already created once in the constructor
+        ret.append(ti.js)  # the <script> was already created once in the constructor
       if ti.jsm:
         js_text = SCRIPT_RENDERERS[ti.app].render(request, ti.jsm, context.kwargs)
         if settings.DMP_MINIFY_JS_CSS and JSMIN:
