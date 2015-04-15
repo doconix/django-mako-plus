@@ -34,6 +34,7 @@ __doc__ = '''
 
 from django.conf import settings
 from django_mako_plus.controller.router import MakoTemplateRenderer
+from django_mako_plus.controller import get_setting
 import os, os.path, time
 
 
@@ -43,7 +44,7 @@ DMP_ATTR_NAME = 'dmp_templateinfo'  # used to attach TemplateInfo objects to Mak
 # Import minification if requested
 JSMIN = False
 CSSMIN = False
-if settings.DMP_MINIFY_JS_CSS and not settings.DEBUG:
+if get_setting('MINIFY_JS_CSS', False) and not settings.DEBUG:
   try:
     from rjsmin import jsmin
     JSMIN = True
@@ -157,7 +158,7 @@ class StaticRenderer(object):
         ret.append(ti.css)  # the <link> was already created once in the constructor
       if ti.cssm:
         css_text = STYLE_RENDERERS[ti.app].render(request, ti.cssm, context.kwargs)
-        if settings.DMP_MINIFY_JS_CSS and JSMIN:
+        if JSMIN and get_setting('MINIFY_JS_CSS', False):
           css_text = cssmin(css_text)
         ret.append('<style type="text/css">%s</style>' % css_text) 
     return '\n'.join(ret)
@@ -172,7 +173,7 @@ class StaticRenderer(object):
         ret.append(ti.js)  # the <script> was already created once in the constructor
       if ti.jsm:
         js_text = SCRIPT_RENDERERS[ti.app].render(request, ti.jsm, context.kwargs)
-        if settings.DMP_MINIFY_JS_CSS and JSMIN:
+        if JSMIN and get_setting('MINIFY_JS_CSS', False):
           js_text = jsmin(js_text)
         ret.append('<script>%s</script>' % js_text)
     return '\n'.join(ret)

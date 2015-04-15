@@ -1,7 +1,34 @@
+from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.http import HttpResponse, Http404, HttpResponseRedirect, HttpResponsePermanentRedirect
 
 
+###############################################################
+###   Gets the specified setting.  During 2015, we changed the
+###   way settings are specified in the settings.py file to
+###   a dictionary.  This is a temporary fix to support both
+###   ways of doing it.
+
+def get_setting(name, default=None):
+  # the new way
+  try:
+    return settings.DJANGO_MAKO_PLUS[name]
+    
+  except KeyError:
+    if default != None:
+      return default
+    raise ImproperlyConfigured('The settings.DJANGO_MAKO_PLUS dict did not have a setting named %s.' % (name))
+    
+  except AttributeError:
+    pass  # move on to old way
+    
+  # the old way
+  try:
+    return getattr(settings, 'DMP_%s' % name)
+  except AttributeError:
+    if default != None:
+      return default
+    raise ImproperlyConfigured('The settings.py file needs to set DMP_%s.' % (name))
 
 
    
@@ -16,23 +43,6 @@ from django.http import HttpResponse, Http404, HttpResponseRedirect, HttpRespons
 ###           ...   
 
     
-# class view_function(object):
-#   '''A decorator to signify which view functions are "callable" by web browsers.
-#      I'm using a class (rather than the more common inner function) so the
-#      router_request function can call isinstance().
-#   '''
-#   def __init__(self, func):
-#     '''Constructor.  This is called by adding the @view_function decorator to any function'''
-#     self.func = func
-#
-#   def __call__(self, *args, **kwargs):
-#     '''Called when the user calls this "function".'''
-#     return self.func(*args, **kwargs)
-#
-#   def __str__(self):
-#     '''Debugging view'''
-#     return '@view_function: %s' % self.func
-
 def view_function(f):    
   '''A decorator to signify which view functions are "callable" by web browsers.
      This decorator is more of an annotation on functions than a decorator.

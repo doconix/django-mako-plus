@@ -9,7 +9,7 @@ from django.template import Context, RequestContext
 from django.utils.importlib import import_module
 from mako.exceptions import TopLevelLookupException, html_error_template
 from mako.lookup import TemplateLookup
-from ..controller import signals, view_function, RedirectException, InternalRedirectException
+from django_mako_plus.controller import signals, view_function, RedirectException, InternalRedirectException, get_setting
 import os, os.path, re, mimetypes, sys
 try:
   from urllib.parse import unquote  # Py3+
@@ -75,7 +75,7 @@ def route_request(request):
           raise Http404
 
         # send the pre-signal
-        if settings.DMP_SIGNALS:
+        if get_setting('SIGNALS', False):
           for receiver, ret_response in signals.dmp_signal_pre_process_request.send(sender=sys.modules[__name__], request=request):
             if isinstance(ret_response, (HttpResponse, StreamingHttpResponse)):
               return ret_response
@@ -88,7 +88,7 @@ def route_request(request):
         response = func_obj(request)
               
         # send the post-signal
-        if settings.DMP_SIGNALS:
+        if get_setting('SIGNALS', False):
           for receiver, ret_response in signals.dmp_signal_post_process_request.send(sender=sys.modules[__name__], request=request, response=response):
             if ret_response != None:
               response = ret_response # sets it to the last non-None in the signal receiver chain
@@ -107,7 +107,7 @@ def route_request(request):
       except InternalRedirectException:
         ivr = sys.exc_info()[1] # Py2.7 and Py3+ compliant
         # send the signal
-        if settings.DMP_SIGNALS:
+        if get_setting('SIGNALS', False):
           signals.dmp_signal_internal_redirect_exception.send(sender=sys.modules[__name__], request=request, exc=ivr)
         # do the internal redirect
         request.dmp_router_module = ivr.redirect_module
@@ -122,7 +122,7 @@ def route_request(request):
         else:
           log.debug('DMP :: class-based view function %s.%s.%s redirected processing to %s' % (request.dmp_router_module, request.dmp_router_class, request.dmp_router_function, e.redirect_to))
         # send the signal
-        if settings.DMP_SIGNALS:
+        if get_setting('SIGNALS', False):
           signals.dmp_signal_redirect_exception.send(sender=sys.modules[__name__], request=request, exc=e)
         # send the browser the redirect command
         return e.get_response(request)
@@ -143,11 +143,11 @@ class MakoTemplateRenderer:
     self.app_path = app_path
     template_dir = get_app_template_dir(app_path, template_subdir)  # raises ImproperlyConfigured if error
     self.template_search_dirs = [ template_dir ]
-    if settings.DMP_TEMPLATES_DIRS:
-      self.template_search_dirs.extend(settings.DMP_TEMPLATES_DIRS)
+    if get_setting('TEMPLATES_DIRS', False):
+      self.template_search_dirs.extend(get_setting('TEMPLATES_DIRS'))
     self.template_search_dirs.append(settings.BASE_DIR)
-    self.cache_root = os.path.abspath(os.path.join(project_path, app_path, settings.DMP_TEMPLATES_CACHE_DIR, template_subdir)) 
-    self.tlookup = TemplateLookup(directories=self.template_search_dirs, imports=settings.DMP_DEFAULT_TEMPLATE_IMPORTS, module_directory=self.cache_root, collection_size=2000, filesystem_checks=settings.DEBUG)
+    self.cache_root = os.path.abspath(os.path.join(project_path, app_path, get_setting('TEMPLATES_CACHE_DIR'), template_subdir)) 
+    self.tlookup = TemplateLookup(directories=self.template_search_dirs, imports=get_setting('DEFAULT_TEMPLATE_IMPORTS'), module_directory=self.cache_root, collection_size=2000, filesystem_checks=settings.DEBUG)
 
 
   def get_template(self, template):
@@ -205,7 +205,7 @@ class MakoTemplateRenderer:
     template_obj = self.get_template(template)
 
     # send the pre-render signal
-    if settings.DMP_SIGNALS and request != None:
+    if get_setting('SIGNALS', False) and request != None:
       for receiver, ret_template_obj in signals.dmp_signal_pre_render_template.send(sender=self, request=request, context=context, template=template_obj):
         if ret_template_obj != None:  # changes the template object to the received
           template_obj = ret_template_obj
@@ -228,7 +228,7 @@ class MakoTemplateRenderer:
       content = render_obj.render_unicode(**context_dict)
       
     # send the post-render signal
-    if settings.DMP_SIGNALS and request != None:
+    if get_setting('SIGNALS', False) and request != None:
       for receiver, ret_content in signals.dmp_signal_post_render_template.send(sender=self, request=request, context=context, template=template_obj, content=content):
         if ret_content != None:
           content = ret_content  # sets it to the last non-None return in the signal receiver chain
@@ -273,7 +273,7 @@ class MakoTemplateRenderer:
       e = sys.exc_info()[1] # Py2.7 and Py3+ compliant
       log.debug('DMP :: view function %s.%s redirected processing to %s' % (request.dmp_router_module, request.dmp_router_function, e.redirect_to))
       # send the signal
-      if settings.DMP_SIGNALS:
+      if get_setting('SIGNALS', False):
         signals.dmp_signal_redirect_exception.send(sender=sys.modules[__name__], request=request, exc=e)
       # send the browser the redirect command
       return e.get_response(request)
@@ -342,27 +342,32 @@ class RequestInitMiddleware:
     '''
     # split the path
     path_parts = request.path[1:].split('/') # [1:] to remove the leading /
+    
+    # splice the list if the settings need it
+    start_index = get_setting('URL_START_INDEX', 0)
+    if start_index > 0:
+      path_parts = path_parts[start_index:]
       
     # ensure that we have at least 2 path_parts to work with
     # by adding the default app and/or page as needed
     if len(path_parts) == 0:
-      path_parts.append(settings.DMP_DEFAULT_APP)
-      path_parts.append(settings.DMP_DEFAULT_PAGE)
+      path_parts.append(get_setting('DEFAULT_APP', 'homepage'))
+      path_parts.append(get_setting('DEFAULT_PAGE', 'index'))
       
     elif len(path_parts) == 1: # /app or /page
       if path_parts[0] in TEMPLATE_RENDERERS:  # one of our apps specified, so insert the default page
-        path_parts.append(settings.DMP_DEFAULT_PAGE)
+        path_parts.append(get_setting('DEFAULT_PAGE', 'index'))
       else:  # not one of our apps, so insert the app and assume path_parts[0] is a page in that app
-        path_parts.insert(0, settings.DMP_DEFAULT_APP)
+        path_parts.insert(0, get_setting('DEFAULT_APP', 'homepage'))
         if not path_parts[1]: # was the page empty?
-          path_parts[1] = settings.DMP_DEFAULT_PAGE
+          path_parts[1] = get_setting('DEFAULT_PAGE', 'index')
     
     else: # at this point in the elif, we know len(path_parts) >= 2
       if path_parts[0] not in TEMPLATE_RENDERERS: # the first part was not one of our apps, so insert the default app
-        path_parts.insert(0, settings.DMP_DEFAULT_APP)
+        path_parts.insert(0, get_setting('DEFAULT_APP', 'homepage'))
       if not path_parts[1]:  # is the page empty?
-        path_parts[1] = settings.DMP_DEFAULT_PAGE
-        
+        path_parts[1] = get_setting('DEFAULT_PAGE', 'index')
+            
     # set the app and page in the request
     request.dmp_router_app = path_parts[0]
     request.dmp_router_page = path_parts[1]

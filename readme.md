@@ -31,7 +31,7 @@ But don't worry, you'll still get all the Django goodness with its fantastic ORM
 
 This app was developed at MyEducator.com, primarily by Dr. Conan C. Albrecht <ca@byu.edu>.  You can view my blog at http://goalbrecht.com/.  Please email me if you find errors with this tutorial or have suggestions/fixes for the DMP framework.  Since I also use the framework in my Django classes at BYU, many students have implemented the framework at their companies upon graduation.  At this point, the framework is quite mature and robust.
 
-I've been told by some that DMP has a lot in common with Rails.  I've actually never used RoR, but good ideas are good wherever they are found, right? :)
+I've been told by some that DMP has a lot in common with Rails.  I've actually never used RoR, but good ideas are good ideas wherever they are found, right? :)
 
 
 ## Why Mako instead of Jinja2, Cheetah, or [insert template language here]?
@@ -39,6 +39,15 @@ I've been told by some that DMP has a lot in common with Rails.  I've actually n
 Python has several mature, excellent templating languages.  Both Mako and Jinja2 are fairly recent yet mature systems.  Both are screaming fast.  Cheetah is an older system but has quite a bit of traction.  It wasn't a clear choice of one over the rest.
 
 The short answer is I liked Mako's approach the best.  It felt the most Pythonic to me.  Jinja2 may feel more like Django's built-in template system, but Mako won out because it looked more like Python--and the point of DMP is to include Python in templates. 
+
+
+## Can I use DMP with other Django apps?
+
+Many add-on apps have been created for Django, and you may want to use them as well.  Be assured that DMP plays nicely with the other children.
+
+In particular, most apps add lines to your `urls.py` file.  Just be sure that DMP's line in this file comes *last*.  DMP's line is a wildcard, and it matches everything.  As long as DMP is the last pattern listed, your other apps should run normally.
+
+Note also that other apps likely use Django's built-in templating system rather than DMP's Mako templating system.  The two templating systems work fine side by side, so other apps should render fine the normal Django way and your custom apps will render fine with Mako.
 
 
 ## Comparison with Django Syntax
@@ -229,7 +238,15 @@ Simply use PIP, which comes with Python 3.4+.  If you are on an older Python ver
         pip3 install django
         pip3 install mako
         pip3 install django-mako-plus
-   
+        
+Note that on Windows, it might be called simply `pip`:
+
+        pip install django
+        pip install mako
+        pip install django-mako-plus
+        
+DMP requires Django 1.7+, Python 2.7+, and Mako 1.0+.
+        
    
 ### Create a Django project
 
@@ -238,6 +255,10 @@ Create a Django project with the typical:
         python3 django-admin.py startproject test_dmp
   
 This step is described in detail in the standard Django tutorial.  You can, of course, name your project anything you want, but in the sections below, I'll assume you called your project `test_dmp`.
+
+Don't forget to migrate to synchronize your database.  The apps in a standard Django project (such as the session app) need a few tables created for you to run the project.
+
+        python3 manage.py migrate
 
 > If the django-admin.py command isn't found, it's probably not in your path.   This is a common problem to people new to Django, and the main Django has an entire page dedicated the problem.  Check it out at [https://docs.djangoproject.com/en/dev/faq/troubleshooting](https://docs.djangoproject.com/en/dev/faq/troubleshooting).
   
@@ -288,33 +309,38 @@ This step is described in detail in the standard Django tutorial.  You can, of c
    
          ###############################################################
          ###   Specific settings for the Django-Mako-Plus app
-
-         # identifies where the Mako template cache will be stored, relative to each app
-         DMP_TEMPLATES_CACHE_DIR = 'cached_templates'
-
-         # the default app and page to render in Mako when the url is too short
-         DMP_DEFAULT_PAGE = 'index'  
-         DMP_DEFAULT_APP = 'homepage'
-
-         # these are included in every template by default - if you put your most-used libraries here, you won't have to import them exlicitly in templates
-         DMP_DEFAULT_TEMPLATE_IMPORTS = [
-           'import os, os.path, re',
-         ]
          
-         # whether to send the custom DMP signals -- set to False for a slight speed-up in router processing
-         # determines whether DMP will send its custom signals during the process
-         DMP_SIGNALS = True
+         DJANGO_MAKO_PLUS = {
+             # identifies where the Mako template cache will be stored, relative to each app
+             'TEMPLATES_CACHE_DIR': 'cached_templates',
+           
+             # the default app and page to render in Mako when the url is too short
+             'DEFAULT_PAGE': 'index',
+             'DEFAULT_APP': 'homepage',
+
+             # these are included in every template by default - if you put your most-used libraries here, you won't have to import them exlicitly in templates
+             'DEFAULT_TEMPLATE_IMPORTS': [
+               'import os, os.path, re, json',
+             ],
+             
+             # see the DMP online tutorial for information about this setting
+             'URL_START_INDEX': 0,
          
-         # whether to minify using rjsmin, rcssmin during 1) collection of static files, and 2) on the fly as .jsm and .cssm files are rendered
-         # rjsmin and rcssmin are fast enough that doing it on the fly can be done without slowing requests down
-         DMP_MINIFY_JS_CSS = True
+             # whether to send the custom DMP signals -- set to False for a slight speed-up in router processing
+             # determines whether DMP will send its custom signals during the process
+             'SIGNALS': True,
+         
+             # whether to minify using rjsmin, rcssmin during 1) collection of static files, and 2) on the fly as .jsm and .cssm files are rendered
+             # rjsmin and rcssmin are fast enough that doing it on the fly can be done without slowing requests down
+             'MINIFY_JS_CSS': True,
 
-         # see the DMP online tutorial for information about this setting
-         DMP_TEMPLATES_DIRS = [ 
-           # os.path.join(BASE_DIR, 'base_app', 'templates'),
-         ]
-
-         ###  End of settings for the base_app Controller
+             # see the DMP online tutorial for information about this setting
+             'TEMPLATES_DIRS': [ 
+               # '/var/somewhere/templates/',
+             ],
+         }
+         
+         ###  End of settings for the Django-Mako-Plus
          ################################################################
          
 5. Add the following to serve your static files.  This step is pure Django; you can read about it in the standard Django docs.  These variables are also explained below in the section entitled "Static Files, Your Web Server, and DMP".
@@ -352,11 +378,12 @@ As with any Django app, you need to add your new app to the INSTALLED_APPS list 
             'homepage',
         )
         
-Congratulations.  You're ready to go!
+Congratulations.  You're ready to go!  Skip forward to the "Tutorial" section to continue.
+
 
 ### Huh? "app homepage is not a designated DMP app"?
 
-If DMP tells you that an app you're trying to access "is not a designated DMP app", you missed something above.  Rather than go above and trying again, go on to the next section on converting existing apps for a summary of everything needed to make a valid DMP app.  You're likely missing something in this list, and by going through this next section, you'll ensure all the needed pieces are in place.  I'll bet you don't the `DJANGO_MAKO_PLUS = True` part in your app's init file.  Another possible reason is you didn't list `homepage` as one of your `INSTALLED_APPS` as described above.
+If DMP tells you that an app you're trying to access "is not a designated DMP app", you missed something above.  Rather than go above and trying again, go on to the next section on converting existing apps for a summary of everything needed to make a valid DMP app.  You're likely missing something in this list, and by going through this next section, you'll ensure all the needed pieces are in place.  I'll bet you didn't set the `DJANGO_MAKO_PLUS = True` part in your app's init file.  Another possible reason is you didn't list `homepage` as one of your `INSTALLED_APPS` as described above.
 
 
 ### Convert Existing Apps to DMP
@@ -384,6 +411,22 @@ Already have an app that you'd like to switch over?  Just do the following:
 
 * Clean up: once your functions are in new files, you can remove the `your-app/views.py` file.  You can also remove all the entries for your app in `urls.py`.
       
+
+### Installing Django in a Subdirectory
+
+This section is for those that need Django is a subdirectory, such as `/mysite`.  If your Django installation is at the root of your domain, skip this section.
+
+In other words, suppose your site isn't at the root of your domain.  Instead of the normal url pattern, `http://www.yourdomain.com/`, your Django installation is at `http://www.yourdomain.com/mysite/`.  All apps are contained within this `mysite/` directory.
+
+Since DMP calls your apps and functions based on the URL pattern, you need to tell it to ignore the `mysite/` prefix.  This is accomplished with the `URL_START_INDEX` setting:
+
+         DJANGO_MAKO_PLUS = {
+             'URL_START_INDEX': 1,
+         }
+
+The above setting tells DMP to ignore the first item in your URLs.  With this setting, the URL `http://www.yourdomain.com/mysite/homepage/index/` translates to the `homepage` app and `index` view page.  The first item is skipped over.
+
+If your prefix has two subdirectorie prefixes, such as `mysite/mystuff/`, set the `URL_START_INDEX` to 2.  For three directories, set it to 3, and so forth.
 
 # Tutorial
 
@@ -493,7 +536,7 @@ For example, the url `/homepage/index/` routes as follows:
   
 The above illustrates the easiest way to show pages: simply place .html files in your templates/ directory.  This is useful for pages that don't have any "work" to do.  Examples might be the "About Us" and "Terms of Service" pages.  There's usually no functionality or permissions issues with these pages, so no view function is required.
 
-> What about the case where a page isn't specified, such as `/homepage/`?  If the url doesn't contain two parts, the router goes to the default page as specified in your settings.py `DMP_DEFAULT_PAGE` variable.  This allows you to have a "default page", similar to the way web servers default to the index.html page.  If the path is entirely empty (i.e. http://www.yourserver.com/ with *no* path parts), the router uses both defaults specified in your settings.py file: `DMP_DEFAULT_PAGE` and `DMP_DEFAULT_APP`.
+> What about the case where a page isn't specified, such as `/homepage/`?  If the url doesn't contain two parts, the router goes to the default page as specified in your settings.py `DEFAULT_PAGE` setting.  This allows you to have a "default page", similar to the way web servers default to the index.html page.  If the path is entirely empty (i.e. http://www.yourserver.com/ with *no* path parts), the router uses both defaults specified in your settings.py file: `DEFAULT_PAGE` and `DEFAULT_APP`.
 
 ## Adding a View Function
 
@@ -940,17 +983,19 @@ If the templates you need to access are within your project directory, no extra 
         
 ### Case 2: Templates Outside Your Project Directory
 
-Suppose your templates are located on a different disk or entirely different directory, relative to your project.  DMP allows you to add extra directories to the template search path through the `DMP_TEMPLATES_DIRS` setting.  This variable contains a list of directories that are searched by DMP regardless of the app being referenced.  To include the `/var/templates/` directory in the search path, set this variable as follows:
+Suppose your templates are located on a different disk or entirely different directory, relative to your project.  DMP allows you to add extra directories to the template search path through the `TEMPLATES_DIRS` setting.  This variable contains a list of directories that are searched by DMP regardless of the app being referenced.  To include the `/var/templates/` directory in the search path, set this variable as follows:
 
-        DMP_TEMPLATES_DIRS = [ 
-           '/var/templates/',
-        ]
-
+        DJANGO_MAKO_PLUS = {
+            'TEMPLATES_DIRS': [ 
+               '/var/somewhere/templates/',
+            ],
+        }
+        
 Suppose, after making the above change, you need to render the '/var/templates/page1.html' template:
 
         return dmp_render_to_response(request, 'page1.html', template_vars)
         
-DMP will first search the current app's `templates` directory (i.e. the normal way), then it will search the `DMP_TEMPLATES_DIRS` list, which in this case contains `/var/templates/`.  Your `page1.html` template will be found and rendered.
+DMP will first search the current app's `templates` directory (i.e. the normal way), then it will search the `TEMPLATES_DIRS` list, which in this case contains `/var/templates/`.  Your `page1.html` template will be found and rendered.
 
 
 ## Template Inheritance Across Apps
@@ -994,7 +1039,6 @@ I want `homepage/templates/index.html` to extend from `base_app/templates/site_b
 
 
 
-
 ## Importing Python Modules into Templates
 
 It's easy to import Python modules into your Mako templates.  Simply use a module-level block:
@@ -1011,9 +1055,9 @@ or a Python-level block (see the Mako docs for the difference):
           from decimal import Decimal
         %>
 
-There may be some modules, such as `re` or `decimal` that are so useful you want them available in every template of your site.  In settings.py, simply add these to the `DMP_DEFAULT_TEMPLATES_IMPORTS` variable:
+There may be some modules, such as `re` or `decimal` that are so useful you want them available in every template of your site.  In settings.py, simply add these to the `DEFAULT_TEMPLATE_IMPORTS` variable:
 
-        DMP_DEFAULT_TEMPLATE_IMPORTS = [
+        DEFAULT_TEMPLATE_IMPORTS = [
           'import os, os.path, re',
           'from decimal import Decimal',
         ]
@@ -1074,7 +1118,7 @@ During development, Django will use the `STATICFILES_DIRS` variable to find the 
 
 Simply place media files for the homepage app in the homepage/media/ folder.  This includes images, videos, PDF files, etc. -- any static files that aren't Javascript or CSS files.
 
-Reference static files using the `${ STATIC_FILES }` variable.  For example, reference images in your html pages like this: 
+Reference static files using the `${ STATIC_URL }` variable.  For example, reference images in your html pages like this: 
 
         <img src="${ STATIC_URL }homepage/media/image.png" />
 
@@ -1138,16 +1182,15 @@ The `dmp_collectstatic` command has the following command-line options:
 
 ### Minification of JS and CSS
 
-DMP will try to minify your *.js and *.css files using the `rjsmin` and `rcssmin` modules if the settings.py `DMP_MINIFY_JS_CSS` is True.  Your Python installation must also have these modules installed 
+DMP will try to minify your *.js and *.css files using the `rjsmin` and `rcssmin` modules if the settings.py `MINIFY_JS_CSS` is True.  Your Python installation must also have these modules installed 
 
 These two modules do fairly simplistic minification using regular expressions.  They are not as full-featured as other minifiers like the popular Yahoo! one.  However, these are linked into DMP because they are pure Python code, and they are incredibly fast.  If you want more complete minification, this probably isn't it.  
 
-These two modules might be simplistic, but they *are* fast enough to do minification of dynamic `*.jsm` and `*.cssm` files on the fly.  Setting the `DMP_MINIFY_JS_CSS` variable to True will not only minify during the `dmp_collectstatic` command, it will minfiy the dynamic files as well.
+These two modules might be simplistic, but they *are* fast enough to do minification of dynamic `*.jsm` and `*.cssm` files on the fly.  Setting the `MINIFY_JS_CSS` variable to True will not only minify during the `dmp_collectstatic` command, it will minfiy the dynamic files as well.
 
-Again, if you want to disable these minifications procedures, simply set `DMP_MINIFY_JS_CSS` to False.
+Again, if you want to disable these minifications procedures, simply set `MINIFY_JS_CSS` to False.
 
-Minification of `*.jsm` and `*.cssm` is skipped during development so you can debug your Javascript and CSS.  Even if your set `DMP_MINIFY_JS_CSS` to True, minification only happens when settings.py `DEBUG` is False.
-        
+Minification of `*.jsm` and `*.cssm` is skipped during development so you can debug your Javascript and CSS.  Even if your set `MINIFY_JS_CSS` to True, minification only happens when settings.py `DEBUG` is False.
         
 
 #### Django Apps + DMP Apps
@@ -1222,7 +1265,9 @@ Before going further with this section's examples, be sure to read the standard 
 
 Be sure your settings.py file has the following in it:
 
-        DMP_SIGNALS = True
+        DJANGO_MAKO_PLUS = {
+            'SIGNALS': True,
+        }
         
 ## Step 2: Create a Signal Receiver
 
