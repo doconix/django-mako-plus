@@ -91,28 +91,28 @@ class TemplateInfo(object):
     try:
       fstat = os.stat(os.path.join(self.app_dir, 'styles', self.template_name + '.css'))
       self.css = '<link rel="stylesheet" type="text/css" href="%s?%s" />' % (os.path.join(settings.STATIC_URL, self.app, 'styles', self.template_name + '.css'), cgi_id if cgi_id != None else int(fstat.st_mtime))
-    except IOError:
+    except OSError:
       self.css = None
 
     # the mako-rendered templatename.cssm file
     try:
       fstat = os.stat(os.path.join(self.app_dir, 'styles', self.template_name + '.cssm'))
       self.cssm = self.template_name + '.cssm'
-    except IOError:
+    except OSError:
       self.cssm = None
 
     # the static templatename.js file
     try:
       fstat = os.stat(os.path.join(self.app_dir, 'scripts', self.template_name + '.js'))
       self.js = '<script src="%s?%s"></script>' % (os.path.join(settings.STATIC_URL, self.app, 'scripts', self.template_name + '.js'), cgi_id if cgi_id != None else int(fstat.st_mtime))
-    except IOError:
+    except OSError:
       self.js = None
 
     # the mako-rendered templatename.jsm file
     try:
       fstat = os.stat(os.path.join(self.app_dir, 'scripts', self.template_name + '.jsm'))
       self.jsm = self.template_name + '.jsm'
-    except IOError:
+    except OSError:
       self.jsm = None
 
 
