@@ -317,6 +317,9 @@ Don't forget to migrate to synchronize your database.  The apps in a standard Dj
              # the default app and page to render in Mako when the url is too short
              'DEFAULT_PAGE': 'index',
              'DEFAULT_APP': 'homepage',
+             
+             # the default encoding of template files
+             'DEFAULT_TEMPLATE_ENCODING': 'utf-8',
 
              # these are included in every template by default - if you put your most-used libraries here, you won't have to import them exlicitly in templates
              'DEFAULT_TEMPLATE_IMPORTS': [

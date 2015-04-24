@@ -147,7 +147,7 @@ class MakoTemplateRenderer:
       self.template_search_dirs.extend(get_setting('TEMPLATES_DIRS'))
     self.template_search_dirs.append(settings.BASE_DIR)
     self.cache_root = os.path.abspath(os.path.join(project_path, app_path, get_setting('TEMPLATES_CACHE_DIR'), template_subdir)) 
-    self.tlookup = TemplateLookup(directories=self.template_search_dirs, imports=get_setting('DEFAULT_TEMPLATE_IMPORTS'), module_directory=self.cache_root, collection_size=2000, filesystem_checks=settings.DEBUG)
+    self.tlookup = TemplateLookup(directories=self.template_search_dirs, imports=get_setting('DEFAULT_TEMPLATE_IMPORTS'), module_directory=self.cache_root, collection_size=2000, filesystem_checks=settings.DEBUG, input_encoding=get_setting('DEFAULT_TEMPLATE_ENCODING', 'utf-8'))
 
 
   def get_template(self, template):
