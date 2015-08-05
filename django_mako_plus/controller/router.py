@@ -7,6 +7,7 @@ from django.http import HttpResponse, StreamingHttpResponse, Http404, HttpRespon
 from django.conf import settings
 from django.template import Context, RequestContext
 from django.utils.importlib import import_module
+from django.template.engine import Engine
 from mako.exceptions import TopLevelLookupException, html_error_template
 from mako.lookup import TemplateLookup
 from django_mako_plus.controller import signals, view_function, RedirectException, InternalRedirectException, get_setting
@@ -146,8 +147,10 @@ class MakoTemplateRenderer:
     if get_setting('TEMPLATES_DIRS', False):
       self.template_search_dirs.extend(get_setting('TEMPLATES_DIRS'))
     self.template_search_dirs.append(settings.BASE_DIR)
-    self.cache_root = os.path.abspath(os.path.join(project_path, app_path, get_setting('TEMPLATES_CACHE_DIR'), template_subdir)) 
+    self.cache_root = os.path.abspath(os.path.join(project_path, app_path, get_setting('TEMPLATES_CACHE_DIR'), template_subdir))
     self.tlookup = TemplateLookup(directories=self.template_search_dirs, imports=get_setting('DEFAULT_TEMPLATE_IMPORTS'), module_directory=self.cache_root, collection_size=2000, filesystem_checks=settings.DEBUG, input_encoding=get_setting('DEFAULT_TEMPLATE_ENCODING', 'utf-8'))
+    # Use the default django engine (to get the list of context processors)
+    self.engine = Engine.get_default()
 
 
   def get_template(self, template):
@@ -198,10 +201,11 @@ class MakoTemplateRenderer:
     except AttributeError:
       pass
     context = Context(params) if request == None else RequestContext(request, params)  # Django's RequestContext automatically runs all the TEMPLATE_CONTEXT_PROCESSORS and populates with variables
-    for d in context:
-      context_dict.update(d)
+    with context.bind_template(self):
+      for d in context:
+        context_dict.update(d)
 
-    # get the template 
+    # get the template
     template_obj = self.get_template(template)
 
     # send the pre-render signal
