@@ -80,12 +80,29 @@ class TemplateInfo(object):
     self.template_dir, self.template_name = os.path.split(os.path.splitext(template.filename)[0])
     self.app_dir = os.path.dirname(self.template_dir)
     self.app = os.path.split(self.app_dir)[1]
-    
+
     # ensure we have renderers for this template
     if self.app not in SCRIPT_RENDERERS:
       SCRIPT_RENDERERS[self.app] = MakoTemplateRenderer(self.app, 'scripts')
     if self.app not in STYLE_RENDERERS:
       STYLE_RENDERERS[self.app] = MakoTemplateRenderer(self.app, 'styles')
+
+    # the static templatename.scss file
+    try:
+      scss_file = os.path.join(self.app_dir, 'styles', self.template_name + '.scss')
+      scss_stat = os.stat(scss_file)
+      try:
+        css_file = os.path.join(self.app_dir, 'styles', self.template_name + '.css')
+        css_stat = os.stat(css_file)
+        # update the CSS file if the SCCS file is newer
+        if scss_stat.st_mtime > css_stat.st_mtime:
+          os.system(get_setting('SCCS_BINARY', '/usr/bin/env scss') + ' %s %s %s' % (get_setting('SCCS_ARGS', ''), scss_file, css_file))
+      except OSError:
+          # if no CSS file exists, create one
+          os.system(get_setting('SCCS_BINARY', '/usr/bin/env scss') + ' %s %s %s' % (get_setting('SCCS_ARGS', ''), scss_file, css_file))
+    except OSError:
+        # no SCCS file exists .. continue as normal
+        pass
 
     # the static templatename.css file
     try:
