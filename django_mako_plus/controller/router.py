@@ -381,14 +381,10 @@ class RequestInitMiddleware:
     du_pos = request.dmp_router_page.find('.')
     if du_pos >= 0:
       request.dmp_router_function = request.dmp_router_page[du_pos+1:]
+      request.dmp_router_function = request.dmp_router_function.replace('.', '_')  # python methods can't have dot, so replace with an underscore if in the name
       request.dmp_router_page = request.dmp_router_page[:du_pos]
-    else:
-      du_pos = request.dmp_router_page.find('__')  # __ can also separate the function name, this is a deprecated way to do it - we'll support it for the near future
-      if du_pos >= 0:
-        request.dmp_router_function = request.dmp_router_page[du_pos+2:]
-        request.dmp_router_page = request.dmp_router_page[:du_pos]
-      else:  # the . not found, and the __ not found, so go to default function name
-        request.dmp_router_function = 'process_request'
+    else:  # the . not found, and the __ not found, so go to default function name
+      request.dmp_router_function = 'process_request'
 
     # set the class to be None (it is set later if we find a class-based view)
     request.dmp_router_class = None
