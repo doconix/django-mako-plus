@@ -13,6 +13,12 @@ class Command(MakeMessagesCommand):
   help = "Makes messages for Mako templates.  The native makemessages in Django doesn't understand Mako files, so this command compiles all your templates so it can find the compiled .py versions of the templates."
 
 
+  def add_arguments(self, parser):
+    super(Command, self).add_arguments(parser)
+    parser.add_argument('--extra-gettext-option', default=[], dest='extra_gettext_option', action='append', help="Add an additional option to be passed to gettext. Ex: --extra-gettext-option='--keyword=mytrans'")
+    
+
+
   def handle(self, *args, **options):
     # ensure that we have the necessary version of django
     if django_version[0] + django_version[1]/10 <= 1.7:
@@ -21,6 +27,10 @@ class Command(MakeMessagesCommand):
     # go through each dmp_enabled app and compile its mako templates
     for app_name in _get_dmp_apps():
       self.compile_mako_files(app_name)
+      
+    # add any extra xgettext_options (the regular makemessages doesn't do this, and I need to include other aliases like _(), _z(), etc.
+    for opt in options.get('extra_gettext_option', []):
+      self.xgettext_options.append(opt)
     
     # call the superclass command
     return super(Command, self).handle(*args, **options)
