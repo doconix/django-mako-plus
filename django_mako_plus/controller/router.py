@@ -314,7 +314,7 @@ def get_renderer(app_name):
   try:
     return TEMPLATE_RENDERERS[app_name]
   except KeyError:
-    raise ImproperlyConfigured('App %s is not a designated DMP app.  Template rendering is not possible without DJANGO_MAKO_PLUS=True in its __init__.py file.' % (app_name))
+    raise ImproperlyConfigured('App %s is not a designated DMP app.  Template rendering is not possible without DJANGO_MAKO_PLUS=True in its __init__.py file.  It is also possible that the %s app is not listed in your INSTALLED_APPS.' % (app_name, app_name))
 
 
 
