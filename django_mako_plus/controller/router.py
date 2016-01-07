@@ -6,7 +6,7 @@ from django.core.exceptions import ImproperlyConfigured
 from django.http import HttpResponse, StreamingHttpResponse, Http404, HttpResponseRedirect, HttpResponsePermanentRedirect
 from django.conf import settings
 from django.template import Context, RequestContext
-from django.utils.importlib import import_module
+from importlib import import_module
 from django.template.engine import Engine
 from mako.exceptions import TopLevelLookupException, html_error_template
 from mako.lookup import TemplateLookup
@@ -19,7 +19,7 @@ except ImportError:
 
 
 # set up the logger
-import logging 
+import logging
 log = logging.getLogger('django_mako_plus')
 
 
@@ -36,11 +36,11 @@ def route_request(request):
 
     # set the full function location
     request.dmp_router_module = '.'.join([ request.dmp_router_app, 'views', request.dmp_router_page ])
-    
+
     # first try going to the view function for this request
     # we look for a views/name.py file where name is the same name as the HTML file
     response = None
-    
+
     while True: # enables the InternalRedirectExceptions to loop around
       full_module_filename = os.path.normpath(os.path.join(settings.BASE_DIR, request.dmp_router_module.replace('.', '/') + '.py'))
       try:
@@ -49,18 +49,18 @@ def route_request(request):
           log.debug('DMP :: module %s not found; sending processing directly to template %s.html' % (request.dmp_router_module, request.dmp_router_page_full))
           try:
             dmp_renderer = get_renderer(request.dmp_router_app)
-          except ImproperlyConfigured as e: 
+          except ImproperlyConfigured as e:
             log.debug('DMP :: %s' % (e))
             raise Http404
           return dmp_renderer.render_to_response(request, '%s.html' % request.dmp_router_page_full)
-        
+
         # find the function
         module_obj = import_module(request.dmp_router_module)
         if not hasattr(module_obj, request.dmp_router_function):
           log.debug('DMP :: view function/class %s not in module %s; returning 404 not found.' % (request.dmp_router_function, request.dmp_router_module))
           raise Http404
         func_obj = getattr(module_obj, request.dmp_router_function)
-        
+
         # see if the func_obj is actually a class -- we might be doing class-based views here
         if isinstance(func_obj, type):
           request.dmp_router_class = request.dmp_router_function
@@ -71,7 +71,7 @@ def route_request(request):
           func_obj = getattr(func_obj(), request.dmp_router_function)  # move to the class.get(), class.post(), etc. method
 
         # ensure it is decorated with @view_function - this is for security so only certain functions can be called
-        if getattr(func_obj, 'dmp_view_function', False) != True: 
+        if getattr(func_obj, 'dmp_view_function', False) != True:
           log.debug('DMP :: view function/class %s found successfully, but it is not decorated with @view_function; returning 404 not found.  Note that if you have multiple decorators on a function, the @view_function decorator must be listed first.' % (request.dmp_router_function))
           raise Http404
 
@@ -87,13 +87,13 @@ def route_request(request):
         else:
           log.debug('DMP :: calling class-based view function %s.%s.%s' % (request.dmp_router_module, request.dmp_router_class, request.dmp_router_function))
         response = func_obj(request)
-              
+
         # send the post-signal
         if get_setting('SIGNALS', False):
           for receiver, ret_response in signals.dmp_signal_post_process_request.send(sender=sys.modules[__name__], request=request, response=response):
             if ret_response != None:
               response = ret_response # sets it to the last non-None in the signal receiver chain
-            
+
         # if we didn't get a correct response back, send a 404
         if not isinstance(response, (HttpResponse, StreamingHttpResponse)):
           if request.dmp_router_class == None:
@@ -101,10 +101,10 @@ def route_request(request):
           else:
             log.debug('DMP :: class-based view function %s.%s.%s failed to return an HttpResponse (or the post-signal overwrote it).  Returning Http404.' % (request.dmp_router_module, request.dmp_router_class, request.dmp_router_function))
           raise Http404
-              
+
         # return the response
         return response
-        
+
       except InternalRedirectException:
         ivr = sys.exc_info()[1] # Py2.7 and Py3+ compliant
         # send the signal
@@ -115,7 +115,7 @@ def route_request(request):
         request.dmp_router_function = ivr.redirect_function
         full_module_filename = os.path.normpath(os.path.join(settings.BASE_DIR, request.dmp_router_module.replace('.', '/') + '.py'))
         log.debug('DMP :: received an InternalViewRedirect to %s -> %s' % (full_module_filename, request.dmp_router_function))
-      
+
       except RedirectException: # redirect to another page
         e = sys.exc_info()[1] # Py2.7 and Py3+ compliant
         if request.dmp_router_class == None:
@@ -130,7 +130,7 @@ def route_request(request):
 
     # the code should never get here
     raise Exception("Django-Mako-Plus router error: The route_request() function should not have been able to get to this point.  Please notify the owner of the DMP project.  Thanks.")
-    
+
 
 
 ##############################################################
@@ -163,7 +163,7 @@ class MakoTemplateRenderer:
       template_obj.template_path = template
     if not hasattr(template_obj, 'template_full_path'):
       template_obj.template_full_path = template_obj.filename
-    if not hasattr(template_obj, 'mako_template_renderer'):  
+    if not hasattr(template_obj, 'mako_template_renderer'):
       template_obj.mako_template_renderer = self
     return template_obj
 
@@ -171,15 +171,15 @@ class MakoTemplateRenderer:
   def render(self, request, template, params={}, def_name=None):
     '''Runs a template and returns a string.  Normally, you probably want to call render_to_response instead
        because it gives a full HttpResponse or Http404.
-       
+
        This method raises a mako.exceptions.TopLevelLookupException if the template is not found.
-    
-       The method throws two signals: 
+
+       The method throws two signals:
          1. dmp_signal_pre_render_template: you can (optionally) return a new Mako Template object from a receiver to replace
             the normal template object that is used for the render operation.
          2. dmp_signal_post_render_template: you can (optionally) return a string to replace the string from the normal
             template object render.
-    
+
        @request  The request context from Django.  If this is None, 1) any TEMPLATE_CONTEXT_PROCESSORS defined in your settings
                  file will be ignored and 2) DMP signals will not be sent, but the template will otherwise render fine.
        @template The template file path to render.  This is relative to the app_path/controller_TEMPLATES_DIR/ directory.
@@ -189,7 +189,7 @@ class MakoTemplateRenderer:
        @def_name Limits output to a specific top-level Mako <%block> or <%def> section within the template.
                  If the section is a <%def>, it must have no parameters.  For example, def_name="foo" will call
                  <%block name="foo"></%block> or <%def name="foo()"></def> within the template.
-                 The block/def must be defined in the exact template.  DMP does not support calling defs from 
+                 The block/def must be defined in the exact template.  DMP does not support calling defs from
                  super-templates.
     '''
     # must convert the request context to a real dict to use the ** below
@@ -217,7 +217,7 @@ class MakoTemplateRenderer:
     # do we need to limit down to a specific def?
     # this only finds within the exact template (won't go up the inheritance tree)
     # I wish I could make it do so, but can't figure this out
-    render_obj = template_obj  
+    render_obj = template_obj
     if def_name:  # do we need to limit to just a def?
       render_obj = template_obj.get_def(def_name)
 
@@ -230,32 +230,32 @@ class MakoTemplateRenderer:
         content = html_error_template().render_unicode()
     else:  # this is outside the above "try" loop because in non-DEBUG mode, we want to let the exception throw out of here (without having to re-raise it)
       content = render_obj.render_unicode(**context_dict)
-      
+
     # send the post-render signal
     if get_setting('SIGNALS', False) and request != None:
       for receiver, ret_content in signals.dmp_signal_post_render_template.send(sender=self, request=request, context=context, template=template_obj, content=content):
         if ret_content != None:
           content = ret_content  # sets it to the last non-None return in the signal receiver chain
-          
+
     # return
     return content
-    
-    
+
+
   def render_to_response(self, request, template, params={}, def_name=None):
-    '''Runs a template and returns an HttpRequest object to it. 
-    
+    '''Runs a template and returns an HttpRequest object to it.
+
        This method returns a django.http.Http404 exception if the template is not found.
        If the template raises a django_mako_plus.controller.RedirectException, the browser is redirected to
          the given page, and a new request from the browser restarts the entire DMP routing process.
        If the template raises a django_mako_plus.controller.InternalRedirectException, the entire DMP
          routing process is restarted internally (the browser doesn't see the redirect).
-    
-       The method throws two signals: 
+
+       The method throws two signals:
          1. dmp_signal_pre_render_template: you can (optionally) return a new Mako Template object from a receiver to replace
             the normal template object that is used for the render operation.
          2. dmp_signal_post_render_template: you can (optionally) return a string to replace the string from the normal
             template object render.
-    
+
        @request  The request context from Django.  If this is None, any TEMPLATE_CONTEXT_PROCESSORS defined in your settings
                  file will be ignored but the template will otherwise render fine.
        @template The template file path to render.  This is relative to the app_path/controller_TEMPLATES_DIR/ directory.
@@ -270,7 +270,7 @@ class MakoTemplateRenderer:
       content_type = mimetypes.types_map.get(os.path.splitext(template)[1].lower(), 'text/html')
       content = self.render(request, template, params, def_name)
       return HttpResponse(content.encode(settings.DEFAULT_CHARSET), content_type='%s; charset=%s' % (content_type, settings.DEFAULT_CHARSET))
-    except TopLevelLookupException: # template file not found    
+    except TopLevelLookupException: # template file not found
       log.debug('DMP :: template "%s" not found in search path: %s.' % (template, self.template_search_dirs))
       raise Http404()
     except RedirectException: # redirect to another page
@@ -302,13 +302,13 @@ def get_renderer(app_name):
      renderer object for each DMP-enabled app in your project.
      This renderer object keeps track of the app's template directory
      as well as a cached lookup of template objects for speed.
-     
+
      This renderer object is available in two ways:
        1. Primarily, through the myapp.dmp_renderer object; see the tutorial for more information.
        2. Secondarily, through this method: django_mako_plus.controller.router.get_renderer('myapp').
-     
+
      If the app_name is not a valid DMP app or is not listed in
-     settings.INSTALLED_APPS, and ImproperlyConfigured exception 
+     settings.INSTALLED_APPS, and ImproperlyConfigured exception
      is raised.
   '''
   try:
@@ -323,41 +323,41 @@ def get_renderer(app_name):
 
 ##########################################################
 ###   Middleware the prepares the request for
-###   use with the controller. 
+###   use with the controller.
 
 class RequestInitMiddleware:
   '''Adds several fields to the request that our controller needs.
-  
+
      This class MUST be included in settings.py -> MIDDLEWARE_CLASSES.
   '''
-  
+
   def process_request(self, request):
     '''Called for each browser request.  This adds the following fields to the request object:
-    
+
        request.dmp_router_app       The Django application (such as "calculator").
        request.dmp_router_page      The view module (such as "calc" for calc.py).
        request.dmp_router_page_full The view module as specified in the URL, including the function name if specified.
        request.dmp_router_function  The function within the view module to be called (usually "process_request").
        request.dmp_router_module    The module path in Python terms, such as calculator.views.calc.
        request.urlparams            A list of the remaining url parts (see the calc.py example).
-       
+
        This method is run as part of the middleware processing, so it runs long
        before the route_request() method at the top of this file.
     '''
     # split the path
     path_parts = request.path[1:].split('/') # [1:] to remove the leading /
-    
+
     # splice the list if the settings need it
     start_index = get_setting('URL_START_INDEX', 0)
     if start_index > 0:
       path_parts = path_parts[start_index:]
-      
+
     # ensure that we have at least 2 path_parts to work with
     # by adding the default app and/or page as needed
     if len(path_parts) == 0:
       path_parts.append(get_setting('DEFAULT_APP', 'homepage'))
       path_parts.append(get_setting('DEFAULT_PAGE', 'index'))
-      
+
     elif len(path_parts) == 1: # /app or /page
       if path_parts[0] in TEMPLATE_RENDERERS:  # one of our apps specified, so insert the default page
         path_parts.append(get_setting('DEFAULT_PAGE', 'index'))
@@ -365,18 +365,18 @@ class RequestInitMiddleware:
         path_parts.insert(0, get_setting('DEFAULT_APP', 'homepage'))
         if not path_parts[1]: # was the page empty?
           path_parts[1] = get_setting('DEFAULT_PAGE', 'index')
-    
+
     else: # at this point in the elif, we know len(path_parts) >= 2
       if path_parts[0] not in TEMPLATE_RENDERERS: # the first part was not one of our apps, so insert the default app
         path_parts.insert(0, get_setting('DEFAULT_APP', 'homepage'))
       if not path_parts[1]:  # is the page empty?
         path_parts[1] = get_setting('DEFAULT_PAGE', 'index')
-            
+
     # set the app and page in the request
     request.dmp_router_app = path_parts[0]
     request.dmp_router_page = path_parts[1]
     request.dmp_router_page_full = path_parts[1]  # might be different from dmp_router_page when split by '.' below
-    
+
     # see if a function is specified with the page (the . separates a function name)
     du_pos = request.dmp_router_page.find('.')
     if du_pos >= 0:
@@ -393,14 +393,14 @@ class RequestInitMiddleware:
     # note that I'm not using unquote_plus because the + switches to a space *after* the question mark (in the regular parameters)
     # in the normal url, spaces have to be quoted with %20.  Thanks Rosie for the tip.
     request.urlparams = URLParamList([ unquote(s) for s in path_parts[2:] ])
-    
-        
 
 
-class URLParamList(list):  
-  '''A simple extension to Python's list that returns '' for indices that don't exist.  
-     For example, if the object is ['a', 'b'] and you call obj[5], it will return '' 
-     rather than throwing an IndexError.  This makes dealing with url parameters 
+
+
+class URLParamList(list):
+  '''A simple extension to Python's list that returns '' for indices that don't exist.
+     For example, if the object is ['a', 'b'] and you call obj[5], it will return ''
+     rather than throwing an IndexError.  This makes dealing with url parameters
      simpler since you don't have to check the length of the list.'''
   def __getitem__(self, idx):
     '''Returns the element at idx, or '' if idx is beyond the length of the list'''
@@ -409,11 +409,11 @@ class URLParamList(list):
       return ''
     # else do the regular list function (for int, splice types, etc.)
     return list.__getitem__(self, idx)
-  
 
 
 
-  
+
+
 ################################################################################
 ###   Initialize the template renderers and performs other setup for DMP
 
@@ -436,14 +436,14 @@ class RenderShortcut(object):
   def __init__(self, app_name, method_name):
     self.app_name = app_name
     self.method_name = method_name
-    
+
   def __call__(self, *args, **kwargs):
     '''Allows instances of this class to act like functions.'''
     # I use get_renderer to essentially do "late binding" to the map, just in
     # case the TEMPLATE_RENDERERS map must be modified after its initial creation
     # below.  This way I don't have a direct (and permanent) pointer to the renderer.
     return getattr(get_renderer(self.app_name), self.method_name)(*args, **kwargs)
-    
+
 
 
 def get_app_template_dir(app_name, template_subdir="templates"):
@@ -483,9 +483,9 @@ def _get_dmp_apps():
       yield app_name
     except (ImproperlyConfigured, ImportError):
       pass # we'll handle these exceptions below in get_renderer() since the app doesn't get added to the TEMPLATE_RENDERERS map
-  
-  
-   
+
+
+
 # go through each app in INSTALLED_APPS and find the DMP-enabled apps
 for app_name in _get_dmp_apps():
   try:
@@ -498,5 +498,3 @@ for app_name in _get_dmp_apps():
     module_obj.dmp_render_to_response = RenderShortcut(app_name, 'render_to_response')
   except (ImportError):
     pass # we'll handle these exceptions below in get_renderer() since the app doesn't get added to the TEMPLATE_RENDERERS map
-
-
