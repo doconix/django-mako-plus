@@ -360,13 +360,13 @@ Don't forget to migrate to synchronize your database.  The apps in a standard Dj
 
 Add the Django-Mako-Plus router as **the last pattern** in your `urls.py` file:
 
-          urlpatterns = patterns('',
+          urlpatterns = [
           
               ...
 
               # the django_mako_plus controller handles every request - this line is the glue that connects Mako to Django
               url(r'^.*$', 'django_mako_plus.controller.router.route_request' ),
-          ) 
+          ]
           
 ### Create a DMP-Style App
 
