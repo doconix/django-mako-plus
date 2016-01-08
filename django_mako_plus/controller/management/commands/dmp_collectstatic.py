@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand, CommandError
-from django.utils.importlib import import_module
+from importlib import import_module
 from django.conf import settings
 from django_mako_plus.controller import router, get_setting
 from optparse import make_option

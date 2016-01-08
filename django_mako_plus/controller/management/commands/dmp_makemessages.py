@@ -1,9 +1,8 @@
 from django import VERSION as django_version
 from django.core.management.base import BaseCommand, CommandError
-from django.utils.importlib import import_module
+from importlib import import_module
 from django.core.management.commands.makemessages import Command as MakeMessagesCommand
 from django.conf import settings
-from django.utils.importlib import import_module
 from django_mako_plus.controller.router import _get_dmp_apps, MakoTemplateRenderer
 from optparse import make_option
 import os, os.path, shutil, fnmatch, glob
