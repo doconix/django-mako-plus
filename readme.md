@@ -980,7 +980,7 @@ This likely impacts few users of DMP, so you may want to skip this section for n
 
 ### Case 1: Templates Within Your Project Directory
 
-If the templates you need to access are within your project directory, no extra setup is required.  Simply reference those templates relateive to the root project directory.  For example, to access a template located at homepage/mytemplates/sub1/page.html (relative to your project root), use the following:
+If the templates you need to access are within your project directory, no extra setup is required.  Simply reference those templates relative to the root project directory.  For example, to access a template located at homepage/mytemplates/sub1/page.html (relative to your project root), use the following:
 
         return dmp_render_to_response(request, '/homepage/mytemplates/sub1/page.html', template_vars)
         
@@ -990,7 +990,7 @@ Suppose your templates are located on a different disk or entirely different dir
 
         DJANGO_MAKO_PLUS = {
             'TEMPLATES_DIRS': [ 
-               '/var/somewhere/templates/',
+               '/var/templates/',
             ],
         }
         
