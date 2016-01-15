@@ -252,7 +252,7 @@ DMP requires Django 1.7+, Python 2.7+, and Mako 1.0+.
 
 Create a Django project with the typical:
 
-        python3 django-admin.py startproject test_dmp
+        django-admin startproject test_dmp
   
 This step is described in detail in the standard Django tutorial.  You can, of course, name your project anything you want, but in the sections below, I'll assume you called your project `test_dmp`.
 
