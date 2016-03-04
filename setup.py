@@ -22,7 +22,7 @@ def walk(root):
   for fname in os.listdir(root):
     fpath = os.path.join(root, fname)
     # skip hidden/cache files
-    if fname.startswith('.') or fname in ( '__pycache__', 'app_template' ):
+    if fname.startswith('.') or fname in ( '__pycache__', ):
       continue
     # if a directory, walk it
     elif os.path.isdir(fpath):

@@ -35,7 +35,7 @@ __doc__ = '''
 from django.conf import settings
 from django_mako_plus.controller.router import MakoTemplateRenderer
 from django_mako_plus.controller import get_setting
-import os, os.path, time
+import os, os.path, time, posixpath
 
 
 DMP_ATTR_NAME = 'dmp_templateinfo'  # used to attach TemplateInfo objects to Mako templates
@@ -107,7 +107,7 @@ class TemplateInfo(object):
     # the static templatename.css file
     try:
       fstat = os.stat(os.path.join(self.app_dir, 'styles', self.template_name + '.css'))
-      self.css = '<link rel="stylesheet" type="text/css" href="%s?%s" />' % (os.path.join(settings.STATIC_URL, self.app, 'styles', self.template_name + '.css'), cgi_id if cgi_id != None else int(fstat.st_mtime))
+      self.css = '<link rel="stylesheet" type="text/css" href="%s?%s" />' % (posixpath.join(settings.STATIC_URL, self.app, 'styles', self.template_name + '.css'), cgi_id if cgi_id != None else int(fstat.st_mtime))
     except OSError:
       self.css = None
 
@@ -121,7 +121,7 @@ class TemplateInfo(object):
     # the static templatename.js file
     try:
       fstat = os.stat(os.path.join(self.app_dir, 'scripts', self.template_name + '.js'))
-      self.js = '<script src="%s?%s"></script>' % (os.path.join(settings.STATIC_URL, self.app, 'scripts', self.template_name + '.js'), cgi_id if cgi_id != None else int(fstat.st_mtime))
+      self.js = '<script src="%s?%s"></script>' % (posixpath.join(settings.STATIC_URL, self.app, 'scripts', self.template_name + '.js'), cgi_id if cgi_id != None else int(fstat.st_mtime))
     except OSError:
       self.js = None
 

@@ -5,5 +5,5 @@
 
 
 # The version of DMP - used by sdist to publish to PyPI
-__version__ = '2.6.6'
+__version__ = '2.7.1'
 
