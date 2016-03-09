@@ -33,8 +33,8 @@ __doc__ = '''
 '''
 
 from django.conf import settings
-from django_mako_plus.controller.router import MakoTemplateRenderer
-from django_mako_plus.controller import get_setting
+from django_mako_plus.router import MakoTemplateRenderer
+from django_mako_plus import get_setting
 import os, os.path, time, posixpath
 
 
@@ -139,7 +139,7 @@ class StaticRenderer(object):
      The mako_self parameter is simply the "self" variable
      accessible within any Mako template.  An example call is:
      
-     <%! from django_mako_plus.controller import static_files %>
+     <%! from django_mako_plus import static_files %>
      <%  static_renderer = static_files.StaticRenderer(self) %>
      
      The optional cgi_id parameter is a less obvious.  On some browsers, 

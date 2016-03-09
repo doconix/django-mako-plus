@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand, CommandError
 from importlib import import_module
 from django.conf import settings
-from django_mako_plus.controller import router
+from django_mako_plus import router
 import os, os.path
 
 

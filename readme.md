@@ -264,18 +264,18 @@ Don't forget to migrate to synchronize your database.  The apps in a standard Dj
   
 ### Edit Your `settings.py` File:
 
-1. Add `django_mako_plus.controller` to the end of your `INSTALLED_APPS` list:
+1. Add `django_mako_plus` to the end of your `INSTALLED_APPS` list:
    
          INSTALLED_APPS = (
              ...
-             'django_mako_plus.controller',
+             'django_mako_plus',
          )
          
-2. Add `django_mako_plus.controller.router.RequestInitMiddleware` to the end of your `MIDDLEWARE CLASSES` list:
+2. Add `django_mako_plus.router.RequestInitMiddleware` to the end of your `MIDDLEWARE CLASSES` list:
    
          MIDDLEWARE_CLASSES = (
              ...
-             'django_mako_plus.controller.router.RequestInitMiddleware',
+             'django_mako_plus.router.RequestInitMiddleware',
          )       
          
 3. Add a logger to help you debug (optional but highly recommended!):
@@ -360,14 +360,14 @@ Don't forget to migrate to synchronize your database.  The apps in a standard Dj
 
 Add the Django-Mako-Plus router as **the last pattern** in your `urls.py` file (the default admin is also included here for completeness):
 
-          import django_mako_plus.controller.router
+          import django_mako_plus.router
           
           urlpatterns = [
           
               ...
 
               # the django_mako_plus controller handles every request - this line is the glue that connects Mako to Django
-              url(r'^.*$', django_mako_plus.controller.router.route_request ),
+              url(r'^.*$', django_mako_plus.router.route_request ),
           ]
           
 ### Create a DMP-Style App
@@ -483,7 +483,7 @@ The real HTML is kept in the `base.htm` file.  It looks like this:
         ## this is the skeleton of all pages on in this app - it defines the basic html tags
 
         ## set up a StaticRenderer object to enable the CSS/JS automatic inclusion magic.
-        <%! from django_mako_plus.controller import static_files %>
+        <%! from django_mako_plus import static_files %>
         <%  static_renderer = static_files.StaticRenderer(self) %>
 
         <!DOCTYPE html>
@@ -526,7 +526,7 @@ The purpose of the inheritance from `base.htm` is to get a consistent look, menu
 
 In the installation procedures above, you added the following line to your urls.py routing file:
 
-        url(r'^.*$', 'django_mako_plus.controller.router.route_request' ),
+        url(r'^.*$', 'django_mako_plus.router.route_request' ),
 
 The regular expression in this line, `^.*$`, is a wildcard that matches everything.  It tells every url to go to the Django-Mako-Plus router, where it is further routed according to the pattern: `/app/page`.  We aren't really routing without `urls.py`; we're adding a second, more important router afterward.  In fact, you can still use the `urls.py` file in the normal Django way because we placed the wildcard at the *end* of the file.  Things like the `/admin/` still work the normal, Django way.
 
@@ -548,7 +548,7 @@ The above illustrates the easiest way to show pages: simply place .html files in
 Let's add some "work" to the process by adding the current server time to the index page.  Create a new file `homepage/views/index.py` and copy this code into it:
 
         from django.conf import settings
-        from django_mako_plus.controller import view_function
+        from django_mako_plus import view_function
         from datetime import datetime
         from .. import dmp_render, dmp_render_to_response
 
@@ -644,8 +644,8 @@ Once you've imported the functions with aliases, simply use the appropriate func
 Suppose you need to put your templates in a directory named something other than `/appname/templates/`.  Or perhaps you have a non-traditional app path.  The two above methods are really just convenience methods to make rendering easier.  If you need more control, create the template renderer yourself and use it directly:
 
         from django.conf import settings
-        from django_mako_plus.controller import view_function
-        from django_mako_plus.controller.router import MakoTemplateRenderer
+        from django_mako_plus import view_function
+        from django_mako_plus.router import MakoTemplateRenderer
         from datetime import datetime
         
         @view_function
@@ -687,7 +687,7 @@ Note that URL parameters don't take the place of form parameters.  You'll still 
 Although this might not be the best use of urlparams, suppose we want to display our server time with user-specified format.  On a different page of our site, we might present several different `<a href>` links to the user that contain different formats (we wouldn't expect users to come up with these urls on their own -- we'd create links for the user to click on).  Change your `index.py` file to use a url-specified format for the date:
   
         from django.conf import settings
-        from django_mako_plus.controller import view_function
+        from django_mako_plus import view_function
         from .. import dmp_render, dmp_render_to_response
         from datetime import datetime
 
@@ -716,7 +716,7 @@ With DMP, your class-based view will be discovered via request url, so you have 
         from django.conf import settings
         from django.http import HttpResponse
         from django.views.generic import View
-        from django_mako_plus.controller import view_function
+        from django_mako_plus import view_function
         from .. import dmp_render, dmp_render_to_response
         from datetime import datetime
 
@@ -791,7 +791,7 @@ The style of a web page is often dependent upon the user, such as a user-definab
 Let's make the color dynamic by adding a new random variable `timecolor` to our index.py view:
 
         from django.conf import settings
-        from django_mako_plus.controller import view_function
+        from django_mako_plus import view_function
         from .. import dmp_render, dmp_render_to_response
         from datetime import datetime
         import random
@@ -856,7 +856,7 @@ Save the changes and take your browser to [http://localhost:8000/homepage/index/
 After reading the previous sections on automatic CSS and JS inclusion, you might want to know how it works.  It's all done in the templates (base.htm now, and base_ajax.htm in a later section below) you are inheriting from.  Open `base.htm` and look at the following code:
 
         ## set up a StaticRenderer object to enable the CSS/JS automatic inclusion magic.
-        <%! from django_mako_plus.controller import static_files %>
+        <%! from django_mako_plus import static_files %>
         <%  static_renderer = static_files.StaticRenderer(self) %>
 
         ...
@@ -913,7 +913,7 @@ Note the new `<button>` element in the above html.  Next, we'll add Javascript t
 The client side is now ready, so let's create the `/homepage/index_time/` server endpoint.  Create a new `homepage/views/index_time.py` file:
 
         from django.conf import settings
-        from django_mako_plus.controller import view_function
+        from django_mako_plus import view_function
         from .. import dmp_render, dmp_render_to_response
         from datetime import datetime
         import random
@@ -1217,7 +1217,7 @@ Suppose your view needs to redirect the user's browser to a different page than 
 
 When you need to redirect the browser to a different page, you should normally use the standard `django.http.HttpResponseRedirect` object.  By returning a redirect object from your view, DMP (and subsequently Django) direct the browser to redirect.  
 
-BUT, suppose you are several levels deep in method calls without direct access to the request or response objects?  How can you direct a method several levels up in the call stack to send a redirect response?  That's where the `django_mako_plus.controller.RedirectException` comes in handy.  Since it is an exception, it bubbles all the way up the stack to the DMP router -- where it is sent directly to the browser.
+BUT, suppose you are several levels deep in method calls without direct access to the request or response objects?  How can you direct a method several levels up in the call stack to send a redirect response?  That's where the `django_mako_plus.RedirectException` comes in handy.  Since it is an exception, it bubbles all the way up the stack to the DMP router -- where it is sent directly to the browser.
 
 Is this an abuse of exceptions?  Probably.  But in one possible viewpoint, a redirect can be seen as an exception to normal processing.  It is quite handy to be able to redirect the browser from anywhere in your web code.  If this feels dirty to you, feel free to skip ahead to the next section and ignore this part of DMP.  :)
 
@@ -1225,7 +1225,7 @@ Two types of redirects are supported by DMP: a standard browser redirect and an 
 
 To initiate the two types of redirects, use the following code:
 
-        from django_mako_plus.controller import RedirectException, InternalRedirectException
+        from django_mako_plus import RedirectException, InternalRedirectException
 
         # send a normal, browser-based redirect from anywhere in the call stack
         # this is effectively the same as: return django.http.HttpResponseRedirect('/some/new/url')
@@ -1279,7 +1279,7 @@ Be sure your settings.py file has the following in it:
 The following creates two receivers.  The first is called just before the view's process_request function is called.  The second is called just before DMP renders .html templates.
 
         from django.dispatch import receiver
-        from django_mako_plus.controller import signals
+        from django_mako_plus import signals
 
         @receiver(signals.dmp_signal_pre_process_request)
         def dmp_signal_pre_process_request(sender, **kwargs):
