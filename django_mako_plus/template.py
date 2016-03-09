@@ -2,10 +2,14 @@ from django.apps import apps
 from django.conf import settings
 from django.template.backends.base import BaseEngine
 from django.core.exceptions import ImproperlyConfigured
-from django.template import TemplateDoesNotExist, TemplateSyntaxError, engines
+from django.template import TemplateDoesNotExist, TemplateSyntaxError, Context, RequestContext
+
 from mako.exceptions import TopLevelLookupException, html_error_template
 from mako.lookup import TemplateLookup
-import os, os.path, sys
+
+from .exceptions import InternalRedirectException, RedirectException
+
+import os, os.path, sys, mimetypes
 from copy import deepcopy
 
 
@@ -13,6 +17,10 @@ from copy import deepcopy
 # a local copy of the options from settings.py
 # Django sends when it initializes the MakoTemplates object below.
 DMP_OPTIONS = {}
+
+# we cache a few extra things in the options
+DMP_OPTIONS_PREFIX = 'django_mako_plus_'
+DMP_OPTIONS_INSTANCE_KEY = DMP_OPTIONS_PREFIX + 'instance'
 
 
 #########################################################
@@ -30,7 +38,13 @@ class MakoTemplates(BaseEngine):
       try:
         DMP_OPTIONS.update(params.pop('OPTIONS'))
       except KeyError:
-        raise ImproperlyConfigured('The Django Mako Plus template system options were not set up correctly in settings.py.  Please ensure the DMP_OPTIONS is available.')
+        raise ImproperlyConfigured('The Django Mako Plus template OPTIONS were not set up correctly in settings.py.  Please ensure the OPTIONS is set in the template setup.')
+        
+      # set up the cached instance
+      for key in DMP_OPTIONS:
+        if key.startswith(DMP_OPTIONS_PREFIX):
+          raise ImproperlyConfigured('The Django Mako Plus template OPTIONS were not set up correctly in settings.py.  Keys starting with "%s" are reserved and cannot be used.' % DMP_OPTIONS_PREFIX)
+      DMP_OPTIONS[DMP_OPTIONS_INSTANCE_KEY] = self
 
       # super constructor
       super(MakoTemplates, self).__init__(params)
@@ -39,6 +53,7 @@ class MakoTemplates(BaseEngine):
       self.template_renderers = {}
       for app_config in get_dmp_app_configs():
         self.register_app(app_config)
+        
     except Exception as e:
       import traceback
       traceback.print_exc()
@@ -53,12 +68,23 @@ class MakoTemplates(BaseEngine):
        
        This should not normally be called directly.
     '''
-    print('registering app', app_config)
-    # add a renderer to the cache
-    self.template_renderers[app_config.name] = MakoTemplateRenderer(app_config.path)
-    # add the shortcut functions
-    app_config.module.render = RenderShortcut(self, app_config.name, 'render')
-    app_config.module.render_to_string = RenderShortcut(self, app_config.name, 'render_to_string')
+    # set up the template, script, and style renderers
+    self.template_renderers[app_config.name] = {
+      'templates': MakoTemplateRenderer(app_config.path),
+      'scripts': MakoTemplateRenderer(app_config.path, 'scripts'),
+      'styles': MakoTemplateRenderer(app_config.path, 'styles'),
+    }
+
+    # add the shortcut functions (only to the main templates, we don't do to scripts or styles
+    # because people generally don't call those directly)
+    app_config.module.dmp_render = RenderShortcut(self, app_config.name, 'render', 'templates')
+    app_config.module.dmp_render_to_string = RenderShortcut(self, app_config.name, 'render_to_string', 'templates')
+    
+    
+  @property
+  def template_context_processors(self):
+    '''Returns the template context processors that are set in the options'''
+    return DMP_OPTIONS.get(
     
     
   def get_renderer(self, app_name):
@@ -67,13 +93,23 @@ class MakoTemplates(BaseEngine):
        
        This is the primary interface for getting an MakoTemplateRenderer.
     '''
+    return self._get_renderer(app_name, 'templates')
+
+
+  def _get_renderer(self, app_name, renderer_type):
+    '''Returns the styles renderer for the given app name from the cache.
+       Raises a LookupException if the app_name has not been registered.
+       
+       This method is generally only used internally within DMP.
+       
+       renderer_type is one of 'templates', 'scripts', or 'styles'.
+    '''
     try:
-      return self.template_renderers[app_name]
+      return self.template_renderers[app_name][renderer_type]
     except KeyError:
-      raise LookupError("%s has not been registered as a DMP app.  Did you forget to include the DJANGO_MAKO_PLUS = True line in your app's __init__.py?" % app_name)
+      raise LookupError("%s has not been registered as a DMP app (or the renderer_type was invalid).  Did you forget to include the DJANGO_MAKO_PLUS = True line in your app's __init__.py?" % app_name)
 
   
-
   def from_string(self, template_code):
     '''Compiles a template from the given string.  
        This is one of the required methods of Django template engines.
@@ -96,13 +132,17 @@ class MakoTemplates(BaseEngine):
 ###   Utilities not meant to be used outside this package.
 
 
+def get_dmp_instance():
+  '''Retrieves the DMP template engine instance.'''
+  return DMP_OPTIONS[DMP_OPTIONS_INSTANCE_KEY]
+
+
 def get_dmp_app_configs():
   '''Gets the DMP-enabled app configs, which will be a subset of all installed apps.  This is a generator function.'''
   for config in apps.get_app_configs():
     # check for the DJANGO_MAKO_PLUS = True in the app (should be in app/__init__.py)
     if getattr(config.module, 'DJANGO_MAKO_PLUS', False):
       yield config
-      
       
 
 class RenderShortcut(object):
@@ -111,17 +151,20 @@ class RenderShortcut(object):
      to call each app's renderer with a function rather than having to get
      an object reference.
   '''
-  def __init__(self, dmp_instance, app_name, method_name):
+  def __init__(self, dmp_instance, app_name, method_name, renderer_type):
     self.dmp_instance = dmp_instance
     self.app_name = app_name
     self.method_name = method_name
+    self.renderer_type = renderer_type
 
   def __call__(self, *args, **kwargs):
     '''Allows instances of this class to act like functions.'''
     # I use get_renderer to essentially do "late binding" to the map, just in
     # case the TEMPLATE_RENDERERS map must be modified after its initial creation
     # below.  This way I don't have a direct (and permanent) pointer to the renderer.
-    return getattr(self.dmp_instance.get_renderer(self.app_name), self.method_name)(*args, **kwargs)
+    # this next line gets the appropriate MakoTemplateRenderer and calls the render or
+    # render_to_string method.
+    return getattr(self.dmp_instance._get_renderer(self.app_name, self.renderer_type), self.method_name)(*args, **kwargs)
 
 
 
@@ -146,6 +189,12 @@ class MakoTemplateRenderer:
     # calculate the template cache directory
     self.cache_root = os.path.abspath(os.path.join(project_path, app_path, DMP_OPTIONS.get('TEMPLATES_CACHE_DIR', 'templates'), template_subdir))
     self.tlookup = TemplateLookup(directories=self.template_search_dirs, imports=DMP_OPTIONS.get('DEFAULT_TEMPLATE_IMPORTS'), module_directory=self.cache_root, collection_size=2000, filesystem_checks=settings.DEBUG, input_encoding=DMP_OPTIONS.get('DEFAULT_TEMPLATE_ENCODING', 'utf-8'))
+
+
+  @property
+  def engine(self):
+    '''This is a singleton instance because Django only creates one of a given template engine'''
+    return get_dmp_instance()
 
 
   def get_template(self, template):
@@ -195,7 +244,8 @@ class MakoTemplateRenderer:
       context_dict['STATIC_URL'] = settings.STATIC_URL  # this is used so much in templates, it's useful to have it always available
     except AttributeError:
       pass
-    context = Context(params) if request == None else RequestContext(request, params)  # Django's RequestContext automatically runs all the TEMPLATE_CONTEXT_PROCESSORS and populates with variables
+    # create the context (the parameters).  Django has some built-in Context Processors that can be run.
+    context = Context(params) if request == None else RequestContext(request, params)  
     with context.bind_template(self):
       for d in context:
         context_dict.update(d)

@@ -1,20 +1,19 @@
-from django.core.urlresolvers import get_mod_func
+from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.http import HttpResponse, StreamingHttpResponse, Http404, HttpResponseRedirect, HttpResponsePermanentRedirect
-from django.conf import settings
-from django.template import Context, RequestContext
-from importlib import import_module
-#from django_mako_plus import signals, view_function, RedirectException, InternalRedirectException
+
+from .exceptions import InternalRedirectException, RedirectException
+from .template import DMP_OPTIONS, get_dmp_instance
+from .signals import dmp_signal_pre_process_request, dmp_signal_post_process_request, dmp_signal_internal_redirect_exception, dmp_signal_redirect_exception
+
 import os, os.path, re, mimetypes, sys
 from urllib.parse import unquote
-from .exceptions import InternalRedirectException, RedirectException
-from .template import DMP_OPTIONS
+from importlib import import_module
 
 
 # set up the logger
 import logging
 log = logging.getLogger('django_mako_plus')
-
 
 
 
@@ -67,7 +66,7 @@ def route_request(request):
       if not os.path.exists(full_module_filename):
         log.debug('DMP :: module %s not found; sending processing directly to template %s.html' % (request.dmp_router_module, request.dmp_router_page_full))
         try:
-          dmp_renderer = dmp_instance.get_renderer(request.dmp_router_app)
+          dmp_renderer = get_dmp_instance().get_renderer(request.dmp_router_app)
         except ImproperlyConfigured as e:
           log.debug('DMP :: %s' % (e))
           raise Http404
@@ -96,7 +95,7 @@ def route_request(request):
 
       # send the pre-signal
       if DMP_OPTIONS.get('SIGNALS', False):
-        for receiver, ret_response in signals.dmp_signal_pre_process_request.send(sender=sys.modules[__name__], request=request):
+        for receiver, ret_response in dmp_signal_pre_process_request.send(sender=sys.modules[__name__], request=request):
           if isinstance(ret_response, (HttpResponse, StreamingHttpResponse)):
             return ret_response
 
@@ -109,7 +108,7 @@ def route_request(request):
 
       # send the post-signal
       if DMP_OPTIONS.get('SIGNALS', False):
-        for receiver, ret_response in signals.dmp_signal_post_process_request.send(sender=sys.modules[__name__], request=request, response=response):
+        for receiver, ret_response in dmp_signal_post_process_request.send(sender=sys.modules[__name__], request=request, response=response):
           if ret_response != None:
             response = ret_response # sets it to the last non-None in the signal receiver chain
 
@@ -128,7 +127,7 @@ def route_request(request):
       ivr = sys.exc_info()[1] # Py2.7 and Py3+ compliant
       # send the signal
       if DMP_OPTIONS.get('SIGNALS', False):
-        signals.dmp_signal_internal_redirect_exception.send(sender=sys.modules[__name__], request=request, exc=ivr)
+        dmp_signal_internal_redirect_exception.send(sender=sys.modules[__name__], request=request, exc=ivr)
       # do the internal redirect
       request.dmp_router_module = ivr.redirect_module
       request.dmp_router_function = ivr.redirect_function
@@ -143,7 +142,7 @@ def route_request(request):
         log.debug('DMP :: class-based view function %s.%s.%s redirected processing to %s' % (request.dmp_router_module, request.dmp_router_class, request.dmp_router_function, e.redirect_to))
       # send the signal
       if DMP_OPTIONS.get('SIGNALS', False):
-        signals.dmp_signal_redirect_exception.send(sender=sys.modules[__name__], request=request, exc=e)
+        dmp_signal_redirect_exception.send(sender=sys.modules[__name__], request=request, exc=e)
       # send the browser the redirect command
       return e.get_response(request)
 

@@ -33,12 +33,11 @@ __doc__ = '''
 '''
 
 from django.conf import settings
-from django_mako_plus.router import MakoTemplateRenderer
-from django_mako_plus import get_setting
+from .template import DMP_OPTIONS, get_dmp_instance
 import os, os.path, time, posixpath
 
 
-DMP_ATTR_NAME = 'dmp_templateinfo'  # used to attach TemplateInfo objects to Mako templates
+DMP_ATTR_NAME = 'django_mako_plus_templateinfo'  # used to attach TemplateInfo objects to Mako templates
 
 
 # Import minification if requested
@@ -57,14 +56,6 @@ if get_setting('MINIFY_JS_CSS', False) and not settings.DEBUG:
     pass
 
 
-#######################################################################
-###   A dict of template renderers for scripts and styles in our apps.
-###   These are created as needed in TemplateInfo below and cached here.
-###   One for each app is created in each dict.
-
-SCRIPT_RENDERERS = {}
-STYLE_RENDERERS = {}
-
 
 
 #######################################################################
@@ -73,19 +64,14 @@ STYLE_RENDERERS = {}
 class TemplateInfo(object):
   '''Data class that holds information about a template's directories.  The StaticRenderer
      object below creates a TemplateInfo object for each level in the Mako template inheritance
-     chain.
+     chain.  This object is then attached to the template object, which Mako already caches.
+     That way we only do this work once per server run (in production mode).
   '''
   def __init__(self, template, cgi_id=None):
     # set up the directories so we can go through them fast on render
     self.template_dir, self.template_name = os.path.split(os.path.splitext(template.filename)[0])
     self.app_dir = os.path.dirname(self.template_dir)
     self.app = os.path.split(self.app_dir)[1]
-
-    # ensure we have renderers for this template
-    if self.app not in SCRIPT_RENDERERS:
-      SCRIPT_RENDERERS[self.app] = MakoTemplateRenderer(self.app, 'scripts')
-    if self.app not in STYLE_RENDERERS:
-      STYLE_RENDERERS[self.app] = MakoTemplateRenderer(self.app, 'styles')
 
     # the static templatename.scss file
     try:
@@ -174,7 +160,7 @@ class StaticRenderer(object):
       if ti.css:
         ret.append(ti.css)  # the <link> was already created once in the constructor
       if ti.cssm:
-        css_text = STYLE_RENDERERS[ti.app].render(request, ti.cssm, context.kwargs)
+        css_text = get_dmp_instance()._get_renderer(ti.app, 'styles').render(request, ti.cssm, context.kwargs)
         if JSMIN and get_setting('MINIFY_JS_CSS', False):
           css_text = cssmin(css_text)
         ret.append('<style type="text/css">%s</style>' % css_text) 
@@ -189,7 +175,7 @@ class StaticRenderer(object):
       if ti.js:
         ret.append(ti.js)  # the <script> was already created once in the constructor
       if ti.jsm:
-        js_text = SCRIPT_RENDERERS[ti.app].render(request, ti.jsm, context.kwargs)
+        js_text = get_dmp_instance()._get_renderer(ti.app, 'scripts').render(request, ti.jsm, context.kwargs)
         if JSMIN and get_setting('MINIFY_JS_CSS', False):
           js_text = jsmin(js_text)
         ret.append('<script>%s</script>' % js_text)
