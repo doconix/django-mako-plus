@@ -43,7 +43,7 @@ DMP_ATTR_NAME = 'django_mako_plus_templateinfo'  # used to attach TemplateInfo o
 # Import minification if requested
 JSMIN = False
 CSSMIN = False
-if get_setting('MINIFY_JS_CSS', False) and not settings.DEBUG:
+if DMP_OPTIONS.get('MINIFY_JS_CSS', False) and not settings.DEBUG:
   try:
     from rjsmin import jsmin
     JSMIN = True
@@ -82,10 +82,10 @@ class TemplateInfo(object):
         css_stat = os.stat(css_file)
         # update the CSS file if the SCCS file is newer
         if scss_stat.st_mtime > css_stat.st_mtime:
-          os.system(get_setting('SCCS_BINARY', '/usr/bin/env scss') + ' %s %s %s' % (get_setting('SCCS_ARGS', ''), scss_file, css_file))
+          os.system(DMP_OPTIONS.get('SCCS_BINARY', '/usr/bin/env scss') + ' %s %s %s' % (DMP_OPTIONS.get('SCCS_ARGS', ''), scss_file, css_file))
       except OSError:
           # if no CSS file exists, create one
-          os.system(get_setting('SCCS_BINARY', '/usr/bin/env scss') + ' %s %s %s' % (get_setting('SCCS_ARGS', ''), scss_file, css_file))
+          os.system(DMP_OPTIONS.get('SCCS_BINARY', '/usr/bin/env scss') + ' %s %s %s' % (DMP_OPTIONS.get('SCCS_ARGS', ''), scss_file, css_file))
     except OSError:
         # no SCCS file exists .. continue as normal
         pass
@@ -161,7 +161,7 @@ class StaticRenderer(object):
         ret.append(ti.css)  # the <link> was already created once in the constructor
       if ti.cssm:
         css_text = get_dmp_instance()._get_renderer(ti.app, 'styles').render(request, ti.cssm, context.kwargs)
-        if JSMIN and get_setting('MINIFY_JS_CSS', False):
+        if JSMIN and DMP_OPTIONS.get('MINIFY_JS_CSS', False):
           css_text = cssmin(css_text)
         ret.append('<style type="text/css">%s</style>' % css_text) 
     return '\n'.join(ret)
@@ -176,7 +176,7 @@ class StaticRenderer(object):
         ret.append(ti.js)  # the <script> was already created once in the constructor
       if ti.jsm:
         js_text = get_dmp_instance()._get_renderer(ti.app, 'scripts').render(request, ti.jsm, context.kwargs)
-        if JSMIN and get_setting('MINIFY_JS_CSS', False):
+        if JSMIN and DMP_OPTIONS.get('MINIFY_JS_CSS', False):
           js_text = jsmin(js_text)
         ret.append('<script>%s</script>' % js_text)
     return '\n'.join(ret)

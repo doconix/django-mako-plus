@@ -1,8 +1,10 @@
 from django.core.management.base import BaseCommand, CommandError
-from importlib import import_module
 from django.conf import settings
-from django_mako_plus import router
+
+import django_mako_plus
+
 import os, os.path
+from importlib import import_module
 
 
 class Command(BaseCommand):
@@ -43,7 +45,7 @@ class Command(BaseCommand):
     
     # create the directory structure by copying our app_template
     os.mkdir(app_dir)
-    template_dir = os.path.join(os.path.abspath(os.path.dirname(router.__file__)), 'app_template')
+    template_dir = os.path.join(os.path.abspath(os.path.dirname(django_mako_plus.__file__)), 'app_template')
     def copy_dir(root):
       for fname in os.listdir(root):
         # skip certain files

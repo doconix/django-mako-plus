@@ -1,22 +1,28 @@
 from django.core.management.base import BaseCommand, CommandError
-from importlib import import_module
 from django.conf import settings
-from django_mako_plus import router, get_setting
+
+from django_mako_plus.template import DMP_OPTIONS, get_dmp_instance, get_dmp_app_configs
+
 from optparse import make_option
 import os, os.path, shutil, fnmatch
+from importlib import import_module
+
 
 # import minification if requested
-if get_setting('MINIFY_JS_CSS', False):
+JSMIN = False
+CSSMIN = False
+if DMP_OPTIONS.get('MINIFY_JS_CSS', False):
   try:
     from rjsmin import jsmin
     JSMIN = True
   except ImportError:
-    JSMIN = False
+    raise CommandError('The Django Mako Plus option "MINIFY_JS_CSS" is True in settings.py, but the "rjsmin" module does not seem to be installed. Do you need to "pip install" it?')
   try:
     from rcssmin import cssmin
     CSSMIN = True
   except ImportError:
-    CSSMIN = False
+    raise CommandError('The Django Mako Plus option "MINIFY_JS_CSS" is True in settings.py, but the "rcssmin" module does not seem to be installed. Do you need to "pip install" it?')
+
 
 
 class Command(BaseCommand):
@@ -67,13 +73,9 @@ class Command(BaseCommand):
       os.makedirs(dest_root)
 
     # go through the DMP apps and collect the static files
-    for appname in router.TEMPLATE_RENDERERS:  # this set holds the DMP-enabled apps
-      try:
-        module_obj = import_module(appname)
-      except ImportError as e:
-        raise CommandError('Could not import app %s: %s' % (appname, e))
-      app_root = os.path.dirname(module_obj.__file__)
-      self.copy_dir(os.path.abspath(app_root), os.path.abspath(os.path.join(dest_root, appname)))
+    for config in get_dmp_app_configs(): 
+      app_root = os.path.dirname(config.module.__file__)
+      self.copy_dir(os.path.abspath(app_root), os.path.abspath(os.path.join(dest_root, config.name)))
     
     
     
@@ -103,7 +105,7 @@ class Command(BaseCommand):
     
       ###  DIRECTORIES  ###
       # ignore these directories
-      elif os.path.isdir(source_path) and fname in ( 'templates', 'views', get_setting('TEMPLATES_CACHE_DIR'), '__pycache__' ):
+      elif os.path.isdir(source_path) and fname in ( 'migrations', 'templates', 'views', DMP_OPTIONS.get('TEMPLATES_CACHE_DIR'), '__pycache__' ):
         pass
         
       # if a directory, create it in the destination and recurse
@@ -129,19 +131,15 @@ class Command(BaseCommand):
         pass
       
       # if a regular Javscript file, minify it
-      elif ext == '.js' and get_setting('MINIFY_JS_CSS', False) and JSMIN:
-        fin = open(source_path)
-        fout = open(dest_path, 'w')
-        fout.write(jsmin(fin.read()))
-        fout.close()
-        fin.close()
+      elif ext == '.js' and DMP_OPTIONS.get('MINIFY_JS_CSS', False) and JSMIN:
+        with open(source_path) as fin:
+          with open(dest_path, 'w') as fout:
+            fout.write(jsmin(fin.read()))
         
-      elif ext == '.css' and get_setting('MINIFY_JS_CSS', False) and CSSMIN:
-        fin = open(source_path)
-        fout = open(dest_path, 'w')
-        fout.write(cssmin(fin.read()))
-        fout.close()
-        fin.close()
+      elif ext == '.css' and DMP_OPTIONS.get('MINIFY_JS_CSS', False) and CSSMIN:
+        with open(source_path) as fin:
+          with open(dest_path, 'w') as fout:
+            fout.write(cssmin(fin.read()))
       
       # if we get here, it's a binary file like an image, movie, pdf, etc.
       else:

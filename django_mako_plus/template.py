@@ -1,22 +1,31 @@
 from django.apps import apps
 from django.conf import settings
-from django.template.backends.base import BaseEngine
 from django.core.exceptions import ImproperlyConfigured
-from django.template import TemplateDoesNotExist, TemplateSyntaxError, Context, RequestContext
+from django.http import HttpResponse, Http404
+from django.template import TemplateDoesNotExist, TemplateSyntaxError, Context, RequestContext, engines
+from django.template.backends.base import BaseEngine
+from django.utils.module_loading import import_string
 
 from mako.exceptions import TopLevelLookupException, html_error_template
 from mako.lookup import TemplateLookup
 
 from .exceptions import InternalRedirectException, RedirectException
+from .signals import dmp_signal_pre_render_template, dmp_signal_post_render_template, dmp_signal_redirect_exception
 
 import os, os.path, sys, mimetypes
 from copy import deepcopy
+from importlib import import_module
 
+
+# set up the logger
+import logging
+log = logging.getLogger('django_mako_plus')
 
 
 # a local copy of the options from settings.py
 # Django sends when it initializes the MakoTemplates object below.
 DMP_OPTIONS = {}
+
 
 # we cache a few extra things in the options
 DMP_OPTIONS_PREFIX = 'django_mako_plus_'
@@ -32,32 +41,33 @@ class MakoTemplates(BaseEngine):
   '''
   def __init__(self, params):
     '''Constructor'''
+    # pop off the options
+    params = deepcopy(params)
     try:
-      # pop off the options
-      params = deepcopy(params)
-      try:
-        DMP_OPTIONS.update(params.pop('OPTIONS'))
-      except KeyError:
-        raise ImproperlyConfigured('The Django Mako Plus template OPTIONS were not set up correctly in settings.py.  Please ensure the OPTIONS is set in the template setup.')
-        
-      # set up the cached instance
-      for key in DMP_OPTIONS:
-        if key.startswith(DMP_OPTIONS_PREFIX):
-          raise ImproperlyConfigured('The Django Mako Plus template OPTIONS were not set up correctly in settings.py.  Keys starting with "%s" are reserved and cannot be used.' % DMP_OPTIONS_PREFIX)
-      DMP_OPTIONS[DMP_OPTIONS_INSTANCE_KEY] = self
+      DMP_OPTIONS.update(params.pop('OPTIONS'))
+    except KeyError:
+      raise ImproperlyConfigured('The Django Mako Plus template OPTIONS were not set up correctly in settings.py.  Please ensure the OPTIONS is set in the template setup.')
 
-      # super constructor
-      super(MakoTemplates, self).__init__(params)
+    # super constructor
+    super(MakoTemplates, self).__init__(params)
+      
+    # set up the cached instance
+    for key in DMP_OPTIONS:
+      if key.startswith(DMP_OPTIONS_PREFIX):
+        raise ImproperlyConfigured('The Django Mako Plus template OPTIONS were not set up correctly in settings.py.  Keys starting with "%s" are reserved and cannot be used.' % DMP_OPTIONS_PREFIX)
+    DMP_OPTIONS[DMP_OPTIONS_INSTANCE_KEY] = self
 
-      # add a template renderer for each DMP-enabled app
-      self.template_renderers = {}
-      for app_config in get_dmp_app_configs():
-        self.register_app(app_config)
-        
-    except Exception as e:
-      import traceback
-      traceback.print_exc()
-
+    # add a template renderer for each DMP-enabled app
+    self.template_renderers = {}
+    for app_config in get_dmp_app_configs():
+      self.register_app(app_config)
+      
+    # set up the context processors
+    context_processors = []
+    for processor in DMP_OPTIONS.get('CONTEXT_PROESSORS', []):
+      context_processors.append(import_string(processor))
+    self.template_context_processors = tuple(context_processors)
+      
     
   def register_app(self, app_config):
     '''Registers an app as a "DMP-enabled" app.  Registering creates a cached
@@ -79,12 +89,6 @@ class MakoTemplates(BaseEngine):
     # because people generally don't call those directly)
     app_config.module.dmp_render = RenderShortcut(self, app_config.name, 'render', 'templates')
     app_config.module.dmp_render_to_string = RenderShortcut(self, app_config.name, 'render_to_string', 'templates')
-    
-    
-  @property
-  def template_context_processors(self):
-    '''Returns the template context processors that are set in the options'''
-    return DMP_OPTIONS.get(
     
     
   def get_renderer(self, app_name):
@@ -134,6 +138,12 @@ class MakoTemplates(BaseEngine):
 
 def get_dmp_instance():
   '''Retrieves the DMP template engine instance.'''
+  # ensure the template engine has been loaded (on certain management commands, the template system doesn't load)
+  if DMP_OPTIONS_INSTANCE_KEY not in DMP_OPTIONS:
+    for name in engines:
+      engines[name]  # just accessing each one causes the load of each
+  
+  # return the instance
   return DMP_OPTIONS[DMP_OPTIONS_INSTANCE_KEY]
 
 
@@ -236,15 +246,9 @@ class MakoTemplateRenderer:
                  The block/def must be defined in the exact template.  DMP does not support calling defs from
                  super-templates.
     '''
-    # must convert the request context to a real dict to use the ** below
+    # set up the context dictionary, which is the variables available throughout the template
     context_dict = {}
-    context_dict['request'] = request
-    context_dict['settings'] = settings
-    try:
-      context_dict['STATIC_URL'] = settings.STATIC_URL  # this is used so much in templates, it's useful to have it always available
-    except AttributeError:
-      pass
-    # create the context (the parameters).  Django has some built-in Context Processors that can be run.
+    # let the context_processors add variables to the context.
     context = Context(params) if request == None else RequestContext(request, params)  
     with context.bind_template(self):
       for d in context:
@@ -255,7 +259,7 @@ class MakoTemplateRenderer:
 
     # send the pre-render signal
     if DMP_OPTIONS.get('SIGNALS', False) and request != None:
-      for receiver, ret_template_obj in signals.dmp_signal_pre_render_template.send(sender=self, request=request, context=context, template=template_obj):
+      for receiver, ret_template_obj in dmp_signal_pre_render_template.send(sender=self, request=request, context=context, template=template_obj):
         if ret_template_obj != None:  # changes the template object to the received
           template_obj = ret_template_obj
 
@@ -278,7 +282,7 @@ class MakoTemplateRenderer:
 
     # send the post-render signal
     if DMP_OPTIONS.get('SIGNALS', False) and request != None:
-      for receiver, ret_content in signals.dmp_signal_post_render_template.send(sender=self, request=request, context=context, template=template_obj, content=content):
+      for receiver, ret_content in dmp_signal_post_render_template.send(sender=self, request=request, context=context, template=template_obj, content=content):
         if ret_content != None:
           content = ret_content  # sets it to the last non-None return in the signal receiver chain
 
@@ -323,7 +327,7 @@ class MakoTemplateRenderer:
       log.debug('DMP :: view function %s.%s redirected processing to %s' % (request.dmp_router_module, request.dmp_router_function, e.redirect_to))
       # send the signal
       if DMP_OPTIONS.get('SIGNALS', False):
-        signals.dmp_signal_redirect_exception.send(sender=sys.modules[__name__], request=request, exc=e)
+        dmp_signal_redirect_exception.send(sender=sys.modules[__name__], request=request, exc=e)
       # send the browser the redirect command
       return e.get_response(request)
 

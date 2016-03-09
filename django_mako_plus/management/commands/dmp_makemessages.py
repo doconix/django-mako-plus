@@ -1,10 +1,11 @@
-from django import VERSION as django_version
-from django.core.management.base import BaseCommand, CommandError
-from importlib import import_module
-from django.core.management.commands.makemessages import Command as MakeMessagesCommand
 from django.conf import settings
-from django_mako_plus.controller.router import _get_dmp_apps, MakoTemplateRenderer
+from django.core.management.base import BaseCommand, CommandError
+from django.core.management.commands.makemessages import Command as MakeMessagesCommand
+
+from django_mako_plus.template import get_dmp_instance, get_dmp_app_configs
+
 from optparse import make_option
+from importlib import import_module
 import os, os.path, shutil, fnmatch, glob
 
 
@@ -19,13 +20,9 @@ class Command(MakeMessagesCommand):
 
 
   def handle(self, *args, **options):
-    # ensure that we have the necessary version of django
-    if django_version[0] + django_version[1]/10 <= 1.7:
-      raise CommandError('The dmp_makemessages command requires Django 1.8+ (the rest of DMP will work fine - this message is just for dmp_makemessages).')
-    
     # go through each dmp_enabled app and compile its mako templates
-    for app_name in _get_dmp_apps():
-      self.compile_mako_files(app_name)
+    for app_config in get_dmp_app_configs():
+      self.compile_mako_files(app_config)
       
     # add any extra xgettext_options (the regular makemessages doesn't do this, and I need to include other aliases like _(), _z(), etc.
     for opt in options.get('extra_gettext_option', []):
@@ -35,24 +32,18 @@ class Command(MakeMessagesCommand):
     return super(Command, self).handle(*args, **options)
     
     
-  def compile_mako_files(self, app_name):
+  def compile_mako_files(self, app_config):
     '''Compiles the Mako templates within the apps of this system'''
-    # import the module
-    mod = import_module(app_name)
-    
     # go through the files in the templates, scripts, and styles directories
-    moddir = os.path.dirname(mod.__file__)
-    for subdir_name, renderer in ( 
-      ( 'templates', MakoTemplateRenderer(app_name) ),
-      ( 'scripts', MakoTemplateRenderer(app_name, template_subdir="scripts") ),
-      ( 'styles', MakoTemplateRenderer(app_name, template_subdir="styles") ),
-    ):
+    moddir = os.path.dirname(app_config.module.__file__)
+    for subdir_name in ('templates', 'scripts', 'styles'):
       subdir = os.path.join(moddir, subdir_name)
       if os.path.exists(subdir):
         for filename in os.listdir(subdir):
           fname, ext = os.path.splitext(filename)
           if ext.lower() in ( '.htm', '.html', '.jsm', '.cssm' ):
             # create the template object, which creates the compiled .py file
+            renderer = get_dmp_instance()._get_renderer(app_config.name, subdir_name)
             renderer.get_template(filename)
             
     
