@@ -29,7 +29,7 @@ But don't worry, you'll still get all the Django goodness with its fantastic ORM
 
 ## Where Is DMP Used?
 
-This app was developed at MyEducator.com, primarily by Dr. Conan C. Albrecht <ca@byu.edu>.  You can view my blog at http://goalbrecht.com/.  Please email me if you find errors with this tutorial or have suggestions/fixes for the DMP framework.  Since I also use the framework in my Django classes at BYU, many students have implemented the framework at their companies upon graduation.  At this point, the framework is quite mature and robust.
+This app was developed at MyEducator.com, primarily by Dr. Conan C. Albrecht <ca@byu.edu>.  Please email me if you find errors with this tutorial or have suggestions/fixes for the DMP framework.  Since I also use the framework in my Django classes at BYU, many students have implemented the framework at their companies upon graduation.  At this point, the framework is quite mature and robust.
 
 I've been told by some that DMP has a lot in common with Rails.  I've actually never used RoR, but good ideas are good ideas wherever they are found, right? :)
 
@@ -43,9 +43,9 @@ The short answer is I liked Mako's approach the best.  It felt the most Pythonic
 
 ## Can I use DMP with other Django apps?
 
-Many add-on apps have been created for Django, and you may want to use them as well.  Be assured that DMP plays nicely with the other children.
+Many downloadable apps have been created for Django, and you may want to use them as well.  Be assured that DMP plays nicely with the other children.
 
-In particular, most apps add lines to your `urls.py` file.  Just be sure that DMP's line in this file comes *last*.  DMP's line is a wildcard, and it matches everything.  As long as DMP is the last pattern listed, your other apps should run normally.
+In particular, most apps add lines to your `urls.py` file.  Just be sure that DMP's line in this file comes *last*.  DMP's line is a wildcard, so it matches everything.  As long as DMP is the last pattern listed, your other apps should run normally.
 
 Note also that other apps likely use Django's built-in templating system rather than DMP's Mako templating system.  The two templating systems work fine side by side, so other apps should render fine the normal Django way and your custom apps will render fine with Mako.
 
@@ -223,12 +223,17 @@ ${ random.randint(1, 10) }</code></pre></td>
 # Installation
 
 
-### Python 3+ (also 2.7)
+### Upgrade Notes for DMP 3.0
 
-* Install Python and ensure you can run "python3" at the command prompt.  The framework is developed on Python 3.x, but we've ensured it also works with 2.7 for those without a choice.
-* Install PIP for `pip3` (it comes with Python 3.4+)
+In March, 2016, Django-Mako-Plus 3.0 was released.  It is a refactor of the entire codebase, and *it contains many incompatible changes* to all previous versions of DMP.  The primary reason for the incompatible upgrade is to match Django's template API.  DMP predates Django pluggable template support, so it defined its own methods.  Now that Django supports custom templating engines, a refactor of DMP was in order.
 
-All of the above can be found on numerous Python tutorials and web sites.  They are standard methods of installing modules in Python.
+DMP 3.0 also breaks with previous versions of Python and Django.  The new version requires Python 3 and Django 1.8+.
+
+
+### Python 3+
+
+* Install Python and ensure you can run "python3" at the command prompt.  The framework requires Python 3.x and Django 1.8+.  If you need to support Python 2.7 or an older version of Django, use the latest DMP 2.* code (it's very stable).
+
 
 
 ### Install Django, Mako, and DMP
@@ -245,7 +250,7 @@ Note that on Windows, it might be called simply `pip`:
         pip install mako
         pip install django-mako-plus
         
-DMP requires Django 1.7+, Python 2.7+, and Mako 1.0+.
+DMP requires Django 1.8+, Python 3+, and Mako 1.0+.
         
    
 ### Create a Django project
@@ -253,6 +258,10 @@ DMP requires Django 1.7+, Python 2.7+, and Mako 1.0+.
 Create a Django project with the typical:
 
         django-admin startproject test_dmp
+        
+on some systems, one of the following commands might work better:
+
+        python3 -m django startproject test_dmp
   
 This step is described in detail in the standard Django tutorial.  You can, of course, name your project anything you want, but in the sections below, I'll assume you called your project `test_dmp`.
 
@@ -260,7 +269,6 @@ Don't forget to migrate to synchronize your database.  The apps in a standard Dj
 
         python3 manage.py migrate
 
-> If the django-admin.py command isn't found, it's probably not in your path.   This is a common problem to people new to Django, and the main Django has an entire page dedicated the problem.  Check it out at [https://docs.djangoproject.com/en/dev/faq/troubleshooting](https://docs.djangoproject.com/en/dev/faq/troubleshooting).
   
 ### Edit Your `settings.py` File:
 
@@ -305,12 +313,11 @@ Don't forget to migrate to synchronize your database.  The apps in a standard Dj
              },
          }
          
-4. Add the Django-Mako-Plus settings (paste this code at the end of your `settings.py` file):   
+4. Add the Django-Mako-Plus engine to the TEMPLATES list:   
    
          TEMPLATES = [
            {
                'BACKEND': 'django_mako_plus.MakoTemplates',
-               'APP_DIRS': True,
                'OPTIONS': {
                    # functions to automatically add variables to the params/context before templates are rendered
                    'CONTEXT_PROESSORS': [
@@ -362,7 +369,7 @@ Don't forget to migrate to synchronize your database.  The apps in a standard Dj
          
 5. Add the following to serve your static files.  This step is pure Django; you can read about it in the standard Django docs.  These variables are also explained below in the section entitled "Static Files, Your Web Server, and DMP".
 
-         STATIC_URL = '/static/'
+         STATIC_URL = '/static/'   # you probably already have this
          STATICFILES_DIRS = (
              # SECURITY WARNING: this next line must be commented out at deployment
              BASE_DIR,  
@@ -374,14 +381,14 @@ Don't forget to migrate to synchronize your database.  The apps in a standard Dj
 
 Add the Django-Mako-Plus router as **the last pattern** in your `urls.py` file (the default admin is also included here for completeness):
 
-         from django_mako_plus import route_request as dmp_route_request
+         from django_mako_plus import route_request
           
           urlpatterns = [
           
               ...
 
               # the django_mako_plus controller handles every request - this line is the glue that connects Mako to Django
-              url(r'^.*$', dmp_route_request),
+              url(r'^.*$', route_request),
           ]
           
 ### Create a DMP-Style App
@@ -397,7 +404,20 @@ As with any Django app, you need to add your new app to the INSTALLED_APPS list 
             'homepage',
         )
         
-Congratulations.  You're ready to go!  Skip forward to the "Tutorial" section to continue.
+Congratulations.  You're ready to go! 
+
+
+### Load it Up!
+
+Start your web server with the following:
+
+        python3 manage.py runserver
+        
+If you get a message about unapplied migrations, ignore it for now and continue.  
+
+Open your web browser to [http://localhost:8000/](http://localhost:8000/).  You should see a message welcoming you to the homepage app.
+
+If everything is working, skip ahead to the tutorial.
 
 
 ### Huh? "app homepage is not a designated DMP app"?
@@ -435,19 +455,18 @@ Already have an app that you'd like to switch over?  Just do the following:
 
 This section is for those that need Django is a subdirectory, such as `/mysite`.  If your Django installation is at the root of your domain, skip this section.
 
-In other words, suppose your site isn't at the root of your domain.  Instead of the normal url pattern, `http://www.yourdomain.com/`, your Django installation is at `http://www.yourdomain.com/mysite/`.  All apps are contained within this `mysite/` directory.
+In other words, suppose your Django site isn't the only thing on your server.  Instead of the normal url pattern, `http://www.yourdomain.com/`, your Django installation is at `http://www.yourdomain.com/mysite/`.  All apps are contained within this `mysite/` directory.
 
-Since DMP calls your apps and functions based on the URL pattern, you need to tell it to ignore the `mysite/` prefix.  This is accomplished with the `URL_START_INDEX` setting:
+Since DMP calls your apps and functions based on the URL pattern, you need to tell it to ignore the `mysite/` prefix.  This is accomplished with the `URL_START_INDEX` setting in the `OPTIONS` dictionary we installed earlier:
 
-         DJANGO_MAKO_PLUS = {
-             'URL_START_INDEX': 1,
-         }
+         'URL_START_INDEX': 1,
 
-The above setting tells DMP to ignore the first item in your URLs.  With this setting, the URL `http://www.yourdomain.com/mysite/homepage/index/` translates to the `homepage` app and `index` view page.  The first item is skipped over.
+The above setting tells DMP to ignore the first item in your URLs.  With this setting, the URL `http://www.yourdomain.com/mysite/homepage/index/` translates to the `homepage` app and `index` view page.  The first item is skipped.
 
 If your prefix has two subdirectorie prefixes, such as `mysite/mystuff/`, set the `URL_START_INDEX` to 2.  For three directories, set it to 3, and so forth.
 
 # Tutorial
+
 
 I'll assume you've just installed Django-Mako-Plus according to the instructions above.  You should have a `dmp_test` project directory that contains a `homepage` app.  I'll further assume you know how to open a terminal/console and `cd` to the `dmp_test` directory.  Most of the commands below are typed into the terminal in this directory.
 
@@ -534,15 +553,22 @@ Pay special attention to the `<%block name="content">` section, which is overrid
 
 The purpose of the inheritance from `base.htm` is to get a consistent look, menu, etc. across all pages of your site.  When you create additional pages, simply override the `content` block, similar to the way `index.html` does it.
 
+> Don't erase anything in the base.htm file.  In particular, the `static_files` and `StaticRenderer` lines at the top and bottom are important parts of DMP.  As much as you probably want to clean up the mess, try your best to leave them alone.  These code lines are not the droids you are looking for.  Move along.
 
 
 ## Routing Without urls.py
 
-In the installation procedures above, you added the following line to your urls.py routing file:
+In the installation procedures above, you set your urls.py file to look something like the following:
 
-        url(r'^.*$', 'django_mako_plus.router.route_request' ),
+        from django_mako_plus import route_request
 
-The regular expression in this line, `^.*$`, is a wildcard that matches everything.  It tells every url to go to the Django-Mako-Plus router, where it is further routed according to the pattern: `/app/page`.  We aren't really routing without `urls.py`; we're adding a second, more important router afterward.  In fact, you can still use the `urls.py` file in the normal Django way because we placed the wildcard at the *end* of the file.  Things like the `/admin/` still work the normal, Django way.
+        urlpatterns = [
+            url(r'^admin/', admin.site.urls),
+            url(r'^.*$', route_request),
+        ]
+        
+
+The regular expression in the last line, `^.*$`, is a wildcard that matches everything.  It tells every url to go to the Django-Mako-Plus router, where it is further routed according to the pattern: `/app/page`.  We aren't really routing without `urls.py`; we're adding a second, more important router afterward.  In fact, you can still use the `urls.py` file in the normal Django way because we placed the wildcard at the *end* of the file.  Things like the `/admin/` still work the normal, Django way.
 
 Rather than listing every. single. page. on. your. site. in the `urls.py` file, the router figures out the destination via a convention.  The first url part is taken as the app to go to, and the second url part is taken as the view to call.
 
@@ -564,14 +590,14 @@ Let's add some "work" to the process by adding the current server time to the in
         from django.conf import settings
         from django_mako_plus import view_function
         from datetime import datetime
-        from .. import dmp_render, dmp_render_to_response
+        from .. import dmp_render, dmp_render_to_string
 
         @view_function
         def process_request(request):
-          template_vars = {
+          context = {
             'now': datetime.now(),
           }
-          return dmp_render_to_response(request, 'index.html', template_vars)
+          return dmp_render(request, 'index.html', context)
   
 Reload your server and browser page, and you should see the exact same page.  It might look the same, but something very important happened in the routing.  Rather than going straight to the `index.html` page, processing went to your new `index.py` file.  At the end of the `process_request` function above, we manually render the `index.html` file.  In other words, we're now doing extra "work" before the rendering.  This is the place to do database connections, modify objects, prepare and handle forms, etc.  It keeps complex code out of your html pages.
 
@@ -579,7 +605,7 @@ Let me pause for a minute and talk about log messages.  If you enabled the logge
 
           DEBUG controller :: processing: app=homepage, page=index, funcname=, urlparams=['']
           DEBUG controller :: calling view function homepage.views.index.process_request
-          DEBUG controller :: rendering template .../dmptest/homepage/templates/index.html  
+          DEBUG controller :: rendering template .../dmp_test/homepage/templates/index.html  
 
 These debug statements are incredibly helpful in figuring out why pages aren't routing right.  If your page didn't load right, you'll probably see why in these statements.  In my log above, the first line lists what the controller assigned the app and page to be.
 
@@ -587,16 +613,16 @@ The second line tells me the controller found my new `index.py` view, and it cal
 
 >This decoration with `@view_function` is done for security.  If the framework let browsers specify any old function, end users could invoke any function of any module on your system!  By requiring the decorator, the framework limits end users to one specifically-named function.
 
-If you have multiple decorators on your function, such as a permissions check and `view_function`, you **must list `view_function` first**.  For example:
+You can have multiple decorators on your function, such as a permissions check and `view_function`:
 
-          @view_function                    # must be listed first
+          @view_function
           @permission_required('can_vote')
           def process_request(request):
             ...
 
-> Later in the tutorial, we'll describe another way to call other functions within your view  Even though `process_request` is the default function, you can actually have multiple web-accessible functions within a view/*.py file.
+> Later in the tutorial, we'll describe another way to call other functions within your view  Even though `process_request` is the default function, you can actually have multiple web-accessible functions within a single .py file.
 
-As stated earlier, we explicitly call the Mako renderer at the end of the `process_request` function.  The template_vars (the third parameter of the call) is a dictionary containing variable names that will be globally available within the template.
+As stated earlier, we explicitly call the Mako renderer at the end of the `process_request` function.  The context (the third parameter of the call) is a dictionary containing variable names that will be globally available within the template.
 
 Let's use the `now` variable in our index.html template:
 
@@ -622,65 +648,101 @@ Reload your web page and ensure the new view is working correctly.  You should s
 
 > This section explains the two render functions included with DMP.  If you just want to get things working, skip over this section.  You can always come back later for an explanation of how things are put together.
 
-In the example above, we used the `dmp_render_to_response` function to render our template.  It's the DMP equivalent of Django's `render_to_response` function.  The primary difference between the two functions (other than, obviously, the names) is DMP's function must be **connected to an app**.  Since Django puts all templates in a single directory tree, it can use a single, generic function for all templates in the system.  DMP's structure is more app-based: each of your apps contains a `templates` directory. 
+In the example above, we used the `dmp_render` function to render our template.  It's the DMP equivalent of Django's `render` shortcut function.  The primary difference between the two functions (other than, obviously, the names) is DMP's function must be **connected to an app**.  Django searches for templates in a flat list of directories -- while your apps might have templates in them, Django just searches through them in order.  DMP's structure is logically app-based: each of your apps contains a `templates` directory, and DMP always searches the *current* app directly.  With DMP, there are no worries about template name clashes or finding issues.
 
-Therefore, DMP doesn't just have a single "render" function -- it has one per app.  In other words, DMP adds the function *to each of your apps*.  You'll have one version of `dmp_render_to_response` in your homepage app, another version of `dmp_render_to_response` in your catalog app, and so forth through your apps.
+Because DMP is app-aware, it creates more than one render function -- one per app.    You'll have one version of `dmp_render` in your homepage app, another version of `dmp_render` in your catalog app, and so forth through your apps.  The function is named the same in each module for consistency.
 
-**Practically, you don't need to worry about any of this.  You just need to import the function in a very specific way.**  In each of your views, use the following:
+**Practically, you don't need to worry about any of this.  DMP is smart enough to know which render is connected to which app.  You just need to import the function correctly in each of your views.**  In each .py file, use the following import:
 
         # this works in any app/views/*.py file:
-        from .. import dmp_render, dmp_render_to_response
+        from .. import dmp_render, dmp_render_to_string
 
 If relative imports (the double dot) bother you, use an absolute one instead:
 
-        # this works in any directory of your project, but be aware
-        # that it processes templates specifically in the homepage app:
-        from homepage import dmp_render, dmp_render_to_response
+        # this also works in any app/views/*.py file:
+        from homepage import dmp_render, dmp_render_to_string
         
 By using one of the above import lines, you'll always get a template renderer that is app-aware and that processes template inheritance, includes, CSS, and JS files correctly.
         
-> Some Python programmers have strong feelings about relative vs. absolute imports.  They were once strongly discouraged in PEP-8 and other places.  In recent years, Guido and others seem to have softened and suggested that relative imports have a place.  But regardless of your take on the issue, DMP can be used with either relative or absolute import statements.
+> Some Python programmers have strong feelings about relative vs. absolute imports.  They were once strongly discouraged in PEP-8 and other places.  In recent years, Guido and others seem to have softened and suggested that relative imports have a place.  Whatever your flavor of life, pick one of the above.  Personally, I favor the first one (relative importing) because it requires me to think less.
 
-> This tutorial uses the relative import method for a specific reason: view files are often copied across apps.  In my experience, new view files aren't started from scratch very often; instead, programmers copy an existing view, clear it out, and write new python code.  If absolute imports were used (e.g. homepage was explicitly specified in the import), the wrong render object would be used when this code line was copied to a view in another app.  Since views are *always* placed in the app/views/ folder, relative imports solve the "copying" issue without any additional problems.  My $0.02.
+> This tutorial uses the relative import method for a specific reason: view files are often copied across apps.  In my experience, new view files aren't started from scratch very often; instead, programmers copy an existing view, clear it out, and write new functions.  If absolute imports were used (the second method above), the wrong render object would be used when this code line was copied across apps.  Since DMP views are *always* placed in the app/views/ folder, relative imports solve the "copying" issue without any additional problems.  My $0.02.
 
 
-DMP provides a second function, `dmp_render`, which is a simplified version of `dmp_render_to_response`.  Both functions process your template, but `dmp_render` returns a string rather than an `HttpResponse` object.  If you need a custom response, or if you simply need the rendered string, `dmp_render` is the ticket.  Most of the time, `dmp_render_to_response` is the appropriate method because Django expects the full response object (not just the content string) returned from your views.
+DMP provides a second function, `dmp_render_to_string`.  Both functions process your template, but `dmp_render_to_string` returns a string rather than an `HttpResponse` object.  If you need a custom response, or if you simply need the rendered string, `dmp_render_to_string` is the ticket.  Most of the time, `dmp_render` is the appropriate method because Django expects the full response object (not just the content string) returned from your views.
 
-For an example of `dmp_render`, scroll lower in this tutorial to the "Mime Types and Status Codes" section.
+For an example of `dmp_render_to_string`, scroll lower in this tutorial to the "Mime Types and Status Codes" section.
 
 If you need to process templates across apps within a single view.py file (likely a rare case), use absolute imports and give an alias to the functions as you import them:
 
-        import homepage.dmp_render_to_response as homepage_render_to_response
-        import catalog.dmp_render_to_response as catalog_render_to_response
+        import homepage.dmp_render as homepage_render
+        import catalog.dmp_render as catalog_render
         
 Once you've imported the functions with aliases, simply use the appropriate function for templates in the two apps.
 
-Suppose you need to put your templates in a directory named something other than `/appname/templates/`.  Or perhaps you have a non-traditional app path.  The two above methods are really just convenience methods to make rendering easier.  If you need more control, create the template renderer yourself and use it directly:
+Suppose you need to put your templates in a directory named something other than `/appname/templates/`.  Or perhaps you have a non-traditional app path.  The two above methods are really just convenience methods to make rendering easier.  If you need a custom template instance, switch to the paddle shifters:
 
         from django.conf import settings
         from django_mako_plus import view_function
+        from django_mako_plus.template import get_app_template_lookup
         from datetime import datetime
-        
+
         @view_function
         def process_request(request):
-          template_vars = {
+          context = {
             'now': datetime.now(),
           }
-          
+  
           # this syntax is only needed if you need to customize the way template rendering works
-          templater = MakoTemplateRenderer('/app/path/', template_subdir="my_templates")
-          return templater.render_to_response(request, 'index.html', template_vars)
+          tlookup = get_app_template_lookup('/app/path/', subdir="my_templates")
+          template = tlookup.get_template('index.html')
+          return template.render_to_response(request=request, context=context)
+          
+The above code references an app in a non-standard location and a template subdirectory with a non-standard name.
 
-### Why Not the Normal Django API?
 
-Starting with version 1.8, Django has support for multiple template engines.  You might be wondering why DMP doesn't plug into this new way of doing things.
+### Can't I Use the Django Shortcut Functions?
 
-The short answer is Django's standard templating API doesn't do what DMP needs.  In particular, despite supporting multiple engines (like Django, Jinja2, etc.), the standard get_template() and render() functions don't have any sense of the "current app" where the function is being called.  Another need Django doesn't support is DMP's idea of rendering single `def`s in a page.
+Yep, and you can use the other Django template methods as well.  The code below is now sans the `dmp_render` function; it instead sports the regular `render` method from the shortcuts module:
 
-Rather than fitting a square peg into a round hole, DMP has kept its `dmp_render` and `dmp_render_to_response` functions.  These ensure that you'll get all the DMP goodness.
+        from django.conf import settings
+        from django.shortcuts import render
+        from django_mako_plus import view_function
+        from datetime import datetime
 
-> It actually *is* possible to introspect the current app from the standard Django functions by inspecting the call stack.  However, this is a "hacktastic" way to do it (a.k.a. not a good thing). Better to keep the separate API than to hack things together.
+        @view_function
+        def process_request(request):
+          context = {
+            'now': datetime.now(),
+          }
+          return render(request, 'homepage/index.html', context)
+          # or
+          return render(request, 'homepage/index.html', context, using='django_mako_plus')
+  
+However, *be sure to note one specific requirement* when using the normal Django methods.  You must specify your template with the `app/template.html` format.  Since the DMP engine is specific to your apps, it needs to know which app your template resides in.
 
+The the second version of the `render` call in the example above includes the `using` parameter, which specifically tells Django to use the DMP engine for rendering.  If you omit this, Django starts with the first template engine listed in your settings.py, which may or may not be DMP.  If DMP is the only engine listed, there's no reason to specify the `using` parameter.  This confusion is explained in detail in the Django documentation.
+
+The following is another example of using the standard Django methods.  Note the app/template format in the filename again:
+
+        from django.conf import settings
+        from django.http import HttpResponse
+        from django.template.loader import get_template
+        from django_mako_plus import view_function
+        from datetime import datetime
+
+        @view_function
+        def process_request(request):
+          context = {
+            'now': datetime.now(),
+          }
+          template = get_template('homepage/index.html')
+          # or
+          template = get_template('homepage/index.html', using='django_mako_plus')
+          return HttpResponse(template.render(context=context, request=request))
+
+
+As you can hopefully see, DMP provides custom functions like `dmp_render` and also allows regular Django functions.  Use whichever best suits your needs.
 
 
 ## URL Parameters
@@ -701,15 +763,15 @@ Although this might not be the best use of urlparams, suppose we want to display
   
         from django.conf import settings
         from django_mako_plus import view_function
-        from .. import dmp_render, dmp_render_to_response
+        from .. import dmp_render, dmp_render_to_string
         from datetime import datetime
 
         @view_function
         def process_request(request):
-          template_vars = {
+          context = {
             'now': datetime.now().strftime(request.urlparams[0] if request.urlparams[0] else '%H:%M'),
           }
-          return dmp_render_to_response(request, 'index.html', template_vars)
+          return dmp_render(request, 'index.html', context)
 
 The following links now give the time in different formats:
 
@@ -717,12 +779,12 @@ The following links now give the time in different formats:
 * The current hour: `http://localhost:8000/homepage/index/%H/`
 * The month, year: `http://localhost:8000/homepage/index/%B,%20%Y`
 
-> If a urlparam doesn't exist, it always returns the empty string ''.  This is slightly different than a regular Python list, which throws an exception when an index is too large.  This means that request.urlparams[50] returns the empty string rather than an exception.  The `if` statement in the code above can be used to determine if a urlparam exists or not.  Another way to code a default value for a urlparam is `request.urlparam[2] or 'some default value'`.  
+> If a urlparam doesn't exist, it always returns the empty string ''.  This is slightly different than a regular Python list, which throws an exception when you index it beyond the length of the list.  In DMP, request.urlparams[50] returns the empty string rather than an exception.  The `if` statement in the code above can be used to determine if a urlparam exists or not.  Another way to code a default value for a urlparam is `request.urlparam[2] or 'some default value'`.  
 
 
 ## Class-Based Views
 
-Django-Mako-Plus fully supports Django's class-based view concept.  You can read more about this pattern at https://docs.djangoproject.com/en/dev/topics/class-based-views/.  If you are using view classes, DMP automatically detects and adjusts accordingly.  If you are using regular function-based views (my preference, btw), skip this section for now.
+Django-Mako-Plus supports Django's class-based view concept.  You can read more about this pattern in the Django documentation.  If you are using view classes, DMP automatically detects and adjusts accordingly.  If you are using regular function-based views, skip this section for now.
 
 With DMP, your class-based view will be discovered via request url, so you have to name your class accordingly.  In keeping with the rest of DMP, the default class name in a file should be named `class process_request()`.  The `get()`, `post()`, etc. methods of this class must be decorated with with `@view_function`.  Consider the following `index.py` file:
 
@@ -730,36 +792,35 @@ With DMP, your class-based view will be discovered via request url, so you have 
         from django.http import HttpResponse
         from django.views.generic import View
         from django_mako_plus import view_function
-        from .. import dmp_render, dmp_render_to_response
+        from .. import dmp_render, dmp_render_to_string
         from datetime import datetime
 
         class process_request(View):
-        
           @view_function
-          def get(request):
-            template_vars = {
+          def get(self, request):
+            context = {
               'now': datetime.now().strftime(request.urlparams[0] if request.urlparams[0] else '%H:%M'),
             }
-            return dmp_render_to_response(request, 'index.html', template_vars)
+            return dmp_render(request, 'index.html', context)
 
         class discovery(View):
           @view_function
-          def get(request):
+          def get(self, request):
             return HttpResponse('Get was called.')
-            
+    
           @view_function
-          def post(request):
+          def post(self, request):
             return HttpResponse('Post was called.')
 
 In the above `index.py` file, two class-based views are defined.  The first is called with the url `/homepage/index/`.  The second is called with the url `/homepage/index.discovery/`.
 
-> Python programmers usually use CamelCase (e.g. start with an uppercase letter) for class names.  In the above classes, I'm naming them all lowercase so my URL doesn't have uppercase characters in it.  If you'd rather use CamelCase, just be sure to use CamelCase in your URL.
+> Python programmers usually use CamelCase (e.g. start with an uppercase letter) for class names.  In the above classes, I'm naming them all lowercase so my URL doesn't have uppercase characters in it.  If you'd rather use CamelCase, just be sure to match it in your URL.
 
 
 
 ## A Bit of Style
 
-Modern web pages are made up of three primary parts: html, CSS, and Javascript (images and other media might be a fourth, but we'll go with three for this discussion).  Since all of your pages need these three components, this framework combines them intelligently for you.  All you have to do is name the .html, the css., and the .js file with the same name, and DMP will automatically generate the `<link>` and `<script>` tags for you.  It will even put them in the "right" spot in the html (styles at the beginning, scripts at the end).
+Modern web pages are made up of three primary parts: HTML, CSS, and Javascript (media might be a fourth, but we'll go with three for now).  Since all of your pages need these three components, this framework combines them intelligently for you.  All you have to do is name the .html, the css., and the .js file with the same name, and DMP will automatically generate the `<link>` and `<script>` tags for you.  It will even put them in the "right" spot and order in the html (styles at the beginning, scripts at the end).
 
 To style our index.html file, create `homepage/styles/index.css` and copy the following into it:
 
@@ -769,8 +830,6 @@ To style our index.html file, create `homepage/styles/index.css` and copy the fo
         }
 
 When you refresh your page, the server time should be styled with large, red text.  If you view the html source in your browser, you'll see a new `<link...>` near the top of your file.  It's as easy as naming the files the same and placing the .css file in the styles/ directory.
-
-> You might be wondering about the big number after the html source `<link>`.  That's the file modification time, in minutes since 1970.  This is included because browsers (especially Chrome) don't automatically download new CSS files.  They use their cached versions until a specified date, often far in the future (this duration is set by your web server). By adding a number to the end of the file, browsers  think the CSS files are "new" because the "filename" changes whenever you change the file.  Trixy browserses...
 
 The framework knows how to follow template inheritance.  For example, since `index.html` extends from `base.htm`, we can actually put our CSS in any of **four** different files: `index.css`, `index.cssm`, `base.css`, and `base.cssm` (the .cssm files are explained in the next section).  Place your CSS styles in the appropriate file, depending on where the HTML elements are located.  For example, let's style our header a little.  Since the `<header>` element is in `base.htm`, create `homepage/styles/base.css` and place the following in it:
   
@@ -794,28 +853,30 @@ Reload your browser, and you should have a nice white on blue header. If you vie
 
 Note that `base.css` is included first because it's at the top of the hierarchy.  Styles from `index.css` override any conflicting styles from `base.css`, which makes sense because `index.html` is the final template in the inheritance chain.
 
+> You might be wondering about the big number after the html source `<link>`.  That's the file modification time, in minutes since 1970.  This is included because browsers (especially Chrome) don't automatically download new CSS files.  They use their cached versions until a specified date, often far in the future (this duration is set by your web server). By adding a number to the end of the file, browsers  think the CSS files are "new" because the "filename" changes whenever you change the file.  Trixy browserses...
+
 
 ## A Bit of Style, Reloaded
 
 The style of a web page is often dependent upon the user, such as a user-definable theme in an online email app or a user-settable font family in an online reader.  DMP supports this behavior, mostly because the authors at MyEducator needed it for their online book reader.  You can use Mako (hence, any Python code) not only in your .html files, but also in your CSS and JS files.  Simply name the file with `.cssm` rather than .css.  When the framework sees `index.cssm`, it runs the file through the Mako templating engine before it sends it out.
 
-> Since we assume .cssm files are generated per user, they are embedded directly in the HTML rather than linked.  This circumvents a second call to the server, which would happen every time since the CSS is being dynamically generated.  Dynamic CSS can't be cached by a browser any more than dynamic HTML can.
+> Since .cssm files are generated per request, they are embedded directly in the HTML rather than linked.  This circumvents a second call to the server, which would happen every time since the CSS is being dynamically generated.  Dynamic CSS can't be cached by a browser any more than dynamic HTML can.
 
 Let's make the color dynamic by adding a new random variable `timecolor` to our index.py view:
 
         from django.conf import settings
         from django_mako_plus import view_function
-        from .. import dmp_render, dmp_render_to_response
+        from .. import dmp_render, dmp_render_to_string
         from datetime import datetime
         import random
 
         @view_function
         def process_request(request):
-          template_vars = {
+          context = {
             'now': datetime.now().strftime(request.urlparams[0] if request.urlparams[0] else '%H:%M'),
             'timecolor': random.choice([ 'red', 'blue', 'green', 'brown' ]),
           }
-          return dmp_render_to_response(request, 'index.html', template_vars)
+          return dmp_render(request, 'index.html', context)
 
 Now, rename your index.css file to `index.cssm`.  Then set the content of index.cssm to the following:
 
@@ -824,9 +885,9 @@ Now, rename your index.css file to `index.cssm`.  Then set the content of index.
           color: ${ timecolor };
         }
   
-Refresh your browser a few times.  The color should change with each refresh! 
+Refresh your browser a few times.  Hey look, Ma, the color changes with each refresh! 
 
-As shown in the example above, the template_vars dictionary sent the templating engine in `process_request` are globally available in .html, .cssm, and .jsm files.
+As shown in the example above, the context dictionary sent the templating engine in `process_request` are globally available in .html, .cssm, and .jsm files.
 
 > Note that this behavior is different than CSS engines like Less and Sass. Most developers use Less and Sass for variables at development time.  These variables are rendered and stripped out before upload to the server, and they become static, normal CSS files on the server.  .cssm files should be used for dynamically-generated, per-request CSS.
 
@@ -927,16 +988,16 @@ The client side is now ready, so let's create the `/homepage/index_time/` server
 
         from django.conf import settings
         from django_mako_plus import view_function
-        from .. import dmp_render, dmp_render_to_response
+        from .. import dmp_render, dmp_render_to_string
         from datetime import datetime
         import random
 
         @view_function
         def process_request(request):
-          template_vars = {
+          context = {
             'now': datetime.now(),
           }
-          return dmp_render_to_response(request, 'index_time.html', template_vars)
+          return dmp_render(request, 'index_time.html', context)
   
 Finally, create the `/homepage/templates/index_time.html` template, which is rendered at the end of `process_request()` above:
 
@@ -963,10 +1024,10 @@ Open `homepage/views/index.py` and add the following to the end of the file:
 
         @view_function
         def gettime(request):
-          template_vars = {
+          context = {
             'now': datetime.now(),
           }
-          return dmp_render_to_response(request, 'index_time.html', template_vars)  
+          return dmp_render(request, 'index_time.html', context)  
 
 Note the function is decorated with `@view_function`, and it contains the function body from our now-deleted `index_time.py`.  The framework recognizes **any** function with this decorator as an available endpoint for urls, not just the hard-coded `process_request` function.  In other words, you can actually name your view methods any way you like, as long as you follow the pattern described in this section.  
 
@@ -997,7 +1058,7 @@ This likely impacts few users of DMP, so you may want to skip this section for n
 
 If the templates you need to access are within your project directory, no extra setup is required.  Simply reference those templates relative to the root project directory.  For example, to access a template located at homepage/mytemplates/sub1/page.html (relative to your project root), use the following:
 
-        return dmp_render_to_response(request, '/homepage/mytemplates/sub1/page.html', template_vars)
+        return dmp_render(request, '/homepage/mytemplates/sub1/page.html', context)
         
 ### Case 2: Templates Outside Your Project Directory
 
@@ -1011,7 +1072,7 @@ Suppose your templates are located on a different disk or entirely different dir
         
 Suppose, after making the above change, you need to render the '/var/templates/page1.html' template:
 
-        return dmp_render_to_response(request, 'page1.html', template_vars)
+        return dmp_render(request, 'page1.html', context)
         
 DMP will first search the current app's `templates` directory (i.e. the normal way), then it will search the `TEMPLATES_DIRS` list, which in this case contains `/var/templates/`.  Your `page1.html` template will be found and rendered.
 
@@ -1085,15 +1146,15 @@ Any entries in this list will be automatically included in templates throughout 
 
 ## Mime Types and Status Codes
 
-The `dmp_render_to_response()` function returns the *text/html* mime type and *200* status code.  What if you need to return JSON, CSV, or a 404 not found?  Just wrap the `render` function in a standard Django `HttpResponse` object.  A few examples:
+The `dmp_render()` function returns the *text/html* mime type and *200* status code.  What if you need to return JSON, CSV, or a 404 not found?  Just wrap the `render` function in a standard Django `HttpResponse` object.  A few examples:
 
         from django.http import HttpResponse
         
         # return CSV
-        return HttpResponse(dmp_render(request, 'my_csv.html', {}), mimetype='text/csv')
+        return HttpResponse(dmp_render_to_string(request, 'my_csv.html', {}), mimetype='text/csv')
         
         # return a custom error page
-        return HttpResponse(dmp_render(request, 'custom_error_page.html', {}), status=404)
+        return HttpResponse(dmp_render_to_string(request, 'custom_error_page.html', {}), status=404)
         
 
 ## Useful Variables

@@ -284,6 +284,7 @@ class MakoTemplateLookup:
        This method raises a Django exception if the template is not found or cannot compile.
     '''
     try:
+      # wrap the mako template in an adapter that gives the Django template API
       return MakoTemplateAdapter(self.get_mako_template(template))
     except (TopLevelLookupException, TemplateLookupException) as e: # Mako exception raised
       log.debug('DMP :: template "%s" not found in search path: %s.' % (template, self.template_search_dirs))
@@ -301,7 +302,16 @@ class MakoTemplateLookup:
        This method raises a Mako exception if the template is not found or cannot compile.
     '''
     # get the template
-    return self.tlookup.get_template(template)
+    template_obj = self.tlookup.get_template(template)
+    
+    # if this is the first time the template has been pulled from self.tlookup, add a few extra attributes
+    if not hasattr(template_obj, 'template_path'):
+      template_obj.template_path = template
+    if not hasattr(template_obj, 'template_full_path'):
+      template_obj.template_full_path = template_obj.filename
+    
+    # get the template
+    return template_obj
 
 
 
