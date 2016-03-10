@@ -43,7 +43,7 @@ class Command(MakeMessagesCommand):
           fname, ext = os.path.splitext(filename)
           if ext.lower() in ( '.htm', '.html', '.jsm', '.cssm' ):
             # create the template object, which creates the compiled .py file
-            renderer = get_dmp_instance()._get_renderer(app_config.name, subdir_name)
+            renderer = get_dmp_instance().get_app_template_lookup(app_config.name, subdir_name)
             renderer.get_template(filename)
             
     

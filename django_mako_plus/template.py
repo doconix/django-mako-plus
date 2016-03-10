@@ -6,8 +6,9 @@ from django.template import TemplateDoesNotExist, TemplateSyntaxError, Context, 
 from django.template.backends.base import BaseEngine
 from django.utils.module_loading import import_string
 
-from mako.exceptions import TopLevelLookupException, html_error_template
+from mako.exceptions import TopLevelLookupException, TemplateLookupException, CompileException, SyntaxException, html_error_template
 from mako.lookup import TemplateLookup
+from mako.template import Template
 
 from .exceptions import InternalRedirectException, RedirectException
 from .signals import dmp_signal_pre_render_template, dmp_signal_post_render_template, dmp_signal_redirect_exception
@@ -58,7 +59,7 @@ class MakoTemplates(BaseEngine):
     DMP_OPTIONS[DMP_OPTIONS_INSTANCE_KEY] = self
 
     # add a template renderer for each DMP-enabled app
-    self.template_renderers = {}
+    self.template_lookups = {}
     for app_config in get_dmp_app_configs():
       self.register_app(app_config)
       
@@ -79,53 +80,83 @@ class MakoTemplates(BaseEngine):
        This should not normally be called directly.
     '''
     # set up the template, script, and style renderers
-    self.template_renderers[app_config.name] = {
-      'templates': MakoTemplateRenderer(app_config.path),
-      'scripts': MakoTemplateRenderer(app_config.path, 'scripts'),
-      'styles': MakoTemplateRenderer(app_config.path, 'styles'),
-    }
+    get_app_template_lookup(app_config.name, 'templates', create=True)
+    get_app_template_lookup(app_config.name, 'scripts', create=True)
+    get_app_template_lookup(app_config.name, 'styles', create=True)
 
     # add the shortcut functions (only to the main templates, we don't do to scripts or styles
     # because people generally don't call those directly)
-    app_config.module.dmp_render = RenderShortcut(self, app_config.name, 'render', 'templates')
-    app_config.module.dmp_render_to_string = RenderShortcut(self, app_config.name, 'render_to_string', 'templates')
+    app_config.module.dmp_render = RenderShortcut(self, app_config.name, 'render_to_response')   # the Django shortcut to return an HttpResponse is render().
+    app_config.module.dmp_render_to_string = RenderShortcut(self, app_config.name, 'render')  # the Django Template method to render to a string is render().  Django templates never return a direct response.  Lame these two names are the same.
     
     
-  def get_renderer(self, app_name):
-    '''Returns the template renderer for the given app name from the cache.
+  def get_template_lookup(self, app_name):
+    '''Returns the template lookup object for the "templates" directory in
+       the given app name from the DMP cache.
+    
        Raises a LookupException if the app_name has not been registered.
-       
-       This is the primary interface for getting an MakoTemplateRenderer.
     '''
-    return self._get_renderer(app_name, 'templates')
+    return self.get_app_template_lookup(app_name, 'templates')
 
 
-  def _get_renderer(self, app_name, renderer_type):
-    '''Returns the styles renderer for the given app name from the cache.
-       Raises a LookupException if the app_name has not been registered.
+  def get_app_template_lookup(self, app_name, subdir, create=False):
+    '''Returns a template lookup object for the given app name in the given subdir.
+       For example, get_app_template_lookup('homepage', 'styles') will return
+       a lookup for the styles/ directory in the homepage app.
        
-       This method is generally only used internally within DMP.
+       If the lookup is not found in the DMP cache, one of two things occur:
+         1. If create=True, it is created automatically and returned.
+         2. If create=False, a LookupException is raised.
+         
+       This method is only used when custom lookups are needed.  The
+       get_template_lookup(app_name) method is the more common method.
        
-       renderer_type is one of 'templates', 'scripts', or 'styles'.
+       DMP automatically creates template lookup objects for the following 
+       subdirectories for every DMP-enabled app: 'templates', 'scripts', 'styles'.
     '''
+    # get all the renderers for this app
     try:
-      return self.template_renderers[app_name][renderer_type]
+      app_lookups = self.template_lookups[app_name]
     except KeyError:
-      raise LookupError("%s has not been registered as a DMP app (or the renderer_type was invalid).  Did you forget to include the DJANGO_MAKO_PLUS = True line in your app's __init__.py?" % app_name)
+      if create:
+        app_lookups = {}
+        self.template_lookups[app_name] = app_lookups
+      else:
+        raise LookupError("%s has not been registered as a DMP app.  Did you forget to include the DJANGO_MAKO_PLUS=True line in your app's __init__.py?" % app_name)
+
+    # get the specific subdir renderer
+    try:
+      return app_lookups[subdir]
+    except KeyError:
+      if create:
+        lookup = MakoTemplateLookup(app_name, subdir)
+        app_lookups[subdir] = lookup
+        return lookup
+      else:
+        raise LookupError("%s is a DMP app, but a template lookup object for the %s directory was not found." % (app_name, subdir))
 
   
   def from_string(self, template_code):
-    '''Compiles a template from the given string.  
+    '''Compiles a template from the given string. 
        This is one of the required methods of Django template engines.
     '''
-    return ''
+    mako_template = Template(template_code, imports=DMP_OPTIONS.get('DEFAULT_TEMPLATE_IMPORTS'), input_encoding=DMP_OPTIONS.get('DEFAULT_TEMPLATE_ENCODING', 'utf-8'))
+    return MakoTemplateAdapter(mako_template)
 
 
   def get_template(self, template_name):
-    '''Retrieves a template.
+    '''Retrieves a template object.
        This is one of the required methods of Django template engines.
+       
+       Because DMP templates are always app-specific (Django only searches
+       a global set of directories), the template_name MUST be in the format:
+       "app_name/template.html".  DMP splits the template_name string on the
+       slash to get the app name and template name. 
     '''
-    return ''
+    parts = template_name.split('/', 1)
+    if len(parts) < 2:
+      raise LookupError('Invalid template_name format for a DMP template.  This method requires that the template name be in app_name/template.html format (separated by slash).')
+    return self.get_template_lookup(parts[0]).get_template(parts[1])
     
     
     
@@ -133,7 +164,7 @@ class MakoTemplates(BaseEngine):
 
 
 ##############################################################
-###   Utilities not meant to be used outside this package.
+###   Utility functions
 
 
 def get_dmp_instance():
@@ -155,33 +186,77 @@ def get_dmp_app_configs():
       yield config
       
 
-class RenderShortcut(object):
-  '''A shortcut way to call render() for an app's template renderer.
-     The code in this class is a bit convoluted, but it makes it possible
-     to call each app's renderer with a function rather than having to get
-     an object reference.
+def get_template_lookup(app_name):
+  '''Returns the template lookup object for the "templates" directory in
+     the given app name from the DMP cache.
+  
+     Raises a LookupException if the app_name has not been registered.
   '''
-  def __init__(self, dmp_instance, app_name, method_name, renderer_type):
+  return get_dmp_instance().get_app_template_lookup(app_name, 'templates')
+  
+  
+def get_app_template_lookup(app_name, subdir, create=False):
+  '''Returns a template lookup object for the given app name in the given subdir.
+     For example, get_app_template_lookup('homepage', 'styles') will return
+     a renderer for the styles/ directory in the homepage app.
+     
+     If the template lookup is not found in the DMP cache, one of two things occur:
+       1. If create=True, it is created automatically and returned.
+       2. If create=False, a LookupException is raised.
+       
+     This method is only used when custom lookups are needed.  The
+     get_template_lookup(app_name) method is the more common method.
+     
+     DMP automatically creates lookup objects for the following subdirectories
+     for every DMP-enabled app:
+       'templates', 'scripts', 'styles'.
+  '''
+  return get_dmp_instance().get_app_template_lookup(app_name, subdir, create)
+
+
+
+class RenderShortcut(object):
+  '''A shortcut way to call render() on a template.
+     This enables the primary DMP way to run templates.  
+     These shortcuts are created in MakoTemplates.__init__ above.
+     Use of these shortcuts:
+     
+       # this code goes in an app's view files, such as views/index.py
+       from .. import render, render_to_string
+
+       # to render templates/index.html to a string
+       st = render_to_string(request, 'index.html', { 'var1': 'value' })
+
+       # to render templates/index.html to an HttpResponse
+       response = render(request, 'index.html', { 'var1': 'value' })
+
+       # this shows how to render a file in a scripts/ or styles/ folder
+       # to render scripts/index.jsm to a string
+       st = render_to_string(request, 'index.html', { 'var1': 'value' }, subdir='scripts')
+
+       # to render styles/index.cssm to a response
+       st = render(request, 'index.html', { 'var1': 'value' }, subdir='styles')
+  '''
+  def __init__(self, dmp_instance, app_name, template_method_name):
     self.dmp_instance = dmp_instance
     self.app_name = app_name
-    self.method_name = method_name
-    self.renderer_type = renderer_type
+    self.template_method_name = template_method_name
 
-  def __call__(self, *args, **kwargs):
+  def __call__(self, request, template, context=None, subdir='templates'):
     '''Allows instances of this class to act like functions.'''
-    # I use get_renderer to essentially do "late binding" to the map, just in
-    # case the TEMPLATE_RENDERERS map must be modified after its initial creation
-    # below.  This way I don't have a direct (and permanent) pointer to the renderer.
-    # this next line gets the appropriate MakoTemplateRenderer and calls the render or
-    # render_to_string method.
-    return getattr(self.dmp_instance._get_renderer(self.app_name, self.renderer_type), self.method_name)(*args, **kwargs)
+    # I'm doing "late binding" to the map, just in
+    # case new template lookup objects are added after creation.  
+    # This way I don't have a direct (and permanent) pointer to the lookup object.
+    template_lookup = self.dmp_instance.get_app_template_lookup(self.app_name, subdir)
+    template_obj = template_lookup.get_template(template)
+    return getattr(template_obj, self.template_method_name)(context=context, request=request)
 
 
 
 ##############################################################
-###   Renders Mako templates
+###   Looks up Mako templates
 
-class MakoTemplateRenderer:
+class MakoTemplateLookup:
   '''Renders Mako templates.'''
   def __init__(self, app_path, template_subdir='templates'):
     '''Creates a renderer to the given path (relative to the project root where settings.STATIC_ROOT points to).'''
@@ -201,77 +276,93 @@ class MakoTemplateRenderer:
     self.tlookup = TemplateLookup(directories=self.template_search_dirs, imports=DMP_OPTIONS.get('DEFAULT_TEMPLATE_IMPORTS'), module_directory=self.cache_root, collection_size=2000, filesystem_checks=settings.DEBUG, input_encoding=DMP_OPTIONS.get('DEFAULT_TEMPLATE_ENCODING', 'utf-8'))
 
 
+  def get_template(self, template):
+    '''Retrieve a *Django* template object for the given template name, using the app_path and template_subdir
+       settings in this object.
+       
+       This method corresponds to the Django templating system API.
+       This method raises a Django exception if the template is not found or cannot compile.
+    '''
+    try:
+      return MakoTemplateAdapter(self.get_mako_template(template))
+    except (TopLevelLookupException, TemplateLookupException) as e: # Mako exception raised
+      log.debug('DMP :: template "%s" not found in search path: %s.' % (template, self.template_search_dirs))
+      raise TemplateDoesNotExist('Template "%s" not found in search path: %s.' % (template, self.template_search_dirs))
+    except (CompileException, SyntaxException) as e: # Mako exception raised
+      log.debug('DMP :: template "%s" not found in search path: %s.' % (template, self.template_search_dirs))
+      raise TemplateSyntaxError('Template "%s" raised an error: %s' % (template, e))
+    
+    
+  def get_mako_template(self, template):
+    '''Retrieve a *Mako* template object for the given template name, using the app_path and template_subdir
+       settings in this object.
+       
+       This method is an alternative to get_template().  Use it when you need the actual Mako template object.
+       This method raises a Mako exception if the template is not found or cannot compile.
+    '''
+    # get the template
+    return self.tlookup.get_template(template)
+
+
+
+
+class MakoTemplateAdapter(object):
+  '''A thin wrapper for a Mako template object that provides the Django API methods.'''
+  def __init__(self, mako_template):
+    self.mako_template = mako_template
+    
+
   @property
   def engine(self):
     '''This is a singleton instance because Django only creates one of a given template engine'''
     return get_dmp_instance()
 
 
-  def get_template(self, template):
-    '''Retrieve a template object for the given template name, using the app_path and template_subdir
-       settings in this object.
-    '''
-    template_obj = self.tlookup.get_template(template)
-    # if this is the first time the template has been pulled from self.tlookup, add a few extra attributes
-    if not hasattr(template_obj, 'template_path'):
-      template_obj.template_path = template
-    if not hasattr(template_obj, 'template_full_path'):
-      template_obj.template_full_path = template_obj.filename
-    if not hasattr(template_obj, 'mako_template_renderer'):
-      template_obj.mako_template_renderer = self
-    return template_obj
-
-
-  def render_to_string(self, request, template, params={}, def_name=None):
-    '''Runs a template and returns a string.  Normally, you probably want to call render() instead
-       because it gives a full HttpResponse or Http404.
-
-       This method raises a mako.exceptions.TopLevelLookupException if the template is not found.
-
-       The method throws two signals:
+  def render(self, context=None, request=None, def_name=None):
+    '''Renders a template using the Mako system.  This method signature conforms to
+       the Django template API, which specifies that template.render() returns a string.
+       
+       The method triggers two signals:
          1. dmp_signal_pre_render_template: you can (optionally) return a new Mako Template object from a receiver to replace
             the normal template object that is used for the render operation.
          2. dmp_signal_post_render_template: you can (optionally) return a string to replace the string from the normal
             template object render.
 
-       @request  The request context from Django.  If this is None, 1) any TEMPLATE_CONTEXT_PROCESSORS defined in your settings
-                 file will be ignored and 2) DMP signals will not be sent, but the template will otherwise render fine.
-       @template The template file path to render.  This is relative to the app_path/controller_TEMPLATES_DIR/ directory.
-                 For example, to render app_path/templates/page1, set template="page1.html", assuming you have
-                 set up the variables as described in the documentation above.
-       @params   A dictionary of name=value variables to send to the template page.
+       @context  A dictionary of name=value variables to send to the template page.  This can be a real dictionary
+                 or a Django Context object.
+       @request  The request context from Django.  If this is None, any TEMPLATE_CONTEXT_PROCESSORS defined in your settings
+                 file will be ignored but the template will otherwise render fine.
        @def_name Limits output to a specific top-level Mako <%block> or <%def> section within the template.
                  If the section is a <%def>, it must have no parameters.  For example, def_name="foo" will call
-                 <%block name="foo"></%block> or <%def name="foo()"></def> within the template.
-                 The block/def must be defined in the exact template.  DMP does not support calling defs from
-                 super-templates.
+                 <%block name="foo"></%block> or <%def name="foo()"></def> within the template.  This is an
+                 extension to the Django API, so it is optional.
+       
+       The rendered string is returned.
     '''
     # set up the context dictionary, which is the variables available throughout the template
     context_dict = {}
     # let the context_processors add variables to the context.
-    context = Context(params) if request == None else RequestContext(request, params)  
+    if not isinstance(context, Context):
+      context = Context(context) if request == None else RequestContext(request, context)  
     with context.bind_template(self):
       for d in context:
         context_dict.update(d)
 
-    # get the template
-    template_obj = self.get_template(template)
-
     # send the pre-render signal
     if DMP_OPTIONS.get('SIGNALS', False) and request != None:
-      for receiver, ret_template_obj in dmp_signal_pre_render_template.send(sender=self, request=request, context=context, template=template_obj):
+      for receiver, ret_template_obj in dmp_signal_pre_render_template.send(sender=self, request=request, context=context, template=self.mako_template):
         if ret_template_obj != None:  # changes the template object to the received
-          template_obj = ret_template_obj
+          self.mako_template = ret_template_obj
 
     # do we need to limit down to a specific def?
     # this only finds within the exact template (won't go up the inheritance tree)
     # I wish I could make it do so, but can't figure this out
-    render_obj = template_obj
+    render_obj = self.mako_template
     if def_name:  # do we need to limit to just a def?
-      render_obj = template_obj.get_def(def_name)
+      render_obj = self.mako_template.get_def(def_name)
 
     # PRIMARY FUNCTION: render the template
-    log.debug('DMP :: rendering template %s' % template_obj.filename)
+    log.debug('DMP :: rendering template %s' % self.mako_template.filename)
     if settings.DEBUG:
       try:
         content = render_obj.render_unicode(**context_dict)
@@ -282,16 +373,16 @@ class MakoTemplateRenderer:
 
     # send the post-render signal
     if DMP_OPTIONS.get('SIGNALS', False) and request != None:
-      for receiver, ret_content in dmp_signal_post_render_template.send(sender=self, request=request, context=context, template=template_obj, content=content):
+      for receiver, ret_content in dmp_signal_post_render_template.send(sender=self, request=request, context=context, template=self.mako_template, content=content):
         if ret_content != None:
           content = ret_content  # sets it to the last non-None return in the signal receiver chain
 
     # return
     return content
-
-
-  def render(self, request, template, params={}, def_name=None):
-    '''Runs a template and returns an HttpRequest object to it.
+    
+    
+  def render_to_response(self, context=None, request=None, def_name=None):
+    '''Renders the template and returns an HttpRequest object containing its content.
 
        This method returns a django.http.Http404 exception if the template is not found.
        If the template raises a django_mako_plus.RedirectException, the browser is redirected to
@@ -299,7 +390,7 @@ class MakoTemplateRenderer:
        If the template raises a django_mako_plus.InternalRedirectException, the entire DMP
          routing process is restarted internally (the browser doesn't see the redirect).
 
-       The method throws two signals:
+       The method triggers two signals:
          1. dmp_signal_pre_render_template: you can (optionally) return a new Mako Template object from a receiver to replace
             the normal template object that is used for the render operation.
          2. dmp_signal_post_render_template: you can (optionally) return a string to replace the string from the normal
@@ -310,25 +401,27 @@ class MakoTemplateRenderer:
        @template The template file path to render.  This is relative to the app_path/controller_TEMPLATES_DIR/ directory.
                  For example, to render app_path/templates/page1, set template="page1.html", assuming you have
                  set up the variables as described in the documentation above.
-       @params   A dictionary of name=value variables to send to the template page.
+       @context  A dictionary of name=value variables to send to the template page.  This can be a real dictionary
+                 or a Django Context object.
        @def_name Limits output to a specific top-level Mako <%block> or <%def> section within the template.
                  If the section is a <%def>, it must have no parameters.  For example, def_name="foo" will call
                  <%block name="foo"></%block> or <%def name="foo()"></def> within the template.
     '''
     try:
-      content_type = mimetypes.types_map.get(os.path.splitext(template)[1].lower(), 'text/html')
-      content = self.render_to_string(request, template, params, def_name)
+      content_type = mimetypes.types_map.get(os.path.splitext(self.mako_template.filename)[1].lower(), 'text/html')
+      content = self.render(context=context, request=request, def_name=def_name)
       return HttpResponse(content.encode(settings.DEFAULT_CHARSET), content_type='%s; charset=%s' % (content_type, settings.DEFAULT_CHARSET))
-    except TopLevelLookupException: # template file not found
-      log.debug('DMP :: template "%s" not found in search path: %s.' % (template, self.template_search_dirs))
-      raise Http404()
     except RedirectException: # redirect to another page
-      e = sys.exc_info()[1] # Py2.7 and Py3+ compliant
-      log.debug('DMP :: view function %s.%s redirected processing to %s' % (request.dmp_router_module, request.dmp_router_function, e.redirect_to))
+      e = sys.exc_info()[1] 
+      if request == None:
+        log.debug('DMP :: a template redirected processing to %s' % (request.dmp_router_module, request.dmp_router_function, e.redirect_to))
+      else:
+        log.debug('DMP :: view function %s.%s redirected processing to %s' % (request.dmp_router_module, request.dmp_router_function, e.redirect_to))
       # send the signal
       if DMP_OPTIONS.get('SIGNALS', False):
         dmp_signal_redirect_exception.send(sender=sys.modules[__name__], request=request, exc=e)
       # send the browser the redirect command
       return e.get_response(request)
+
 
 

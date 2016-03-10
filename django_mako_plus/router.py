@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.http import HttpResponse, StreamingHttpResponse, Http404, HttpResponseRedirect, HttpResponsePermanentRedirect
+from django.template import TemplateDoesNotExist, TemplateSyntaxError
 
 from .exceptions import InternalRedirectException, RedirectException
 from .template import DMP_OPTIONS, get_dmp_instance
@@ -66,11 +67,11 @@ def route_request(request):
       if not os.path.exists(full_module_filename):
         log.debug('DMP :: module %s not found; sending processing directly to template %s.html' % (request.dmp_router_module, request.dmp_router_page_full))
         try:
-          dmp_renderer = get_dmp_instance().get_renderer(request.dmp_router_app)
-        except ImproperlyConfigured as e:
+          dmp_lookup = get_dmp_instance().get_template_lookup(request.dmp_router_app)
+          return dmp_lookup.get_template('%s.html' % request.dmp_router_page_full).render_to_response(request=request)
+        except (TemplateDoesNotExist, TemplateSyntaxError, ImproperlyConfigured) as e:
           log.debug('DMP :: %s' % (e))
           raise Http404
-        return dmp_renderer.render(request, '%s.html' % request.dmp_router_page_full)
 
       # find the function
       module_obj = import_module(request.dmp_router_module)

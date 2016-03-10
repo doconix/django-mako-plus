@@ -271,11 +271,11 @@ Don't forget to migrate to synchronize your database.  The apps in a standard Dj
              'django_mako_plus',
          )
          
-2. Add `django_mako_plus.router.RequestInitMiddleware` to the end of your `MIDDLEWARE CLASSES` list:
+2. Add `django_mako_plus.RequestInitMiddleware` to the end of your `MIDDLEWARE CLASSES` list:
    
          MIDDLEWARE_CLASSES = (
              ...
-             'django_mako_plus.router.RequestInitMiddleware',
+             'django_mako_plus.RequestInitMiddleware',
          )       
          
 3. Add a logger to help you debug (optional but highly recommended!):
@@ -307,44 +307,58 @@ Don't forget to migrate to synchronize your database.  The apps in a standard Dj
          
 4. Add the Django-Mako-Plus settings (paste this code at the end of your `settings.py` file):   
    
-         ###############################################################
-         ###   Specific settings for the Django-Mako-Plus app
-         
-         DJANGO_MAKO_PLUS = {
-             # identifies where the Mako template cache will be stored, relative to each app
-             'TEMPLATES_CACHE_DIR': 'cached_templates',
+         TEMPLATES = [
+           {
+               'BACKEND': 'django_mako_plus.MakoTemplates',
+               'APP_DIRS': True,
+               'OPTIONS': {
+                   # functions to automatically add variables to the params/context before templates are rendered
+                   'CONTEXT_PROESSORS': [
+                       'django.template.context_processors.static',            # adds "STATIC_URL" from settings.py
+                       'django.template.context_processors.request',           # adds "request" object
+                       'django.contrib.auth.context_processors.auth',          # adds "user" and "perms" objects
+                       'django_mako_plus.context_processors.settings',         # adds "settings" dictionary
+                   ],
            
-             # the default app and page to render in Mako when the url is too short
-             'DEFAULT_PAGE': 'index',
-             'DEFAULT_APP': 'homepage',
-             
-             # the default encoding of template files
-             'DEFAULT_TEMPLATE_ENCODING': 'utf-8',
+                   # identifies where the Mako template cache will be stored, relative to each app
+                   'TEMPLATES_CACHE_DIR': '.cached_templates',
 
-             # these are included in every template by default - if you put your most-used libraries here, you won't have to import them exlicitly in templates
-             'DEFAULT_TEMPLATE_IMPORTS': [
-               'import os, os.path, re, json',
-             ],
-             
-             # see the DMP online tutorial for information about this setting
-             'URL_START_INDEX': 0,
-         
-             # whether to send the custom DMP signals -- set to False for a slight speed-up in router processing
-             # determines whether DMP will send its custom signals during the process
-             'SIGNALS': True,
-         
-             # whether to minify using rjsmin, rcssmin during 1) collection of static files, and 2) on the fly as .jsm and .cssm files are rendered
-             # rjsmin and rcssmin are fast enough that doing it on the fly can be done without slowing requests down
-             'MINIFY_JS_CSS': True,
+                   # the default app and page to render in Mako when the url is too short
+                   'DEFAULT_PAGE': 'index',
+                   'DEFAULT_APP': 'homepage',
 
-             # see the DMP online tutorial for information about this setting
-             'TEMPLATES_DIRS': [ 
-               # '/var/somewhere/templates/',
-             ],
-         }
-         
-         ###  End of settings for the Django-Mako-Plus
-         ################################################################
+                   # the default encoding of template files
+                   'DEFAULT_TEMPLATE_ENCODING': 'utf-8',
+
+                   # these are included in every template by default - if you put your most-used libraries here, you won't have to import them exlicitly in templates
+                   'DEFAULT_TEMPLATE_IMPORTS': [
+                     'import os, os.path, re, json',
+                   ],
+
+                   # see the DMP online tutorial for information about this setting
+                   'URL_START_INDEX': 0,
+
+                   # whether to send the custom DMP signals -- set to False for a slight speed-up in router processing
+                   # determines whether DMP will send its custom signals during the process
+                   'SIGNALS': True,
+
+                   # whether to minify using rjsmin, rcssmin during 1) collection of static files, and 2) on the fly as .jsm and .cssm files are rendered
+                   # rjsmin and rcssmin are fast enough that doing it on the fly can be done without slowing requests down
+                   'MINIFY_JS_CSS': True,
+           
+                   # the name of the SASS binary to run if the dates on styles/*.scss files don't match the matching styles/*.css files.
+                   # these are checked and run once at server startup.
+                   'SCCS_BINARY': 'sass',
+
+                   # see the DMP online tutorial for information about this setting
+                   'TEMPLATES_DIRS': [ 
+                       # '/var/somewhere/templates/',
+                   ],
+               },
+           },
+           
+           # you'll likely already have the DjangoTemplates settings here
+         ]
          
 5. Add the following to serve your static files.  This step is pure Django; you can read about it in the standard Django docs.  These variables are also explained below in the section entitled "Static Files, Your Web Server, and DMP".
 
@@ -360,14 +374,14 @@ Don't forget to migrate to synchronize your database.  The apps in a standard Dj
 
 Add the Django-Mako-Plus router as **the last pattern** in your `urls.py` file (the default admin is also included here for completeness):
 
-          import django_mako_plus.router
+         from django_mako_plus import route_request as dmp_route_request
           
           urlpatterns = [
           
               ...
 
               # the django_mako_plus controller handles every request - this line is the glue that connects Mako to Django
-              url(r'^.*$', django_mako_plus.router.route_request ),
+              url(r'^.*$', dmp_route_request),
           ]
           
 ### Create a DMP-Style App
@@ -645,7 +659,6 @@ Suppose you need to put your templates in a directory named something other than
 
         from django.conf import settings
         from django_mako_plus import view_function
-        from django_mako_plus.router import MakoTemplateRenderer
         from datetime import datetime
         
         @view_function

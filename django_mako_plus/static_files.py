@@ -160,7 +160,8 @@ class StaticRenderer(object):
       if ti.css:
         ret.append(ti.css)  # the <link> was already created once in the constructor
       if ti.cssm:
-        css_text = get_dmp_instance()._get_renderer(ti.app, 'styles').render(request, ti.cssm, context.kwargs)
+        lookup = get_dmp_instance().get_app_template_lookup(ti.app, 'styles')
+        css_text = lookup.get_template(ti.cssm).render(request=request, context=context.kwargs)
         if JSMIN and DMP_OPTIONS.get('MINIFY_JS_CSS', False):
           css_text = cssmin(css_text)
         ret.append('<style type="text/css">%s</style>' % css_text) 
@@ -175,7 +176,8 @@ class StaticRenderer(object):
       if ti.js:
         ret.append(ti.js)  # the <script> was already created once in the constructor
       if ti.jsm:
-        js_text = get_dmp_instance()._get_renderer(ti.app, 'scripts').render(request, ti.jsm, context.kwargs)
+        lookup = get_dmp_instance().get_app_template_lookup(ti.app, 'scripts')
+        js_text = lookup.get_template(ti.jsm).render(request=request, context=context.kwargs)
         if JSMIN and DMP_OPTIONS.get('MINIFY_JS_CSS', False):
           js_text = jsmin(js_text)
         ret.append('<script>%s</script>' % js_text)

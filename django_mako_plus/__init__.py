@@ -22,9 +22,6 @@ from .router import route_request
 from .middleware import RequestInitMiddleware
 
 
-# the template renderer
+# the template engine
 from .template import MakoTemplates
-from .template import MakoTemplateRenderer
 
-
-# signals aren't used as much, so I 

@@ -2,7 +2,7 @@ from django.core.exceptions import ImproperlyConfigured
 #from django_mako_plus import signals, view_function, RedirectException, InternalRedirectException
 from django.template import engines
 from urllib.parse import unquote
-from .template import DMP_OPTIONS
+from .template import DMP_OPTIONS, get_dmp_app_configs
 
 
 
@@ -17,7 +17,7 @@ class RequestInitMiddleware:
   '''
   def __init__(self):
     '''Constructor'''
-    self.dmp_instance = engines['django_mako_plus']
+    self.dmp_app_names = set(( config.name for config in get_dmp_app_configs() ))
 
 
   def process_request(self, request):
@@ -48,7 +48,7 @@ class RequestInitMiddleware:
       path_parts.append(DMP_OPTIONS.get('DEFAULT_PAGE', 'index'))
 
     elif len(path_parts) == 1: # /app or /page
-      if path_parts[0] in self.dmp_instance.template_renderers:  # one of our apps specified, so insert the default page
+      if path_parts[0] in self.dmp_app_names:  # one of our apps specified, so insert the default page
         path_parts.append(DMP_OPTIONS.get('DEFAULT_PAGE', 'index'))
       else:  # not one of our apps, so insert the app and assume path_parts[0] is a page in that app
         path_parts.insert(0, DMP_OPTIONS.get('DEFAULT_APP', 'homepage'))
@@ -56,7 +56,7 @@ class RequestInitMiddleware:
           path_parts[1] = DMP_OPTIONS.get('DEFAULT_PAGE', 'index')
 
     else: # at this point in the elif, we know len(path_parts) >= 2
-      if path_parts[0] not in self.dmp_instance.template_renderers: # the first part was not one of our apps, so insert the default app
+      if path_parts[0] not in self.dmp_app_names: # the first part was not one of our apps, so insert the default app
         path_parts.insert(0, DMP_OPTIONS.get('DEFAULT_APP', 'homepage'))
       if not path_parts[1]:  # is the page empty?
         path_parts[1] = DMP_OPTIONS.get('DEFAULT_PAGE', 'index')
