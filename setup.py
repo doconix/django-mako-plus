@@ -10,10 +10,14 @@ CLASSIFIERS = [
   'License :: OSI Approved :: Apache Software License',
   'Operating System :: OS Independent',
   'Topic :: Software Development',
+  'Programming Language :: Python :: 3.2',
+  'Programming Language :: Python :: 3.3',
+  'Programming Language :: Python :: 3.4',
+  'Programming Language :: Python :: 3.5',
 ]
 install_requires = [
-  'django>=1.4.1',
-  'mako>=0.9.0',
+  'django >= 1.8.0',
+  'mako >= 1.0.0',
 ]
 
 # Compile the list of packages available
@@ -44,7 +48,7 @@ data_files.extend([
 
 # add the app_template/ directory
 package_data_files = []
-app_template_dir = 'controller/app_template'
+app_template_dir = 'app_template'
 for root, dirs, files in os.walk(os.path.join(MODULE_NAME, app_template_dir)):
   for fname in files:
     if fname.startswith('.') or fname in ( '__pycache__', ): # skip hidden/cache files
@@ -73,7 +77,7 @@ setup(
     MODULE_NAME: package_data_files,
   },
 #  data_files=data_files,
-#  install_requires=install_requires,
+  install_requires=install_requires,
   classifiers=CLASSIFIERS,
   license='Apache 2.0',
 )

@@ -229,6 +229,24 @@ In March, 2016, Django-Mako-Plus 3.0 was released.  It is a refactor of the enti
 
 DMP 3.0 also breaks with previous versions of Python and Django.  The new version requires Python 3 and Django 1.8+.
 
+Suggestions for your upgrade:
+
+* The location of many things has refactored.  Perform some fancy, project-wide search and replace operations:
+    * Replace for all instances of "django_mako_plus.controller" with "django_mako_plus".
+    * Following the Django format, dmp_render() is now the primary method for rendering to a response.  Replace "dmp_render_to_response" with "dmp_render" and "dmp_render" with "dmp_render_to_string". I suggest doing three steps:
+        * Replace "dmp_render_to_response" with "dmp_temp_render".
+        * Replace "dmp_render" with "dmp_render_to_string".
+        * Replace "dmp_temp_render" with "dmp_render".
+
+* Ensure "django_mako_plus.controller.router.RequestInitMiddleware" in settings.py INSTALLED_APPS was changed to "django_mako_plus". 
+
+* Ensure "django_mako_plus.controller.router.RequestInitMiddleware" in settings.py MIDDLEWARE was changed to "django_mako_plus.RequestInitMiddleware".  It will probably need adjusting.
+
+* Add the 'django_mako_plus.MakoTemplates' setting to the settings.py TEMPLATES.  This structure now includes all the DMP settings, so integrate your existing DMP settings.py information into here.  See the tutorial for the exact structure.
+    * After you move your settings to TEMPLATES, remove the old, top-level DJANGO_MAKO_PLUS = {} from settings.py.
+
+* Ensure "django_mako_plus.controller.router.router_request" in urls.py was changed to "django_mako_plus.route_request".  It will probably need adjusting.
+
 
 ### Python 3+
 
