@@ -229,7 +229,7 @@ In March, 2016, Django-Mako-Plus 3.0 was released.  It is a refactor of the enti
 
 DMP 3.0 also breaks with previous versions of Python and Django.  The new version requires Python 3 and Django 1.8+.
 
-If you need to use Python 2.7 or an older version of Django, download the latest DMP 2.x code.  It is very stable and works well.
+If you need to use Python 2.7 or an older version of Django, download the DMP 2.7.1 code.  It is very stable and works well.
 
 Suggestions for your upgrade:
 
