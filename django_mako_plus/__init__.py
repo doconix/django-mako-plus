@@ -5,9 +5,13 @@
 
 
 # The version of DMP - used by sdist to publish to PyPI
-__version__ = '3.0.1'
+__version__ = '3.0.2'
 
+# pointer to our app config (Django looks for this exact variable name)
+default_app_config = 'django_mako_plus.Config'
 
+# our app config
+from .apps import Config
 
 # the exceptions
 from .exceptions import InternalRedirectException
@@ -24,4 +28,5 @@ from .middleware import RequestInitMiddleware
 
 # the template engine
 from .template import MakoTemplates
-
+from .template import get_template_lookup
+from .template import get_app_template_lookup
