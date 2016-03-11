@@ -280,10 +280,6 @@ If you're using Python 2.7, install the last 2.x version with `pip3 install djan
 
 Create a Django project with the typical:
 
-        django-admin startproject test_dmp
-
-on some systems, one of the following commands might work better:
-
         python3 -m django startproject test_dmp
 
 This step is described in detail in the standard Django tutorial.  You can, of course, name your project anything you want, but in the sections below, I'll assume you called your project `test_dmp`.
