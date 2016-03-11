@@ -17,7 +17,7 @@ But wait, there's more! :)  Django-Mako-Plus adds the following features:
 
 1. DMP uses the Mako templating engine rather than the weaker Django templating engine.  Why would I want to learn a whole new language for templating when Mako uses my favorite language: Python?
 
-2. DMP allows calling views and html pages by convention rather than specific entries in urls.py. Any .html file on your site can be called without new entries in urls.py for every. single. new. page.  Doesn't Python favor convention over configuration?  
+2. DMP allows calling views and html pages by convention rather than specific entries in urls.py. Any .html file on your site can be called without new entries in urls.py for every. single. new. page.  Doesn't Python favor convention over configuration?
 
 3. DMP introduces the idea of URL parameters.  These allow you to embed parameters in urls, Django style--meaning you can use pretty URLs like http://myserver.com/abc/def/123/ without specific entries in urls.py and without the need for traditional (i.e. ulgy) ?first=abc&second=def&third=123 syntax.
 
@@ -132,7 +132,7 @@ Note in the examples how the DMP column normally uses standard Python syntax, wi
   </tr><tr>
     <td nowrap><pre><code>{% load static %}
 &lt;img src=&quot;{% get_static_prefix %}images/hi.jpg&quot;/&gt;</code></pre></td>
-    <td nowrap><pre><code>&lt;img src=&quot;${ settings.STATIC_ROOT }images/hi.jpg&quot;/&gt;</code></pre></td>
+    <td nowrap><pre><code>&lt;img src=&quot;${ STATIC_ROOT }images/hi.jpg&quot;/&gt;</code></pre></td>
   </tr>
 </table>
 - Call a Python method:
@@ -252,7 +252,7 @@ Suggestions for your upgrade:
 
 ### Python 3+
 
-Install Python and ensure you can run "python3" at the command prompt.  The framework requires Python 3.x and Django 1.8+.  
+Install Python and ensure you can run "python3" at the command prompt.  The framework requires Python 3.x and Django 1.8+.
 
 If you need to use Python 2.7 or an older version of Django, download the latest DMP 2.7.1 code.  It is very stable and works well.
 
@@ -310,7 +310,7 @@ Don't forget to migrate to synchronize your database.  The apps in a standard Dj
          MIDDLEWARE_CLASSES = (
              ...
              'django_mako_plus.RequestInitMiddleware',
-         )       
+         )
 
 3. Add a logger to help you debug (optional but highly recommended!):
 
@@ -339,7 +339,7 @@ Don't forget to migrate to synchronize your database.  The apps in a standard Dj
              },
          }
 
-4. Add the Django-Mako-Plus engine to the TEMPLATES list:   
+4. Add the Django-Mako-Plus engine to the TEMPLATES list:
 
          TEMPLATES = [
            {
@@ -398,9 +398,9 @@ Don't forget to migrate to synchronize your database.  The apps in a standard Dj
          STATIC_URL = '/static/'   # you probably already have this
          STATICFILES_DIRS = (
              # SECURITY WARNING: this next line must be commented out at deployment
-             BASE_DIR,  
+             BASE_DIR,
          )
-         STATIC_ROOT = os.path.join(BASE_DIR, 'static')  
+         STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 
 ### Enable the Django-Mako-Plus Router
@@ -439,7 +439,7 @@ Start your web server with the following:
 
         python3 manage.py runserver
 
-If you get a message about unapplied migrations, ignore it for now and continue.  
+If you get a message about unapplied migrations, ignore it for now and continue.
 
 Open your web browser to [http://localhost:8000/](http://localhost:8000/).  You should see a message welcoming you to the homepage app.
 
@@ -496,7 +496,7 @@ If your prefix has two subdirectorie prefixes, such as `mysite/mystuff/`, set th
 
 I'll assume you've just installed Django-Mako-Plus according to the instructions above.  You should have a `dmp_test` project directory that contains a `homepage` app.  I'll further assume you know how to open a terminal/console and `cd` to the `dmp_test` directory.  Most of the commands below are typed into the terminal in this directory.
 
-**Quick Start:** You already have a default page in the new app, so fire up your server with `python3 manage.py runserver` and go to [http://localhost:8000/homepage/index/](http://localhost:8000/homepage/index/).  
+**Quick Start:** You already have a default page in the new app, so fire up your server with `python3 manage.py runserver` and go to [http://localhost:8000/homepage/index/](http://localhost:8000/homepage/index/).
 
 You should see a congratulations page.  If you don't, go back to the installation section and walk through the steps again.  Your console might have valuable error messages to help troubleshoot things.
 
@@ -522,7 +522,7 @@ The following setting is automatically done when you run `dmp_startapp`, but if 
 
         DJANGO_MAKO_PLUS = True
 
-Let's start with the two primary html template files: `base.htm` and `index.html`.  
+Let's start with the two primary html template files: `base.htm` and `index.html`.
 
 `index.html` is pretty simple:
 
@@ -567,7 +567,7 @@ The real HTML is kept in the `base.htm` file.  It looks like this:
 
             <%block name="content">
               Site content goes here in sub-templates.
-            </%block>  
+            </%block>
 
             ## render the JS with the same name as this page
             ${ static_renderer.get_template_js(request, context)  }
@@ -631,7 +631,7 @@ Let me pause for a minute and talk about log messages.  If you enabled the logge
 
           DEBUG controller :: processing: app=homepage, page=index, funcname=, urlparams=['']
           DEBUG controller :: calling view function homepage.views.index.process_request
-          DEBUG controller :: rendering template .../dmp_test/homepage/templates/index.html  
+          DEBUG controller :: rendering template .../dmp_test/homepage/templates/index.html
 
 These debug statements are incredibly helpful in figuring out why pages aren't routing right.  If your page didn't load right, you'll probably see why in these statements.  In my log above, the first line lists what the controller assigned the app and page to be.
 
@@ -777,7 +777,7 @@ Django is all about pretty urls.  In keeping with that philosophy, this framewor
 
 In traditional web links, you'd specify parameters using key=value pairs, as in `/homepage/index?first=abc&second=def`.  That's ugly, of course, and it's certainly not the Django way (it does still work, though).
 
-With DMP, you have another, better option available.  You'll specify parameters as `/homepage/index/abc/def/`.  The controller makes them available to your view as `request.urlparams[0]` and `request.urlparams[1]`.  
+With DMP, you have another, better option available.  You'll specify parameters as `/homepage/index/abc/def/`.  The controller makes them available to your view as `request.urlparams[0]` and `request.urlparams[1]`.
 
 Suppose you have a product detail page that needs the SKU number of the product to display.  A nice way to call that page might be `/catalog/product/142233342/`.  The app=catalog, view=product.py, and urlparams[0]=142233342.
 
@@ -805,7 +805,7 @@ The following links now give the time in different formats:
 * The current hour: `http://localhost:8000/homepage/index/%H/`
 * The month, year: `http://localhost:8000/homepage/index/%B,%20%Y`
 
-> If a urlparam doesn't exist, it always returns the empty string ''.  This is slightly different than a regular Python list, which throws an exception when you index it beyond the length of the list.  In DMP, request.urlparams[50] returns the empty string rather than an exception.  The `if` statement in the code above can be used to determine if a urlparam exists or not.  Another way to code a default value for a urlparam is `request.urlparam[2] or 'some default value'`.  
+> If a urlparam doesn't exist, it always returns the empty string ''.  This is slightly different than a regular Python list, which throws an exception when you index it beyond the length of the list.  In DMP, request.urlparams[50] returns the empty string rather than an exception.  The `if` statement in the code above can be used to determine if a urlparam exists or not.  Another way to code a default value for a urlparam is `request.urlparam[2] or 'some default value'`.
 
 
 ## Class-Based Views
@@ -870,7 +870,7 @@ The framework knows how to follow template inheritance.  For example, since `ind
           font-size: 2.5em;
           color: #F4F4F4;
           background-color: #0088CC;
-        }  
+        }
 
 Reload your browser, and you should have a nice white on blue header. If you view source in the browser, you'll see the CSS files were included as follows:
 
@@ -1048,7 +1048,7 @@ Reload your browser page and try the button.  It should reload the time *from th
 
 ## Really, a Whole New File for Ajax?
 
-All right, there **is** a shortcut, and a good one at that. The last section showed you how to create an ajax endpoint view.  Since modern web pages have many little ajax calls thoughout their pages, the framework allows you to put several web-accessible methods **in the same .py file**.  
+All right, there **is** a shortcut, and a good one at that. The last section showed you how to create an ajax endpoint view.  Since modern web pages have many little ajax calls thoughout their pages, the framework allows you to put several web-accessible methods **in the same .py file**.
 
 Let's get rid of `homepage/views/index_time.py`.  That's right, just delete the file.  Now rename `homepage/views/index_time.html` to `homepage/views/index.gettime.html`.  This rename of the html file isn't actually necessary, but it's a nice way to keep the view and template names consistent.
 
@@ -1059,9 +1059,9 @@ Open `homepage/views/index.py` and add the following to the end of the file:
           context = {
             'now': datetime.now(),
           }
-          return dmp_render(request, 'index.time.html', context)  
+          return dmp_render(request, 'index.time.html', context)
 
-Note the function is decorated with `@view_function`, and it contains the function body from our now-deleted `index_time.py`.  The framework recognizes **any** function with this decorator as an available endpoint for urls, not just the hard-coded `process_request` function.  In other words, you can actually name your view methods any way you like, as long as you follow the pattern described in this section.  
+Note the function is decorated with `@view_function`, and it contains the function body from our now-deleted `index_time.py`.  The framework recognizes **any** function with this decorator as an available endpoint for urls, not just the hard-coded `process_request` function.  In other words, you can actually name your view methods any way you like, as long as you follow the pattern described in this section.
 
 In this case, getting the server time is essentially "part" of the index page, so it makes sense to put the ajax endpoint right in the same file.  Both `process_request` and `gettime` serve content for the `/homepage/index/` html page.  Having two view files is actually more confusing to a reader of your code because they are so related.   Placing two view functions (that are highly related like these are) in the same file keeps everything together and makes your code more concise and easier to understand.
 
@@ -1083,9 +1083,9 @@ To repeat, a full DMP url is really `/app/view.function/`.  Using `/app/view/` i
 
 ## Templates Located Elsewhere
 
-This impacts few users of DMP, so you may want to skip this section for now.  
+This impacts few users of DMP, so you may want to skip this section for now.
 
-Suppose your templates are located in a directory outside your normal project root.  For whatever reason, you don't want to put your templates in the app/templates directory.  
+Suppose your templates are located in a directory outside your normal project root.  For whatever reason, you don't want to put your templates in the app/templates directory.
 
 
 ### Case 1: Templates Within Your Project Directory
@@ -1205,7 +1205,7 @@ are available throughout the request:
 * `request.dmp_router_app`: The Django application specified in the URL.  In the URL `http://www.server.com/calculator/index/1/2/3`, the `dmp_router_app` is the string "calculator".
 * `request.dmp_router_page`: The name of the Python module specified in the URL.  In the URL `http://www.server.com/calculator/index/1/2/3`, the `dmp_router_page` is the string "index".  In the URL `http://www.server.com/calculator/index.somefunc/1/2/3`, the `dmp_router_page` is still the string "index".
 * `request.dmp_router_page_full`: The exact module name specified in the URL, including the function name if specified.  In the URL `http://www.server.com/calculator/index/1/2/3`, the `dmp_router_page_full` is the string "index".  In the URL `http://www.server.com/calculator/index.somefunc/1/2/3`, the `dmp_router_page` is the string "index.somefunc".  Note the difference in this last example to what `dmp_router_page` reports.
-* `request.dmp_router_function`: The name of the function within the module that will be called, even if it is not specified in the URL.  In the URL `http://www.server.com/calculator/index/1/2/3`, the `dmp_router_function` is the string "process_request" (the default function).  In the URL `http://www.server.com/calculator/index.somefunc/1/2/3`, the `dmp_router_page` is the string "somefunc".  
+* `request.dmp_router_function`: The name of the function within the module that will be called, even if it is not specified in the URL.  In the URL `http://www.server.com/calculator/index/1/2/3`, the `dmp_router_function` is the string "process_request" (the default function).  In the URL `http://www.server.com/calculator/index.somefunc/1/2/3`, the `dmp_router_page` is the string "somefunc".
 * `request.dmp_router_module`: The name of the real Python module specified in the URL, as it will be imported into the runtime module space.  In the URL `http://www.server.com/calculator/index/1/2/3`, the `dmp_router_module` is the string "calculator.views.index".
 * `request.dmp_router_class`: The name of the class if the router sees that the "function" is actually a class-based view.  None otherwise.
 * `request.urlparams`: A list of parameters specified in the URL.  See the section entitled "URL Parameters" above for more information.
@@ -1226,9 +1226,9 @@ In your project's settings.py file, be sure you the following:
 
         STATIC_URL = '/static/'
         STATICFILES_DIRS = (
-            BASE_DIR,  
+            BASE_DIR,
         )
-        STATIC_ROOT = os.path.join(BASE_DIR, 'static')  
+        STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 Note that the last line is a serious security issue if you go to production with it.  More on that later.
 
@@ -1252,9 +1252,9 @@ At production/deployment, comment out `BASE_DIR` because it essentially makes yo
 
         STATIC_URL = '/static/'
         STATICFILES_DIRS = (
-        #    BASE_DIR,  
+        #    BASE_DIR,
         )
-        STATIC_ROOT = os.path.join(BASE_DIR, 'static')  
+        STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 When you deploy to a web server, run `dmp_collectstatic` to collect your static files into a separate directory (called `/static/` in the settings above).  You should then point your web server (Apache, Nginx, IIS, etc.) to serve this folder directly to browsers.  For example, in Nginx, you'd set the following:
 
@@ -1304,7 +1304,7 @@ The `dmp_collectstatic` command has the following command-line options:
 
 DMP will try to minify your *.js and *.css files using the `rjsmin` and `rcssmin` modules if the settings.py `MINIFY_JS_CSS` is True.  Your Python installation must also have these modules installed
 
-These two modules do fairly simplistic minification using regular expressions.  They are not as full-featured as other minifiers, but they use pure Python code and are incredibly fast.  If you want more complete minification, this probably isn't it.  
+These two modules do fairly simplistic minification using regular expressions.  They are not as full-featured as other minifiers, but they use pure Python code and are incredibly fast.  If you want more complete minification, this probably isn't it.
 
 These two modules might be simplistic, but they *are* fast enough to do minification of dynamic `*.jsm` and `*.cssm` files at production time.  Setting the `MINIFY_JS_CSS` variable to True will not only minify during the `dmp_collectstatic` command, it will minfiy the dynamic files as well as they are rendered for each client.
 
@@ -1332,7 +1332,7 @@ The above two commands will use both methods to bring files into your `/static/`
 
 Suppose your view needs to redirect the user's browser to a different page than the one currently being routed.  For example, the user might not be authenticated correctly or a form might have just been submitted.  In the latter case, web applications often redirect the browser to the *same* page after a form submission (and handling with a view), effectively switching the browser from its current POST request to a regular GET request.  That way, if the user hits the refresh button within his or her browser, the page simply gets refreshed without the form being submitted again.
 
-When you need to redirect the browser to a different page, you should normally use the standard `django.http.HttpResponseRedirect` object.  By returning a redirect object from your view, DMP (and subsequently Django) direct the browser to redirect.  
+When you need to redirect the browser to a different page, you should normally use the standard `django.http.HttpResponseRedirect` object.  By returning a redirect object from your view, DMP (and subsequently Django) direct the browser to redirect.
 
 BUT, suppose you are several levels deep in method calls without direct access to the request or response objects?  How can you direct a method several levels up in the call stack to send a redirect response?  That's where the `django_mako_plus.RedirectException` comes in handy.  Since it is an exception, it bubbles all the way up the stack to the DMP router -- where it is sent directly to the browser.
 
@@ -1361,7 +1361,7 @@ This section has nothing to do with the Django-Mako-Framework, but I want to add
 
 At MyEducator, we've been through all of them at various levels of testing and production.  By far, we've had the best success with [uWSGI](https://docs.djangoproject.com/en/dev/howto/deployment/wsgi/uwsgi/).  It is a professional server, and it is stable.
 
-One other decision you'll have to make is which database use.  I'm excluding the "big and beefies" like Oracle or DB2.  Those with sites that need these databases already know who they are.  Most of you will be choosing between MySQL, PostgreSQL, and perhaps another mid-level database.  
+One other decision you'll have to make is which database use.  I'm excluding the "big and beefies" like Oracle or DB2.  Those with sites that need these databases already know who they are.  Most of you will be choosing between MySQL, PostgreSQL, and perhaps another mid-level database.
 
 In choosing between these mid-level databases, you'll find that many, if not most, of the Django developers use PostgreSQL.  The system is likely tested best and first on PG.  We started on MySQL, and we moved to PG after experiencing a few problems.  Since deploying on PG, things have been amazingly smooth.
 
