@@ -240,7 +240,7 @@ Suggestions for your upgrade:
         * Replace `dmp_render` with `dmp_render_to_string`.
         * Replace `dmp_temp_render` with `dmp_render`.
 
-* Ensure `django_mako_plus.controller.router.route_request` in settings.py INSTALLED_APPS changes to `django_mako_plus`.
+* Ensure `django_mako_plus.controller` in settings.py INSTALLED_APPS changes to `django_mako_plus`.
 
 * Ensure `django_mako_plus.controller.router.RequestInitMiddleware` in settings.py MIDDLEWARE changes to `django_mako_plus.RequestInitMiddleware`.  It will probably need adjusting.
 
