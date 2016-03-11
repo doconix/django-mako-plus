@@ -254,9 +254,6 @@ Suggestions for your upgrade:
 
 Install Python and ensure you can run "python3" at the command prompt.  The framework requires Python 3.x and Django 1.8+.
 
-If you need to use Python 2.7 or an older version of Django, download the latest DMP 2.7.1 code.  It is very stable and works well.
-
-
 
 ### Install Django, Mako, and DMP
 
@@ -274,7 +271,7 @@ Note that on Windows, it might be called simply `pip`:
 
 DMP requires Django 1.8+, Python 3+, and Mako 1.0+.
 
-If you're using Python 2.7, install with `pip3 install django-mako-plus==2.7.1`.
+If you're using Python 2.7, install the last 2.x version with `pip3 install django-mako-plus==2.7.1`.  Note that this tutorial shows the newer API.
 
 
 
