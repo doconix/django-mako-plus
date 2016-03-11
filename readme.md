@@ -233,7 +233,7 @@ If you need to use Python 2.7 or an older version of Django, download the DMP 2.
 
 Suggestions for your upgrade:
 
-* The location of many things has refactored.  Perform some fancy, project-wide search and replace operations:
+* Perform some fancy, project-wide search and replace operations:
     * Replace for all instances of `django_mako_plus.controller` with `django_mako_plus`.
     * Following the Django format, dmp_render() is now the primary method for rendering to a response.  Replace `dmp_render_to_response` with `dmp_render` and `dmp_render` with `dmp_render_to_string`. I suggest doing three steps:
         * Replace `dmp_render_to_response` with `dmp_temp_render`.
