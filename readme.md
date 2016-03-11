@@ -240,14 +240,14 @@ Suggestions for your upgrade:
         * Replace `dmp_render` with `dmp_render_to_string`.
         * Replace `dmp_temp_render` with `dmp_render`.
 
-* Ensure `django_mako_plus.controller.router.RequestInitMiddleware` in settings.py INSTALLED_APPS was changed to `django_mako_plus`.
+* Ensure `django_mako_plus.controller.router.route_request` in settings.py INSTALLED_APPS changes to `django_mako_plus`.
 
-* Ensure `django_mako_plus.controller.router.RequestInitMiddleware` in settings.py MIDDLEWARE was changed to `django_mako_plus.RequestInitMiddleware`.  It will probably need adjusting.
+* Ensure `django_mako_plus.controller.router.RequestInitMiddleware` in settings.py MIDDLEWARE changes to `django_mako_plus.RequestInitMiddleware`.  It will probably need adjusting.
 
 * Add the `django_mako_plus.MakoTemplates` setting to the settings.py TEMPLATES.  This structure now includes all the DMP settings, so integrate your existing DMP settings.py information into here.  See the tutorial for the exact structure.
     * After you move your settings to TEMPLATES, remove the old, top-level DJANGO_MAKO_PLUS = {} from settings.py.
 
-* Ensure `django_mako_plus.controller.router.router_request` in urls.py was changed to `django_mako_plus.route_request`.  It will probably need adjusting.
+* Ensure `django_mako_plus.controller.router.router_request` in urls.py changes to `django_mako_plus.route_request`.  It will probably need adjusting.
 
 
 ### Python 3+
