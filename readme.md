@@ -25,6 +25,8 @@ But wait, there's more! :)  Django-Mako-Plus adds the following features:
 
 5. DMP automatically includes CSS and JS files, and it allows Python code within these files.  These static files get included in your web pages without any explicit declaration of `<link>` or `<script>` elements.  This means that `mypage.css` and `mypage.js` get linked in `mypage.html` automatically.  Python code within these support files means your CSS can change based on user or database entries.
 
+6. DMP integrates with Sass by automatically running `scss` on updated .scss files.
+
 But don't worry, you'll still get all the Django goodness with its fantastic ORM, views, forms, etc.
 
 ## Where Is DMP Used?
