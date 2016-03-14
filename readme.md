@@ -375,6 +375,7 @@ Don't forget to migrate to synchronize your database.  The apps in a standard Dj
                    # the name of the SASS binary to run if the dates on styles/*.scss files don't match the matching styles/*.css files.
                    # these are checked and run once at server startup.
                    'SCSS_BINARY': 'sass',
+                   'SCSS_ARGS': '',            # any arguments to Sass
 
                    # see the DMP online tutorial for information about this setting
                    'TEMPLATES_DIRS': [
@@ -912,7 +913,7 @@ As shown in the example above, the context dictionary sent the templating engine
 
 ## Sass Integration
 
-Thanks to a submission by a crack-shot user, DMP can automatically compile your .scss files each time you update them.  When DMP starts up, it checks your `scripts` folders for any updated .scss files and recompiles them.  Just be sure to set the DMP SCSS_BINARY option in settings.py.
+Thanks to a submission by a crack-shot user, DMP can automatically compile your .scss files each time you update them.  When DMP starts up, it checks your `styles` folders for any updated .scss files and recompiles them.  Just be sure to set the DMP SCSS_BINARY option in settings.py.
 
 Where's the love for Less integration?  We just need a user to submit a patch for it.
 
