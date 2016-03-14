@@ -259,7 +259,7 @@ class MakoTemplateLookup:
     # check the template dir
     template_dir = os.path.abspath(os.path.join(app_path, template_subdir))
     if not os.path.isdir(template_dir):
-      raise ImproperlyConfigured('DMP :: Cannot create MakoTemplateRenderer: App %s has no templates folder (it needs %s).' % (app_name, template_dir))
+      raise ImproperlyConfigured('DMP :: Cannot create MakoTemplateRenderer: App %s has no templates folder (it needs %s).' % os.path.join(app_path, template_subdir))
     # calculate the template search directory
     self.template_search_dirs = [ template_dir ]
     if DMP_OPTIONS.get('TEMPLATES_DIRS'):

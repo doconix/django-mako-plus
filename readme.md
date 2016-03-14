@@ -372,12 +372,14 @@ Don't forget to migrate to synchronize your database.  The apps in a standard Dj
                    # rjsmin and rcssmin are fast enough that doing it on the fly can be done without slowing requests down
                    'MINIFY_JS_CSS': True,
 
-                   # the name of the SASS binary to run if the dates on styles/*.scss files don't match the matching styles/*.css files.
-                   # these are checked and run once at server startup.
-                   'SCSS_BINARY': 'sass',
-                   'SCSS_ARGS': '',            # any arguments to Sass
+                   # the name of the SASS binary to run if a .scss file is newer than the resulting .css file
+                   # happens when the corresponding template.html is accessed the first time after server startup
+                   # if DEBUG=False, this only happens once per file after server startup, not for every request
+                   # specify the binary in a list below -- even if just one item (see subprocess.Popen)
+                   'SCSS_BINARY': [ '/usr/bin/env', 'scss', '--unix-newlines' ],
 
                    # see the DMP online tutorial for information about this setting
+                   # it can normally be empty
                    'TEMPLATES_DIRS': [
                        # '/var/somewhere/templates/',
                    ],
@@ -913,7 +915,21 @@ As shown in the example above, the context dictionary sent the templating engine
 
 ## Sass Integration
 
-Thanks to a submission by a crack-shot user, DMP can automatically compile your .scss files each time you update them.  When DMP starts up, it checks your `styles` folders for any updated .scss files and recompiles them.  Just be sure to set the DMP SCSS_BINARY option in settings.py.
+Thanks to a submission by a crack-shot user, DMP can automatically compile your .scss files each time you update them.  When a template is rendered the first time, DMP checks the timestamps on the .scss file and .css file, and it reruns Sass when necessary.  Just be sure to set the `SCSS_BINARY` option in settings.py.
+
+When `DEBUG = True`, DMP checks the timestamps every time a template is rendered.  When in production mode (`DEBUG = False`), DMP only checks the timestamps the first time a template is rendered -- you'll have to restart your server to recompile updated .scss files.  You can disable Sass integration by removing the `SCSS_BINARY` from the settings or by setting it to `None`.
+
+Note that `SCSS_BINARY` *must be specified in a list*.  DMP uses Python's subprocess.Popen command without the shell option (it's more cross-platform that way, and it works better with spaces in your paths).  Specify any arguments in the list as well.  For example, the following settings are all valid:
+
+        'SCSS_BINARY': [ 'scss' ],
+        # or:
+        'SCSS_BINARY': [ 'C:\\Ruby200-x64\\bin\\scss' ],
+        # or:
+        'SCSS_BINARY': [ '/usr/bin/env', 'scss', '--unix-newlines', '--cache-location', '/tmp/' ],
+        # or, to disable:
+        'SCSS_BINARY': None,
+
+If Sass isn't running right, check the DMP log statements.  When the log is enabled, it shows the exact command syntax that DMP is using.
 
 Where's the love for Less integration?  We just need a user to submit a patch for it.
 

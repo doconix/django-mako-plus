@@ -34,10 +34,16 @@ __doc__ = '''
 
 from django.conf import settings
 from .template import DMP_OPTIONS, get_dmp_instance
-import os, os.path, time, posixpath
+import os, os.path, time, posixpath, subprocess
 
 
-DMP_ATTR_NAME = 'django_mako_plus_templateinfo'  # used to attach TemplateInfo objects to Mako templates
+# set up the logger
+import logging
+log = logging.getLogger('django_mako_plus')
+
+
+# attribute name used to attach TemplateInfo objects to Mako templates
+DMP_ATTR_NAME = 'django_mako_plus_templateinfo'
 
 
 # Import minification if requested
@@ -56,6 +62,13 @@ if DMP_OPTIONS.get('MINIFY_JS_CSS', False) and not settings.DEBUG:
     pass
 
 
+# Sass Command
+SCSS_BINARY = DMP_OPTIONS.get('SCSS_BINARY', None)
+if isinstance(SCSS_BINARY, str):  # for backwards compatability
+  log.warning('DMP :: The settings.py variable SCSS_BINARY must be a list of arguments, not a string.  Splitting the string for now.')
+  SCSS_BINARY = SCSS_BINARY.split(' ')
+elif not SCSS_BINARY:
+  log.debug('DMP :: Sass integration disabled because SCSS_BINARY is empty.')
 
 
 #######################################################################
@@ -68,55 +81,64 @@ class TemplateInfo(object):
      That way we only do this work once per server run (in production mode).
   '''
   def __init__(self, template, cgi_id=None):
+    # I want short try blocks, so there are several - for example, the first OSError can only occur for one reason: if the os.stat() fails.
+    # I'm using os.stat here instead of os.path.exists because I need the st_mtime.  The os.stat checks that the file exists and gets the modified time in one command.
+
     # set up the directories so we can go through them fast on render
     self.template_dir, self.template_name = os.path.split(os.path.splitext(template.filename)[0])
     self.app_dir = os.path.dirname(self.template_dir)
     self.app = os.path.split(self.app_dir)[1]
 
-    # the static templatename.scss file
-    try:
-      scss_file = os.path.join(self.app_dir, 'styles', self.template_name + '.scss')
-      scss_stat = os.stat(scss_file)
+    # set up the filenames
+    css_file = os.path.join(self.app_dir, 'styles', '%s.css' % self.template_name)
+    cssm_file = os.path.join(self.app_dir, 'styles', '%s.cssm' % self.template_name)
+    js_file = os.path.join(self.app_dir, 'scripts', '%s.js' % self.template_name)
+    jsm_file = os.path.join(self.app_dir, 'scripts', '%s.jsm' % self.template_name)
+
+    # the SASS templatename.scss (compile any updated templatename.scss files to templatename.css files)
+    if SCSS_BINARY:
+      scss_file = os.path.join(self.app_dir, 'styles', '%s.scss' % self.template_name)
       try:
-        css_file = os.path.join(self.app_dir, 'styles', self.template_name + '.css')
-        css_stat = os.stat(css_file)
-        # update the CSS file if the SCCS file is newer
-        if scss_stat.st_mtime > css_stat.st_mtime:
-          os.system(DMP_OPTIONS.get('SCSS_BINARY', '/usr/bin/env scss') + ' %s %s %s' % (DMP_OPTIONS.get('SCSS_ARGS', ''), scss_file, css_file))
+        scss_stat = os.stat(scss_file)
       except OSError:
-          # if no CSS file exists, create one
-          os.system(DMP_OPTIONS.get('SCSS_BINARY', '/usr/bin/env scss') + ' %s %s %s' % (DMP_OPTIONS.get('SCSS_ARGS', ''), scss_file, css_file))
-    except OSError:
-        # no SCCS file exists .. continue as normal
-        pass
+        scss_stat = None
+      if scss_stat != None:  # only continue this block if we found a .scss file
+        try:
+          fstat = os.stat(css_file)
+        except OSError:
+          fstat = None
+        # if we 1) have no css_file or 2) have a newer scss_file, run the compiler
+        if fstat == None or scss_stat.st_mtime > fstat.st_mtime:
+          run_command(SCSS_BINARY + [ scss_file, css_file ])
 
     # the static templatename.css file
     try:
-      fstat = os.stat(os.path.join(self.app_dir, 'styles', self.template_name + '.css'))
+      fstat = os.stat(css_file)
       self.css = '<link rel="stylesheet" type="text/css" href="%s?%s" />' % (posixpath.join(settings.STATIC_URL, self.app, 'styles', self.template_name + '.css'), cgi_id if cgi_id != None else int(fstat.st_mtime))
     except OSError:
       self.css = None
 
     # the mako-rendered templatename.cssm file
     try:
-      fstat = os.stat(os.path.join(self.app_dir, 'styles', self.template_name + '.cssm'))
+      fstat = os.stat(cssm_file)
       self.cssm = self.template_name + '.cssm'
     except OSError:
       self.cssm = None
 
     # the static templatename.js file
     try:
-      fstat = os.stat(os.path.join(self.app_dir, 'scripts', self.template_name + '.js'))
+      fstat = os.stat(js_file)
       self.js = '<script src="%s?%s"></script>' % (posixpath.join(settings.STATIC_URL, self.app, 'scripts', self.template_name + '.js'), cgi_id if cgi_id != None else int(fstat.st_mtime))
     except OSError:
       self.js = None
 
     # the mako-rendered templatename.jsm file
     try:
-      fstat = os.stat(os.path.join(self.app_dir, 'scripts', self.template_name + '.jsm'))
+      fstat = os.stat(jsm_file)
       self.jsm = self.template_name + '.jsm'
     except OSError:
       self.jsm = None
+
 
 
 class StaticRenderer(object):
@@ -182,3 +204,14 @@ class StaticRenderer(object):
           js_text = jsmin(js_text)
         ret.append('<script>%s</script>' % js_text)
     return '\n'.join(ret)
+
+
+def run_command(cmd_parts):
+  '''Runs a command, piping all output to the DMP log.  The cmd_parts should be a sequence so paths can have spaces and we are os independent.'''
+  log.debug('DMP :: %s' % ' '.join(cmd_parts))
+  p = subprocess.Popen(cmd_parts, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE)
+  stdout, stderr = p.communicate()
+  if stdout:
+    log.debug('DMP :: %s' % stdout.decode('utf8'))
+  if stderr:
+    log.debug('DMP :: %s' % stderr.decode('utf8'))
