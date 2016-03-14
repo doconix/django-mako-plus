@@ -5,7 +5,7 @@
 
 
 # The version of DMP - used by sdist to publish to PyPI
-__version__ = '3.0.2'
+__version__ = '3.0.3'
 
 # pointer to our app config (Django looks for this exact variable name)
 default_app_config = 'django_mako_plus.Config'

@@ -374,7 +374,7 @@ Don't forget to migrate to synchronize your database.  The apps in a standard Dj
 
                    # the name of the SASS binary to run if the dates on styles/*.scss files don't match the matching styles/*.css files.
                    # these are checked and run once at server startup.
-                   'SCCS_BINARY': 'sass',
+                   'SCSS_BINARY': 'sass',
 
                    # see the DMP online tutorial for information about this setting
                    'TEMPLATES_DIRS': [
