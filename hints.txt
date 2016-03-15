@@ -8,9 +8,7 @@ git push origin master
 
 To upload to pypi:
 
-- change the __init__.py file -> __version__ = 
+- change the __init__.py file -> __version__ =
 python setup.py sdist upload
 - remove the extra files/dirs it created (like dist/)
-rm -rf dist/ MANIFEST
-
-
+rm -rf dist/ django_mako_plus.egg-info/
