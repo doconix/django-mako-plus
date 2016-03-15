@@ -3,7 +3,10 @@ from setuptools import setup
 
 MODULE_NAME = 'django_mako_plus'
 
-VERSION = '3.0.8'
+VERSION = '3.0.9'
+
+
+
 CLASSIFIERS = [
   'Framework :: Django',
   'Intended Audience :: Developers',
