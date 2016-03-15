@@ -1419,6 +1419,9 @@ The following creates two receivers.  The first is called just before the view's
           context = kwargs['context']            # the template variables
           template = kwargs['template']          # the Mako template object that will do the rendering
           print('>>> render_template signal received!')
+          # let's return a different template to be used - DMP will use this instead of kwargs['template']
+          tlookup = get_app_template_lookup('myapp')
+          template = tlookup.get_template('different.html')
 
 The above code should be in a code file that is called during Django initialization.  Good locations might be in a `models.py` file or your app's `__init__.py` file.
 

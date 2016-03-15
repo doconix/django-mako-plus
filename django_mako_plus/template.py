@@ -356,8 +356,11 @@ class MakoTemplateAdapter(object):
     # send the pre-render signal
     if DMP_OPTIONS.get('SIGNALS', False) and request != None:
       for receiver, ret_template_obj in dmp_signal_pre_render_template.send(sender=self, request=request, context=context, template=self.mako_template):
-        if ret_template_obj != None:  # changes the template object to the received
-          self.mako_template = ret_template_obj
+        if ret_template_obj != None:
+          if isinstance(ret_template_obj, MakoTemplateAdapter):
+            self.mako_template = ret_template_obj.mako_template   # if the signal function sends a MakoTemplateAdapter back, use the real mako template inside of it
+          else:
+            self.mako_template = ret_template_obj                 # if something else, we assume it is a mako.template.Template, so use it as the template
 
     # do we need to limit down to a specific def?
     # this only finds within the exact template (won't go up the inheritance tree)
