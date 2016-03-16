@@ -1,4 +1,4 @@
-[Skip Ahead to Installation](#installation)
+[Skip Ahead to Installation &rarr;](#installation)
 
 # Use This If You've Said:
 
