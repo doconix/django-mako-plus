@@ -1,3 +1,5 @@
+[Skip Ahead to Installation](#installation)
+
 # Use This If You've Said:
 
 * Is there an alternative to the Django templating language?
