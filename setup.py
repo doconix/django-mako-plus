@@ -3,7 +3,12 @@ from setuptools import setup
 
 MODULE_NAME = 'django_mako_plus'
 
-VERSION = '3.0.12'
+
+# I can't import the version file the normal way because it loads
+# __init__.py, which then imports the DMP engine.  Thanks to sorin
+# on StackOverflow for this idea.
+exec(open('django_mako_plus/version.py').read())
+VERSION = __version__
 
 
 
@@ -65,7 +70,7 @@ for root, dirs, files in os.walk(os.path.join(MODULE_NAME, app_template_dir)):
 # read the long description if sdist
 description = 'Combines Django framework and Mako templating engine, plus a few bonuses.'
 long_description = description
-if sys.argv[1] == 'sdist':
+if len(sys.argv) > 1 and sys.argv[1] == 'sdist':
   long_description = open('readme.txt').read()
 
 # run the setup
