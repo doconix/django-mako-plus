@@ -3,7 +3,7 @@ from setuptools import setup
 
 MODULE_NAME = 'django_mako_plus'
 
-VERSION = '3.0.9'
+VERSION = '3.0.12'
 
 
 

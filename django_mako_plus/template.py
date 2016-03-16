@@ -52,6 +52,12 @@ class MakoTemplates(BaseEngine):
     # super constructor
     super(MakoTemplates, self).__init__(params)
 
+    # set up the context processors
+    context_processors = []
+    for processor in DMP_OPTIONS.get('CONTEXT_PROESSORS', []):
+      context_processors.append(import_string(processor))
+    self.template_context_processors = tuple(context_processors)
+
     # set up the cached instance
     for key in DMP_OPTIONS:
       if key.startswith(DMP_OPTIONS_PREFIX):
@@ -62,12 +68,6 @@ class MakoTemplates(BaseEngine):
     self.template_lookups = {}
     for app_config in get_dmp_app_configs():
       self.register_app(app_config)
-
-    # set up the context processors
-    context_processors = []
-    for processor in DMP_OPTIONS.get('CONTEXT_PROESSORS', []):
-      context_processors.append(import_string(processor))
-    self.template_context_processors = tuple(context_processors)
 
 
   def register_app(self, app_config):
@@ -259,7 +259,7 @@ class MakoTemplateLookup:
     # check the template dir
     template_dir = os.path.abspath(os.path.join(app_path, template_subdir))
     if not os.path.isdir(template_dir):
-      raise ImproperlyConfigured('DMP :: Cannot create MakoTemplateRenderer: App %s has no templates folder (it needs %s).' % os.path.join(app_path, template_subdir))
+      raise ImproperlyConfigured('DMP :: Cannot create MakoTemplateRenderer: App %s has no templates folder (it needs %s).' % (app_path, template_subdir))
     # calculate the template search directory
     self.template_search_dirs = [ template_dir ]
     if DMP_OPTIONS.get('TEMPLATES_DIRS'):
