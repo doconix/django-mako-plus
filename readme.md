@@ -250,7 +250,7 @@ Suggestions for your upgrade:
 
 * Ensure `django_mako_plus.controller.router.router_request` in urls.py changes to `django_mako_plus.route_request`.  It will probably need adjusting.
 
-* This last one is the biggest change to make.  The DMP options in settings.py have moved into the TEMPLATES section, so you need to integrate your existing DMP settings.py information into it.  Copy #4 below into your settings.py.  Then integrate your existing settings into it.
+* This last one is the most manual change to make.  The DMP options in settings.py have moved into the TEMPLATES section, so you need to integrate your existing DMP settings.py information into it.  Copy #4 below into your settings.py.  Then integrate your existing settings into it.
     * After you integrate your settings to TEMPLATES, remove the old, top-level DJANGO_MAKO_PLUS = {} from settings.py.
 
 
