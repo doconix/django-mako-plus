@@ -370,7 +370,7 @@ class MakoTemplateAdapter(object):
       render_obj = self.mako_template.get_def(def_name)
 
     # PRIMARY FUNCTION: render the template
-    log.debug('DMP :: rendering template %s' % self.mako_template.filename)
+    log.debug('DMP :: Rendering template %s' % (self.mako_template.filename or 'string'))
     if settings.DEBUG:
       try:
         content = render_obj.render_unicode(**context_dict)
