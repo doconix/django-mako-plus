@@ -18,19 +18,19 @@ log = logging.getLogger('django_mako_plus')
 
 
 
-       
+
 ###############################################################
 ###   A decorator that signals that a function is callable
-###   by DMP.  This prevents "just any function" from being 
+###   by DMP.  This prevents "just any function" from being
 ###   called by the router above.  The function must be
 ###   decorated to be callable:
 ###
 ###       @view_function
 ###       function process_request(request):
-###           ...   
+###           ...
 
-    
-def view_function(f):    
+
+def view_function(f):
   '''A decorator to signify which view functions are "callable" by web browsers.
      This decorator is more of an annotation on functions than a decorator.
      Rather than the usual inner function pattern, I'm simply setting a flag on the
@@ -40,9 +40,9 @@ def view_function(f):
   f.dmp_view_function = True
   return f
 
-    
-    
-    
+
+
+
 
 ##############################################################
 ###   The front controller of all views on the site.
@@ -124,8 +124,7 @@ def route_request(request):
       # return the response
       return response
 
-    except InternalRedirectException:
-      ivr = sys.exc_info()[1] # Py2.7 and Py3+ compliant
+    except InternalRedirectException as ivr:
       # send the signal
       if DMP_OPTIONS.get('SIGNALS', False):
         dmp_signal_internal_redirect_exception.send(sender=sys.modules[__name__], request=request, exc=ivr)
@@ -135,8 +134,7 @@ def route_request(request):
       full_module_filename = os.path.normpath(os.path.join(settings.BASE_DIR, request.dmp_router_module.replace('.', '/') + '.py'))
       log.debug('DMP :: received an InternalViewRedirect to %s -> %s' % (full_module_filename, request.dmp_router_function))
 
-    except RedirectException: # redirect to another page
-      e = sys.exc_info()[1] # Py2.7 and Py3+ compliant
+    except RedirectException as e: # redirect to another page
       if request.dmp_router_class == None:
         log.debug('DMP :: view function %s.%s redirected processing to %s' % (request.dmp_router_module, request.dmp_router_function, e.redirect_to))
       else:
@@ -149,6 +147,3 @@ def route_request(request):
 
   # the code should never get here
   raise Exception("Django-Mako-Plus router error: The route_request() function should not have been able to get to this point.  Please notify the owner of the DMP project.  Thanks.")
-
-
-

@@ -1360,10 +1360,21 @@ To initiate the two types of redirects, use the following code:
         # this is effectively the same as: return django.http.HttpResponseRedirect('/some/new/url')
         raise RedirectException('/some/new/url')
 
-        # restart the routing process with a new view, as if the browser had done this url
-        # the browser keeps the same url and doesn't know a redirect has happened
+        # the next line is the same as: return django.http.HttpResponsePermanentRedirect('/some/new/url')
+        raise RedirectException('/some/new/url', permanent=True)
+
+        # the next line sends a Javascript-based redirect.  This is useful for Ajax responses that
+        # need to redirect the full page or for other places a normal redirect response doesn't work.
+        # this is effectively the same as: <script>window.location.href="/some/new/url";</script>
+        raise RedirectException('/some/new/url', as_javascript=True)
+
+        # restart the routing process with a new view, as if the browser had done this url.
+        # the browser keeps the same url and doesn't know a redirect has happened.
+        # the request.dmp_router_module and request.dmp_router_function variables are updated
+        # to reflect the new values, but all other variables, such as request.urlparams,
+        # request.GET, and request.POST remain the same as before.
         # the next line is as if the browser went to /homepage/upgrade/
-        raise RedirectException('homepage.views.upgrade', 'process_request')
+        raise InternalRedirectException('homepage.views.upgrade', 'process_request')
 
 > Is this an abuse of exceptions?  Probably.  But from one viewpoint, a redirect can be seen as an exception to normal processing.  It is quite handy to be able to redirect the browser from anywhere in your codebase.  If this feels dirty to you, feel free to skip it.
 
