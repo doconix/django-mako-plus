@@ -13,9 +13,9 @@ from mako.template import Template
 from .exceptions import InternalRedirectException, RedirectException
 from .signals import dmp_signal_pre_render_template, dmp_signal_post_render_template, dmp_signal_redirect_exception
 
-import os, os.path, sys, mimetypes
 from copy import deepcopy
 from importlib import import_module
+import os, os.path, sys, mimetypes
 
 
 # set up the logger
@@ -375,7 +375,8 @@ class MakoTemplateAdapter(object):
       try:
         content = render_obj.render_unicode(**context_dict)
       except:
-        content = html_error_template().render_unicode()
+        log.exception('DMP :: Exception raised during template rendering:')  # to the console
+        content = html_error_template().render_unicode()       # to the browser
     else:  # this is outside the above "try" loop because in non-DEBUG mode, we want to let the exception throw out of here (without having to re-raise it)
       content = render_obj.render_unicode(**context_dict)
 
