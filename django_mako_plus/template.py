@@ -170,6 +170,7 @@ class MakoTemplates(BaseEngine):
 def get_dmp_instance():
   '''Retrieves the DMP template engine instance.'''
   # return the instance
+  #TODO: catch keyerror and give a better error message
   return DMP_OPTIONS[DMP_OPTIONS_INSTANCE_KEY]
 
 
@@ -230,21 +231,24 @@ class RenderShortcut(object):
        st = render_to_string(request, 'index.html', { 'var1': 'value' }, subdir='scripts')
 
        # to render styles/index.cssm to a response
-       st = render(request, 'index.html', { 'var1': 'value' }, subdir='styles')
+       response = render(request, 'index.html', { 'var1': 'value' }, subdir='styles')
+
+       # to render a specific "def" block within a template (see Mako documentation for defs)
+       response = render(request, 'index.html', { 'var1': 'value' }, def_name='myfunc')
   '''
   def __init__(self, dmp_instance, app_name, template_method_name):
     self.dmp_instance = dmp_instance
     self.app_name = app_name
     self.template_method_name = template_method_name
 
-  def __call__(self, request, template, context=None, subdir='templates'):
+  def __call__(self, request, template, context=None, def_name=None, subdir='templates'):
     '''Allows instances of this class to act like functions.'''
     # I'm doing "late binding" to the map, just in
     # case new template lookup objects are added after creation.
     # This way I don't have a direct (and permanent) pointer to the lookup object.
     template_lookup = self.dmp_instance.get_app_template_lookup(self.app_name, subdir)
     template_obj = template_lookup.get_template(template)
-    return getattr(template_obj, self.template_method_name)(context=context, request=request)
+    return getattr(template_obj, self.template_method_name)(context=context, request=request, def_name=def_name)
 
 
 

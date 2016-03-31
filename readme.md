@@ -226,14 +226,13 @@ ${ random.randint(1, 10) }</code></pre></td>
 
 # Installation
 
+Note: If you need to use DMP 2.7, follow the [old installation instructions](https://github.com/doconix/django-mako-plus/blob/8fb0ccf942546b7ff241fd877315a18764f2dd3f/readme.md).  Be sure to use `pip3 install django-mako-plus==2.7.1` to get the old DMP codebase.
 
 ### Upgrade Notes for DMP 3.0
 
 In March, 2016, Django-Mako-Plus 3.0 was released.  It is a refactor of the entire codebase, and *it contains many incompatible changes* to all previous versions of DMP.  The primary reason for the incompatible upgrade is to match Django's template API.  DMP predates Django's pluggable template support, so it defined its own methods.  Now that Django supports custom templating engines, a refactor of DMP is in order.
 
 DMP 3.0 also breaks with previous versions of Python and Django.  The new version requires Python 3 and Django 1.8+.
-
-If you need to use Python 2.7 or an older version of Django, download the DMP 2.7.1 code.  It is very stable and works well.
 
 Suggestions for your upgrade:
 
@@ -274,9 +273,6 @@ Note that on Windows, it might be called simply `pip`:
         pip install django-mako-plus
 
 DMP requires Django 1.8+, Python 3+, and Mako 1.0+.
-
-If you're using Python 2.7, install the last 2.x version with `pip3 install django-mako-plus==2.7.1`.  Note that this tutorial shows the newer API.
-
 
 
 
