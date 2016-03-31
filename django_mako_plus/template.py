@@ -94,7 +94,7 @@ class MakoTemplates(BaseEngine):
     '''Returns the template lookup object for the "templates" directory in
        the given app name from the DMP cache.
 
-       Raises a LookupException if the app_name has not been registered.
+       Raises a TemplateDoesNotExist if the app_name has not been registered.
     '''
     return self.get_app_template_lookup(app_name, 'templates')
 
@@ -121,7 +121,7 @@ class MakoTemplates(BaseEngine):
        If the lookup is not found in the DMP cache, one of two things occur:
          1. If create=True, it is created automatically and returned.  This overrides
             the need to set DJANGO_MAKO_PLUS=True in the app's __init__.py file.
-         2. If create=False, a LookupException is raised.  This is the normal
+         2. If create=False, a TemplateDoesNotExist is raised.  This is the normal
             behavior.
     '''
     # get all the renderers for this app
@@ -132,7 +132,7 @@ class MakoTemplates(BaseEngine):
         app_lookups = {}
         self.template_lookups[app_name] = app_lookups
       else:
-        raise LookupError("%s has not been registered as a DMP app.  Did you forget to include the DJANGO_MAKO_PLUS=True line in your app's __init__.py?" % app_name)
+        raise TemplateDoesNotExist("%s has not been registered as a DMP app.  Did you forget to include the DJANGO_MAKO_PLUS=True line in your app's __init__.py?" % app_name)
 
     # get the specific subdir renderer
     try:
@@ -143,7 +143,7 @@ class MakoTemplates(BaseEngine):
         try:
           # if an app name, convert to the app's path
           app_path = apps.get_app_config(app_name).path
-        except LookupError:
+        except TemplateDoesNotExist:
           # if it wasn't an app name, assume it is an app path
           app_path = os.path.abspath(os.path.join(settings.BASE_DIR, app_name))
         # create the lookup object and return
@@ -152,7 +152,7 @@ class MakoTemplates(BaseEngine):
         return lookup
       else:
         # the call opted not to create the lookup, so
-        raise LookupError("%s is a DMP app, but a template lookup object for the %s subdirectory was not found." % (app_name, subdir))
+        raise TemplateDoesNotExist("%s is a DMP app, but a template lookup object for the %s subdirectory was not found." % (app_name, subdir))
 
 
   def from_string(self, template_code):
@@ -174,7 +174,7 @@ class MakoTemplates(BaseEngine):
     '''
     parts = template_name.split('/', 1)
     if len(parts) < 2:
-      raise LookupError('Invalid template_name format for a DMP template.  This method requires that the template name be in app_name/template.html format (separated by slash).')
+      raise TemplateDoesNotExist('Invalid template_name format for a DMP template.  This method requires that the template name be in app_name/template.html format (separated by slash).')
     return self.get_template_lookup(parts[0]).get_template(parts[1])
 
 
@@ -192,7 +192,7 @@ def get_dmp_instance():
   try:
     return DMP_OPTIONS[DMP_OPTIONS_INSTANCE_KEY]
   except KeyError:
-    raise ImproperlyConfigured('The Django Mako Plus template engine did not initialize correctly.  Look for previous errors that caused it to fail during initialization.')
+    raise ImproperlyConfigured('The Django Mako Plus template engine did not initialize correctly.  Check your logs for previous errors that may have caused initialization to fail, and check that DMP is set correctly in settings.py.')
 
 
 def get_dmp_app_configs():
@@ -207,7 +207,7 @@ def get_template_lookup(app_name):
   '''Returns the template lookup object for the "templates" directory in
      the given app name from the DMP cache.
 
-     Raises a LookupException if the app_name has not been registered.
+     Raises a TemplateDoesNotExist if the app_name has not been registered.
   '''
   return get_dmp_instance().get_app_template_lookup(app_name, 'templates')
 
@@ -234,7 +234,7 @@ def get_app_template_lookup(app_name, subdir, create=False):
      If the lookup is not found in the DMP cache, one of two things occur:
        1. If create=True, it is created automatically and returned.  This overrides
           the need to set DJANGO_MAKO_PLUS=True in the app's __init__.py file.
-       2. If create=False, a LookupException is raised.  This is the normal
+       2. If create=False, a TemplateDoesNotExist is raised.  This is the normal
           behavior.
   '''
   return get_dmp_instance().get_app_template_lookup(app_name, subdir, create)
