@@ -50,168 +50,168 @@ DMP_ATTR_NAME = 'django_mako_plus_templateinfo'
 JSMIN = False
 CSSMIN = False
 if DMP_OPTIONS.get('MINIFY_JS_CSS', False) and not settings.DEBUG:
-  try:
-    from rjsmin import jsmin
-    JSMIN = True
-  except ImportError:
-    pass
-  try:
-    from rcssmin import cssmin
-    CSSMIN = True
-  except ImportError:
-    pass
+    try:
+        from rjsmin import jsmin
+        JSMIN = True
+    except ImportError:
+        pass
+    try:
+        from rcssmin import cssmin
+        CSSMIN = True
+    except ImportError:
+        pass
 
 
 # Sass Command
 SCSS_BINARY = DMP_OPTIONS.get('SCSS_BINARY', None)
 if isinstance(SCSS_BINARY, str):  # for backwards compatability
-  log.warning('DMP :: The settings.py variable SCSS_BINARY must be a list of arguments, not a string.  Splitting the string for now.')
-  SCSS_BINARY = SCSS_BINARY.split(' ')
+    log.warning('DMP :: The settings.py variable SCSS_BINARY must be a list of arguments, not a string.  Splitting the string for now.')
+    SCSS_BINARY = SCSS_BINARY.split(' ')
 elif not SCSS_BINARY:
-  log.debug('DMP :: Sass integration disabled because SCSS_BINARY is empty.')
+    log.debug('DMP :: Sass integration disabled because SCSS_BINARY is empty.')
 
 
 #######################################################################
 ###   Template-specific CSS and JS, both static and mako-rendered
 
 class TemplateInfo(object):
-  '''Data class that holds information about a template's directories.  The StaticRenderer
-     object below creates a TemplateInfo object for each level in the Mako template inheritance
-     chain.  This object is then attached to the template object, which Mako already caches.
-     That way we only do this work once per server run (in production mode).
-  '''
-  def __init__(self, template, cgi_id=None):
-    # I want short try blocks, so there are several - for example, the first OSError can only occur for one reason: if the os.stat() fails.
-    # I'm using os.stat here instead of os.path.exists because I need the st_mtime.  The os.stat checks that the file exists and gets the modified time in one command.
+    '''Data class that holds information about a template's directories.  The StaticRenderer
+       object below creates a TemplateInfo object for each level in the Mako template inheritance
+       chain.  This object is then attached to the template object, which Mako already caches.
+       That way we only do this work once per server run (in production mode).
+    '''
+    def __init__(self, template, cgi_id=None):
+        # I want short try blocks, so there are several - for example, the first OSError can only occur for one reason: if the os.stat() fails.
+        # I'm using os.stat here instead of os.path.exists because I need the st_mtime.  The os.stat checks that the file exists and gets the modified time in one command.
 
-    # set up the directories so we can go through them fast on render
-    self.template_dir, self.template_name = os.path.split(os.path.splitext(template.filename)[0])
-    self.app_dir = os.path.dirname(self.template_dir)
-    self.app = os.path.split(self.app_dir)[1]
+        # set up the directories so we can go through them fast on render
+        self.template_dir, self.template_name = os.path.split(os.path.splitext(template.filename)[0])
+        self.app_dir = os.path.dirname(self.template_dir)
+        self.app = os.path.split(self.app_dir)[1]
 
-    # set up the filenames
-    css_file = os.path.join(self.app_dir, 'styles', '%s.css' % self.template_name)
-    cssm_file = os.path.join(self.app_dir, 'styles', '%s.cssm' % self.template_name)
-    js_file = os.path.join(self.app_dir, 'scripts', '%s.js' % self.template_name)
-    jsm_file = os.path.join(self.app_dir, 'scripts', '%s.jsm' % self.template_name)
+        # set up the filenames
+        css_file = os.path.join(self.app_dir, 'styles', '%s.css' % self.template_name)
+        cssm_file = os.path.join(self.app_dir, 'styles', '%s.cssm' % self.template_name)
+        js_file = os.path.join(self.app_dir, 'scripts', '%s.js' % self.template_name)
+        jsm_file = os.path.join(self.app_dir, 'scripts', '%s.jsm' % self.template_name)
 
-    # the SASS templatename.scss (compile any updated templatename.scss files to templatename.css files)
-    if SCSS_BINARY:
-      scss_file = os.path.join(self.app_dir, 'styles', '%s.scss' % self.template_name)
-      try:
-        scss_stat = os.stat(scss_file)
-      except OSError:
-        scss_stat = None
-      if scss_stat != None:  # only continue this block if we found a .scss file
+        # the SASS templatename.scss (compile any updated templatename.scss files to templatename.css files)
+        if SCSS_BINARY:
+            scss_file = os.path.join(self.app_dir, 'styles', '%s.scss' % self.template_name)
+            try:
+                scss_stat = os.stat(scss_file)
+            except OSError:
+                scss_stat = None
+            if scss_stat != None:  # only continue this block if we found a .scss file
+                try:
+                    fstat = os.stat(css_file)
+                except OSError:
+                    fstat = None
+                # if we 1) have no css_file or 2) have a newer scss_file, run the compiler
+                if fstat == None or scss_stat.st_mtime > fstat.st_mtime:
+                    run_command(SCSS_BINARY + [ scss_file, css_file ])
+
+        # the static templatename.css file
         try:
-          fstat = os.stat(css_file)
+            fstat = os.stat(css_file)
+            self.css = '<link rel="stylesheet" type="text/css" href="%s?%s" />' % (posixpath.join(settings.STATIC_URL, self.app, 'styles', self.template_name + '.css'), cgi_id if cgi_id != None else int(fstat.st_mtime))
         except OSError:
-          fstat = None
-        # if we 1) have no css_file or 2) have a newer scss_file, run the compiler
-        if fstat == None or scss_stat.st_mtime > fstat.st_mtime:
-          run_command(SCSS_BINARY + [ scss_file, css_file ])
+            self.css = None
 
-    # the static templatename.css file
-    try:
-      fstat = os.stat(css_file)
-      self.css = '<link rel="stylesheet" type="text/css" href="%s?%s" />' % (posixpath.join(settings.STATIC_URL, self.app, 'styles', self.template_name + '.css'), cgi_id if cgi_id != None else int(fstat.st_mtime))
-    except OSError:
-      self.css = None
+        # the mako-rendered templatename.cssm file
+        try:
+            fstat = os.stat(cssm_file)
+            self.cssm = self.template_name + '.cssm'
+        except OSError:
+            self.cssm = None
 
-    # the mako-rendered templatename.cssm file
-    try:
-      fstat = os.stat(cssm_file)
-      self.cssm = self.template_name + '.cssm'
-    except OSError:
-      self.cssm = None
+        # the static templatename.js file
+        try:
+            fstat = os.stat(js_file)
+            self.js = '<script src="%s?%s"></script>' % (posixpath.join(settings.STATIC_URL, self.app, 'scripts', self.template_name + '.js'), cgi_id if cgi_id != None else int(fstat.st_mtime))
+        except OSError:
+            self.js = None
 
-    # the static templatename.js file
-    try:
-      fstat = os.stat(js_file)
-      self.js = '<script src="%s?%s"></script>' % (posixpath.join(settings.STATIC_URL, self.app, 'scripts', self.template_name + '.js'), cgi_id if cgi_id != None else int(fstat.st_mtime))
-    except OSError:
-      self.js = None
-
-    # the mako-rendered templatename.jsm file
-    try:
-      fstat = os.stat(jsm_file)
-      self.jsm = self.template_name + '.jsm'
-    except OSError:
-      self.jsm = None
+        # the mako-rendered templatename.jsm file
+        try:
+            fstat = os.stat(jsm_file)
+            self.jsm = self.template_name + '.jsm'
+        except OSError:
+            self.jsm = None
 
 
 
 class StaticRenderer(object):
-  '''Renders the styles and scripts for a given template.
+    '''Renders the styles and scripts for a given template.
 
-     The mako_self parameter is simply the "self" variable
-     accessible within any Mako template.  An example call is:
+       The mako_self parameter is simply the "self" variable
+       accessible within any Mako template.  An example call is:
 
-     <%! from django_mako_plus import static_files %>
-     <%  static_renderer = static_files.StaticRenderer(self) %>
+       <%! from django_mako_plus import static_files %>
+       <%  static_renderer = static_files.StaticRenderer(self) %>
 
-     The optional cgi_id parameter is a less obvious.  On some browsers,
-     new CSS/JS files don't load because the browser waits for 7 (or whatever) days
-     to check for a new version.  This value is set by your web server,
-     and it's normally a good thing to speed everything up.  However,
-     when you upload new CSS/JS, you want all browsers to download the new
-     files even if their cached versions have't expired yet.
+       The optional cgi_id parameter is a less obvious.  On some browsers,
+       new CSS/JS files don't load because the browser waits for 7 (or whatever) days
+       to check for a new version.  This value is set by your web server,
+       and it's normally a good thing to speed everything up.  However,
+       when you upload new CSS/JS, you want all browsers to download the new
+       files even if their cached versions have't expired yet.
 
-     By adding an arbitrary id to the end of the .css and .js files, browsers will
-     see the files as *new* anytime that id changes.  The default method
-     for calculating the id is the file modification time (minutes since 1970).
-  '''
-  def __init__(self, mako_self, cgi_id=None):
-    self.mako_self = mako_self
-    self.template_chain = []
-    # step up the template inheritance chain and ensure each template has a TemplateInfo object
-    # I attach it to the template objects because they are cached by mako (and thus we take
-    # advantage of that caching).
-    while mako_self != None:
-      if settings.DEBUG or not hasattr(mako_self.template, DMP_ATTR_NAME):  # always recreate in debug mode
-        setattr(mako_self.template, DMP_ATTR_NAME, TemplateInfo(mako_self.template))
-      self.template_chain.append(mako_self.template)
-      mako_self = mako_self.inherits
-
-
-  def get_template_css(self, request, context):
-    '''Retrives the static and mako-rendered CSS'''
-    ret = []
-    for template in reversed(self.template_chain):  # reverse so lower CSS overrides higher CSS in the inheritance chain
-      ti = getattr(template, DMP_ATTR_NAME)
-      if ti.css:
-        ret.append(ti.css)  # the <link> was already created once in the constructor
-      if ti.cssm:
-        lookup = get_dmp_instance().get_app_template_lookup(ti.app, 'styles')
-        css_text = lookup.get_template(ti.cssm).render(request=request, context=context.kwargs)
-        if JSMIN and DMP_OPTIONS.get('MINIFY_JS_CSS', False):
-          css_text = cssmin(css_text)
-        ret.append('<style type="text/css">%s</style>' % css_text)
-    return '\n'.join(ret)
+       By adding an arbitrary id to the end of the .css and .js files, browsers will
+       see the files as *new* anytime that id changes.  The default method
+       for calculating the id is the file modification time (minutes since 1970).
+    '''
+    def __init__(self, mako_self, cgi_id=None):
+        self.mako_self = mako_self
+        self.template_chain = []
+        # step up the template inheritance chain and ensure each template has a TemplateInfo object
+        # I attach it to the template objects because they are cached by mako (and thus we take
+        # advantage of that caching).
+        while mako_self != None:
+            if settings.DEBUG or not hasattr(mako_self.template, DMP_ATTR_NAME):  # always recreate in debug mode
+                setattr(mako_self.template, DMP_ATTR_NAME, TemplateInfo(mako_self.template))
+            self.template_chain.append(mako_self.template)
+            mako_self = mako_self.inherits
 
 
-  def get_template_js(self, request, context):
-    '''Retrieves the static and mako_rendered CSS'''
-    ret = []
-    for template in self.template_chain:
-      ti = getattr(template, DMP_ATTR_NAME)
-      if ti.js:
-        ret.append(ti.js)  # the <script> was already created once in the constructor
-      if ti.jsm:
-        lookup = get_dmp_instance().get_app_template_lookup(ti.app, 'scripts')
-        js_text = lookup.get_template(ti.jsm).render(request=request, context=context.kwargs)
-        if JSMIN and DMP_OPTIONS.get('MINIFY_JS_CSS', False):
-          js_text = jsmin(js_text)
-        ret.append('<script>%s</script>' % js_text)
-    return '\n'.join(ret)
+    def get_template_css(self, request, context):
+        '''Retrives the static and mako-rendered CSS'''
+        ret = []
+        for template in reversed(self.template_chain):  # reverse so lower CSS overrides higher CSS in the inheritance chain
+            ti = getattr(template, DMP_ATTR_NAME)
+            if ti.css:
+                ret.append(ti.css)  # the <link> was already created once in the constructor
+            if ti.cssm:
+                lookup = get_dmp_instance().get_app_template_lookup(ti.app, 'styles')
+                css_text = lookup.get_template(ti.cssm).render(request=request, context=context.kwargs)
+                if JSMIN and DMP_OPTIONS.get('MINIFY_JS_CSS', False):
+                    css_text = cssmin(css_text)
+                ret.append('<style type="text/css">%s</style>' % css_text)
+        return '\n'.join(ret)
+
+
+    def get_template_js(self, request, context):
+        '''Retrieves the static and mako_rendered CSS'''
+        ret = []
+        for template in self.template_chain:
+            ti = getattr(template, DMP_ATTR_NAME)
+            if ti.js:
+                ret.append(ti.js)  # the <script> was already created once in the constructor
+            if ti.jsm:
+                lookup = get_dmp_instance().get_app_template_lookup(ti.app, 'scripts')
+                js_text = lookup.get_template(ti.jsm).render(request=request, context=context.kwargs)
+                if JSMIN and DMP_OPTIONS.get('MINIFY_JS_CSS', False):
+                    js_text = jsmin(js_text)
+                ret.append('<script>%s</script>' % js_text)
+        return '\n'.join(ret)
 
 
 def run_command(cmd_parts):
-  '''Runs a command, piping all output to the DMP log.  The cmd_parts should be a sequence so paths can have spaces and we are os independent.'''
-  log.debug('DMP :: %s' % ' '.join(cmd_parts))
-  p = subprocess.Popen(cmd_parts, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE)
-  stdout, stderr = p.communicate()
-  if stdout:
-    log.debug('DMP :: %s' % stdout.decode('utf8'))
-  if stderr:
-    log.debug('DMP :: %s' % stderr.decode('utf8'))
+    '''Runs a command, piping all output to the DMP log.  The cmd_parts should be a sequence so paths can have spaces and we are os independent.'''
+    log.debug('DMP :: %s' % ' '.join(cmd_parts))
+    p = subprocess.Popen(cmd_parts, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE)
+    stdout, stderr = p.communicate()
+    if stdout:
+        log.debug('DMP :: %s' % stdout.decode('utf8'))
+    if stderr:
+        log.debug('DMP :: %s' % stderr.decode('utf8'))
