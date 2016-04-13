@@ -124,14 +124,20 @@ class TemplateInfo(object):
        object below creates a TemplateInfo object for each level in the Mako template inheritance
        chain.  This object is then attached to the template object, which Mako already caches.
        That way we only do this work once per server run (in production mode).
+
+       The app_dir is the search location for the styles/ and scripts/ folders, relative to the
+       project base directory.  For typical apps, this is simply the app name.
+
+       The template_filename is the filename of the template.
+
+       The cgi_id parameter is described in the MakoTemplateRenderer class below.
     '''
-    def __init__(self, template, cgi_id=None):
+    def __init__(self, app_dir, template_filename, cgi_id=None):
         # I want short try blocks, so there are several - for example, the first OSError can only occur for one reason: if the os.stat() fails.
         # I'm using os.stat here instead of os.path.exists because I need the st_mtime.  The os.stat checks that the file exists and gets the modified time in one command.
-
-        # set up the directories so we can go through them fast on render
-        self.template_dir, self.template_name = os.path.split(os.path.splitext(template.filename)[0])
-        self.app_dir = os.path.dirname(self.template_dir)
+        print('>>>', app_dir, template_filename)
+        self.template_name = os.path.splitext(template_filename)[0]  # remove its extension
+        self.app_dir = app_dir
         self.app = os.path.split(self.app_dir)[1]
 
         # set up the filenames
@@ -250,7 +256,8 @@ class StaticRenderer(object):
         # advantage of that caching).
         while mako_self != None:
             if settings.DEBUG or not hasattr(mako_self.template, DMP_TEMPLATEINFO_KEY):  # always recreate in debug mode
-                setattr(mako_self.template, DMP_TEMPLATEINFO_KEY, TemplateInfo(mako_self.template))
+                template_dir, template_name = os.path.split(mako_self.template.filename)
+                setattr(mako_self.template, DMP_TEMPLATEINFO_KEY, TemplateInfo(template_dir, template_name))
             self.template_chain.append(mako_self.template)
             mako_self = mako_self.inherits
 
