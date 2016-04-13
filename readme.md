@@ -537,9 +537,8 @@ The real HTML is kept in the `base.htm` file.  It looks like this:
 
         ## this is the skeleton of all pages on in this app - it defines the basic html tags
 
-        ## set up a StaticRenderer object to enable the CSS/JS automatic inclusion magic.
-        <%! from django_mako_plus import static_files %>
-        <%  static_renderer = static_files.StaticRenderer(self) %>
+        ## imports
+        <%! from django_mako_plus import get_template_css, get_template_js %>
 
         <!DOCTYPE html>
         <html>
@@ -552,7 +551,7 @@ The real HTML is kept in the `base.htm` file.  It looks like this:
             <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 
             ## render the css with the same name as this page
-            ${ static_renderer.get_template_css(request, context)  }
+            ${ get_template_css(self, request, context) }
 
           </head>
           <body>
@@ -566,7 +565,7 @@ The real HTML is kept in the `base.htm` file.  It looks like this:
             </%block>
 
             ## render the JS with the same name as this page
-            ${ static_renderer.get_template_js(request, context)  }
+            ${ get_template_js(self, request, context) }
 
           </body>
         </html>
@@ -575,7 +574,7 @@ Pay special attention to the `<%block name="content">` section, which is overrid
 
 The purpose of the inheritance from `base.htm` is to get a consistent look, menu, etc. across all pages of your site.  When you create additional pages, simply override the `content` block, similar to the way `index.html` does it.
 
-> Don't erase anything in the base.htm file.  In particular, the `static_files` and `StaticRenderer` lines at the top and bottom are important parts of DMP.  As much as you probably want to clean up the mess, try your best to leave them alone.  These code lines are not the droids you are looking for.  Move along.
+> Don't erase anything in the base.htm file.  In particular, import, get_template_css, and get_template_js are important parts of DMP.  As much as you probably want to clean up the mess, try your best to leave them alone.  These are not the code lines you are looking for.  Move along.
 
 
 ## Routing Without urls.py
@@ -971,21 +970,20 @@ Save the changes and take your browser to [http://localhost:8000/homepage/index/
 
 After reading the previous sections on automatic CSS and JS inclusion, you might want to know how it works.  It's all done in the templates (base.htm now, and base_ajax.htm in a later section below) you are inheriting from.  Open `base.htm` and look at the following code:
 
-        ## set up a StaticRenderer object to enable the CSS/JS automatic inclusion magic.
-        <%! from django_mako_plus import static_files %>
-        <%  static_renderer = static_files.StaticRenderer(self) %>
+        ## imports
+        <%! from django_mako_plus import get_template_css, get_template_js %>
 
         ...
 
         ## render the css with the same name as this page
-        ${ static_renderer.get_template_css(request, context)  }
+        ${ get_template_css(self, request, context) }
 
         ...
 
         ## render the JS with the same name as this page
-        ${ static_renderer.get_template_js(request, context)  }
+        ${ get_template_css(self, request, context) }
 
-The first block at the top of the file sets up a `static_renderer` object, which comes with this framework.  This object checks for the various .css, .cssm, .js, and .jsm files as the template is being rendered.  The next two calls, `get_template_css()` and `get_template_js()` include the `<link>`, `<script>`, and other code based on what it finds.
+The first block at the top of the file imports the two functions we'll use.   The next two calls, `get_template_css()` and `get_template_js()` include the `<link>`, `<script>`, and other code based on what it finds.
 
 This all works because the `index.html` template extends from the `base.htm` template.  If you fail to inherit from `base.htm` or `base_ajax.htm`, the `static_renderer` won't be able to include the support files.
 
