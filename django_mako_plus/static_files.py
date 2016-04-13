@@ -135,7 +135,6 @@ class TemplateInfo(object):
     def __init__(self, app_dir, template_filename, cgi_id=None):
         # I want short try blocks, so there are several - for example, the first OSError can only occur for one reason: if the os.stat() fails.
         # I'm using os.stat here instead of os.path.exists because I need the st_mtime.  The os.stat checks that the file exists and gets the modified time in one command.
-        print('>>>', app_dir, template_filename)
         self.template_name = os.path.splitext(template_filename)[0]  # remove its extension
         self.app_dir = app_dir
         self.app = os.path.split(self.app_dir)[1]
@@ -257,7 +256,8 @@ class StaticRenderer(object):
         while mako_self != None:
             if settings.DEBUG or not hasattr(mako_self.template, DMP_TEMPLATEINFO_KEY):  # always recreate in debug mode
                 template_dir, template_name = os.path.split(mako_self.template.filename)
-                setattr(mako_self.template, DMP_TEMPLATEINFO_KEY, TemplateInfo(template_dir, template_name))
+                app_dir = os.path.dirname(template_dir)
+                setattr(mako_self.template, DMP_TEMPLATEINFO_KEY, TemplateInfo(app_dir, template_name))
             self.template_chain.append(mako_self.template)
             mako_self = mako_self.inherits
 
