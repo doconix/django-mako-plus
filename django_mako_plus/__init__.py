@@ -35,3 +35,8 @@ from .middleware import RequestInitMiddleware
 from .template import MakoTemplates
 from .template import get_template_lookup
 from .template import get_app_template_lookup
+
+
+# the static files shortcuts
+from .static_files import get_template_css
+from .static_files import get_template_js

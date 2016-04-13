@@ -77,7 +77,7 @@ class MakoTemplates(BaseEngine):
            this method is called automatically for any app with
            DJANGO_MAKO_PLUS = True in its __init__.py file.
 
-           This should not normally be called directly.
+           This method should not normally be called directly.
         '''
         # set up the template, script, and style renderers
         get_app_template_lookup(app_config.name, 'templates', create=True)
@@ -86,8 +86,10 @@ class MakoTemplates(BaseEngine):
 
         # add the shortcut functions (only to the main templates, we don't do to scripts or styles
         # because people generally don't call those directly)
+        # Django's shortcut to return an *HttpResponse* is render(), and its template method to render a *string* is also render().
+        # Good job on naming there, folks.  That's going to confuse everyone.  But I'm matching it to be consistent despite the potential confusion.
         app_config.module.dmp_render = RenderShortcut(self, app_config.name, 'render_to_response')   # the Django shortcut to return an HttpResponse is render().
-        app_config.module.dmp_render_to_string = RenderShortcut(self, app_config.name, 'render')  # the Django Template method to render to a string is render().  Django templates never return a direct response.  Lame these two names are the same.
+        app_config.module.dmp_render_to_string = RenderShortcut(self, app_config.name, 'render')  # the Django Template method to render to a string is render().  Django templates never return a direct response.
 
 
     def get_template_lookup(self, app_name):
@@ -306,8 +308,9 @@ class MakoTemplateLookup:
 
 
     def get_template(self, template):
-        '''Retrieve a *Django* template object for the given template name, using the app_path and template_subdir
-           settings in this object.
+        '''Retrieve a *Django* API template object for the given template name, using the app_path and template_subdir
+           settings in this object.  This method still uses the corresponding Mako template and engine, but it
+           gives a Django API wrapper around it so you can use it the same as any Django template.
 
            This method corresponds to the Django templating system API.
            This method raises a Django exception if the template is not found or cannot compile.
@@ -324,8 +327,8 @@ class MakoTemplateLookup:
 
 
     def get_mako_template(self, template):
-        '''Retrieve a *Mako* template object for the given template name, using the app_path and template_subdir
-           settings in this object.
+        '''Retrieve the real *Mako* template object for the given template name without any wrapper,
+           using the app_path and template_subdir settings in this object.
 
            This method is an alternative to get_template().  Use it when you need the actual Mako template object.
            This method raises a Mako exception if the template is not found or cannot compile.

@@ -42,9 +42,9 @@ import logging
 log = logging.getLogger('django_mako_plus')
 
 
-# attribute name used to attach TemplateInfo objects to Mako templates
-DMP_ATTR_NAME = 'django_mako_plus_templateinfo'
-
+# keys to cache these objects for a small speedup
+DMP_TEMPLATEINFO_KEY = 'django_mako_plus_templateinfo'
+DMP_STATIC_RENDERER_KEY = 'django_mako_plus_staticrenderer'
 
 # Import minification if requested
 JSMIN = False
@@ -69,6 +69,51 @@ if isinstance(SCSS_BINARY, str):  # for backwards compatability
     SCSS_BINARY = SCSS_BINARY.split(' ')
 elif not SCSS_BINARY:
     log.debug('DMP :: Sass integration disabled because SCSS_BINARY is empty.')
+
+
+
+
+#######################################################################
+###   Shortcut methods - these are the primary way the static render
+###   shoudl be used
+
+def get_template_css(mako_self, request, context, cgi_id=None):
+    '''Renders the styles for a given template.
+
+       The mako_self parameter is simply the "self" variable
+       accessible within any Mako template.  An example call is:
+
+       <%! from django_mako_plus import get_template_css %>
+       ${ get_template_css(self, request, context) }
+
+       See StaticRenderer below for a description of cgi_id.
+    '''
+    return _get_cached_static_renderer(mako_self, cgi_id).get_template_css(request, context)
+
+
+def get_template_js(mako_self, request, context, cgi_id=None):
+    '''Renders the scripts for a given template.
+
+       The mako_self parameter is simply the "self" variable
+       accessible within any Mako template.  An example call is:
+
+       <%! from django_mako_plus import get_template_js %>
+       ${ get_template_js(self, request, context) }
+
+       See StaticRenderer below for a description of cgi_id.
+    '''
+    return _get_cached_static_renderer(mako_self, cgi_id).get_template_js(request, context)
+
+
+def _get_cached_static_renderer(mako_self, cgi_id=None):
+    '''Internal method to get/cache a template renderer in the current mako_self'''
+    try:
+        return getattr(mako_self, DMP_STATIC_RENDERER_KEY)
+    except AttributeError:
+        static_renderer = StaticRenderer(mako_self, cgi_id)
+        setattr(mako_self, DMP_STATIC_RENDERER_KEY, static_renderer)
+        return static_renderer
+
 
 
 #######################################################################
@@ -140,6 +185,42 @@ class TemplateInfo(object):
             self.jsm = None
 
 
+    def get_template_css(self, request, context):
+        '''Returns the CSS for this template's .css and .cssm files, if they exist.'''
+        ret = []
+        # do we have a css?
+        if self.css:
+            ret.append(self.css)  # the <link> was already created once in the constructor
+        # do we have a cssm?
+        if self.cssm:
+            lookup = get_dmp_instance().get_app_template_lookup(self.app, 'styles')
+            css_text = lookup.get_template(self.cssm).render(request=request, context=context.kwargs)
+            if JSMIN and DMP_OPTIONS.get('MINIFY_JS_CSS', False):
+                css_text = cssmin(css_text)
+            ret.append('<style type="text/css">%s</style>' % css_text)
+        # join and return
+        return '\n'.join(ret)
+
+
+    def get_template_js(self, request, context):
+        '''Returns the Javascript for this template's .js and .jsm files, if they exist.'''
+        ret = []
+        # do we have a js?
+        if self.js:
+            ret.append(self.js)  # the <script> was already created once in the constructor
+        # do we have a jsm?
+        if self.jsm:
+            lookup = get_dmp_instance().get_app_template_lookup(self.app, 'scripts')
+            js_text = lookup.get_template(self.jsm).render(request=request, context=context.kwargs)
+            if JSMIN and DMP_OPTIONS.get('MINIFY_JS_CSS', False):
+                js_text = jsmin(js_text)
+            ret.append('<script>%s</script>' % js_text)
+        # join and return
+        return '\n'.join(ret)
+
+
+
+
 
 class StaticRenderer(object):
     '''Renders the styles and scripts for a given template.
@@ -168,42 +249,29 @@ class StaticRenderer(object):
         # I attach it to the template objects because they are cached by mako (and thus we take
         # advantage of that caching).
         while mako_self != None:
-            if settings.DEBUG or not hasattr(mako_self.template, DMP_ATTR_NAME):  # always recreate in debug mode
-                setattr(mako_self.template, DMP_ATTR_NAME, TemplateInfo(mako_self.template))
+            if settings.DEBUG or not hasattr(mako_self.template, DMP_TEMPLATEINFO_KEY):  # always recreate in debug mode
+                setattr(mako_self.template, DMP_TEMPLATEINFO_KEY, TemplateInfo(mako_self.template))
             self.template_chain.append(mako_self.template)
             mako_self = mako_self.inherits
 
 
     def get_template_css(self, request, context):
-        '''Retrives the static and mako-rendered CSS'''
+        '''Retrives the static and mako-rendered CSS for the entire template chain'''
         ret = []
         for template in reversed(self.template_chain):  # reverse so lower CSS overrides higher CSS in the inheritance chain
-            ti = getattr(template, DMP_ATTR_NAME)
-            if ti.css:
-                ret.append(ti.css)  # the <link> was already created once in the constructor
-            if ti.cssm:
-                lookup = get_dmp_instance().get_app_template_lookup(ti.app, 'styles')
-                css_text = lookup.get_template(ti.cssm).render(request=request, context=context.kwargs)
-                if JSMIN and DMP_OPTIONS.get('MINIFY_JS_CSS', False):
-                    css_text = cssmin(css_text)
-                ret.append('<style type="text/css">%s</style>' % css_text)
+            ret.append(getattr(template, DMP_TEMPLATEINFO_KEY).get_template_css(request, context))
         return '\n'.join(ret)
 
 
     def get_template_js(self, request, context):
-        '''Retrieves the static and mako_rendered CSS'''
+        '''Retrieves the static and mako_rendered CSS for the entire template chain'''
         ret = []
         for template in self.template_chain:
-            ti = getattr(template, DMP_ATTR_NAME)
-            if ti.js:
-                ret.append(ti.js)  # the <script> was already created once in the constructor
-            if ti.jsm:
-                lookup = get_dmp_instance().get_app_template_lookup(ti.app, 'scripts')
-                js_text = lookup.get_template(ti.jsm).render(request=request, context=context.kwargs)
-                if JSMIN and DMP_OPTIONS.get('MINIFY_JS_CSS', False):
-                    js_text = jsmin(js_text)
-                ret.append('<script>%s</script>' % js_text)
+            ret.append(getattr(template, DMP_TEMPLATEINFO_KEY).get_template_js(request, context))
         return '\n'.join(ret)
+
+
+
 
 
 def run_command(cmd_parts):
