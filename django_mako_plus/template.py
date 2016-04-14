@@ -145,7 +145,7 @@ class MakoTemplates(BaseEngine):
                 try:
                     # if an app name, convert to the app's path
                     app_path = apps.get_app_config(app_name).path
-                except TemplateDoesNotExist:
+                except LookupError:
                     # if it wasn't an app name, assume it is an app path
                     app_path = os.path.abspath(os.path.join(settings.BASE_DIR, app_name))
                 # create the lookup object and return
