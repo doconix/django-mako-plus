@@ -199,7 +199,7 @@ class TemplateInfo(object):
         # do we have a cssm?
         if self.cssm:
             lookup = get_dmp_instance().get_app_template_lookup(self.app, 'styles')
-            css_text = lookup.get_template(self.cssm).render(request=request, context=context.kwargs)
+            css_text = lookup.get_template(self.cssm).render(request=request, context=context)
             if JSMIN and DMP_OPTIONS.get('MINIFY_JS_CSS', False):
                 css_text = cssmin(css_text)
             ret.append('<style type="text/css">%s</style>' % css_text)
@@ -216,7 +216,7 @@ class TemplateInfo(object):
         # do we have a jsm?
         if self.jsm:
             lookup = get_dmp_instance().get_app_template_lookup(self.app, 'scripts')
-            js_text = lookup.get_template(self.jsm).render(request=request, context=context.kwargs)
+            js_text = lookup.get_template(self.jsm).render(request=request, context=context)
             if JSMIN and DMP_OPTIONS.get('MINIFY_JS_CSS', False):
                 js_text = jsmin(js_text)
             ret.append('<script>%s</script>' % js_text)
@@ -266,7 +266,7 @@ class StaticRenderer(object):
         '''Retrives the static and mako-rendered CSS for the entire template chain'''
         ret = []
         for template in reversed(self.template_chain):  # reverse so lower CSS overrides higher CSS in the inheritance chain
-            ret.append(getattr(template, DMP_TEMPLATEINFO_KEY).get_template_css(request, context))
+            ret.append(getattr(template, DMP_TEMPLATEINFO_KEY).get_template_css(request, context.kwargs))
         return '\n'.join(ret)
 
 
@@ -274,7 +274,7 @@ class StaticRenderer(object):
         '''Retrieves the static and mako_rendered CSS for the entire template chain'''
         ret = []
         for template in self.template_chain:
-            ret.append(getattr(template, DMP_TEMPLATEINFO_KEY).get_template_js(request, context))
+            ret.append(getattr(template, DMP_TEMPLATEINFO_KEY).get_template_js(request, context.kwargs))
         return '\n'.join(ret)
 
 
