@@ -346,7 +346,7 @@ Don't forget to migrate to synchronize your database.  The apps in a standard Dj
                        'django_mako_plus.context_processors.settings',         # adds "settings" dictionary
                    ],
 
-                   # identifies where the Mako template cache will be stored, relative to each app
+                   # identifies where the Mako template cache will be stored, relative to each template directory
                    'TEMPLATES_CACHE_DIR': '.cached_templates',
 
                    # the default app and page to render in Mako when the url is too short
@@ -376,7 +376,8 @@ Don't forget to migrate to synchronize your database.  The apps in a standard Dj
                    # happens when the corresponding template.html is accessed the first time after server startup
                    # if DEBUG=False, this only happens once per file after server startup, not for every request
                    # specify the binary in a list below -- even if just one item (see subprocess.Popen)
-                   'SCSS_BINARY': [ '/usr/bin/env', 'scss', '--unix-newlines' ],
+                   #'SCSS_BINARY': [ '/usr/bin/env', 'scss', '--unix-newlines' ],
+                   'SCSS_BINARY': None,
 
                    # see the DMP online tutorial for information about this setting
                    # it can normally be empty
@@ -705,7 +706,7 @@ Suppose you need to put your templates in a directory named something other than
 
         from django.conf import settings
         from django_mako_plus import view_function
-        from django_mako_plus.template import get_app_template_lookup
+        from django_mako_plus.template import get_template_loader
         from datetime import datetime
 
         @view_function
@@ -715,7 +716,7 @@ Suppose you need to put your templates in a directory named something other than
           }
 
           # this syntax is only needed if you need to customize the way template rendering works
-          tlookup = get_app_template_lookup('/app/path/', subdir="my_templates")
+          tlookup = get_template_loader('/app/path/', subdir="my_templates")
           template = tlookup.get_template('index.html')
           return template.render_to_response(request=request, context=context)
 
@@ -1427,7 +1428,7 @@ The following creates two receivers.  The first is called just before the view's
           template = kwargs['template']          # the Mako template object that will do the rendering
           print('>>> render_template signal received!')
           # let's return a different template to be used - DMP will use this instead of kwargs['template']
-          tlookup = get_app_template_lookup('myapp')
+          tlookup = get_template_loader('myapp')
           template = tlookup.get_template('different.html')
 
 The above code should be in a code file that is called during Django initialization.  Good locations might be in a `models.py` file or your app's `__init__.py` file.

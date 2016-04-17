@@ -33,42 +33,13 @@ __doc__ = '''
 '''
 
 from django.conf import settings
-from .template import DMP_OPTIONS, get_dmp_instance
-import os, os.path, time, posixpath, subprocess
+from .util import run_command, get_dmp_instance, get_dmp_option, log
+import os, os.path, posixpath
 
 
-# set up the logger
-import logging
-log = logging.getLogger('django_mako_plus')
-
-
-# keys to cache these objects for a small speedup
+# keys to cache these the static renderer for a small speedup
 DMP_TEMPLATEINFO_KEY = 'django_mako_plus_templateinfo'
 DMP_STATIC_RENDERER_KEY = 'django_mako_plus_staticrenderer'
-
-# Import minification if requested
-JSMIN = False
-CSSMIN = False
-if DMP_OPTIONS.get('MINIFY_JS_CSS', False) and not settings.DEBUG:
-    try:
-        from rjsmin import jsmin
-        JSMIN = True
-    except ImportError:
-        pass
-    try:
-        from rcssmin import cssmin
-        CSSMIN = True
-    except ImportError:
-        pass
-
-
-# Sass Command
-SCSS_BINARY = DMP_OPTIONS.get('SCSS_BINARY', None)
-if isinstance(SCSS_BINARY, str):  # for backwards compatability
-    log.warning('DMP :: The settings.py variable SCSS_BINARY must be a list of arguments, not a string.  Splitting the string for now.')
-    SCSS_BINARY = SCSS_BINARY.split(' ')
-elif not SCSS_BINARY:
-    log.debug('DMP :: Sass integration disabled because SCSS_BINARY is empty.')
 
 
 
@@ -146,7 +117,7 @@ class TemplateInfo(object):
         jsm_file = os.path.join(self.app_dir, 'scripts', '%s.jsm' % self.template_name)
 
         # the SASS templatename.scss (compile any updated templatename.scss files to templatename.css files)
-        if SCSS_BINARY:
+        if get_dmp_option('RUNTIME_SCSS_ENABLED'):
             scss_file = os.path.join(self.app_dir, 'styles', '%s.scss' % self.template_name)
             try:
                 scss_stat = os.stat(scss_file)
@@ -159,7 +130,7 @@ class TemplateInfo(object):
                     fstat = None
                 # if we 1) have no css_file or 2) have a newer scss_file, run the compiler
                 if fstat == None or scss_stat.st_mtime > fstat.st_mtime:
-                    run_command(SCSS_BINARY + [ scss_file, css_file ])
+                    run_command(get_dmp_option('RUNTIME_SCSS_ARGUMENTS') + [ scss_file, css_file ])
 
         # the static templatename.css file
         try:
@@ -198,9 +169,9 @@ class TemplateInfo(object):
             ret.append(self.css)  # the <link> was already created once in the constructor
         # do we have a cssm?
         if self.cssm:
-            lookup = get_dmp_instance().get_app_template_lookup(self.app, 'styles')
+            lookup = get_dmp_instance().get_template_loader(self.app, 'styles')
             css_text = lookup.get_template(self.cssm).render(request=request, context=context)
-            if JSMIN and DMP_OPTIONS.get('MINIFY_JS_CSS', False):
+            if get_dmp_option('RUNTIME_CSSMIN'):
                 css_text = cssmin(css_text)
             ret.append('<style type="text/css">%s</style>' % css_text)
         # join and return
@@ -215,9 +186,9 @@ class TemplateInfo(object):
             ret.append(self.js)  # the <script> was already created once in the constructor
         # do we have a jsm?
         if self.jsm:
-            lookup = get_dmp_instance().get_app_template_lookup(self.app, 'scripts')
+            lookup = get_dmp_instance().get_template_loader(self.app, 'scripts')
             js_text = lookup.get_template(self.jsm).render(request=request, context=context)
-            if JSMIN and DMP_OPTIONS.get('MINIFY_JS_CSS', False):
+            if get_dmp_option('RUNTIME_JSMIN'):
                 js_text = jsmin(js_text)
             ret.append('<script>%s</script>' % js_text)
         # join and return
@@ -276,17 +247,3 @@ class StaticRenderer(object):
         for template in self.template_chain:
             ret.append(getattr(template, DMP_TEMPLATEINFO_KEY).get_template_js(request, context.kwargs))
         return '\n'.join(ret)
-
-
-
-
-
-def run_command(cmd_parts):
-    '''Runs a command, piping all output to the DMP log.  The cmd_parts should be a sequence so paths can have spaces and we are os independent.'''
-    log.debug('DMP :: %s' % ' '.join(cmd_parts))
-    p = subprocess.Popen(cmd_parts, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE)
-    stdout, stderr = p.communicate()
-    if stdout:
-        log.debug('DMP :: %s' % stdout.decode('utf8'))
-    if stderr:
-        log.debug('DMP :: %s' % stderr.decode('utf8'))
