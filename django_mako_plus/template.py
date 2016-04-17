@@ -65,7 +65,7 @@ class MakoTemplates(BaseEngine):
         DMP_OPTIONS[DMP_OPTIONS_INSTANCE_KEY] = self
 
         # add a template renderer for each DMP-enabled app
-        self.template_lookups = {}
+        self.template_loaders = {}
         for app_config in get_dmp_app_configs():
             self.register_app(app_config)
 
@@ -80,9 +80,9 @@ class MakoTemplates(BaseEngine):
            This method should not normally be called directly.
         '''
         # set up the template, script, and style renderers
-        get_app_template_lookup(app_config.name, 'templates', create=True)
-        get_app_template_lookup(app_config.name, 'scripts', create=True)
-        get_app_template_lookup(app_config.name, 'styles', create=True)
+        self.get_app_template_loader(app_config.name, 'templates', create=True)
+        self.get_app_template_loader(app_config.name, 'scripts', create=True)
+        self.get_app_template_loader(app_config.name, 'styles', create=True)
 
         # add the shortcut functions (only to the main templates, we don't do to scripts or styles
         # because people generally don't call those directly)
@@ -91,70 +91,6 @@ class MakoTemplates(BaseEngine):
         app_config.module.dmp_render = RenderShortcut(self, app_config.name, 'render_to_response')   # the Django shortcut to return an HttpResponse is render().
         app_config.module.dmp_render_to_string = RenderShortcut(self, app_config.name, 'render')  # the Django Template method to render to a string is render().  Django templates never return a direct response.
 
-
-    def get_template_lookup(self, app_name):
-        '''Returns the template lookup object for the "templates" directory in
-           the given app name from the DMP cache.
-
-           Raises a TemplateDoesNotExist if the app_name has not been registered.
-        '''
-        return self.get_app_template_lookup(app_name, 'templates')
-
-
-    def get_app_template_lookup(self, app_name, subdir, create=False):
-        '''Returns a template lookup object for the given app name in the given subdir.
-           For example, get_app_template_lookup('homepage', 'styles') will return
-           a lookup for the styles/ directory in the homepage app.
-
-           Normally, you should be calling get_template_lookup() instead of
-           this method.  DMP automatically creates template lookup objects for the
-           subdirectories 'templates', 'scripts', and 'styles' in every DMP-enabled app.
-           Since this is where your templates should normally be placed,
-           get_template_lookup() or the shortcuts dmp_render() and
-           dmp_render_to_string() should suffice.
-
-           This method is only used when custom lookups are needed.  The app_name
-           can be any Django app (regardless of whether it is a DMP-enabled app) OR
-           it can be a directory path to any folder on the file path (which should be
-           the parent folder of subdir).  In other words, use this method when you
-           want to short-circuit the normal DMP caches and normal Django app locations
-           and directly make a template lookup to a custom folder.
-
-           If the lookup is not found in the DMP cache, one of two things occur:
-             1. If create=True, it is created automatically and returned.  This overrides
-                the need to set DJANGO_MAKO_PLUS=True in the app's __init__.py file.
-             2. If create=False, a TemplateDoesNotExist is raised.  This is the normal
-                behavior.
-        '''
-        # get all the renderers for this app
-        try:
-            app_lookups = self.template_lookups[app_name]
-        except KeyError:
-            if create:
-                app_lookups = {}
-                self.template_lookups[app_name] = app_lookups
-            else:
-                raise TemplateDoesNotExist("%s has not been registered as a DMP app.  Did you forget to include the DJANGO_MAKO_PLUS=True line in your app's __init__.py?" % app_name)
-
-        # get the specific subdir renderer
-        try:
-            return app_lookups[subdir]
-        except KeyError:
-            # the template lookup hasn't been cached yet, so create it if create=True
-            if create:
-                try:
-                    # if an app name, convert to the app's path
-                    app_path = apps.get_app_config(app_name).path
-                except LookupError:
-                    # if it wasn't an app name, assume it is an app path
-                    app_path = os.path.abspath(os.path.join(settings.BASE_DIR, app_name))
-                # create the lookup object and return
-                lookup = MakoTemplateLookup(app_path, subdir)
-                app_lookups[subdir] = lookup
-                return lookup
-            else:
-                # the call opted not to create the lookup, so
-                raise TemplateDoesNotExist("%s is a DMP app, but a template lookup object for the %s subdirectory was not found." % (app_name, subdir))
 
 
     def from_string(self, template_code):
@@ -177,11 +113,75 @@ class MakoTemplates(BaseEngine):
         parts = template_name.split('/', 1)
         if len(parts) < 2:
             raise TemplateDoesNotExist('Invalid template_name format for a DMP template.  This method requires that the template name be in app_name/template.html format (separated by slash).')
-        return self.get_template_lookup(parts[0]).get_template(parts[1])
+        return self.get_template_loader(parts[0]).get_template(parts[1])
 
 
+    def get_template_loader(self, app_name):
+        '''Returns the template loader object for the "templates" directory in
+           the given app name from the DMP cache.
+
+           Raises a TemplateDoesNotExist if the app_name has not been registered.
+        '''
+        return self.get_app_template_loader(app_name, 'templates')
 
 
+    def get_app_template_loader(self, app_name, subdir, create=False):
+        '''Returns a template loader object for the given app name in the given subdir.
+           For example, get_app_template_loader('homepage', 'styles') will return
+           a loader for the styles/ directory in the homepage app.
+
+           Normally, you should be calling get_template_loader() instead of
+           this method.  DMP automatically creates template loader objects for the
+           subdirectories 'templates', 'scripts', and 'styles' in every DMP-enabled app.
+           Since this is where your templates should normally be placed,
+           get_template_loader() or the shortcuts dmp_render() and
+           dmp_render_to_string() should suffice.
+
+           This method is only used when custom loaders are needed.  The app_name
+           can be any Django app (regardless of whether it is a DMP-enabled app) OR
+           it can be a directory path to any folder on the file path (which should be
+           the parent folder of subdir).  In other words, use this method when you
+           want to short-circuit the normal DMP caches and normal Django app locations
+           and directly make a template loader to a custom folder.
+
+           If the loader is not found in the DMP cache, one of two things occur:
+             1. If create=True, it is created automatically and returned.  This overrides
+                the need to set DJANGO_MAKO_PLUS=True in the app's __init__.py file.
+             2. If create=False, a TemplateDoesNotExist is raised.  This is the normal
+                behavior.
+        '''
+        # get all the renderers for this app
+        try:
+            app_loaders = self.template_loaders[app_name]
+        except KeyError:
+            if create:
+                app_loaders = {}
+                self.template_loaders[app_name] = app_loaders
+            else:
+                raise TemplateDoesNotExist("%s has not been registered as a DMP app.  Did you forget to include the DJANGO_MAKO_PLUS=True line in your app's __init__.py?" % app_name)
+
+        # get the specific subdir renderer
+        try:
+            return app_loaders[subdir]
+        except KeyError:
+            # the template loader hasn't been cached yet, so create it if create=True
+            if create:
+                try:
+                    # if an app name, convert to the app's path
+                    app_path = apps.get_app_config(app_name).path
+                except LookupError:
+                    # if it wasn't an app name, assume it is an app path
+                    app_path = os.path.abspath(os.path.join(settings.BASE_DIR, app_name))
+                # create the loader object and return
+                loader = MakoTemplateLookup(app_path, subdir)
+                app_loaders[subdir] = loader
+                return loader
+            else:
+                # the call opted not to create the loader, so
+                raise TemplateDoesNotExist("%s is a DMP app, but a template loader object for the %s subdirectory was not found." % (app_name, subdir))
+
+
+    def get_
 
 
 ##############################################################
@@ -205,41 +205,41 @@ def get_dmp_app_configs():
             yield config
 
 
-def get_template_lookup(app_name):
-    '''Returns the template lookup object for the "templates" directory in
+def get_template_loader(app_name):
+    '''Returns the template loader object for the "templates" directory in
        the given app name from the DMP cache.
 
        Raises a TemplateDoesNotExist if the app_name has not been registered.
     '''
-    return get_dmp_instance().get_app_template_lookup(app_name, 'templates')
+    return get_dmp_instance().get_app_template_loader(app_name, 'templates')
 
 
-def get_app_template_lookup(app_name, subdir, create=False):
-    '''Returns a template lookup object for the given app name in the given subdir.
-       For example, get_app_template_lookup('homepage', 'styles') will return
-       a lookup for the styles/ directory in the homepage app.
+def get_app_template_loader(app_name, subdir, create=False):
+    '''Returns a template loader object for the given app name in the given subdir.
+       For example, get_app_template_loader('homepage', 'styles') will return
+       a loader for the styles/ directory in the homepage app.
 
-       Normally, you should be calling get_template_lookup() instead of
-       this method.  DMP automatically creates template lookup objects for the
+       Normally, you should be calling get_template_loader() instead of
+       this method.  DMP automatically creates template loader objects for the
        subdirectories 'templates', 'scripts', and 'styles' in every DMP-enabled app.
        Since this is where your templates should normally be placed,
-       get_template_lookup() or the shortcuts dmp_render() and
+       get_template_loader() or the shortcuts dmp_render() and
        dmp_render_to_string() should suffice.
 
-       This method is only used when custom lookups are needed.  The app_name
+       This method is only used when custom loaders are needed.  The app_name
        can be any Django app (regardless of whether it is a DMP-enabled app) OR
        it can be a directory path to any folder on the file path (which should be
        the parent folder of subdir).  In other words, use this method when you
        want to short-circuit the normal DMP caches and normal Django app locations
-       and directly make a template lookup to a custom folder.
+       and directly make a template loader to a custom folder.
 
-       If the lookup is not found in the DMP cache, one of two things occur:
+       If the loader is not found in the DMP cache, one of two things occur:
          1. If create=True, it is created automatically and returned.  This overrides
             the need to set DJANGO_MAKO_PLUS=True in the app's __init__.py file.
          2. If create=False, a TemplateDoesNotExist is raised.  This is the normal
             behavior.
     '''
-    return get_dmp_instance().get_app_template_lookup(app_name, subdir, create)
+    return get_dmp_instance().get_app_template_loader(app_name, subdir, create)
 
 
 
@@ -276,10 +276,10 @@ class RenderShortcut(object):
     def __call__(self, request, template, context=None, def_name=None, subdir='templates'):
         '''Allows instances of this class to act like functions.'''
         # I'm doing "late binding" to the map, just in
-        # case new template lookup objects are added after creation.
-        # This way I don't have a direct (and permanent) pointer to the lookup object.
-        template_lookup = self.dmp_instance.get_app_template_lookup(self.app_name, subdir)
-        template_obj = template_lookup.get_template(template)
+        # case new template loader objects are added after creation.
+        # This way I don't have a direct (and permanent) pointer to the loader object.
+        template_loader = self.dmp_instance.get_app_template_loader(self.app_name, subdir)
+        template_obj = template_loader.get_template(template)
         return getattr(template_obj, self.template_method_name)(context=context, request=request, def_name=def_name)
 
 
@@ -287,7 +287,7 @@ class RenderShortcut(object):
 ##############################################################
 ###   Looks up Mako templates
 
-class MakoTemplateLookup:
+class MakoTemplateLoader:
     '''Renders Mako templates.'''
     def __init__(self, app_path, template_subdir='templates'):
         '''Creates a renderer to the given path (relative to the project root where settings.STATIC_ROOT points to).'''

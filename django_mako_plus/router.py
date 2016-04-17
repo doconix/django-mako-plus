@@ -67,8 +67,8 @@ def route_request(request):
             if not os.path.exists(full_module_filename):
                 log.debug('DMP :: module %s not found; sending processing directly to template %s.html' % (request.dmp_router_module, request.dmp_router_page_full))
                 try:
-                    dmp_lookup = get_dmp_instance().get_template_lookup(request.dmp_router_app)
-                    return dmp_lookup.get_template('%s.html' % request.dmp_router_page_full).render_to_response(request=request)
+                    dmp_loader = get_dmp_instance().get_template_loader(request.dmp_router_app)
+                    return dmp_loader.get_template('%s.html' % request.dmp_router_page_full).render_to_response(request=request)
                 except (TemplateDoesNotExist, TemplateSyntaxError, ImproperlyConfigured) as e:
                     log.debug('DMP :: %s' % (e))
                     raise Http404
