@@ -47,3 +47,17 @@ class RedirectException(Exception):
         if self.permanent:
             return HttpResponsePermanentRedirect(self.redirect_to)
         return HttpResponseRedirect(self.redirect_to)
+
+
+
+################################################################
+###   Other exceptions
+
+class SassCompileException(Exception):
+    '''Raised when a .scss file won't compile'''
+    def __init__(self, cmd, message):
+        self.cmd = cmd
+        self.message = message
+
+    def __str__(self):
+        return self.message

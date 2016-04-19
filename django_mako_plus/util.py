@@ -44,15 +44,16 @@ def get_dmp_app_configs():
             yield config
 
 
-def run_command(cmd_parts):
+def run_command(cmd_parts, raise_exception=True):
     '''Runs a command, piping all output to the DMP log.  The cmd_parts should be a sequence so paths can have spaces and we are os independent.'''
     log.debug('DMP :: %s' % ' '.join(cmd_parts))
     p = subprocess.Popen(cmd_parts, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE)
     stdout, stderr = p.communicate()
     if stdout:
         log.debug('DMP :: %s' % stdout.decode('utf8'))
-    if stderr:
-        log.debug('DMP :: %s' % stderr.decode('utf8'))
+    if raise_exception and p.returncode != 0:
+        raise subprocess.CalledProcessError(p.returncode, cmd_parts, output=stdout.decode('utf8'), stderr=stderr.decode('utf8'))
+    return p.returncode
 
 
 ################################################################

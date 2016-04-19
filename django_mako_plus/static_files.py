@@ -33,8 +33,9 @@ __doc__ = '''
 '''
 
 from django.conf import settings
+from .exceptions import SassCompileException
 from .util import run_command, get_dmp_instance, get_dmp_option, log
-import os, os.path, posixpath
+import os, os.path, posixpath, subprocess
 
 
 # keys to cache these the static renderer for a small speedup
@@ -130,7 +131,10 @@ class TemplateInfo(object):
                     fstat = None
                 # if we 1) have no css_file or 2) have a newer scss_file, run the compiler
                 if fstat == None or scss_stat.st_mtime > fstat.st_mtime:
-                    run_command(get_dmp_option('RUNTIME_SCSS_ARGUMENTS') + [ scss_file, css_file ])
+                    try:
+                        run_command(get_dmp_option('RUNTIME_SCSS_ARGUMENTS') + [ scss_file, css_file ])
+                    except subprocess.CalledProcessError as cpe:
+                        raise SassCompileException(cpe.cmd, cpe.stderr)
 
         # the static templatename.css file
         try:

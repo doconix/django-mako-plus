@@ -915,7 +915,7 @@ As shown in the example above, the context dictionary sent the templating engine
 
 ## Sass Integration
 
-Thanks to a submission by a crack-shot user, DMP can automatically compile your .scss files each time you update them.  When a template is rendered the first time, DMP checks the timestamps on the .scss file and .css file, and it reruns Sass when necessary.  Just be sure to set the `SCSS_BINARY` option in settings.py.
+DMP can automatically compile your .scss files each time you update them.  When a template is rendered the first time, DMP checks the timestamps on the .scss file and .css file, and it reruns Sass when necessary.  Just be sure to set the `SCSS_BINARY` option in settings.py.
 
 When `DEBUG = True`, DMP checks the timestamps every time a template is rendered.  When in production mode (`DEBUG = False`), DMP only checks the timestamps the first time a template is rendered -- you'll have to restart your server to recompile updated .scss files.  You can disable Sass integration by removing the `SCSS_BINARY` from the settings or by setting it to `None`.
 
@@ -929,10 +929,9 @@ Note that `SCSS_BINARY` *must be specified in a list*.  DMP uses Python's subpro
         # or, to disable:
         'SCSS_BINARY': None,
 
-If Sass isn't running right, check the DMP log statements.  When the log is enabled, it shows the exact command syntax that DMP is using.
+If Sass isn't running right, check the DMP log statements.  When the log is enabled, it shows the exact command syntax that DMP is using.  Copy and paste the code into a terminal and troubleshoot the command manually.
 
-Where's the love for Less integration?  We just need a user to submit a patch for it.
-
+> Unfortunately, you can't put Mako template codes in .scss files (e.g. there's no such thing as .scssm).  Since .scss compiles at development time and .cssm renders at runtime, Sass has to run first on the file.  Sass gets grumpy when it finds Mako codes during compilation. A workaround is to create two files: templatename.cssm and templatename.scss.  Put the Mako-related codes in the .cssm and the Sass in .scss.  DMP will automatically include both files.
 
 ## Static and Dynamic Javascript
 
