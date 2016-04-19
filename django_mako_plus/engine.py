@@ -40,6 +40,10 @@ class MakoTemplates(BaseEngine):
         # super constructor
         super(MakoTemplates, self).__init__(params)
 
+        # THIS IS TEMPORARY.  It can be taken out sometime in summer '16
+        if 'CONTEXT_PROESSORS' in self.options:
+            raise ImproperlyConfigured('Your DMP options in settings.py specifies CONTEXT_PROESSORS, which is misspelled (this probably comes from an error in earlier versions of DMP).  Please correct it to CONTEXT_PROCESSORS. Thanks!')
+
         # set up the context processors
         context_processors = []
         for processor in self.options.get('CONTEXT_PROCESSORS', []):
