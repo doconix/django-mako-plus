@@ -1,5 +1,5 @@
-from django.http import HttpResponse, Http404, HttpResponseRedirect, HttpResponsePermanentRedirect
-
+from django.http import HttpResponseRedirect, HttpResponsePermanentRedirect
+from .http import HttpResponseJavascriptRedirect, REDIRECT_HEADER_KEY
 
 
 
@@ -7,46 +7,109 @@ from django.http import HttpResponse, Http404, HttpResponseRedirect, HttpRespons
 ###   Exceptions used to direct the controller
 
 
-class InternalRedirectException(Exception):
-    '''View functions can throw this exception to indicate that a new view
-       should be called by the HtmlPageServer.  The current view function
-       will end immediately, and processing will be passed to the new view function.
+class BaseRedirectException(Exception):
+    '''
+    Superclass of DMP redirect exceptions
+    '''
+    pass
+
+
+class InternalRedirectException(BaseRedirectException):
+    '''
+    View functions can throw this exception to indicate that a new view
+    should be called by the HtmlPageServer.  The current view function
+    will end immediately, and processing will be passed to the new view function.
     '''
     def __init__(self, redirect_module, redirect_function):
-        '''Indicates the new view to be called.  The view should be given relative to the project root.
-           The parameters should be strings, not the actual module or function reference.
+        '''
+        Indicates the new view to be called.  The view should be given relative to the project root.
+        The parameters should be strings, not the actual module or function reference.
         '''
         super(InternalRedirectException, self).__init__()
         self.redirect_module = redirect_module
         self.redirect_function = redirect_function
 
 
-
-
-class RedirectException(Exception):
-    '''Immediately stops processing of a view function or template and redirects to the given page.
-       Perhaps it takes a little too much liberty with exceptions, but it makes returning from a
-       huge call stack really nice.
-
-       If as_javascript==True, the browser is sent <script>window.location.href="...";</script>.
-       This is useful when using Ajax.  A redirect in Ajax is handled internally by libraries like
-       JQuery, so a regular HTTP redirect can't direct the top-level page.  Javascript is a hack
-       around this so an Ajax call can redirect the whole browser window.
+class RedirectException(BaseRedirectException):
     '''
-    def __init__(self, redirect_to, permanent=False, as_javascript=False):
+    Immediately stops processing of a view function or template and redirects to the given page
+    using the standard 302 response status header.
+
+    After the redirect_to parameter, you can use any of the normal HttpResponse constructor arguments.
+
+    A custom header is set in the response.  This allows middleware, your web server, or
+    calling JS code to adjust the redirect if needed.
+
+    The permanent=... and as_javascript=... are deprecated in favor of JavascriptRedirectException
+    and PermanentRedirectException.
+    '''
+    def __init__(self, redirect_to, *args, **kwargs):
         self.redirect_to = redirect_to
-        self.permanent = permanent
-        self.as_javascript = as_javascript
+        self.args = args
+        self.kwargs = kwargs
+
+    def get_response(self, request, *args, **kwargs):
+        '''Returns the redirect response for this exception.'''
+        # for the two deprecated options
+        if kwargs.pop('permanent', None):
+            return PermanentRedirectException(self.redirect_to, *self.args, **self.kwargs).get_response(request)
+        if kwargs.pop('as_javascript', None):
+            return JavascriptRedirectException(self.redirect_to, *self.args, **self.kwargs).get_response(request)
+        # normal process
+        response = HttpResponseRedirect(self.redirect_to)
+        response[REDIRECT_HEADER_KEY] = self.redirect_to
+        return response
 
 
+class PermanentRedirectException(RedirectException):
+    '''
+    Immediately stops processing of a view function or template and redirects to the given page
+    using the standard 301 response status header.
+
+    After the redirect_to parameter, you can use any of the normal HttpResponse constructor arguments.
+
+    A custom header is set in the response.  This allows middleware, your web server, or
+    calling JS code to adjust the redirect if needed.
+
+    '''
     def get_response(self, request):
-        '''Returns the redirect response for this exception.  DMP passes the current request
-           as a parameter for your convenience in using the user object, session object, etc.'''
-        if self.as_javascript:
-            return HttpResponse('<script>window.location.href="%s";</script>' % self.redirect_to)
-        if self.permanent:
-            return HttpResponsePermanentRedirect(self.redirect_to)
-        return HttpResponseRedirect(self.redirect_to)
+        '''Returns the redirect response for this exception.'''
+        response = HttpResponsePermanentRedirect(self.redirect_to, *self.args, **self.kwargs)
+        response[REDIRECT_HEADER_KEY] = self.redirect_to
+        return response
+
+
+class JavascriptRedirectException(RedirectException):
+    '''
+    Immediately stops processing of a view function or template and redirects to the given page.
+
+    Sends a regular HTTP 200 OK response that contains Javascript to
+    redirect the browser: <script>window.location.href="...";</script>.
+
+    Normally, redirecting should be done via HTTP 302 rather than Javascript.
+    Use this class when your only choice is through Javascript.
+
+    For example, suppose you need to redirect the top-level page from an Ajax response.
+    Ajax redirects normally only redirects the Ajax itself (not the page that initiated the call),
+    and this default behavior is usually what is needed.  However, there are instances when the
+    entire page must be redirected, even if the call is Ajax-based.
+
+    After the redirect_to parameter, you can use any of the normal HttpResponse constructor arguments.
+
+    If you need to omit the surrounding <script> tags, send "include_script_tag=False" to
+    the constructor. One use case for omitting the tags is when the caller is a
+    JQuery $.script() ajax call.
+
+    A custom header is set in the response.  This allows middleware, your web server, or
+    calling JS code to adjust the redirect if needed.
+
+    Note that this method doesn't use the <meta> tag or Refresh header method because
+    they aren't predictable within Ajax (for example, JQuery seems to ignore them).
+    '''
+    def get_response(self, request):
+        '''Returns the redirect response for this exception.'''
+        # the redirect key is already placed in the response by HttpResponseJavascriptRedirect
+        return HttpResponseJavascriptRedirect(self.redirect_to, *self.args, **self.kwargs)
 
 
 

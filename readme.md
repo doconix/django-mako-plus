@@ -1336,39 +1336,48 @@ The above two commands will use both methods to bring files into your `/static/`
 
 
 
-## Redirecting with Exceptions
+## Redirecting
 
-Suppose your view needs to redirect the user's browser to a different page than the one currently being routed.  For example, the user might not be authenticated correctly or a form might have just been submitted.  In the latter case, web applications often redirect the browser to the *same* page after a form submission (and handling with a view), effectively switching the browser from its current POST request to a regular GET request.  That way, if the user hits the refresh button within his or her browser, the page simply gets refreshed without the form being submitted again.
+Redirecting the browser is common in today's sites.  For example, during form submissions, web applications often redirect the browser to the *same* page after a form submission (and handling with a view)--effectively switching the browser from its current POST to a regular GET.  If the user hits the refresh button within his or her browser, the page simply gets refreshed without the form being submitted again. It prevents users from being confused when the browser opens a popup asking if the post data should be submitted again.
 
-When you need to redirect the browser to a different page, you should normally use the standard `django.http.HttpResponseRedirect` object.  By returning a redirect object from your view, DMP (and subsequently Django) direct the browser to redirect.
+DMP provides a Javascript-based redirect response and four exception-based redirects.  The first, HttpResponseJavascriptRedirect, sends a regular HTTP 200 OK response that contains Javascript to redirect the browser: `<script>window.location.href="...";</script>`.  Normally, redirecting should be done via Django's built-in HttpResponseRedirect (HTTP 302), but there are times when a normal 302 doesn't do what you need.  For example, suppose you need to redirect the top-level page from an Ajax response.  Ajax redirects normally only redirects the Ajax itself (not the page that initiated the call), and this default behavior is usually what is needed.  However, there are instances when the entire page must be redirected, even if the call is Ajax-based.  Note that this class doesn't use the <meta> tag or Refresh header method because they aren't predictable within Ajax (for example, JQuery seems to ignore them).
 
-BUT, suppose you are several levels deep in method calls without direct access to the request or response objects?  How can you direct a method several levels up in the call stack to send a redirect response?  That's where the `django_mako_plus.RedirectException` comes in handy.  Since it is an exception, it bubbles all the way up the stack to the DMP router -- where it is sent directly to the browser.
+The four exception-based redirects allow you to raise a redirect from anywhere in your code.  For example, the user might not be authenticated correctly, but the code that checks for this can't return a response object.  Since these three are exceptions, they bubbles all the way up the call stack to the DMP router -- where they generate a redirect to the browser.  Exception-based redirects should be used sparingly, but they can help you create clean code.  For example, without the ability to redirect with an exception, you might have to pass and return other variables (often the request/response objects) through many more function calls.
 
-Two types of redirects are supported by DMP: a standard browser redirect and an internal redirect.  The standard browser redirect, `RedirectException`, uses the HTTP 302 code to initiate a new request.  The internal redirect is simpler and shorter: it restarts the routing process with a different view/template within the *current* request, without changing the browser url.  Internal redirect exceptions are rare and shouldn't be abused; an example might be returning an "upgrade your browser" page to a client.  Since the user has an old browser, a regular 302 redirect might not work the way you expect.  Redirecting internally is much safer.
+As you might expect, RedirectException sends a normal 302 redirect and PermanentRedirectException sends a permanent 301 redirect.  JavascriptRedirectException sends a redirect HttpResponseJavascriptRedirect as just described.
 
-To initiate the two types of redirects, use the following code:
+The fourth exception, InternalRedirectException, is simpler and faster: it restarts the routing process with a different view/template within the *current* request, without changing the browser url.  Internal redirect exceptions are rare and shouldn't be abused. An example might be returning an "upgrade your browser" page to a client; since the user has an old browser, a regular 302 redirect might not work the way you expect.  Redirecting internally is much safer because your server stays in control the entire time.
 
-        from django_mako_plus import RedirectException, InternalRedirectException
+The following code shows examples of different methods if redirection:
 
-        # send a normal, browser-based redirect from anywhere in the call stack
-        # this is effectively the same as: return django.http.HttpResponseRedirect('/some/new/url')
+        from django.http import HttpResponseRedirect
+        from django_mako_plus import HttpResponseJavascriptRedirect
+        from django_mako_plus import RedirectException, PermanentRedirectException, JavascriptRedirectException, InternalRedirectException
+
+        # return a normal redirect with Django from a process_request method
+        return HttpResponseRedirect('/some/new/url/')
+
+        # return a Javascript-based redirect from a process_request method
+        return HttpResponseJavascriptRedirect('/some/new/url/')
+
+        # raise a normal redirect from anywhere in your code
         raise RedirectException('/some/new/url')
 
-        # the next line is the same as: return django.http.HttpResponsePermanentRedirect('/some/new/url')
-        raise RedirectException('/some/new/url', permanent=True)
+        # raise a permanent redirect from anywhere in your code
+        raise PermanentRedirectException('/some/new/url')
 
-        # the next line sends a Javascript-based redirect.  This is useful for Ajax responses that
-        # need to redirect the full page or for other places a normal redirect response doesn't work.
-        # this is effectively the same as: <script>window.location.href="/some/new/url";</script>
-        raise RedirectException('/some/new/url', as_javascript=True)
+        # raise a Javascript-based redirect from anywhere in your code
+        raise JavascriptRedirectException('/some/new/url')
 
-        # restart the routing process with a new view, as if the browser had done this url.
+        # restart the routing process with a new view without returning to the browser.
         # the browser keeps the same url and doesn't know a redirect has happened.
         # the request.dmp_router_module and request.dmp_router_function variables are updated
         # to reflect the new values, but all other variables, such as request.urlparams,
         # request.GET, and request.POST remain the same as before.
         # the next line is as if the browser went to /homepage/upgrade/
         raise InternalRedirectException('homepage.views.upgrade', 'process_request')
+
+DMP adds a custom header, "Redirect-Exception", to all exception-based redirects.  Although you'll probably ignore this most of the time, the header allows you to further act on exception redirects in response middleware, your web server, or calling Javascript code.
 
 > Is this an abuse of exceptions?  Probably.  But from one viewpoint, a redirect can be seen as an exception to normal processing.  It is quite handy to be able to redirect the browser from anywhere in your codebase.  If this feels dirty to you, feel free to skip it.
 

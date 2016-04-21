@@ -18,8 +18,14 @@ from .apps import Config
 
 
 # the exceptions
-from .exceptions import InternalRedirectException
 from .exceptions import RedirectException
+from .exceptions import PermanentRedirectException
+from .exceptions import JavascriptRedirectException
+from .exceptions import InternalRedirectException
+
+
+# the http responses
+from .http import HttpResponseJavascriptRedirect
 
 
 # the convenience functions
