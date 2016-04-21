@@ -84,7 +84,14 @@ class JavascriptRedirectException(RedirectException):
     Immediately stops processing of a view function or template and redirects to the given page.
 
     Sends a regular HTTP 200 OK response that contains Javascript to
-    redirect the browser: <script>window.location.href="...";</script>.
+    redirect the browser:
+
+        <script>window.location.href="...";</script>.
+
+    If redirect_to is empty, it redirects to the current location (essentially refreshing
+    the current page):
+
+        <script>window.location.href=window.location.href;</script>.
 
     Normally, redirecting should be done via HTTP 302 rather than Javascript.
     Use this class when your only choice is through Javascript.

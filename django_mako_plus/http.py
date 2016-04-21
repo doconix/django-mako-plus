@@ -12,7 +12,14 @@ REDIRECT_HEADER_KEY = 'Redirect-Location'
 class HttpResponseJavascriptRedirect(HttpResponse):
     '''
     Sends a regular HTTP 200 OK response that contains Javascript to
-    redirect the browser: <script>window.location.href="...";</script>.
+    redirect the browser:
+
+        <script>window.location.href="...";</script>.
+
+    If redirect_to is empty, it redirects to the current location (essentially refreshing
+    the current page):
+
+        <script>window.location.href=window.location.href;</script>.
 
     Normally, redirecting should be done via HTTP 302 rather than Javascript.
     Use this class when your only choice is through Javascript.
@@ -34,13 +41,16 @@ class HttpResponseJavascriptRedirect(HttpResponse):
     Note that this method doesn't use the <meta> tag or Refresh header method because
     they aren't predictable within Ajax (for example, JQuery seems to ignore them).
     '''
-    def __init__(self, redirect_to, *args, **kwargs):
-        # set up the redirect JS (pop off the include_script_tag if sent)
-        if kwargs.pop('include_script_tag', True):
-            content = '<script>window.location.href="{}";</script>'.format(redirect_to)
+    def __init__(self, redirect_to=None, *args, **kwargs):
+        # set up the code
+        if redirect_to:
+            script = 'window.location.href="{}";'.format(redirect_to)
         else:
-            content = 'window.location.href="{}";'.format(redirect_to)
+            script = 'window.location.href=window.location.href'
+        # do we need to add the <script> tag? (that's the default)
+        if kwargs.pop('include_script_tag', True):
+            script = '<script>{}</script>'.format(script)
         # call the super
-        super().__init__(content, *args, **kwargs)
+        super().__init__(script, *args, **kwargs)
         # add the custom header
-        self[REDIRECT_HEADER_KEY] = redirect_to
+        self[REDIRECT_HEADER_KEY] = redirect_to or 'window.location.href'
