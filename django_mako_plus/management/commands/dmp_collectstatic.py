@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand, CommandError
 from django.conf import settings
 
-from django_mako_plus.template import get_dmp_instance, get_dmp_app_configs, DMP_OPTIONS
+from django_mako_plus.util import get_dmp_instance, get_dmp_app_configs, DMP_OPTIONS
 
 from optparse import make_option
 import os, os.path, shutil, fnmatch
