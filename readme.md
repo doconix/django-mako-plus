@@ -339,7 +339,7 @@ Don't forget to migrate to synchronize your database.  The apps in a standard Dj
                'BACKEND': 'django_mako_plus.MakoTemplates',
                'OPTIONS': {
                    # functions to automatically add variables to the params/context before templates are rendered
-                   'CONTEXT_PROESSORS': [
+                   'CONTEXT_PROCESSORS': [
                        'django.template.context_processors.static',            # adds "STATIC_URL" from settings.py
                        'django.template.context_processors.request',           # adds "request" object
                        'django.contrib.auth.context_processors.auth',          # adds "user" and "perms" objects
