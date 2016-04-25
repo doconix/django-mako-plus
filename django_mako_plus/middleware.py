@@ -1,9 +1,7 @@
 from django.core.exceptions import ImproperlyConfigured
-#from django_mako_plus import signals, view_function, RedirectException, InternalRedirectException
-from django.template import engines
 from urllib.parse import unquote
 
-from .util import URLParamList, get_dmp_app_configs, get_dmp_option
+from .util import URLParamList, get_dmp_app_configs, get_dmp_instance, DMP_OPTIONS
 
 
 ##########################################################
@@ -37,29 +35,29 @@ class RequestInitMiddleware:
         path_parts = request.path[1:].split('/') # [1:] to remove the leading /
 
         # splice the list if the settings need it
-        start_index = get_dmp_option('URL_START_INDEX', 0)
+        start_index = DMP_OPTIONS.get('URL_START_INDEX', 0)
         if start_index > 0:
             path_parts = path_parts[start_index:]
 
         # ensure that we have at least 2 path_parts to work with
         # by adding the default app and/or page as needed
         if len(path_parts) == 0:
-            path_parts.append(get_dmp_option('DEFAULT_APP', 'homepage'))
-            path_parts.append(get_dmp_option('DEFAULT_PAGE', 'index'))
+            path_parts.append(DMP_OPTIONS.get('DEFAULT_APP', 'homepage'))
+            path_parts.append(DMP_OPTIONS.get('DEFAULT_PAGE', 'index'))
 
         elif len(path_parts) == 1: # /app or /page
             if path_parts[0] in self.dmp_app_names:  # one of our apps specified, so insert the default page
-                path_parts.append(get_dmp_option('DEFAULT_PAGE', 'index'))
+                path_parts.append(DMP_OPTIONS.get('DEFAULT_PAGE', 'index'))
             else:  # not one of our apps, so insert the app and assume path_parts[0] is a page in that app
-                path_parts.insert(0, get_dmp_option('DEFAULT_APP', 'homepage'))
+                path_parts.insert(0, DMP_OPTIONS.get('DEFAULT_APP', 'homepage'))
                 if not path_parts[1]: # was the page empty?
-                    path_parts[1] = get_dmp_option('DEFAULT_PAGE', 'index')
+                    path_parts[1] = DMP_OPTIONS.get('DEFAULT_PAGE', 'index')
 
         else: # at this point in the elif, we know len(path_parts) >= 2
             if path_parts[0] not in self.dmp_app_names: # the first part was not one of our apps, so insert the default app
-                path_parts.insert(0, get_dmp_option('DEFAULT_APP', 'homepage'))
+                path_parts.insert(0, DMP_OPTIONS.get('DEFAULT_APP', 'homepage'))
             if not path_parts[1]:  # is the page empty?
-                path_parts[1] = get_dmp_option('DEFAULT_PAGE', 'index')
+                path_parts[1] = DMP_OPTIONS.get('DEFAULT_PAGE', 'index')
 
         # set the app and page in the request
         request.dmp_router_app = path_parts[0]

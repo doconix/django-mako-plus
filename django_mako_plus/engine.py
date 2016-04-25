@@ -10,7 +10,7 @@ from mako.template import Template
 from .exceptions import InternalRedirectException, RedirectException
 from .signals import dmp_signal_pre_render_template, dmp_signal_post_render_template, dmp_signal_redirect_exception
 from .template import MakoTemplateLoader, MakoTemplateAdapter
-from .util import DMP_INSTANCE, get_dmp_instance, get_dmp_option, get_dmp_app_configs, log
+from .util import get_dmp_instance, get_dmp_app_configs, log, DMP_OPTIONS, DMP_INSTANCE_KEY
 
 from copy import deepcopy
 import os, os.path, sys
@@ -26,29 +26,60 @@ class MakoTemplates(BaseEngine):
     '''
     def __init__(self, params):
         '''Constructor'''
-        # cache our instance in the util module for get_dmp_instance
-        # this is a bit of a hack, but it makes calling utility methods possible
-        DMP_INSTANCE[0] = self
-
-        # pop off the params - we deep copy these so we don't modify the settings
-        self.options = deepcopy(params)
+        # pop the settings.py options into the DMP options
         try:
-            self.options.update(params.pop('OPTIONS'))
+            DMP_OPTIONS.update(params.pop('OPTIONS'))
         except KeyError:
             raise ImproperlyConfigured('The Django Mako Plus template OPTIONS were not set up correctly in settings.py.  Please ensure the OPTIONS is set in the template setup.')
+
+        # cache our instance in the util module for get_dmp_instance
+        # this is a bit of a hack, but it makes calling utility methods possible and efficient
+        DMP_OPTIONS[DMP_INSTANCE_KEY] = self
 
         # super constructor
         super(MakoTemplates, self).__init__(params)
 
         # THIS IS TEMPORARY.  It can be taken out sometime in summer '16
-        if 'CONTEXT_PROESSORS' in self.options:
+        if 'CONTEXT_PROESSORS' in DMP_OPTIONS:
             raise ImproperlyConfigured('Your DMP options in settings.py specifies CONTEXT_PROESSORS, which is misspelled (this probably comes from an error in earlier versions of DMP).  Please correct it to CONTEXT_PROCESSORS. Thanks!')
 
         # set up the context processors
         context_processors = []
-        for processor in self.options.get('CONTEXT_PROCESSORS', []):
+        for processor in DMP_OPTIONS.get('CONTEXT_PROCESSORS', []):
             context_processors.append(import_string(processor))
         self.template_context_processors = tuple(context_processors)
+
+        # now that our engine has loaded, initialize a few parts of it
+        # should we minify JS AND CSS FILES?
+        DMP_OPTIONS['RUNTIME_JSMIN'] = False
+        DMP_OPTIONS['RUNTIME_CSSMIN'] = False
+        if DMP_OPTIONS.get('MINIFY_JS_CSS', False) and not settings.DEBUG:
+            try:
+                from rjsmin import jsmin
+            except ImportError:
+                raise ImproperlyConfigured('MINIFY_JS_CSS = True in the Django Mako Plus settings, but the "rjsmin" package does not seem to be loaded.')
+            try:
+                from rcssmin import cssmin
+            except ImportError:
+                raise ImproperlyConfigured('MINIFY_JS_CSS = True in the Django Mako Plus settings, but the "rcssmin" package does not seem to be loaded.')
+            DMP_OPTIONS['RUNTIME_JSMIN'] = True
+            DMP_OPTIONS['RUNTIME_CSSMIN'] = True
+
+        # should we compile SASS files?
+        DMP_OPTIONS['RUNTIME_SCSS_ENABLED'] = False
+        SCSS_BINARY = DMP_OPTIONS.get('SCSS_BINARY', None)
+        if isinstance(SCSS_BINARY, str):  # for backwards compatability
+            log.warning('DMP :: Future warning: the settings.py variable SCSS_BINARY should be a list of arguments, not a string.')
+            DMP_OPTIONS['RUNTIME_SCSS_ARGUMENTS'] = SCSS_BINARY.split(' ')
+            DMP_OPTIONS['RUNTIME_SCSS_ENABLED'] = True
+        elif isinstance(SCSS_BINARY, (list, tuple)):
+            DMP_OPTIONS['RUNTIME_SCSS_ARGUMENTS'] = SCSS_BINARY
+            DMP_OPTIONS['RUNTIME_SCSS_ENABLED'] = True
+        elif not SCSS_BINARY:
+            DMP_OPTIONS['RUNTIME_SCSS_ARGUMENTS'] = None
+            log.debug('DMP :: Sass integration not enabled.')
+        else:
+            raise ImproperlyConfigured('The SCSS_BINARY option in Django Mako Plus settings must be a list of arguments.  See the DMP documentation.')
 
         # add a template renderer for each DMP-enabled app
         self.template_loaders = {}
@@ -85,7 +116,7 @@ class MakoTemplates(BaseEngine):
         '''Compiles a template from the given string.
            This is one of the required methods of Django template engines.
         '''
-        mako_template = Template(template_code, imports=get_dmp_option('DEFAULT_TEMPLATE_IMPORTS'), input_encoding=get_dmp_option('DEFAULT_TEMPLATE_ENCODING', 'utf-8'))
+        mako_template = Template(template_code, imports=DMP_OPTIONS.get('DEFAULT_TEMPLATE_IMPORTS'), input_encoding=DMP_OPTIONS.get('DEFAULT_TEMPLATE_ENCODING', 'utf-8'))
         return MakoTemplateAdapter(mako_template)
 
 
@@ -173,7 +204,6 @@ class MakoTemplates(BaseEngine):
                 pass  # not there, so we'll create
 
         # create the loader
-#        print('>>>>>>>> creating loader', path)
         loader = MakoTemplateLoader(path, None)
 
         # cache if we are allowed

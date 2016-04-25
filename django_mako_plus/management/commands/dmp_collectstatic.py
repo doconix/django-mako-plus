@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand, CommandError
 from django.conf import settings
 
-from django_mako_plus.template import get_dmp_option, get_dmp_instance, get_dmp_app_configs
+from django_mako_plus.template import get_dmp_instance, get_dmp_app_configs, DMP_OPTIONS
 
 from optparse import make_option
 import os, os.path, shutil, fnmatch
@@ -11,7 +11,7 @@ from importlib import import_module
 # import minification if requested
 JSMIN = False
 CSSMIN = False
-if get_dmp_option('MINIFY_JS_CSS', False):
+if DMP_OPTIONS.get('MINIFY_JS_CSS', False):
     try:
         from rjsmin import jsmin
         JSMIN = True
@@ -105,7 +105,7 @@ class Command(BaseCommand):
 
             ###  DIRECTORIES  ###
             # ignore these directories
-            elif os.path.isdir(source_path) and fname in ( 'migrations', 'templates', 'views', get_dmp_option('TEMPLATES_CACHE_DIR'), '__pycache__' ):
+            elif os.path.isdir(source_path) and fname in ( 'migrations', 'templates', 'views', DMP_OPTIONS.get('TEMPLATES_CACHE_DIR'), '__pycache__' ):
                 pass
 
             # if a directory, create it in the destination and recurse
@@ -131,12 +131,12 @@ class Command(BaseCommand):
                 pass
 
             # if a regular Javscript file, minify it
-            elif ext == '.js' and get_dmp_option('MINIFY_JS_CSS', False) and JSMIN:
+            elif ext == '.js' and DMP_OPTIONS.get('MINIFY_JS_CSS', False) and JSMIN:
                 with open(source_path) as fin:
                     with open(dest_path, 'w') as fout:
                         fout.write(jsmin(fin.read()))
 
-            elif ext == '.css' and get_dmp_option('MINIFY_JS_CSS', False) and CSSMIN:
+            elif ext == '.css' and DMP_OPTIONS.get('MINIFY_JS_CSS', False) and CSSMIN:
                 with open(source_path) as fin:
                     with open(dest_path, 'w') as fout:
                         fout.write(cssmin(fin.read()))

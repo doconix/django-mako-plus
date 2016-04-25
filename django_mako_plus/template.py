@@ -9,7 +9,7 @@ from mako.template import Template
 
 from .exceptions import InternalRedirectException, RedirectException
 from .signals import dmp_signal_pre_render_template, dmp_signal_post_render_template, dmp_signal_redirect_exception
-from .util import get_dmp_instance, get_dmp_option, log
+from .util import get_dmp_instance, log, DMP_OPTIONS
 
 import os, os.path, sys, mimetypes
 
@@ -37,18 +37,18 @@ class MakoTemplateLoader:
         else:
             template_dir = os.path.abspath(os.path.join(app_path, template_subdir))
         if not os.path.isdir(template_dir):
-            raise ImproperlyConfigured('DMP :: Cannot create template loader because its directory does not exist: %s.' % template_dir)
+            raise ImproperlyConfigured('DMP :: Cannot create template loader because its directory does not exist: %s' % template_dir)
 
         # calculate the cache root and template search directories
-        self.cache_root = os.path.join(template_dir, get_dmp_option('TEMPLATES_CACHE_DIR', '.cached_templates'))
+        self.cache_root = os.path.join(template_dir, DMP_OPTIONS.get('TEMPLATES_CACHE_DIR', '.cached_templates'))
         self.template_search_dirs = [ template_dir ]
-        if get_dmp_option('TEMPLATES_DIRS'):
-            self.template_search_dirs.extend(get_dmp_option('TEMPLATES_DIRS'))
+        if DMP_OPTIONS.get('TEMPLATES_DIRS'):
+            self.template_search_dirs.extend(DMP_OPTIONS.get('TEMPLATES_DIRS'))
         # include the project base directory so template inheritance can cross apps by starting with /
         self.template_search_dirs.append(settings.BASE_DIR)
 
         # create the actual Mako TemplateLookup, which does the actual work
-        self.tlookup = TemplateLookup(directories=self.template_search_dirs, imports=get_dmp_option('DEFAULT_TEMPLATE_IMPORTS'), module_directory=self.cache_root, collection_size=2000, filesystem_checks=settings.DEBUG, input_encoding=get_dmp_option('DEFAULT_TEMPLATE_ENCODING', 'utf-8'))
+        self.tlookup = TemplateLookup(directories=self.template_search_dirs, imports=DMP_OPTIONS.get('DEFAULT_TEMPLATE_IMPORTS'), module_directory=self.cache_root, collection_size=2000, filesystem_checks=settings.DEBUG, input_encoding=DMP_OPTIONS.get('DEFAULT_TEMPLATE_ENCODING', 'utf-8'))
 
 
     def get_template(self, template):
@@ -100,7 +100,7 @@ class MakoTemplateAdapter(object):
 
     @property
     def engine(self):
-        '''This is a singleton instance because Django only creates one of a given template engine'''
+        '''Returns the DMP engine'''
         return get_dmp_instance()
 
 
@@ -133,9 +133,10 @@ class MakoTemplateAdapter(object):
         with context.bind_template(self):
             for d in context:
                 context_dict.update(d)
+        context_dict.pop('self', None)  # some contexts have self in them, and it messes up render_unicode below because we get two selfs
 
         # send the pre-render signal
-        if get_dmp_option('SIGNALS', False) and request != None:
+        if DMP_OPTIONS.get('SIGNALS', False) and request != None:
             for receiver, ret_template_obj in dmp_signal_pre_render_template.send(sender=self, request=request, context=context, template=self.mako_template):
                 if ret_template_obj != None:
                     if isinstance(ret_template_obj, MakoTemplateAdapter):
@@ -162,7 +163,7 @@ class MakoTemplateAdapter(object):
             content = render_obj.render_unicode(**context_dict)
 
         # send the post-render signal
-        if get_dmp_option('SIGNALS', False) and request != None:
+        if DMP_OPTIONS.get('SIGNALS', False) and request != None:
             for receiver, ret_content in dmp_signal_post_render_template.send(sender=self, request=request, context=context, template=self.mako_template, content=content):
                 if ret_content != None:
                     content = ret_content  # sets it to the last non-None return in the signal receiver chain
@@ -208,7 +209,7 @@ class MakoTemplateAdapter(object):
             else:
                 log.debug('DMP :: view function %s.%s redirected processing to %s' % (request.dmp_router_module, request.dmp_router_function, e.redirect_to))
             # send the signal
-            if get_dmp_option('SIGNALS', False):
+            if DMP_OPTIONS.get('SIGNALS', False):
                 dmp_signal_redirect_exception.send(sender=sys.modules[__name__], request=request, exc=e)
             # send the browser the redirect command
             return e.get_response(request)

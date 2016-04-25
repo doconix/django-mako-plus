@@ -5,10 +5,13 @@ from django.core.exceptions import ImproperlyConfigured
 import os, os.path, subprocess
 
 
-# this None is replaced with the DMP engine in engine.py when
-# Django initializes the template engine
-DMP_INSTANCE = [ None ]
 
+# this is populated with the dictionary of options in engine.py when
+# Django initializes the template engine
+DMP_OPTIONS = {}
+
+# the key for the DMP singleton engine instance (stored in DMP_OPTIONS by engine.py)
+DMP_INSTANCE_KEY = 'django_mako_plus_instance'
 
 # set up the logger
 import logging
@@ -21,19 +24,10 @@ log = logging.getLogger('django_mako_plus')
 
 def get_dmp_instance():
     '''Retrieves the DMP template engine instance.'''
-    if DMP_INSTANCE[0] == None:
+    try:
+        return DMP_OPTIONS[DMP_INSTANCE_KEY]
+    except KeyError:
         raise ImproperlyConfigured('The Django Mako Plus template engine did not initialize correctly.  Check your logs for previous errors that may have caused initialization to fail, and check that DMP is set correctly in settings.py.')
-    return DMP_INSTANCE[0]
-
-
-def get_dmp_option(key, default=None):
-    '''Returns the value of the given key the DMP options - this is for DMP use only.'''
-    return get_dmp_instance().options.get(key, default)
-
-
-def set_dmp_option(key, value):
-    '''Sets the given value in the DMP options - this is for DMP use only.'''
-    get_dmp_instance().options[key] = value
 
 
 def get_dmp_app_configs():

@@ -34,7 +34,7 @@ __doc__ = '''
 
 from django.conf import settings
 from .exceptions import SassCompileException
-from .util import run_command, get_dmp_instance, get_dmp_option, log
+from .util import run_command, get_dmp_instance, log, DMP_OPTIONS
 import os, os.path, posixpath, subprocess
 
 
@@ -118,7 +118,7 @@ class TemplateInfo(object):
         jsm_file = os.path.join(self.app_dir, 'scripts', '%s.jsm' % self.template_name)
 
         # the SASS templatename.scss (compile any updated templatename.scss files to templatename.css files)
-        if get_dmp_option('RUNTIME_SCSS_ENABLED'):
+        if DMP_OPTIONS.get('RUNTIME_SCSS_ENABLED'):
             scss_file = os.path.join(self.app_dir, 'styles', '%s.scss' % self.template_name)
             try:
                 scss_stat = os.stat(scss_file)
@@ -132,7 +132,7 @@ class TemplateInfo(object):
                 # if we 1) have no css_file or 2) have a newer scss_file, run the compiler
                 if fstat == None or scss_stat.st_mtime > fstat.st_mtime:
                     try:
-                        run_command(get_dmp_option('RUNTIME_SCSS_ARGUMENTS') + [ scss_file, css_file ])
+                        run_command(DMP_OPTIONS.get('RUNTIME_SCSS_ARGUMENTS') + [ scss_file, css_file ])
                     except subprocess.CalledProcessError as cpe:
                         raise SassCompileException(cpe.cmd, cpe.stderr)
 
@@ -173,9 +173,10 @@ class TemplateInfo(object):
             ret.append(self.css)  # the <link> was already created once in the constructor
         # do we have a cssm?
         if self.cssm:
-            lookup = get_dmp_instance().get_template_loader(self.app, 'styles')
+            # engine.py already caches these loaders, so no need to cache them again here
+            lookup = get_dmp_instance().get_template_loader_for_path(os.path.join(self.app_dir, 'styles'))
             css_text = lookup.get_template(self.cssm).render(request=request, context=context)
-            if get_dmp_option('RUNTIME_CSSMIN'):
+            if DMP_OPTIONS.get('RUNTIME_CSSMIN'):
                 css_text = cssmin(css_text)
             ret.append('<style type="text/css">%s</style>' % css_text)
         # join and return
@@ -190,9 +191,10 @@ class TemplateInfo(object):
             ret.append(self.js)  # the <script> was already created once in the constructor
         # do we have a jsm?
         if self.jsm:
-            lookup = get_dmp_instance().get_template_loader(self.app, 'scripts')
+            # engine.py already caches these loaders, so no need to cache them again here
+            lookup = get_dmp_instance().get_template_loader_for_path(os.path.join(self.app_dir, 'scripts'))
             js_text = lookup.get_template(self.jsm).render(request=request, context=context)
-            if get_dmp_option('RUNTIME_JSMIN'):
+            if DMP_OPTIONS.get('RUNTIME_JSMIN'):
                 js_text = jsmin(js_text)
             ret.append('<script>%s</script>' % js_text)
         # join and return

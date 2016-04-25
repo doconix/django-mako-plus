@@ -5,7 +5,7 @@ from django.template import TemplateDoesNotExist, TemplateSyntaxError
 
 from .exceptions import InternalRedirectException, RedirectException
 from .signals import dmp_signal_pre_process_request, dmp_signal_post_process_request, dmp_signal_internal_redirect_exception, dmp_signal_redirect_exception
-from .util import get_dmp_instance, get_dmp_option, log
+from .util import get_dmp_instance, log, DMP_OPTIONS
 
 import os, os.path, re, mimetypes, sys
 from urllib.parse import unquote
@@ -91,7 +91,7 @@ def route_request(request):
                 raise Http404
 
             # send the pre-signal
-            if get_dmp_option('SIGNALS', False):
+            if DMP_OPTIONS.get('SIGNALS', False):
                 for receiver, ret_response in dmp_signal_pre_process_request.send(sender=sys.modules[__name__], request=request):
                     if isinstance(ret_response, (HttpResponse, StreamingHttpResponse)):
                         return ret_response
@@ -104,7 +104,7 @@ def route_request(request):
             response = func_obj(request)
 
             # send the post-signal
-            if get_dmp_option('SIGNALS', False):
+            if DMP_OPTIONS.get('SIGNALS', False):
                 for receiver, ret_response in dmp_signal_post_process_request.send(sender=sys.modules[__name__], request=request, response=response):
                     if ret_response != None:
                         response = ret_response # sets it to the last non-None in the signal receiver chain
@@ -122,7 +122,7 @@ def route_request(request):
 
         except InternalRedirectException as ivr:
             # send the signal
-            if get_dmp_option('SIGNALS', False):
+            if DMP_OPTIONS.get('SIGNALS', False):
                 dmp_signal_internal_redirect_exception.send(sender=sys.modules[__name__], request=request, exc=ivr)
             # do the internal redirect
             request.dmp_router_module = ivr.redirect_module
@@ -136,7 +136,7 @@ def route_request(request):
             else:
                 log.debug('DMP :: class-based view function %s.%s.%s redirected processing to %s' % (request.dmp_router_module, request.dmp_router_class, request.dmp_router_function, e.redirect_to))
             # send the signal
-            if get_dmp_option('SIGNALS', False):
+            if DMP_OPTIONS.get('SIGNALS', False):
                 dmp_signal_redirect_exception.send(sender=sys.modules[__name__], request=request, exc=e)
             # send the browser the redirect command
             return e.get_response(request)

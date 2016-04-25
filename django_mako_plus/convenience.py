@@ -1,4 +1,4 @@
-from .util import get_dmp_instance, get_dmp_option
+from .util import get_dmp_instance
 
 
 ##############################################################
