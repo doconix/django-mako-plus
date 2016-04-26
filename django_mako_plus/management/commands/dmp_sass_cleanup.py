@@ -29,15 +29,24 @@ class Command(BaseCommand):
               default=False,
               help='Set verbosity to level 3 (see --verbosity).'
             ),
+            make_option(
+              '--quiet',
+              action='store_true',
+              dest='quiet',
+              default=False,
+              help='Set verbosity to level 0, which silences all messages (see --verbosity).'
+            ),
     )# option_list
 
     def handle(self, *args, **options):
         # save the options for later
         self.options = options
-        if self.options['trial_run']:
-            self.message("Trial run: dmp_sass_cleanup would have deleted the following files:")
         if self.options['verbose']:
             self.options['verbosity'] = 3
+        if self.options['quiet']:
+            self.options['verbosity'] = 0
+        if self.options['trial_run']:
+            self.message("Trial run: dmp_sass_cleanup would have deleted the following files:")
 
         # ensure we have a base directory
         try:
@@ -57,7 +66,8 @@ class Command(BaseCommand):
 
     def message(self, msg):
         '''Print a message to the console'''
-        print(msg)
+        if self.options['verbosity'] > 0:
+            print(msg)
 
 
     def verbose(self, msg):

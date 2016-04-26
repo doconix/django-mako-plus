@@ -941,7 +941,7 @@ When you create a .scss file, Sass generates two additional files: `.css` and `.
         python manage.py dmp_sass_cleanup --trial-run
 
         # really delete the files
-        python manage.py dmp_sass_cleanup --trial-run
+        python manage.py dmp_sass_cleanup
 
 Add `--verbose` to the command to include messages about skipped files.
 
