@@ -935,7 +935,7 @@ If Sass isn't running right, check the DMP log statements.  When the log is enab
 
 ### Sass Cleanup
 
-When you create a Sass .scss file, it results in two additional files: `.css` and `.css.map`.  Suppose you later remove the .scss.  Your `styles` directory now has two outdated and orphaned generated files.  While some editors remove these files automatically, DMP can do it for you too.  To remove orphaned css files, run one of the following:
+When you create a .scss file, Sass generates two additional files: `.css` and `.css.map`.  If you later remove the .scss, you leave the two generated, now orphaned, files in your `styles` directory.  While some editors remove these files automatically, DMP contains a management command to search for and remove these files:
 
         # see what would be be done without actually deleting anything
         python manage.py dmp_sass_cleanup --trial-run
