@@ -59,7 +59,7 @@ class Command(BaseCommand):
         if self.options['quiet']:
             self.options['verbosity'] = 0
         if self.options['trial_run']:
-            self.message("Trial run: dmp_sass_cleanup would have deleted the following files:")
+            self.message("Trial run: dmp_sass_cleanup would have deleted the following files:", level=1)
 
         # ensure we have a base directory
         try:
@@ -82,21 +82,15 @@ class Command(BaseCommand):
 
         # check the directories
         for styles_dir in styles_directories:
-            self.verbose('')
-            self.verbose('Checking directory {}:'.format(pretty_relpath(styles_dir, settings.BASE_DIR)))
+            self.message('Checking directory {}'.format(pretty_relpath(styles_dir, settings.BASE_DIR)), level=2)
             self.clean_styles(styles_dir)
 
 
-    def message(self, msg):
+    def message(self, msg, level):
         '''Print a message to the console'''
-        if self.options['verbosity'] > 0:
+        # verbosity=1 is the default if not specified in the options
+        if self.options['verbosity'] >= level:
             print(msg)
-
-
-    def verbose(self, msg):
-        '''Print a message based on the verbosity'''
-        if self.options['verbosity'] > 1:
-            self.message(msg)
 
 
     def clean_styles(self, styles_dir):
@@ -109,23 +103,23 @@ class Command(BaseCommand):
 
             # if the .scss file exists, it's not orphaned
             if os.path.exists(scsspath):
-                self.verbose('Skipping {} because its .scss file still exists.'.format(relcss))
+                self.message('Skipping {} because its .scss file still exists.'.format(relcss), level=3)
                 continue
 
             # if the css has no sourceMappingURL line, it's not a generated sass file
             smu = '/*# sourceMappingURL={}.map */'.format(os.path.split(csspath)[1])
             if not file_has_line(csspath, smu):
-                self.verbose('Skipping {} because it is not a generated Sass file (no "{}").'.format(relcss, smu))
+                self.message('Skipping {} because it is not a generated Sass file (no "{}").'.format(relcss, smu), level=3)
                 continue
 
             # if we get here, the css should be removed
-            self.message('Removing {} because it is a generated Sass file, but {} no longer exists.'.format(relcss, pretty_relpath(scsspath, settings.BASE_DIR)))
+            self.message('Removing {} because it is a generated Sass file, but {} no longer exists.'.format(relcss, pretty_relpath(scsspath, settings.BASE_DIR)), level=1)
             if not self.options['trial_run']:
                 os.remove(csspath)
 
             # see if the .css.map file also needs removing
             if os.path.exists(mappath):
-                self.message('Removing {} also.'.format(pretty_relpath(mappath, settings.BASE_DIR)))
+                self.message('Removing {} also.'.format(pretty_relpath(mappath, settings.BASE_DIR)), level=1)
                 if not self.options['trial_run']:
                     os.remove(mappath)
 
