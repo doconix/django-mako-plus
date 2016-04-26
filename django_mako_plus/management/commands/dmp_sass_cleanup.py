@@ -15,7 +15,6 @@ class Command(BaseCommand):
     can_import_settings = True
     option_list = BaseCommand.option_list + (
             make_option(
-              '-t',
               '--trial-run',
               action='store_true',
               dest='trial_run',
@@ -35,6 +34,20 @@ class Command(BaseCommand):
               dest='quiet',
               default=False,
               help='Set verbosity to level 0, which silences all messages (see --verbosity).'
+            ),
+            make_option(
+              '--directory',
+              action='store',
+              dest='directory',
+              default='',
+              help='Check the given directory instead of searching through DMP app styles/ folders.'
+            ),
+            make_option(
+              '--recursive',
+              action='store_true',
+              dest='recursive',
+              default=False,
+              help="Recurse to subdirectories in each search folder.  This option searches subdirectories of each app's styles/ folder, or when specified with --directory, searches subdirectories of the given directory."
             ),
     )# option_list
 
@@ -56,11 +69,21 @@ class Command(BaseCommand):
             print(e)
             raise CommandError('Your settings.py file is missing the BASE_DIR setting. Aborting app creation.')
 
-        # go through the DMP apps and check the styles directories
-        for config in get_dmp_app_configs():
-            styles_dir = os.path.join(config.path, 'styles')
+        # create a list of directories to check (default to each app's styles/)
+        styles_directories = [ os.path.join(config.path, 'styles') for config in get_dmp_app_configs() ]
+        if self.options['directory']:
+            if not os.path.isdir(self.options['directory']):
+                raise CommandError('The specified directory does not exist: {}'.format(self.options['directory']))
+            styles_directories = [ self.options['directory'] ]
+
+        # if we are in recursive mode, add all subdirectories of the search folders
+        if self.options['recursive']:
+            styles_directories = [ d[0] for styles_dir in styles_directories for d in os.walk(styles_dir) ]
+
+        # check the directories
+        for styles_dir in styles_directories:
             self.verbose('')
-            self.verbose('Checking directory {}:'.format(os.path.relpath(styles_dir, settings.BASE_DIR)))
+            self.verbose('Checking directory {}:'.format(pretty_relpath(styles_dir, settings.BASE_DIR)))
             self.clean_styles(styles_dir)
 
 
@@ -80,7 +103,7 @@ class Command(BaseCommand):
         '''Removes orphaned .css and .css.map files in the given styles directory.'''
         # go through the files in this directory
         for csspath in glob.glob(os.path.join(styles_dir, '*.css')):
-            relcss = os.path.relpath(csspath, settings.BASE_DIR)
+            relcss = pretty_relpath(csspath, settings.BASE_DIR)
             scsspath = '{}.scss'.format(os.path.splitext(csspath)[0])
             mappath = '{}.css.map'.format(os.path.splitext(csspath)[0])
 
@@ -96,13 +119,13 @@ class Command(BaseCommand):
                 continue
 
             # if we get here, the css should be removed
-            self.message('Removing {} because it is a generated Sass file, but {} no longer exists.'.format(relcss, os.path.relpath(scsspath, settings.BASE_DIR)))
+            self.message('Removing {} because it is a generated Sass file, but {} no longer exists.'.format(relcss, pretty_relpath(scsspath, settings.BASE_DIR)))
             if not self.options['trial_run']:
                 os.remove(csspath)
 
             # see if the .css.map file also needs removing
             if os.path.exists(mappath):
-                self.message('Removing {} also.'.format(os.path.relpath(mappath, settings.BASE_DIR)))
+                self.message('Removing {} also.'.format(pretty_relpath(mappath, settings.BASE_DIR)))
                 if not self.options['trial_run']:
                     os.remove(mappath)
 
@@ -114,9 +137,21 @@ class Command(BaseCommand):
 
 
 def file_has_line(filepath, st):
-    '''Returns true if the given file has a line that starts with the given st'''
+    '''
+    Returns true if the given file has a line that starts with the given st
+    '''
     with open(filepath) as f:
         for line in f:
             if line.lstrip().startswith(st):
                 return True
     return False
+
+
+def pretty_relpath(path, start):
+    '''
+    Returns a relative path, but only if it doesn't start with a non-pretty parent directory ".."
+    '''
+    relpath = os.path.relpath(path, start)
+    if relpath.startswith('..'):
+        return path
+    return relpath
