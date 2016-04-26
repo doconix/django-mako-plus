@@ -74,8 +74,7 @@ class Command(BaseCommand):
 
         # go through the DMP apps and collect the static files
         for config in get_dmp_app_configs():
-            app_root = os.path.dirname(config.module.__file__)
-            self.copy_dir(os.path.abspath(app_root), os.path.abspath(os.path.join(dest_root, config.name)))
+            self.copy_dir(config.path, os.path.abspath(os.path.join(dest_root, config.name)))
 
 
 
