@@ -1,6 +1,6 @@
 from django.conf import settings
 
-from .sass import compile_scss_file, compile_scssm_file
+from .sass import check_template_scss
 from .exceptions import SassCompileException
 from .util import run_command, get_dmp_instance, log, DMP_OPTIONS
 
@@ -16,7 +16,7 @@ DMP_STATIC_RENDERER_KEY = 'django_mako_plus_staticrenderer'
 
 #######################################################################
 ###   Shortcut methods - these are the primary way the static render
-###   shoudl be used
+###   should be used
 
 def get_template_css(mako_self, request, context, cgi_id=None):
     '''Renders the styles for a given template.
@@ -88,29 +88,7 @@ class TemplateInfo(object):
 
         # the SASS templatename.scss (compile any updated templatename.scss files to templatename.css files)
         if DMP_OPTIONS.get('RUNTIME_SCSS_ENABLED'):
-            for ext in ( 'css', 'cssm' ):
-                scss_file = os.path.join(self.app_dir, 'styles', '{}.s{}'.format(self.template_name, ext))
-                gen_css_file = os.path.join(self.app_dir, 'styles', '{}.{}'.format(self.template_name, ext))
-                print(scss_file)
-                print(gen_css_file)
-                try:
-                    scss_stat = os.stat(scss_file)
-                except OSError:
-                    scss_stat = None
-                if scss_stat != None:  # only continue this block if we found a .scss file
-                    try:
-                        fstat = os.stat(gen_css_file)
-                    except OSError:
-                        fstat = None
-                    # if we 1) have no css_file or 2) have a newer scss_file, run the compiler
-                    if fstat == None or scss_stat.st_mtime > fstat.st_mtime:
-                        try:
-                            if ext == '.scss':
-                                compile_scss_file(scss_file, gen_css_file)
-                            else:
-                                compile_scssm_file(scss_file, gen_css_file)
-                        except subprocess.CalledProcessError as cpe:
-                            raise SassCompileException(cpe.cmd, cpe.stderr)
+            check_template_scss(os.path.join(self.app_dir, 'styles'), self.template_name)
 
         # the static templatename.css file
         try:

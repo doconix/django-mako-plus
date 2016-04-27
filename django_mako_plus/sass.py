@@ -19,6 +19,37 @@ MAKO_EXPRESSION_MARKERS = ( 'MakoExpression', 'ExpressionMako' )
 RE_MAKO_EXPRESSION = re.compile('{}_(.+?)_{}'.format(MAKO_EXPRESSION_MARKERS[0], MAKO_EXPRESSION_MARKERS[1]), flags=re.MULTILINE)
 
 
+def check_template_scss(styles_dir, template_name):
+    '''
+    Checks to see if template.scss or template.scssm need compiling.
+    The styles_dir should be the full path to the styles directory.
+    The template_name should be the name of the template *without the extension*.
+
+    Raises a SassCompileException if compilation fails.
+    '''
+    for ext in ( 'css', 'cssm' ):
+        scss_file = os.path.join(styles_dir, '{}.s{}'.format(template_name, ext))
+        gen_css_file = os.path.join(styles_dir, '{}.{}'.format(template_name, ext))
+        try:
+            scss_stat = os.stat(scss_file)
+        except OSError:
+            scss_stat = None
+        if scss_stat != None:  # only continue this block if we found a .scss file
+            try:
+                fstat = os.stat(gen_css_file)
+            except OSError:
+                fstat = None
+            # if we 1) have no css_file or 2) have a newer scss_file, run the compiler
+            if fstat == None or scss_stat.st_mtime > fstat.st_mtime:
+                try:
+                    if ext == '.scss':
+                        compile_scss_file(scss_file, gen_css_file)
+                    else:
+                        compile_scssm_file(scss_file, gen_css_file)
+                except subprocess.CalledProcessError as cpe:
+                    raise SassCompileException(cpe.cmd, cpe.stderr)
+
+
 def compile_scss_file(scss_file, css_file):
     '''
     Compiles a regular scss file
@@ -32,7 +63,10 @@ def compile_scss_file(scss_file, css_file):
 def compile_scssm_file(scssm_file, css_file):
     '''
     Compiles an scssm (sass with embedded Mako) file.
-    This method works by replacing Mako codes with
+    This is a total hack to sneak mako codes through the Sass compiler.  The algorithm
+    uses the Mako lexer to split the file, then it replaces Expressions in the file
+    with Base32 -- that alphabet is valid throughout CSS rules.  After Sass does its thing,
+    we switch the Base32 back to the Mako codes.
 
     If the Sass execution fails, this function raises subprocess.CalledProcessError.
     '''
@@ -64,12 +98,14 @@ def compile_scssm_file(scssm_file, css_file):
         with open(css_file, 'w') as fout:
             fout.write(csscontents)
         # erase the backup
-        os.remove(backup_scss)
+        # os.remove(backup_scss)
 
     finally:
         # replace the original contents back in the scss file
         with open(scssm_file, 'w') as fout:
             fout.write(contents)
+        # update the modified timestamp on the css file so the scssm_file is older than it (we just rewrote the scssm)
+        os.utime(css_file)
 
 
 
