@@ -42,7 +42,7 @@ def check_template_scss(styles_dir, template_name):
             # if we 1) have no css_file or 2) have a newer scss_file, run the compiler
             if fstat == None or scss_stat.st_mtime > fstat.st_mtime:
                 try:
-                    if ext == '.scss':
+                    if ext == 'css':
                         compile_scss_file(scss_file, gen_css_file)
                     else:
                         compile_scssm_file(scss_file, gen_css_file)
