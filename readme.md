@@ -931,7 +931,7 @@ Note that `SCSS_BINARY` *must be specified in a list*.  DMP uses Python's subpro
 
 If Sass isn't running right, check the DMP log statements.  When the log is enabled, it shows the exact command syntax that DMP is using.  Copy and paste the code into a terminal and troubleshoot the command manually.
 
-> Unfortunately, you can't put Mako template codes in .scss files (e.g. there's no such thing as .scssm).  Since .scss compiles at development time and .cssm renders at runtime, Sass has to run first on the file.  Sass gets grumpy when it finds Mako codes during compilation. A workaround is to create two files: templatename.cssm and templatename.scss.  Put the Mako-related codes in the .cssm and the Sass in .scss.  DMP will automatically include both files.
+> You might be wondering if DMP supports `.scssm` files.  It's a qualified Yes!  Some progress has been made, but it's in beta right now.  Only Mako expressions are supported right now: `${ ... }`.
 
 ### Sass Cleanup
 

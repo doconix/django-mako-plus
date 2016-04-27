@@ -1,40 +1,9 @@
-#!/usr/bin/python
-#
-#   Author:  Conan Albrecht <ca&byu,edu>
-#   License: Apache Open Source License
-#   Version: 2013.10.19
-#
-__doc__ = '''
-  This file is used by base_app/templates/base_template.htm to automatically include the .css, .cssm, .js, and .jsm
-  files into a template hierarchy.
-
-  For example, suppose we have the following template chain:
-    Base template: /base_app/templates/base_template.htm
-    Child template: /calculator/templates/index.html
-
-  Because of this chain, the following styles and scripts are automatically included in the rendered page:
-
-    /base_app/styles/base.css
-    /base_app/styles/base.cssm (this one can contain dynamic Python code)
-    /calculator/styles/index.css
-    /calculator/styles/index.cssm (this one can contain dynamic Python code)
-    /base_app/scripts/base.js
-    /base_app/scripts/base.jsm (this one can contain dynamic Python code)
-    /calculator/scripts/index.js
-    /calculator/scripts/index.jsm (yep, you guessed it, this one can contain dynamic Python code)
-
-  This file makes the above happen.  It allows the programmer to separate the HTML, CSS, and JS into separate
-  files but still have them serve to the browser together.  It also keeps the CSS and JS together with the HTML
-  at each specific level in the template inheritance chain.
-
-  Note that with this Django starter kit, we recreate the static renderer each time.
-  At deployment, it would speed things up considerably to cache these StaticRenderer
-  objects in a dict or other type of cache.  This isn't done here to keep things simpler.
-'''
-
 from django.conf import settings
+
+from .sass import compile_scss_file, compile_scssm_file
 from .exceptions import SassCompileException
 from .util import run_command, get_dmp_instance, log, DMP_OPTIONS
+
 import os, os.path, posixpath, subprocess
 
 
@@ -119,22 +88,29 @@ class TemplateInfo(object):
 
         # the SASS templatename.scss (compile any updated templatename.scss files to templatename.css files)
         if DMP_OPTIONS.get('RUNTIME_SCSS_ENABLED'):
-            scss_file = os.path.join(self.app_dir, 'styles', '%s.scss' % self.template_name)
-            try:
-                scss_stat = os.stat(scss_file)
-            except OSError:
-                scss_stat = None
-            if scss_stat != None:  # only continue this block if we found a .scss file
+            for ext in ( 'css', 'cssm' ):
+                scss_file = os.path.join(self.app_dir, 'styles', '{}.s{}'.format(self.template_name, ext))
+                gen_css_file = os.path.join(self.app_dir, 'styles', '{}.{}'.format(self.template_name, ext))
+                print(scss_file)
+                print(gen_css_file)
                 try:
-                    fstat = os.stat(css_file)
+                    scss_stat = os.stat(scss_file)
                 except OSError:
-                    fstat = None
-                # if we 1) have no css_file or 2) have a newer scss_file, run the compiler
-                if fstat == None or scss_stat.st_mtime > fstat.st_mtime:
+                    scss_stat = None
+                if scss_stat != None:  # only continue this block if we found a .scss file
                     try:
-                        run_command(DMP_OPTIONS.get('RUNTIME_SCSS_ARGUMENTS') + [ scss_file, css_file ])
-                    except subprocess.CalledProcessError as cpe:
-                        raise SassCompileException(cpe.cmd, cpe.stderr)
+                        fstat = os.stat(gen_css_file)
+                    except OSError:
+                        fstat = None
+                    # if we 1) have no css_file or 2) have a newer scss_file, run the compiler
+                    if fstat == None or scss_stat.st_mtime > fstat.st_mtime:
+                        try:
+                            if ext == '.scss':
+                                compile_scss_file(scss_file, gen_css_file)
+                            else:
+                                compile_scssm_file(scss_file, gen_css_file)
+                        except subprocess.CalledProcessError as cpe:
+                            raise SassCompileException(cpe.cmd, cpe.stderr)
 
         # the static templatename.css file
         try:

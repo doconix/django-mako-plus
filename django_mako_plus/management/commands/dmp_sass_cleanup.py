@@ -11,7 +11,7 @@ import os, os.path, shutil, glob
 
 class Command(BaseCommand):
     args = ''
-    help = 'Removes orphaned *.css and *.css.map files from your DMP styles/ folders that no longer have companion *.scss files.'
+    help = 'Removes orphaned *.css, *.css.map, *.cssm, and *.cssm.map files from your DMP styles/ folders that no longer have companion *.scss files.'
     can_import_settings = True
     option_list = BaseCommand.option_list + (
             make_option(
@@ -96,32 +96,33 @@ class Command(BaseCommand):
     def clean_styles(self, styles_dir):
         '''Removes orphaned .css and .css.map files in the given styles directory.'''
         # go through the files in this directory
-        for csspath in glob.glob(os.path.join(styles_dir, '*.css')):
-            relcss = pretty_relpath(csspath, settings.BASE_DIR)
-            scsspath = '{}.scss'.format(os.path.splitext(csspath)[0])
-            mappath = '{}.css.map'.format(os.path.splitext(csspath)[0])
+        for ext in ( 'css', 'cssm' ):
+            for csspath in glob.glob(os.path.join(styles_dir, '*.{}'.format(ext))):
+                relcss = pretty_relpath(csspath, settings.BASE_DIR)
+                scsspath = '{}.s{}'.format(os.path.splitext(csspath)[0], ext)
+                mappath = '{}.{}.map'.format(os.path.splitext(csspath)[0], ext)
 
-            # if the .scss file exists, it's not orphaned
-            if os.path.exists(scsspath):
-                self.message('Skipping {} because its .scss file still exists.'.format(relcss), level=3)
-                continue
+                # if the .scss file exists, it's not orphaned
+                if os.path.exists(scsspath):
+                    self.message('Skipping {} because its .scss file still exists.'.format(relcss), level=3)
+                    continue
 
-            # if the css has no sourceMappingURL line, it's not a generated sass file
-            smu = '/*# sourceMappingURL={}.map */'.format(os.path.split(csspath)[1])
-            if not file_has_line(csspath, smu):
-                self.message('Skipping {} because it is not a generated Sass file (no "{}").'.format(relcss, smu), level=3)
-                continue
+                # if the css has no sourceMappingURL line, it's not a generated sass file
+                smu = '/*# sourceMappingURL={}.map */'.format(os.path.split(csspath)[1])
+                if not file_has_line(csspath, smu):
+                    self.message('Skipping {} because it is not a generated Sass file (no "{}").'.format(relcss, smu), level=3)
+                    continue
 
-            # if we get here, the css should be removed
-            self.message('Removing {} because it is a generated Sass file, but {} no longer exists.'.format(relcss, pretty_relpath(scsspath, settings.BASE_DIR)), level=1)
-            if not self.options['trial_run']:
-                os.remove(csspath)
-
-            # see if the .css.map file also needs removing
-            if os.path.exists(mappath):
-                self.message('Removing {} also.'.format(pretty_relpath(mappath, settings.BASE_DIR)), level=1)
+                # if we get here, the css should be removed
+                self.message('Removing {} because it is a generated Sass file, but {} no longer exists.'.format(relcss, pretty_relpath(scsspath, settings.BASE_DIR)), level=1)
                 if not self.options['trial_run']:
-                    os.remove(mappath)
+                    os.remove(csspath)
+
+                # see if the .css.map file also needs removing
+                if os.path.exists(mappath):
+                    self.message('Removing {} also.'.format(pretty_relpath(mappath, settings.BASE_DIR)), level=1)
+                    if not self.options['trial_run']:
+                        os.remove(mappath)
 
 
 
