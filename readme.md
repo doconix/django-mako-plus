@@ -931,7 +931,7 @@ Note that `SCSS_BINARY` *must be specified in a list*.  DMP uses Python's subpro
 
 If Sass isn't running right, check the DMP log statements.  When the log is enabled, it shows the exact command syntax that DMP is using.  Copy and paste the code into a terminal and troubleshoot the command manually.
 
-> You might be wondering if DMP supports `.scssm` files.  It's a qualified Yes!  Some progress has been made, but it's in beta right now.  Only Mako expressions are supported right now: `${ ... }`.
+> You might be wondering if DMP supports `.scssm` files (Mako embedded in Sass files).  Through a bit of hacking the process, it's a qualified Yes!  Consider `.scssm` support as beta right now.  Only Mako expressions are working thus far: `${ ... }`.  Any other Mako constructs get stripped out by the compiler.
 
 ### Sass Cleanup
 
