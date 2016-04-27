@@ -173,7 +173,6 @@ class StaticRenderer(object):
        and it's normally a good thing to speed everything up.  However,
        when you upload new CSS/JS, you want all browsers to download the new
        files even if their cached versions have't expired yet.
-
        By adding an arbitrary id to the end of the .css and .js files, browsers will
        see the files as *new* anytime that id changes.  The default method
        for calculating the id is the file modification time (minutes since 1970).
