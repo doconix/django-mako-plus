@@ -1,6 +1,7 @@
 from mako.lexer import Lexer
 from mako import parsetree
 
+from .exceptions import SassCompileException
 from .util import DMP_OPTIONS, run_command
 
 import glob, sys, os, os.path, subprocess, itertools, re, base64
