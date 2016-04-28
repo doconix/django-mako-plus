@@ -67,7 +67,7 @@ class Command(BaseCommand):
                 raise CommandError('Your settings.py BASE_DIR setting is not a valid directory.  Please check your settings.py file for the BASE_DIR variable.')
         except AttributeError as e:
             print(e)
-            raise CommandError('Your settings.py file is missing the BASE_DIR setting. Aborting app creation.')
+            raise CommandError('Your settings.py file is missing the BASE_DIR setting.')
 
         # create a list of directories to check (default to each app's styles/)
         styles_directories = [ os.path.join(config.path, 'styles') for config in get_dmp_app_configs() ]
