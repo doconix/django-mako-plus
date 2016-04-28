@@ -7,7 +7,11 @@ from .util import run_command, get_dmp_instance, log, DMP_OPTIONS
 import os, os.path, posixpath, subprocess
 
 
-# keys to cache these the static renderer for a small speedup
+# keys to attach TemplateInfo objects and static renderer to the Mako Template itself
+# I attach it to the template objects because they are already cached by mako, so
+# caching them again here would result in double-caching.  It's a bit of a
+# monkey-patch to set them as attributes in the Mako templates, but it's efficient
+# and encapsulated entirely within this file
 DMP_TEMPLATEINFO_KEY = 'django_mako_plus_templateinfo'
 DMP_STATIC_RENDERER_KEY = 'django_mako_plus_staticrenderer'
 
@@ -74,11 +78,11 @@ class TemplateInfo(object):
        The cgi_id parameter is described in the MakoTemplateRenderer class below.
     '''
     def __init__(self, app_dir, template_filename, cgi_id=None):
-        # I want short try blocks, so there are several - for example, the first OSError can only occur for one reason: if the os.stat() fails.
-        # I'm using os.stat here instead of os.path.exists because I need the st_mtime.  The os.stat checks that the file exists and gets the modified time in one command.
+        # calculate directory and static url locations
         self.template_name = os.path.splitext(template_filename)[0]  # remove its extension
         self.app_dir = app_dir
-        self.app = os.path.split(self.app_dir)[1]
+        app_reldir = os.path.relpath(self.app_dir, settings.BASE_DIR)
+        self.app_url = posixpath.join(*app_reldir.split(os.path.sep))  # ensure we have forward slashes (even on windwos) because this is for urls
 
         # set up the filenames
         css_file = os.path.join(self.app_dir, 'styles', '%s.css' % self.template_name)
@@ -90,10 +94,13 @@ class TemplateInfo(object):
         if DMP_OPTIONS.get('RUNTIME_SCSS_ENABLED'):
             check_template_scss(os.path.join(self.app_dir, 'styles'), self.template_name)
 
+        # I want short try blocks, so there are several - for example, the first OSError can only occur for one reason: if the os.stat() fails.
+        # I'm using os.stat here instead of os.path.exists because I need the st_mtime.  The os.stat checks that the file exists and gets the modified time in one command.
+
         # the static templatename.css file
         try:
             fstat = os.stat(css_file)
-            self.css = '<link rel="stylesheet" type="text/css" href="%s?%s" />' % (posixpath.join(settings.STATIC_URL, self.app, 'styles', self.template_name + '.css'), cgi_id if cgi_id != None else int(fstat.st_mtime))
+            self.css = '<link rel="stylesheet" type="text/css" href="%s?%s" />' % (posixpath.join(settings.STATIC_URL, self.app_url, 'styles', self.template_name + '.css'), cgi_id if cgi_id != None else int(fstat.st_mtime))
         except OSError:
             self.css = None
 
@@ -107,7 +114,7 @@ class TemplateInfo(object):
         # the static templatename.js file
         try:
             fstat = os.stat(js_file)
-            self.js = '<script src="%s?%s"></script>' % (posixpath.join(settings.STATIC_URL, self.app, 'scripts', self.template_name + '.js'), cgi_id if cgi_id != None else int(fstat.st_mtime))
+            self.js = '<script src="%s?%s"></script>' % (posixpath.join(settings.STATIC_URL, self.app_url, 'scripts', self.template_name + '.js'), cgi_id if cgi_id != None else int(fstat.st_mtime))
         except OSError:
             self.js = None
 
@@ -181,8 +188,6 @@ class StaticRenderer(object):
         self.mako_self = mako_self
         self.template_chain = []
         # step up the template inheritance chain and ensure each template has a TemplateInfo object
-        # I attach it to the template objects because they are cached by mako (and thus we take
-        # advantage of that caching).
         while mako_self != None:
             if settings.DEBUG or not hasattr(mako_self.template, DMP_TEMPLATEINFO_KEY):  # always recreate in debug mode
                 template_dir, template_name = os.path.split(mako_self.template.filename)
