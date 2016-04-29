@@ -29,6 +29,7 @@ from .http import HttpResponseJavascriptRedirect
 
 
 # the convenience functions
+# Don't forget that dmp_render and dmp_render_to_string are added to each app's module
 from .convenience import get_template_loader
 from .convenience import get_template_loader_for_path
 
@@ -49,3 +50,5 @@ from .engine import MakoTemplates
 # the static files shortcuts
 from .static_files import get_template_css
 from .static_files import get_template_js
+from .static_files import get_fake_template_css
+from .static_files import get_fake_template_js

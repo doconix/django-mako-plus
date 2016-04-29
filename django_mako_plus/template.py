@@ -100,7 +100,7 @@ class MakoTemplateAdapter(object):
 
     @property
     def engine(self):
-        '''Returns the DMP engine'''
+        '''Returns the DMP engine (method required by Django specs)'''
         return get_dmp_instance()
 
 

@@ -725,46 +725,7 @@ The above code references an app in a non-standard location and a template subdi
 
 ### Can't I Use the Django Shortcut Functions?
 
-Yep, and you can use the other Django template methods as well.  The code below is now sans the `dmp_render` function; it instead sports the regular `render` method from the shortcuts module:
-
-        from django.conf import settings
-        from django.shortcuts import render
-        from django_mako_plus import view_function
-        from datetime import datetime
-
-        @view_function
-        def process_request(request):
-          context = {
-            'now': datetime.now(),
-          }
-          return render(request, 'homepage/index.html', context)
-          # or
-          return render(request, 'homepage/index.html', context, using='django_mako_plus')
-
-However, *be sure to note one specific requirement* when using the normal Django methods.  You must specify your template with the `app/template.html` format.  Since the DMP engine is specific to your apps, it needs to know which app your template resides in.
-
-The the second version of the `render` call in the example above includes the `using` parameter, which specifically tells Django to use the DMP engine for rendering.  If you omit this, Django starts with the first template engine listed in your settings.py, which may or may not be DMP.  If DMP is the only engine listed, there's no reason to specify the `using` parameter.  This confusion is explained in detail in the Django documentation.
-
-The following is another example of using the standard Django methods.  Note the app/template format in the filename again:
-
-        from django.conf import settings
-        from django.http import HttpResponse
-        from django.template.loader import get_template
-        from django_mako_plus import view_function
-        from datetime import datetime
-
-        @view_function
-        def process_request(request):
-          context = {
-            'now': datetime.now(),
-          }
-          template = get_template('homepage/index.html')
-          # or
-          template = get_template('homepage/index.html', using='django_mako_plus')
-          return HttpResponse(template.render(context=context, request=request))
-
-
-As you can hopefully see, DMP provides custom functions like `dmp_render` and also allows regular Django functions.  Use whichever best suits your needs.
+Yep, and you can use the other Django template methods as well.  Scroll down to [Advanced Topics](#advancedtopics) for more information.
 
 
 ## URL Parameters
@@ -802,41 +763,6 @@ The following links now give the time in different formats:
 * The month, year: `http://localhost:8000/homepage/index/%B,%20%Y`
 
 > If a urlparam doesn't exist, it always returns the empty string ''.  This is slightly different than a regular Python list, which throws an exception when you index it beyond the length of the list.  In DMP, request.urlparams[50] returns the empty string rather than an exception.  The `if` statement in the code above can be used to determine if a urlparam exists or not.  Another way to code a default value for a urlparam is `request.urlparam[2] or 'some default value'`.
-
-
-## Class-Based Views
-
-Django-Mako-Plus supports Django's class-based view concept.  You can read more about this pattern in the Django documentation.  If you are using view classes, DMP automatically detects and adjusts accordingly.  If you are using regular function-based views, skip this section for now.
-
-With DMP, your class-based view will be discovered via request url, so you have to name your class accordingly.  In keeping with the rest of DMP, the default class name in a file should be named `class process_request()`.  The `get()`, `post()`, etc. methods of this class must be decorated with with `@view_function`.  Consider the following `index.py` file:
-
-        from django.conf import settings
-        from django.http import HttpResponse
-        from django.views.generic import View
-        from django_mako_plus import view_function
-        from .. import dmp_render, dmp_render_to_string
-        from datetime import datetime
-
-        class process_request(View):
-          @view_function
-          def get(self, request):
-            context = {
-              'now': datetime.now().strftime(request.urlparams[0] if request.urlparams[0] else '%H:%M'),
-            }
-            return dmp_render(request, 'index.html', context)
-
-        class discovery(View):
-          @view_function
-          def get(self, request):
-            return HttpResponse('Get was called.')
-
-          @view_function
-          def post(self, request):
-            return HttpResponse('Post was called.')
-
-In the above `index.py` file, two class-based views are defined.  The first is called with the url `/homepage/index/`.  The second is called with the url `/homepage/index.discovery/`.
-
-> Python programmers usually use CamelCase (e.g. start with an uppercase letter) for class names.  In the above classes, I'm naming them all lowercase so my URL doesn't have uppercase characters in it.  If you'd rather use CamelCase, just be sure to match it in your URL.
 
 
 
@@ -913,26 +839,6 @@ As shown in the example above, the context dictionary sent the templating engine
 
 > Note that this behavior is different than CSS engines like Less and Sass. Most developers use Less and Sass for variables at development time.  These variables are rendered and stripped out before upload to the server, and they become static, normal CSS files on the server.  .cssm files should be used for dynamically-generated, per-request CSS.
 
-## Sass Integration
-
-DMP can automatically compile your .scss files each time you update them.  When a template is rendered the first time, DMP checks the timestamps on the .scss file and .css file, and it reruns Sass when necessary.  Just be sure to set the `SCSS_BINARY` option in settings.py.
-
-When `DEBUG = True`, DMP checks the timestamps every time a template is rendered.  When in production mode (`DEBUG = False`), DMP only checks the timestamps the first time a template is rendered -- you'll have to restart your server to recompile updated .scss files.  You can disable Sass integration by removing the `SCSS_BINARY` from the settings or by setting it to `None`.
-
-Note that `SCSS_BINARY` *must be specified in a list*.  DMP uses Python's subprocess.Popen command without the shell option (it's more cross-platform that way, and it works better with spaces in your paths).  Specify any arguments in the list as well.  For example, the following settings are all valid:
-
-        'SCSS_BINARY': [ 'scss' ],
-        # or:
-        'SCSS_BINARY': [ 'C:\\Ruby200-x64\\bin\\scss' ],
-        # or:
-        'SCSS_BINARY': [ '/usr/bin/env', 'scss', '--unix-newlines', '--cache-location', '/tmp/' ],
-        # or, to disable:
-        'SCSS_BINARY': None,
-
-If Sass isn't running right, check the DMP log statements.  When the log is enabled, it shows the exact command syntax that DMP is using.  Copy and paste the code into a terminal and troubleshoot the command manually.
-
-> You might be wondering if DMP supports `.scssm` files (Mako embedded in Sass files).  Through a bit of hacking the process, it's a qualified Yes!  Consider `.scssm` support as beta right now.  Only Mako expressions are working thus far: `${ ... }`.  Any other Mako constructs get stripped out by the compiler.
-
 
 ## Static and Dynamic Javascript
 
@@ -967,27 +873,19 @@ Save the changes and take your browser to [http://localhost:8000/homepage/index/
 > I should note that letting the user set date formats and timer intervals via the browser url are probably not the most wise or secure ideas.  But hopefully, it is illustrative of the capabilities of DMP.
 
 
-## Behind the Curtain
+## Minification of JS and CSS
 
-After reading the previous sections on automatic CSS and JS inclusion, you might want to know how it works.  It's all done in the templates (base.htm now, and base_ajax.htm in a later section below) you are inheriting from.  Open `base.htm` and look at the following code:
+DMP will try to minify your *.js and *.css files using the `rjsmin` and `rcssmin` modules if the settings.py `MINIFY_JS_CSS` is True.  Your Python installation must also have these modules installed
 
-        ## imports
-        <%! from django_mako_plus import get_template_css, get_template_js %>
+These two modules do fairly simplistic minification using regular expressions.  They are not as full-featured as other minifiers, but they use pure Python code and are incredibly fast.  If you want more complete minification, this probably isn't it.
 
-        ...
+These two modules might be simplistic, but they *are* fast enough to do minification of dynamic `*.jsm` and `*.cssm` files at production time.  Setting the `MINIFY_JS_CSS` variable to True will not only minify during the `dmp_collectstatic` command, it will minfiy the dynamic files as well as they are rendered for each client.
 
-        ## render the css with the same name as this page
-        ${ get_template_css(self, request, context) }
+I've done some informal speed testing with dynamic scripts and styles, and minification doesn't really affect overall template processing speed. YMMV.  Luck favors those that do their own testing.
 
-        ...
+Again, if you want to disable these minifications procedures, simply set `MINIFY_JS_CSS` to False.
 
-        ## render the JS with the same name as this page
-        ${ get_template_css(self, request, context) }
-
-The first block at the top of the file imports the two functions we'll use.   The next two calls, `get_template_css()` and `get_template_js()` include the `<link>`, `<script>`, and other code based on what it finds.
-
-This all works because the `index.html` template extends from the `base.htm` template.  If you fail to inherit from `base.htm` or `base_ajax.htm`, the `static_renderer` won't be able to include the support files.
-
+Minification of `*.jsm` and `*.cssm` is skipped during development so you can debug your Javascript and CSS.  Even if your set `MINIFY_JS_CSS` to True, minification only happens when settings.py `DEBUG` is False (at production).
 
 
 
@@ -1090,80 +988,6 @@ To repeat, a full DMP url is really `/app/view.function/`.  Using `/app/view/` i
 > Since ajax calls often return JSON, XML, or simple text, you often only need to add a function to your view.  At the end of the function, simply `return HttpResponse("json or xml or text")`.  You likely don't need full template, css, or js files.
 
 
-## Templates Located Elsewhere
-
-This impacts few users of DMP, so you may want to skip this section for now.
-
-Suppose your templates are located in a directory outside your normal project root.  For whatever reason, you don't want to put your templates in the app/templates directory.
-
-
-### Case 1: Templates Within Your Project Directory
-
-If the templates you need to access are within your project directory, no extra setup is required.  Simply reference those templates relative to the root project directory.  For example, to access a template located at BASE_DIR/homepage/mytemplates/sub1/page.html, use the following:
-
-        return dmp_render(request, '/homepage/mytemplates/sub1/page.html', context)
-
-Note the starting slash on the path.  That tells DMP to start searching at your project root.
-
-Don't confuse the slashes in the above call with the slash used in Django's `render` function.  When you call `render`, the slash separates the app and filename.  The above call uses `dmp_render`, which is a different function.  You should really standardize on one or the other throughout your project.
-
-
-### Case 2: Templates Outside Your Project Directory
-
-Suppose your templates are located on a different disk or entirely different directory from your project.  DMP allows you to add extra directories to the template search path through the `TEMPLATES_DIRS` setting.  This setting contains a list of directories that are searched by DMP regardless of the app being referenced.  To include the `/var/templates/` directory in the search path, set this variable as follows:
-
-        'TEMPLATES_DIRS': [
-           '/var/templates/',
-        ],
-
-Suppose, after making the above change, you need to render the '/var/templates/page1.html' template:
-
-        return dmp_render(request, 'page1.html', context)
-
-DMP will first search the current app's `templates` directory (i.e. the normal way), then it will search the `TEMPLATES_DIRS` list, which in this case contains `/var/templates/`.  Your `page1.html` template will be found and rendered.
-
-
-## Template Inheritance Across Apps
-
-You may have noticed that this tutorial has focused on a single app.  Most projects consist of many apps.  For example, a sales site might have an app for user management, an app for product management, and an app for the catalog and sales/shopping-cart experience.  All of these apps probably want the same look and feel, and all of them likely want to extend from the **same** `base.htm` file.
-
-When you run `python3 manage.py dmp_startapp <appname>`, you get **new** `base.htm` and `base_ajax.htm` files each time.  This is done to get you started on your first app.  On your second, third, and subsequent apps, you probably want to delete these starter files and instead extend your templates from the `base.htm` and `base_ajax.htm` files in your first app.
-
-In fact, in my projects, I usually create an app called `base_app` that contains the common `base.htm` html code, site-wide CSS, and site-wide Javascript.  Subsequent apps simply extend from `/base_app/templates/base.htm`.  The common `base_app` doesn't really have end-user templates in it -- they are just supertemplates that support other, public apps.
-
-DMP supports cross-app inheritance by including your project root (e.g. `settings.BASE_DIR`) in the template lookup path.  All you need to do is use the full path (relative to the project root) to the template in the inherits statement.
-
-Suppose I have the following app structure:
-
-        dmptest
-            base_app/
-                __init__.py
-                media/
-                scripts/
-                styles/
-                templates/
-                    site_base_ajax.htm
-                    site_base.htm
-                views/
-                    __init__.py
-            homepage/
-                __init__.py
-                media/
-                scripts/
-                styles/
-                templates/
-                    index.html
-                views/
-                    __init__.py
-
-I want `homepage/templates/index.html` to extend from `base_app/templates/site_base.htm`.  The following code in `index.html` sets up the inheritance:
-
-        <%inherit file="/base_app/templates/site_base.htm" />
-
-Again, the front slash in the name above tells DMP to start the lookup at the project root.
-
-> In fact, my pages are often three inheritance levels deep: `base_app/templates/site_base.htm -> homepage/templates/base.htm -> homepage/templates/index.html` to provide for site-wide page code, app-wide page code, and specific page code.
-
 
 
 ## Importing Python Modules into Templates
@@ -1192,6 +1016,7 @@ There may be some modules, such as `re` or `decimal` that are so useful you want
 Any entries in this list will be automatically included in templates throughout all apps of your site.  With the above imports, you'll be able to use `re` and `Decimal` and `os` and `os.path` anywhere in any .html, .cssm, and .jsm file.
 
 
+
 ## Mime Types and Status Codes
 
 The `dmp_render()` function determines the mime type from the template extension and returns a *200* status code.  What if you need to return JSON, CSV, or a 404 not found?  Just wrap the `dmp_render_to_string` function in a standard Django `HttpResponse` object.  A few examples:
@@ -1204,20 +1029,6 @@ The `dmp_render()` function determines the mime type from the template extension
         # return a custom error page
         return HttpResponse(dmp_render_to_string(request, 'custom_error_page.html', {}), status=404)
 
-
-## Useful Variables
-
-At the beginning of each request (as part of its middleware), DMP adds a number of fields to the request object.  These
-variables primarily support the inner workings of the DMP router, but they may be useful to you as well.  The following
-are available throughout the request:
-
-* `request.dmp_router_app`: The Django application specified in the URL.  In the URL `http://www.server.com/calculator/index/1/2/3`, the `dmp_router_app` is the string "calculator".
-* `request.dmp_router_page`: The name of the Python module specified in the URL.  In the URL `http://www.server.com/calculator/index/1/2/3`, the `dmp_router_page` is the string "index".  In the URL `http://www.server.com/calculator/index.somefunc/1/2/3`, the `dmp_router_page` is still the string "index".
-* `request.dmp_router_page_full`: The exact module name specified in the URL, including the function name if specified.  In the URL `http://www.server.com/calculator/index/1/2/3`, the `dmp_router_page_full` is the string "index".  In the URL `http://www.server.com/calculator/index.somefunc/1/2/3`, the `dmp_router_page` is the string "index.somefunc".  Note the difference in this last example to what `dmp_router_page` reports.
-* `request.dmp_router_function`: The name of the function within the module that will be called, even if it is not specified in the URL.  In the URL `http://www.server.com/calculator/index/1/2/3`, the `dmp_router_function` is the string "process_request" (the default function).  In the URL `http://www.server.com/calculator/index.somefunc/1/2/3`, the `dmp_router_page` is the string "somefunc".
-* `request.dmp_router_module`: The name of the real Python module specified in the URL, as it will be imported into the runtime module space.  In the URL `http://www.server.com/calculator/index/1/2/3`, the `dmp_router_module` is the string "calculator.views.index".
-* `request.dmp_router_class`: The name of the class if the router sees that the "function" is actually a class-based view.  None otherwise.
-* `request.urlparams`: A list of parameters specified in the URL.  See the section entitled "URL Parameters" above for more information.
 
 
 ## Static Files, Your Web Server, and DMP
@@ -1309,21 +1120,6 @@ The `dmp_collectstatic` command has the following command-line options:
 
 
 
-### Minification of JS and CSS
-
-DMP will try to minify your *.js and *.css files using the `rjsmin` and `rcssmin` modules if the settings.py `MINIFY_JS_CSS` is True.  Your Python installation must also have these modules installed
-
-These two modules do fairly simplistic minification using regular expressions.  They are not as full-featured as other minifiers, but they use pure Python code and are incredibly fast.  If you want more complete minification, this probably isn't it.
-
-These two modules might be simplistic, but they *are* fast enough to do minification of dynamic `*.jsm` and `*.cssm` files at production time.  Setting the `MINIFY_JS_CSS` variable to True will not only minify during the `dmp_collectstatic` command, it will minfiy the dynamic files as well as they are rendered for each client.
-
-I've done some informal speed testing with dynamic scripts and styles, and minification doesn't really affect overall template processing speed. YMMV.  Luck favors those that do their own testing.
-
-Again, if you want to disable these minifications procedures, simply set `MINIFY_JS_CSS` to False.
-
-Minification of `*.jsm` and `*.cssm` is skipped during development so you can debug your Javascript and CSS.  Even if your set `MINIFY_JS_CSS` to True, minification only happens when settings.py `DEBUG` is False (at production).
-
-
 #### Django Apps + DMP Apps
 
 You might have some traditional Django apps (like the built-in `/admin` app) and some DMP apps (like our `/homepage` in this tutorial).  Your Django apps need the regular `collectstatic` routine, and your DMP apps need the `dmp_collectstatic` routine.
@@ -1383,28 +1179,6 @@ DMP adds a custom header, "Redirect-Exception", to all exception-based redirects
 > Is this an abuse of exceptions?  Probably.  But from one viewpoint, a redirect can be seen as an exception to normal processing.  It is quite handy to be able to redirect the browser from anywhere in your codebase.  If this feels dirty to you, feel free to skip it.
 
 
-## Cleaning Up
-
-DMP caches its compiled templates in subdirectories of each app.  The default locations for each app are `app/templates/.cached_templates`, `app/scripts/.cached_templates`, and `app/styles/.cached_templates`, although the exact name depends on your settings.py.  Normally, these cache directories are hidden and warrant your utmost apathy.  However, there are times when DMP fails to update a cached template as it should.  Or you might just need a pristine project without these generated files.  This can be done with a Unix find command or through DMP's `dmp_cleanup` management command:
-
-        # see what would be be done without actually deleting any cache folders
-        python manage.py dmp_cleanup --trial-run
-
-        # really delete the folders
-        python manage.py dmp_cleanup
-
-Sass also generates compiled files that you can safely remove.  When you create a .scss file, Sass generates two additional files: `.css` and `.css.map`.  If you later remove the .scss, you leave the two generated, now orphaned, files in your `styles` directory.  While some editors remove these files automatically, you can also remove them through DMP's `dmp_sass_cleanup` management command:
-
-        # see what would be be done without actually deleting anything
-        python manage.py dmp_sass_cleanup --trial-run
-
-        # really delete the files
-        python manage.py dmp_sass_cleanup
-
-With both of these management commands, add `--verbose` to the command to include messages about skipped files, and add `--quiet` to silence all messages (except errors).
-
-> You might be wondering how DMP knows whether a file is a regular .css or a Sass-generated one.  It looks in your .css files for a line starting with `/*# sourceMappingURL=yourtemplate.css.map */`.  When it sees this marker, it decides that the file was generated by Sass and can be deleted if the matching .scss file doesn't exist.  Any .css files that omit this marker are skipped.
-
 # Deployment Recommendations
 
 This section has nothing to do with the Django-Mako-Framework, but I want to address a couple issues in hopes that it will save you some headaches.  One of the most difficult decisions in Django development is deciding how to deploy your system.  In particular, there are several ways to connect Django to your web server: mod_wsgi, FastCGI, etc.
@@ -1424,22 +1198,237 @@ The following links contain tutorials for deploying Django with DMP:
 * http://blog.tworivershosting.com/2014/11/ubuntu-server-setup-for-django-mako-plus.html
 
 
-# DMP Signals
+# Advanced Topics
 
-> This is an advanced topic, and it is not required to use DMP.  I suggest you skip this section and come back to it if you ever need Signals.
+The following sections are for those who want to take advantage of some extra, but likely less used, features of DMP.
+
+
+## Useful Variables
+
+At the beginning of each request (as part of its middleware), DMP adds a number of fields to the request object.  These
+variables primarily support the inner workings of the DMP router, but they may be useful to you as well.  The following
+are available throughout the request:
+
+* `request.dmp_router_app`: The Django application specified in the URL.  In the URL `http://www.server.com/calculator/index/1/2/3`, the `dmp_router_app` is the string "calculator".
+* `request.dmp_router_page`: The name of the Python module specified in the URL.  In the URL `http://www.server.com/calculator/index/1/2/3`, the `dmp_router_page` is the string "index".  In the URL `http://www.server.com/calculator/index.somefunc/1/2/3`, the `dmp_router_page` is still the string "index".
+* `request.dmp_router_page_full`: The exact module name specified in the URL, including the function name if specified.  In the URL `http://www.server.com/calculator/index/1/2/3`, the `dmp_router_page_full` is the string "index".  In the URL `http://www.server.com/calculator/index.somefunc/1/2/3`, the `dmp_router_page` is the string "index.somefunc".  Note the difference in this last example to what `dmp_router_page` reports.
+* `request.dmp_router_function`: The name of the function within the module that will be called, even if it is not specified in the URL.  In the URL `http://www.server.com/calculator/index/1/2/3`, the `dmp_router_function` is the string "process_request" (the default function).  In the URL `http://www.server.com/calculator/index.somefunc/1/2/3`, the `dmp_router_page` is the string "somefunc".
+* `request.dmp_router_module`: The name of the real Python module specified in the URL, as it will be imported into the runtime module space.  In the URL `http://www.server.com/calculator/index/1/2/3`, the `dmp_router_module` is the string "calculator.views.index".
+* `request.dmp_router_class`: The name of the class if the router sees that the "function" is actually a class-based view.  None otherwise.
+* `request.urlparams`: A list of parameters specified in the URL.  See the section entitled "URL Parameters" above for more information.
+
+
+## Behind the Curtain
+
+After reading about automatic CSS and JS inclusion, you might want to know how it works.  It's all done in the templates (base.htm now, and base_ajax.htm in a later section below) you are inheriting from.  Open `base.htm` and look at the following code:
+
+        ## imports
+        <%! from django_mako_plus import get_template_css, get_template_js %>
+
+        ...
+
+        ## render the css with the same name as this page
+        ${ get_template_css(self, request, context) }
+
+        ...
+
+        ## render the JS with the same name as this page
+        ${ get_template_css(self, request, context) }
+
+The first block at the top of the file imports the two functions we'll use.   The next two calls, `get_template_css()` and `get_template_js()` include the `<link>`, `<script>`, and other code based on what it finds.
+
+This all works because the `index.html` template extends from the `base.htm` template.  If you fail to inherit from `base.htm` or `base_ajax.htm`, the `static_renderer` won't be able to include the support files.
+
+
+## Rending Templates the Standard Way: `render()`
+
+If you prefer using the standard Django `render()` methods, as described in the Django tutorial, DMP is behind you all the way.  The code below is now sans the `dmp_render` function; it instead sports the regular `render` method from the shortcuts module:
+
+        from django.conf import settings
+        from django.shortcuts import render
+        from django_mako_plus import view_function
+        from datetime import datetime
+
+        @view_function
+        def process_request(request):
+          context = {
+            'now': datetime.now(),
+          }
+          return render(request, 'homepage/index.html', context)
+          # or
+          return render(request, 'homepage/index.html', context, using='django_mako_plus')
+
+However, *be sure to note one specific requirement* when using the normal Django methods.  You must specify your template with the `app/template.html` format.  Since the DMP engine is specific to your apps, it needs to know which app your template resides in.
+
+The the second version of the `render` call in the example above includes the `using` parameter, which specifically tells Django to use the DMP engine for rendering.  If you omit this, Django starts with the first template engine listed in your settings.py, which may or may not be DMP.  If DMP is the only engine listed, there's no reason to specify the `using` parameter.  This confusion is explained in detail in the Django documentation.
+
+The following is another example of using the standard Django methods.  Note the app/template format in the filename again:
+
+        from django.conf import settings
+        from django.http import HttpResponse
+        from django.template.loader import get_template
+        from django_mako_plus import view_function
+        from datetime import datetime
+
+        @view_function
+        def process_request(request):
+          context = {
+            'now': datetime.now(),
+          }
+          template = get_template('homepage/index.html')
+          # or
+          template = get_template('homepage/index.html', using='django_mako_plus')
+          return HttpResponse(template.render(context=context, request=request))
+
+
+As you can hopefully see, DMP provides custom functions like `dmp_render` and also allows regular Django functions.  Use whichever best suits your needs.
+
+
+## Sass Integration
+
+DMP can automatically compile your .scss files each time you update them.  When a template is rendered the first time, DMP checks the timestamps on the .scss file and .css file, and it reruns Sass when necessary.  Just be sure to set the `SCSS_BINARY` option in settings.py.
+
+When `DEBUG = True`, DMP checks the timestamps every time a template is rendered.  When in production mode (`DEBUG = False`), DMP only checks the timestamps the first time a template is rendered -- you'll have to restart your server to recompile updated .scss files.  You can disable Sass integration by removing the `SCSS_BINARY` from the settings or by setting it to `None`.
+
+Note that `SCSS_BINARY` *must be specified in a list*.  DMP uses Python's subprocess.Popen command without the shell option (it's more cross-platform that way, and it works better with spaces in your paths).  Specify any arguments in the list as well.  For example, the following settings are all valid:
+
+        'SCSS_BINARY': [ 'scss' ],
+        # or:
+        'SCSS_BINARY': [ 'C:\\Ruby200-x64\\bin\\scss' ],
+        # or:
+        'SCSS_BINARY': [ '/usr/bin/env', 'scss', '--unix-newlines', '--cache-location', '/tmp/' ],
+        # or, to disable:
+        'SCSS_BINARY': None,
+
+If Sass isn't running right, check the DMP log statements.  When the log is enabled, it shows the exact command syntax that DMP is using.  Copy and paste the code into a terminal and troubleshoot the command manually.
+
+> You might be wondering if DMP supports `.scssm` files (Mako embedded in Sass files).  Through a bit of hacking the process, it's a qualified Yes!  Consider `.scssm` support as beta right now.  Only Mako expressions are working thus far: `${ ... }`.  Any other Mako constructs get stripped out by the compiler.
+
+
+## Class-Based Views
+
+Django-Mako-Plus supports Django's class-based view concept.  You can read more about this pattern in the Django documentation.  If you are using view classes, DMP automatically detects and adjusts accordingly.  If you are using regular function-based views, skip this section for now.
+
+With DMP, your class-based view will be discovered via request url, so you have to name your class accordingly.  In keeping with the rest of DMP, the default class name in a file should be named `class process_request()`.  The `get()`, `post()`, etc. methods of this class must be decorated with with `@view_function`.  Consider the following `index.py` file:
+
+        from django.conf import settings
+        from django.http import HttpResponse
+        from django.views.generic import View
+        from django_mako_plus import view_function
+        from .. import dmp_render, dmp_render_to_string
+        from datetime import datetime
+
+        class process_request(View):
+          @view_function
+          def get(self, request):
+            context = {
+              'now': datetime.now().strftime(request.urlparams[0] if request.urlparams[0] else '%H:%M'),
+            }
+            return dmp_render(request, 'index.html', context)
+
+        class discovery(View):
+          @view_function
+          def get(self, request):
+            return HttpResponse('Get was called.')
+
+          @view_function
+          def post(self, request):
+            return HttpResponse('Post was called.')
+
+In the above `index.py` file, two class-based views are defined.  The first is called with the url `/homepage/index/`.  The second is called with the url `/homepage/index.discovery/`.
+
+> Python programmers usually use CamelCase (e.g. start with an uppercase letter) for class names.  In the above classes, I'm naming them all lowercase so my URL doesn't have uppercase characters in it.  If you'd rather use CamelCase, just be sure to match it in your URL.
+
+
+## Templates Located Elsewhere
+
+This impacts few users of DMP, so you may want to skip this section for now.
+
+Suppose your templates are located in a directory outside your normal project root.  For whatever reason, you don't want to put your templates in the app/templates directory.
+
+
+### Case 1: Templates Within Your Project Directory
+
+If the templates you need to access are within your project directory, no extra setup is required.  Simply reference those templates relative to the root project directory.  For example, to access a template located at BASE_DIR/homepage/mytemplates/sub1/page.html, use the following:
+
+        return dmp_render(request, '/homepage/mytemplates/sub1/page.html', context)
+
+Note the starting slash on the path.  That tells DMP to start searching at your project root.
+
+Don't confuse the slashes in the above call with the slash used in Django's `render` function.  When you call `render`, the slash separates the app and filename.  The above call uses `dmp_render`, which is a different function.  You should really standardize on one or the other throughout your project.
+
+
+### Case 2: Templates Outside Your Project Directory
+
+Suppose your templates are located on a different disk or entirely different directory from your project.  DMP allows you to add extra directories to the template search path through the `TEMPLATES_DIRS` setting.  This setting contains a list of directories that are searched by DMP regardless of the app being referenced.  To include the `/var/templates/` directory in the search path, set this variable as follows:
+
+        'TEMPLATES_DIRS': [
+           '/var/templates/',
+        ],
+
+Suppose, after making the above change, you need to render the '/var/templates/page1.html' template:
+
+        return dmp_render(request, 'page1.html', context)
+
+DMP will first search the current app's `templates` directory (i.e. the normal way), then it will search the `TEMPLATES_DIRS` list, which in this case contains `/var/templates/`.  Your `page1.html` template will be found and rendered.
+
+
+## Template Inheritance Across Apps
+
+You may have noticed that this tutorial has focused on a single app.  Most projects consist of many apps.  For example, a sales site might have an app for user management, an app for product management, and an app for the catalog and sales/shopping-cart experience.  All of these apps probably want the same look and feel, and all of them likely want to extend from the **same** `base.htm` file.
+
+When you run `python3 manage.py dmp_startapp <appname>`, you get **new** `base.htm` and `base_ajax.htm` files each time.  This is done to get you started on your first app.  On your second, third, and subsequent apps, you probably want to delete these starter files and instead extend your templates from the `base.htm` and `base_ajax.htm` files in your first app.
+
+In fact, in my projects, I usually create an app called `base_app` that contains the common `base.htm` html code, site-wide CSS, and site-wide Javascript.  Subsequent apps simply extend from `/base_app/templates/base.htm`.  The common `base_app` doesn't really have end-user templates in it -- they are just supertemplates that support other, public apps.
+
+DMP supports cross-app inheritance by including your project root (e.g. `settings.BASE_DIR`) in the template lookup path.  All you need to do is use the full path (relative to the project root) to the template in the inherits statement.
+
+Suppose I have the following app structure:
+
+        dmptest
+            base_app/
+                __init__.py
+                media/
+                scripts/
+                styles/
+                templates/
+                    site_base_ajax.htm
+                    site_base.htm
+                views/
+                    __init__.py
+            homepage/
+                __init__.py
+                media/
+                scripts/
+                styles/
+                templates/
+                    index.html
+                views/
+                    __init__.py
+
+I want `homepage/templates/index.html` to extend from `base_app/templates/site_base.htm`.  The following code in `index.html` sets up the inheritance:
+
+        <%inherit file="/base_app/templates/site_base.htm" />
+
+Again, the front slash in the name above tells DMP to start the lookup at the project root.
+
+> In fact, my pages are often three inheritance levels deep: `base_app/templates/site_base.htm -> homepage/templates/base.htm -> homepage/templates/index.html` to provide for site-wide page code, app-wide page code, and specific page code.
+
+
+## DMP Signals
 
 DMP sends several custom signals through the Django signal dispatcher.  The purpose is to allow you to hook into the router's processing.  Perhaps you need to run code at various points in the process, or perhaps you need to change the request.dmp_* variables to modify the router processing.
 
 Before going further with this section's examples, be sure to read the standard Django signal documentation.  DMP signals are simply additional signals in the same dispatching system, so the following examples should be easy to understand once you know how Django dispatches signals.
 
-## Step 1: Enable DMP Signals
+### Step 1: Enable DMP Signals
 
 Be sure your settings.py file has the following in it:
 
 
         'SIGNALS': True,
 
-## Step 2: Create a Signal Receiver
+### Step 2: Create a Signal Receiver
 
 The following creates two receivers.  The first is called just before the view's process_request function is called.  The second is called just before DMP renders .html templates.
 
@@ -1465,7 +1454,7 @@ The above code should be in a code file that is called during Django initializat
 
 See the `django_mako_plus/signals.py` file for all the available signals you can listen for.
 
-# Translation (Internationalization)
+## Translation (Internationalization)
 
 
 If your site needs to be translated into other languages, this section is for you.  I'm sure you are aware that Django has full support for translation to other languages.  If not, you should first read the standard Translation documentation at https://docs.djangoproject.com/en/dev/topics/i18n/translation/.
@@ -1490,6 +1479,29 @@ Assuming you have translations set up the way Django's documentation tells you t
 Your translation file (language.mo) is now ready, and assuming you've set the language in your session, you'll now see the translations in your template.
 
 > FYI, the `dmp_makemessages` command does everything the regular command does, so it will also find translatable strings in your regular view files as well.  You don't need to run both `dmp_makemessages` and `makemessages`
+
+
+## Cleaning Up
+
+DMP caches its compiled templates in subdirectories of each app.  The default locations for each app are `app/templates/.cached_templates`, `app/scripts/.cached_templates`, and `app/styles/.cached_templates`, although the exact name depends on your settings.py.  Normally, these cache directories are hidden and warrant your utmost apathy.  However, there are times when DMP fails to update a cached template as it should.  Or you might just need a pristine project without these generated files.  This can be done with a Unix find command or through DMP's `dmp_cleanup` management command:
+
+        # see what would be be done without actually deleting any cache folders
+        python manage.py dmp_cleanup --trial-run
+
+        # really delete the folders
+        python manage.py dmp_cleanup
+
+Sass also generates compiled files that you can safely remove.  When you create a .scss file, Sass generates two additional files: `.css` and `.css.map`.  If you later remove the .scss, you leave the two generated, now orphaned, files in your `styles` directory.  While some editors remove these files automatically, you can also remove them through DMP's `dmp_sass_cleanup` management command:
+
+        # see what would be be done without actually deleting anything
+        python manage.py dmp_sass_cleanup --trial-run
+
+        # really delete the files
+        python manage.py dmp_sass_cleanup
+
+With both of these management commands, add `--verbose` to the command to include messages about skipped files, and add `--quiet` to silence all messages (except errors).
+
+> You might be wondering how DMP knows whether a file is a regular .css or a Sass-generated one.  It looks in your .css files for a line starting with `/*# sourceMappingURL=yourtemplate.css.map */`.  When it sees this marker, it decides that the file was generated by Sass and can be deleted if the matching .scss file doesn't exist.  Any .css files that omit this marker are skipped.
 
 
 # Where to Now?
