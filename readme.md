@@ -1,3 +1,14 @@
+
+# Use This If You've Said:
+
+* Is there an alternative to the Django templating language?
+* Why are Django templates weak sauce? Why not just use regular Python in templates?
+* Why does Django make me list every. single. page. in urls.py?
+* I'd like to include Python code in my CSS and Javascript files.
+* My app's views.py file is getting HUGE.  How can I split it intelligently?
+
+
+
 <!-- TOC depthFrom:1 depthTo:6 withLinks:1 updateOnSave:1 orderedList:0 -->
 
 - [Use This If You've Said:](#use-this-if-youve-said)
@@ -60,15 +71,6 @@
 - [Where to Now?](#where-to-now)
 
 <!-- /TOC -->
-
-
-# Use This If You've Said:
-
-* Is there an alternative to the Django templating language?
-* Why are Django templates weak sauce? Why not just use regular Python in templates?
-* Why does Django make me list every. single. page. in urls.py?
-* I'd like to include Python code in my CSS and Javascript files.
-* My app's views.py file is getting HUGE.  How can I split it intelligently?
 
 
 # Description
