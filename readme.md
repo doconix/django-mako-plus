@@ -1,4 +1,66 @@
-[Skip Ahead to Installation &rarr;](#installation)
+<!-- TOC depthFrom:1 depthTo:6 withLinks:1 updateOnSave:1 orderedList:0 -->
+
+- [Use This If You've Said:](#use-this-if-youve-said)
+- [Description](#description)
+	- [Where Is DMP Used?](#where-is-dmp-used)
+	- [Why Mako instead of Jinja2, Cheetah, or [insert template language here]?](#why-mako-instead-of-jinja2-cheetah-or-insert-template-language-here)
+	- [Can I use DMP with other Django apps?](#can-i-use-dmp-with-other-django-apps)
+	- [Comparison with Django Syntax](#comparison-with-django-syntax)
+- [Installation](#installation)
+		- [Upgrade Notes for DMP 3.0](#upgrade-notes-for-dmp-30)
+		- [Python 3+](#python-3)
+		- [Install Django, Mako, and DMP](#install-django-mako-and-dmp)
+		- [Create a Django project](#create-a-django-project)
+		- [Edit Your `settings.py` File:](#edit-your-settingspy-file)
+		- [Enable the Django-Mako-Plus Router](#enable-the-django-mako-plus-router)
+		- [Create a DMP-Style App](#create-a-dmp-style-app)
+		- [Load it Up!](#load-it-up)
+		- [Huh? "app homepage is not a designated DMP app"?](#huh-app-homepage-is-not-a-designated-dmp-app)
+		- [Convert Existing Apps to DMP](#convert-existing-apps-to-dmp)
+		- [Installing Django in a Subdirectory](#installing-django-in-a-subdirectory)
+- [Tutorial](#tutorial)
+		- [The DMP Structure](#the-dmp-structure)
+	- [Routing Without urls.py](#routing-without-urlspy)
+	- [Adding a View Function](#adding-a-view-function)
+		- [The Render Functions](#the-render-functions)
+		- [Can't I Use the Django Shortcut Functions?](#cant-i-use-the-django-shortcut-functions)
+	- [URL Parameters](#url-parameters)
+	- [A Bit of Style](#a-bit-of-style)
+	- [A Bit of Style, Reloaded](#a-bit-of-style-reloaded)
+	- [Static and Dynamic Javascript](#static-and-dynamic-javascript)
+	- [Minification of JS and CSS](#minification-of-js-and-css)
+	- [Ajax Calls](#ajax-calls)
+	- [Really, a Whole New File for Ajax?](#really-a-whole-new-file-for-ajax)
+	- [Importing Python Modules into Templates](#importing-python-modules-into-templates)
+	- [Mime Types and Status Codes](#mime-types-and-status-codes)
+	- [Static Files, Your Web Server, and DMP](#static-files-your-web-server-and-dmp)
+		- [Static File Setup](#static-file-setup)
+		- [Development](#development)
+		- [Security at Deployment (VERY Important)](#security-at-deployment-very-important)
+		- [Collecting Static Files](#collecting-static-files)
+			- [Django Apps + DMP Apps](#django-apps-dmp-apps)
+	- [Redirecting](#redirecting)
+- [Deployment Recommendations](#deployment-recommendations)
+	- [Deployment Tutorials](#deployment-tutorials)
+- [Advanced Topics](#advanced-topics)
+	- [Useful Variables](#useful-variables)
+	- [Behind the Curtain](#behind-the-curtain)
+	- [Rending Templates the Standard Way: `render()`](#rending-templates-the-standard-way-render)
+	- [Sass Integration](#sass-integration)
+	- [Class-Based Views](#class-based-views)
+	- [Templates Located Elsewhere](#templates-located-elsewhere)
+		- [Case 1: Templates Within Your Project Directory](#case-1-templates-within-your-project-directory)
+		- [Case 2: Templates Outside Your Project Directory](#case-2-templates-outside-your-project-directory)
+	- [Template Inheritance Across Apps](#template-inheritance-across-apps)
+	- [DMP Signals](#dmp-signals)
+		- [Step 1: Enable DMP Signals](#step-1-enable-dmp-signals)
+		- [Step 2: Create a Signal Receiver](#step-2-create-a-signal-receiver)
+	- [Translation (Internationalization)](#translation-internationalization)
+	- [Cleaning Up](#cleaning-up)
+- [Where to Now?](#where-to-now)
+
+<!-- /TOC -->
+
 
 # Use This If You've Said:
 
@@ -725,7 +787,7 @@ The above code references an app in a non-standard location and a template subdi
 
 ### Can't I Use the Django Shortcut Functions?
 
-Yep, and you can use the other Django template methods as well.  Scroll down to [Advanced Topics](#advancedtopics) for more information.
+Yep, and you can use the other Django template methods as well.  Scroll down to [Advanced Topics](#advanced-topics) for more information.
 
 
 ## URL Parameters
