@@ -8,29 +8,31 @@
 * My app's views.py file is getting HUGE.  How can I split it intelligently?
 
 
+# Table of Contents
 
 <!-- TOC depthFrom:1 depthTo:6 withLinks:1 updateOnSave:1 orderedList:0 -->
 
 - [Use This If You've Said:](#use-this-if-youve-said)
+- [Table of Contents](#table-of-contents)
 - [Description](#description)
 	- [Where Is DMP Used?](#where-is-dmp-used)
 	- [Why Mako instead of Jinja2, Cheetah, or [insert template language here]?](#why-mako-instead-of-jinja2-cheetah-or-insert-template-language-here)
 	- [Can I use DMP with other Django apps?](#can-i-use-dmp-with-other-django-apps)
 	- [Comparison with Django Syntax](#comparison-with-django-syntax)
 - [Installation](#installation)
-		- [Upgrade Notes for DMP 3.0](#upgrade-notes-for-dmp-30)
-		- [Python 3+](#python-3)
-		- [Install Django, Mako, and DMP](#install-django-mako-and-dmp)
-		- [Create a Django project](#create-a-django-project)
-		- [Edit Your `settings.py` File:](#edit-your-settingspy-file)
-		- [Enable the Django-Mako-Plus Router](#enable-the-django-mako-plus-router)
-		- [Create a DMP-Style App](#create-a-dmp-style-app)
-		- [Load it Up!](#load-it-up)
-		- [Huh? "app homepage is not a designated DMP app"?](#huh-app-homepage-is-not-a-designated-dmp-app)
-		- [Convert Existing Apps to DMP](#convert-existing-apps-to-dmp)
-		- [Installing Django in a Subdirectory](#installing-django-in-a-subdirectory)
+	- [Upgrade Notes for DMP 3.0](#upgrade-notes-for-dmp-30)
+	- [Python 3+](#python-3)
+	- [Install Django, Mako, and DMP](#install-django-mako-and-dmp)
+	- [Create a Django project](#create-a-django-project)
+	- [Edit Your `settings.py` File:](#edit-your-settingspy-file)
+	- [Enable the Django-Mako-Plus Router](#enable-the-django-mako-plus-router)
+	- [Create a DMP-Style App](#create-a-dmp-style-app)
+	- [Load it Up!](#load-it-up)
+	- [Huh? "app homepage is not a designated DMP app"?](#huh-app-homepage-is-not-a-designated-dmp-app)
+	- [Convert Existing Apps to DMP](#convert-existing-apps-to-dmp)
+	- [Installing Django in a Subdirectory](#installing-django-in-a-subdirectory)
 - [Tutorial](#tutorial)
-		- [The DMP Structure](#the-dmp-structure)
+	- [The DMP Structure](#the-dmp-structure)
 	- [Routing Without urls.py](#routing-without-urlspy)
 	- [Adding a View Function](#adding-a-view-function)
 		- [The Render Functions](#the-render-functions)
@@ -292,7 +294,7 @@ ${ random.randint(1, 10) }</code></pre></td>
 
 Note: If you need to use DMP 2.7, follow the [old installation instructions](https://github.com/doconix/django-mako-plus/blob/8fb0ccf942546b7ff241fd877315a18764f2dd3f/readme.md).  Be sure to use `pip3 install django-mako-plus==2.7.1` to get the old DMP codebase.
 
-### Upgrade Notes for DMP 3.0
+## Upgrade Notes for DMP 3.0
 
 In March, 2016, Django-Mako-Plus 3.0 was released.  It is a refactor of the entire codebase, and *it contains many incompatible changes* to all previous versions of DMP.  The primary reason for the incompatible upgrade is to match Django's template API.  DMP predates Django's pluggable template support, so it defined its own methods.  Now that Django supports custom templating engines, a refactor of DMP is in order.
 
@@ -317,12 +319,12 @@ Suggestions for your upgrade:
     * After you integrate your settings to TEMPLATES, remove the old, top-level DJANGO_MAKO_PLUS = {} from settings.py.
 
 
-### Python 3+
+## Python 3+
 
 Install Python and ensure you can run "python3" at the command prompt.  The framework requires Python 3.x and Django 1.8+.
 
 
-### Install Django, Mako, and DMP
+## Install Django, Mako, and DMP
 
 Install with the python installer:
 
@@ -340,7 +342,7 @@ DMP requires Django 1.8+, Python 3+, and Mako 1.0+.
 
 
 
-### Create a Django project
+## Create a Django project
 
 Create a Django project with the typical:
 
@@ -353,7 +355,7 @@ Don't forget to migrate to synchronize your database.  The apps in a standard Dj
         python3 manage.py migrate
 
 
-### Edit Your `settings.py` File:
+## Edit Your `settings.py` File:
 
 1. Add `django_mako_plus` to the end of your `INSTALLED_APPS` list:
 
@@ -464,7 +466,7 @@ Don't forget to migrate to synchronize your database.  The apps in a standard Dj
          STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 
-### Enable the Django-Mako-Plus Router
+## Enable the Django-Mako-Plus Router
 
 Add the Django-Mako-Plus router as **the last pattern** in your `urls.py` file (the default admin is also included here for completeness):
 
@@ -478,7 +480,7 @@ Add the Django-Mako-Plus router as **the last pattern** in your `urls.py` file (
               url(r'^.*$', route_request),
           ]
 
-### Create a DMP-Style App
+## Create a DMP-Style App
 
 Change to your project directory in the terminal/console, then create a new Django-Mako-Plus app with the following:
 
@@ -494,7 +496,7 @@ As with any Django app, you need to add your new app to the INSTALLED_APPS list 
 Congratulations.  You're ready to go!
 
 
-### Load it Up!
+## Load it Up!
 
 Start your web server with the following:
 
@@ -507,12 +509,12 @@ Open your web browser to [http://localhost:8000/](http://localhost:8000/).  You 
 If everything is working, skip ahead to the tutorial.
 
 
-### Huh? "app homepage is not a designated DMP app"?
+## Huh? "app homepage is not a designated DMP app"?
 
 If DMP tells you that an app you're trying to access "is not a designated DMP app", you missed something above.  Rather than go above and trying again, go on to the next section on converting existing apps for a summary of everything needed to make a valid DMP app.  You're likely missing something in this list, and by going through this next section, you'll ensure all the needed pieces are in place.  I'll bet you didn't set the `DJANGO_MAKO_PLUS = True` part in your app's init file.  Another possible reason is you didn't list `homepage` as one of your `INSTALLED_APPS` as described above.
 
 
-### Convert Existing Apps to DMP
+## Convert Existing Apps to DMP
 
 Already have an app that you'd like to switch over?  Just do the following:
 
@@ -538,7 +540,7 @@ Already have an app that you'd like to switch over?  Just do the following:
 * Clean up: once your functions are in new files, you can remove the `your-app/views.py` file.  You can also remove all the entries for your app in `urls.py`.
 
 
-### Installing Django in a Subdirectory
+## Installing Django in a Subdirectory
 
 This section is for those that need Django is a subdirectory, such as `/mysite`.  If your Django installation is at the root of your domain, skip this section.
 
@@ -561,7 +563,7 @@ I'll assume you've just installed Django-Mako-Plus according to the instructions
 
 You should see a congratulations page.  If you don't, go back to the installation section and walk through the steps again.  Your console might have valuable error messages to help troubleshoot things.
 
-### The DMP Structure
+## The DMP Structure
 
 Let's explore the directory structure of your new app:
 
