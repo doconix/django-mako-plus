@@ -70,7 +70,7 @@ def get_template_js(mako_self, request, context, cgi_id=None):
     return _get_cached_static_renderer(mako_self, cgi_id).get_template_js(request, context)
 
 
-def get_fake_template_css(app_path, request, template, context, cgi_id=None):
+def get_fake_template_css(request, app_path, template, context, cgi_id=None):
     '''
     Renders the styles for the nonexistent template.
 
@@ -87,7 +87,7 @@ def get_fake_template_css(app_path, request, template, context, cgi_id=None):
     The template is the name of the fake template that would normally
     exist in the app/templates/ folder.
 
-    For example, In the 'myapp' app_path, template of 'mytemplate.html' will
+    For example, in the 'myapp' app_path, template of 'mytemplate.html' will
     return a string containing (if they exist):
 
         1. A <link> tag to app/styles/mytemplate.css
@@ -95,10 +95,10 @@ def get_fake_template_css(app_path, request, template, context, cgi_id=None):
 
     This string can be placed into any HTML content.
     '''
-    return _get_cached_template_info(app, template, cgi_id).get_template_css(request, context)
+    return _get_cached_template_info(app_path, template, cgi_id).get_template_css(request, context)
 
 
-def get_fake_template_js(app_path, request, template, context, cgi_id=None):
+def get_fake_template_js(request, app_path, template, context, cgi_id=None):
     '''
     Renders the scripts for the nonexistent template.
 
@@ -115,7 +115,7 @@ def get_fake_template_js(app_path, request, template, context, cgi_id=None):
     The template is the name of the fake template that would normally
     exist in the app/templates/ folder.
 
-    For example, In the 'myapp' app_path, template of 'mytemplate.html' will
+    For example, in the 'myapp' app_path, template of 'mytemplate.html' will
     return a string containing (if they exist):
 
         1. A <script> link to app/scripts/mytemplate.js
@@ -123,7 +123,7 @@ def get_fake_template_js(app_path, request, template, context, cgi_id=None):
 
     This string can be placed into any HTML content.
     '''
-    return _get_cached_template_info(app, template, cgi_id).get_template_js(request, context)
+    return _get_cached_template_info(app_path, template, cgi_id).get_template_js(request, context)
 
 
 
