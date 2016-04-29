@@ -246,7 +246,7 @@ class TemplateInfo(object):
         except OSError:
             self.jsm = None
 
-        
+
     def get_template_css(self, request, context):
         '''Returns the CSS for this template's .css and .cssm files, if they exist.'''
         ret = []
@@ -297,6 +297,6 @@ def _get_cached_template_info(app_path, template_filename, cgi_id=None):
         return FAKE_TEMPLATEINFO_CACHE[key]
     except KeyError:
         ti = TemplateInfo(app_path, template_filename, cgi_id)
-        if True or not settings.DEBUG:  # cache if not in debug mode
+        if not settings.DEBUG:  # cache if not in debug mode
             FAKE_TEMPLATEINFO_CACHE[key] = ti
         return ti
