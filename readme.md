@@ -1573,34 +1573,36 @@ With both of these management commands, add `--verbose` to the command to includ
 
 ## Getting to Static Files Via Fake Templates
 
-You might be wondering who came up with the heading of this section.  Fake Templates?  Let me explain.  No, there is too much.  Let me sum up.  In rare use cases, you may want to take advantage of DMP's static files
+You might be wondering who came up with the heading of this section.  Fake Templates?  Let me explain.  No, there is too much.  Let me sum up:  In rare use cases, you may want to take advantage of DMP's static files
 capability, even though you aren't rendering a real Mako template.  For example, you might be creating HTML directly in Python but want the JS and CSS in regular .js/.jsm/.css/.cssm files.
 
 Obviously, you should normally be using templates to generate HTML, but you might have a custom widgets that are created good old Python.  If these widgets have a significant amount of JS and/or CSS, you may want to keep them in regular files instead of big ol' strings in your code.
 
 By calling DMP's "fake template" functions, you can leverage its automatic discovery of static files, including rendering and caching of script/style template files and compilation of .scss files.  DMP already knows how to cache and render, so why not let it do the work for you?
 
-For example, suppose you are creating HTML in some code within the `myapp` app.  Even though you aren't using a template file, you can render JS and CSS automatically:
+For example, suppose you are creating HTML in some code within a `myapp` view file.  Even though you aren't using a template file, you can still include JS and CSS automatically:
 
+        from django_mako_plus import get_fake_template_css, get_fake_template_js
+        
         def myfunction(request):
             # generate the html
             html = []
-            html.append('<div>Some html here</div>')
+            html.append('<div>All your html content belong to us</div>')
+            html.append('<div>Some more html</div>')
 
-            # set up some variables to pass into the .cssm and .jsm
-            context = {
-                'four': 2 + 2,
-            }
+            # set up a context to pass into the .cssm and .jsm
+            context = { 'four': 2 + 2 }
 
             # include/render two css files if they exist): myapp/styles/mytemplate.css and myapp/styles/mytemplate.cssm
-            html.append(get_fake_template_css(request, 'myapp', 'mytemplate.html', context)
+            html.append(get_fake_template_css(request, 'myapp', 'mytemplate.fakehtml', context))
 
             # include/render two js files if they exist): myapp/scripts/mytemplate.js and myapp/scripts/mytemplate.jsm
-            html.append(get_fake_template_js(request, 'myapp', 'mytemplate.html', context)
+            html.append(get_fake_template_js(request, 'myapp', 'mytemplate.fakehtml', context))
 
             # return the joined content
             return '\n'.join(html)
-            
+
+And no, you really didn't need the `.fakehtml` extension on the template name.  Any extension (or no extension) will do.
 
 # Where to Now?
 
