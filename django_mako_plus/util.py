@@ -23,7 +23,9 @@ log = logging.getLogger('django_mako_plus')
 ###   Utility functions
 
 def get_dmp_instance():
-    '''Retrieves the DMP template engine instance.'''
+    '''
+    Retrieves the DMP template engine instance.
+    '''
     try:
         return DMP_OPTIONS[DMP_INSTANCE_KEY]
     except KeyError:
@@ -31,7 +33,9 @@ def get_dmp_instance():
 
 
 def get_dmp_app_configs():
-    '''Gets the DMP-enabled app configs, which will be a subset of all installed apps.  This is a generator function.'''
+    '''
+    Gets the DMP-enabled app configs, which will be a subset of all installed apps.  This is a generator function.
+    '''
     for config in apps.get_app_configs():
         # check for the DJANGO_MAKO_PLUS = True in the app (should be in app/__init__.py)
         if getattr(config.module, 'DJANGO_MAKO_PLUS', False):
@@ -39,7 +43,9 @@ def get_dmp_app_configs():
 
 
 def run_command(cmd_parts, raise_exception=True):
-    '''Runs a command, piping all output to the DMP log.  The cmd_parts should be a sequence so paths can have spaces and we are os independent.'''
+    '''
+    Runs a command, piping all output to the DMP log.  The cmd_parts should be a sequence so paths can have spaces and we are os independent.
+    '''
     log.debug('DMP :: %s' % ' '.join(cmd_parts))
     p = subprocess.Popen(cmd_parts, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE)
     stdout, stderr = p.communicate()
@@ -54,10 +60,12 @@ def run_command(cmd_parts, raise_exception=True):
 ###   Special type of list used for url params
 
 class URLParamList(list):
-    '''A simple extension to Python's list that returns '' for indices that don't exist.
-       For example, if the object is ['a', 'b'] and you call obj[5], it will return ''
-       rather than throwing an IndexError.  This makes dealing with url parameters
-       simpler since you don't have to check the length of the list.'''
+    '''
+    A simple extension to Python's list that returns '' for indices that don't exist.
+    For example, if the object is ['a', 'b'] and you call obj[5], it will return ''
+    rather than throwing an IndexError.  This makes dealing with url parameters
+    simpler since you don't have to check the length of the list.
+    '''
     def __getitem__(self, idx):
         '''Returns the element at idx, or '' if idx is beyond the length of the list'''
         # if the index is beyond the length of the list, return ''

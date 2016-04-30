@@ -21,8 +21,9 @@ import os, os.path, sys
 ###   The main engine
 
 class MakoTemplates(BaseEngine):
-    '''The primary Mako interface that plugs into the Django templating system.
-       This is referenced in settings.py -> TEMPLATES.
+    '''
+    The primary Mako interface that plugs into the Django templating system.
+    This is referenced in settings.py -> TEMPLATES.
     '''
     def __init__(self, params):
         '''Constructor'''
@@ -83,20 +84,24 @@ class MakoTemplates(BaseEngine):
 
         # add a template renderer for each DMP-enabled app
         self.template_loaders = {}
+        self.dmp_enabled_apps = set()
         for app_config in get_dmp_app_configs():
             self.register_app(app_config)
+            self.dmp_enabled_apps.add(app_config.name)
 
 
     def register_app(self, app_config):
-        '''Registers an app as a "DMP-enabled" app.  Registering creates a cached
-           template renderer to make processing faster and adds the dmp_render()
-           and dmp_render_to_string() methods to the app.  When Django starts,
-           this method is called automatically for any app with
-           DJANGO_MAKO_PLUS = True in its __init__.py file.
+        '''
+        Registers an app as a "DMP-enabled" app.  Registering creates a cached
+        template renderer to make processing faster and adds the dmp_render()
+        and dmp_render_to_string() methods to the app.  When Django starts,
+        this method is called automatically for any app with
+        DJANGO_MAKO_PLUS = True in its __init__.py file.
 
-           This method should not normally be called directly.
+        This method should not normally be called directly.
         '''
         # set up the template, script, and style renderers
+        # these create and cache just by accessing them
         self.get_template_loader(app_config, 'templates', create=True)
         self.get_template_loader(app_config, 'scripts', create=True)
         self.get_template_loader(app_config, 'styles', create=True)
@@ -112,25 +117,37 @@ class MakoTemplates(BaseEngine):
         app_config.module.dmp_render_to_string = RenderShortcut(self, app_config.name, 'render')  # the Django Template method to render to a string is render().  Django templates never return a direct response.
 
 
+    def is_dmp_app(self, app):
+        '''
+        Returns True if the given app is a DMP-enabled app.  The app parameter can
+        be either the name of the app or an AppConfig object.
+        '''
+        if isinstance(app, AppConfig):
+            app = app.name
+        return app in self.dmp_enabled_apps
+
+
     def from_string(self, template_code):
-        '''Compiles a template from the given string.
-           This is one of the required methods of Django template engines.
+        '''
+        Compiles a template from the given string.
+        This is one of the required methods of Django template engines.
         '''
         mako_template = Template(template_code, imports=DMP_OPTIONS.get('DEFAULT_TEMPLATE_IMPORTS'), input_encoding=DMP_OPTIONS.get('DEFAULT_TEMPLATE_ENCODING', 'utf-8'))
         return MakoTemplateAdapter(mako_template)
 
 
     def get_template(self, template_name):
-        '''Retrieves a template object.
-           This is one of the required methods of Django template engines.
+        '''
+        Retrieves a template object.
+        This is one of the required methods of Django template engines.
 
-           Because DMP templates are always app-specific (Django only searches
-           a global set of directories), the template_name MUST be in the format:
-           "app_name/template.html".  DMP splits the template_name string on the
-           slash to get the app name and template name.
+        Because DMP templates are always app-specific (Django only searches
+        a global set of directories), the template_name MUST be in the format:
+        "app_name/template.html".  DMP splits the template_name string on the
+        slash to get the app name and template name.
 
-           Only forward slashes are supported.  Use / even on Windows to specify
-           the "app_name/template.html".
+        Only forward slashes are supported.  Use / even on Windows to specify
+        the "app_name/template.html".
         '''
         parts = template_name.split('/', 1)
         if len(parts) < 2:
@@ -216,9 +233,10 @@ class MakoTemplates(BaseEngine):
 
 
 class RenderShortcut(object):
-    '''A shortcut way to call render() on a template.
-       This enables the primary DMP way to run templates.
-       These shortcuts are created in MakoTemplates.__init__ above.
+    '''
+    A shortcut way to call render() on a template.
+    This enables the primary DMP way to run templates.
+    These shortcuts are created in MakoTemplates.__init__ above.
        Use of these shortcuts:
 
          # this code goes in an app's view files, such as views/index.py
