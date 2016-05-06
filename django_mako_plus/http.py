@@ -14,12 +14,12 @@ class HttpResponseJavascriptRedirect(HttpResponse):
     Sends a regular HTTP 200 OK response that contains Javascript to
     redirect the browser:
 
-        <script>window.location.href="...";</script>.
+        <script>window.location.assign("...");</script>.
 
     If redirect_to is empty, it redirects to the current location (essentially refreshing
     the current page):
 
-        <script>window.location.href=window.location.href;</script>.
+        <script>window.location.assign(window.location.href);</script>.
 
     Normally, redirecting should be done via HTTP 302 rather than Javascript.
     Use this class when your only choice is through Javascript.
@@ -44,9 +44,9 @@ class HttpResponseJavascriptRedirect(HttpResponse):
     def __init__(self, redirect_to=None, *args, **kwargs):
         # set up the code
         if redirect_to:
-            script = 'window.location.href="{}";'.format(redirect_to)
+            script = 'window.location.assign("{}");'.format(redirect_to)
         else:
-            script = 'window.location.href=window.location.href'
+            script = 'window.location.assign(window.location.href)'
         # do we need to add the <script> tag? (that's the default)
         if kwargs.pop('include_script_tag', True):
             script = '<script>{}</script>'.format(script)
