@@ -36,7 +36,7 @@
 	- [Adding a View Function](#adding-a-view-function)
 		- [The Render Functions](#the-render-functions)
 		- [Convenience Functions](#convenience-functions)
-		- [Can't I Use the Django Shortcut Functions?](#cant-i-use-the-django-shortcut-functions)
+		- [Can't I Use the Django API?](#cant-i-use-the-django-api)
 	- [URL Parameters](#url-parameters)
 	- [A Bit of Style](#a-bit-of-style)
 	- [A Bit of Style, Reloaded](#a-bit-of-style-reloaded)
@@ -820,7 +820,6 @@ Use the DMP convenience functions to be more dynamic, to interact directly with 
 
         from django_mako_plus import get_template_for_path
         template = get_template_for_path('/var/some/dir/template.html')
-        mystr = template.render(context, request)
 
 **Get the real Mako template object:**
 
@@ -833,7 +832,7 @@ See the [Mako documentation](http://www.makotemplates.org/) for more information
 > The convenience functions are perfectly fine if they suit your needs, but the `dmp_render` function described at the beginning of the tutorial is likely the best choice for most users because it doesn't hard code the app name.  The convenience functions are not Django-API compliant.
 
 
-### Can't I Use the Django Shortcut Functions?
+### Can't I Use the Django API?
 
 If you need/want to use the standard Django template API, you can do that too:
 
