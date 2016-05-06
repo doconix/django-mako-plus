@@ -9,7 +9,6 @@
 
 
 # Table of Contents
-
 <!-- TOC depthFrom:1 depthTo:6 withLinks:1 updateOnSave:1 orderedList:0 -->
 
 - [Use This If You've Said:](#use-this-if-youve-said)
@@ -36,7 +35,8 @@
 	- [Routing Without urls.py](#routing-without-urlspy)
 	- [Adding a View Function](#adding-a-view-function)
 		- [The Render Functions](#the-render-functions)
-		- [Can't I Use the Django Shortcut Functions?](#cant-i-use-the-django-shortcut-functions)
+		- [Convenience Functions: Can I use a dynamically-found app?  What if I need a template object?  Can I render a file directly?](#convenience-functions-can-i-use-a-dynamically-found-app-what-if-i-need-a-template-object-can-i-render-a-file-directly)
+		- [Can't I Use the Django Shortcut Functions?  I need to stick with the Django API.](#cant-i-use-the-django-shortcut-functions-i-need-to-stick-with-the-django-api)
 	- [URL Parameters](#url-parameters)
 	- [A Bit of Style](#a-bit-of-style)
 	- [A Bit of Style, Reloaded](#a-bit-of-style-reloaded)
