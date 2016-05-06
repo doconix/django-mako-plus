@@ -35,7 +35,7 @@
 	- [Routing Without urls.py](#routing-without-urlspy)
 	- [Adding a View Function](#adding-a-view-function)
 		- [The Render Functions](#the-render-functions)
-		- [Convenience Functions:](#convenience-functions)
+		- [Convenience Functions](#convenience-functions)
 		- [Can't I Use the Django Shortcut Functions?](#cant-i-use-the-django-shortcut-functions)
 	- [URL Parameters](#url-parameters)
 	- [A Bit of Style](#a-bit-of-style)
@@ -790,39 +790,39 @@ Suppose you need to put your templates in a directory named something other than
 The above code references an app in a non-standard location and a template subdirectory with a non-standard name.
 
 
-### Convenience Functions:
+### Convenience Functions
 
 You might be wondering: Can I use a dynamically-found app?  What if I need a template object?  Can I render a file directly?
 
 Use the DMP convenience functions to be more dynamic, to interact directly with template objects, or to render a file of your choosing.
 
-Render a file from any app's template's directory:
+**Render a file from any app's template's directory:**
 
         from django_mako_plus import render_template
         mystr = render_template(request, 'homepage', 'index.html', context)
 
-Render a file from a custom directory within an app:
+**Render a file from a custom directory within an app:**
 
         from django_mako_plus import render_template
         mystr = render_template(request, 'homepage', 'custom.html', context, subdir="customsubdir")
 
-Render a file at any location, even outside of Django:
+**Render a file at any location, even outside of Django:**
 
         from django_mako_plus import render_template_for_path
         mystr = render_template_for_path(request, '/var/some/dir/template.html', context)
 
-Get a template object from an app:
+**Get a template object from an app:**
 
         from django_mako_plus import get_template
         template = get_template('homepage', 'index.html')
 
-Get a template object at any location, even outside of Django:
+**Get a template object at any location, even outside of Django:**
 
         from django_mako_plus import get_template_for_path
         template = get_template_for_path('/var/some/dir/template.html')
         mystr = template.render(context, request)
 
-Get the real Mako template object:
+**Get the real Mako template object:**
 
         from django_mako_plus import get_template_for_path
         template = get_template_for_path('/var/some/dir/template.html')
