@@ -30,10 +30,12 @@ from .http import HttpResponseJavascriptRedirect
 
 # the convenience functions
 # Instead of these functions, consider using dmp_render() and dmp_render_to_string()
-from .convenience import get_template_loader
-from .convenience import get_template_loader_for_path
+from .convenience import render_template
+from .convenience import render_template_for_path
 from .convenience import get_template
 from .convenience import get_template_for_path
+from .convenience import get_template_loader
+from .convenience import get_template_loader_for_path
 
 
 # the utilities

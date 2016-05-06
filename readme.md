@@ -790,9 +790,60 @@ Suppose you need to put your templates in a directory named something other than
 The above code references an app in a non-standard location and a template subdirectory with a non-standard name.
 
 
-### Can't I Use the Django Shortcut Functions?
+### Convenience Functions: Can I use a dynamically-found app?  What if I need a template object?  Can I render a file directly?
 
-Yep, and you can use the other Django template methods as well.  Scroll down to [Advanced Topics](#rending-templates-the-standard-way-render) for more information.
+Use the DMP convenience functions to be more dynamic, to interact directly with template objects, or to render a file of your choosing.
+
+Render a file from any app's template's directory:
+
+        from django_mako_plus import render_template
+        mystr = render_template(request, 'homepage', 'index.html', context)
+
+Render a file from a custom directory within an app:
+
+        from django_mako_plus import render_template
+        mystr = render_template(request, 'homepage', 'custom.html', context, subdir="customsubdir")
+
+Render a file at any location, even outside of Django:
+
+        from django_mako_plus import render_template_for_path
+        mystr = render_template_for_path(request, '/var/some/dir/template.html', context)
+
+Get a template object from an app:
+
+        from django_mako_plus import get_template
+        template = get_template('homepage', 'index.html')
+
+Get a template object at any location, even outside of Django:
+
+        from django_mako_plus import get_template_for_path
+        template = get_template_for_path('/var/some/dir/template.html')
+        mystr = template.render(context, request)
+
+Get the real Mako template object:
+
+        from django_mako_plus import get_template_for_path
+        template = get_template_for_path('/var/some/dir/template.html')
+        mako_template = template.mako_template
+
+See the [Mako documentation](http://www.makotemplates.org/) for more information on working directly with Mako template objects.  Mako has many features that go well beyond the DMP interface.
+
+> The convenience functions are perfectly fine if they suit your needs, but the `dmp_render` function described at the beginning of the tutorial is likely the best choice for most users because it doesn't hard code the app name.  The convenience functions are not Django-API compliant.
+
+
+### Can't I Use the Django Shortcut Functions?  I need to stick with the Django API.
+
+Yep, and you can use the other Django template methods as well:
+
+        from django.shortcuts import render
+        return render(request, 'homepage/index.html', context)
+
+or to be more explicit with Django:
+
+        from django.shortcuts import render
+        return render(request, 'homepage/index.html', context, using='django_mako_plus')
+
+Scroll down to [Advanced Topics](#rending-templates-the-standard-way-render) for more information.
 
 
 ## URL Parameters
@@ -1583,7 +1634,7 @@ By calling DMP's "fake template" functions, you can leverage its automatic disco
 For example, suppose you are creating HTML in some code within a `myapp` view file.  Even though you aren't using a template file, you can still include JS and CSS automatically:
 
         from django_mako_plus import get_fake_template_css, get_fake_template_js
-        
+
         def myfunction(request):
             # generate the html
             html = []
