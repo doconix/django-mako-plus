@@ -35,8 +35,8 @@
 	- [Routing Without urls.py](#routing-without-urlspy)
 	- [Adding a View Function](#adding-a-view-function)
 		- [The Render Functions](#the-render-functions)
-		- [Convenience Functions: Can I use a dynamically-found app?  What if I need a template object?  Can I render a file directly?](#convenience-functions-can-i-use-a-dynamically-found-app-what-if-i-need-a-template-object-can-i-render-a-file-directly)
-		- [Can't I Use the Django Shortcut Functions?  I need to stick with the Django API.](#cant-i-use-the-django-shortcut-functions-i-need-to-stick-with-the-django-api)
+		- [Convenience Functions:](#convenience-functions)
+		- [Can't I Use the Django Shortcut Functions?](#cant-i-use-the-django-shortcut-functions)
 	- [URL Parameters](#url-parameters)
 	- [A Bit of Style](#a-bit-of-style)
 	- [A Bit of Style, Reloaded](#a-bit-of-style-reloaded)
@@ -790,7 +790,9 @@ Suppose you need to put your templates in a directory named something other than
 The above code references an app in a non-standard location and a template subdirectory with a non-standard name.
 
 
-### Convenience Functions: Can I use a dynamically-found app?  What if I need a template object?  Can I render a file directly?
+### Convenience Functions:
+
+You might be wondering: Can I use a dynamically-found app?  What if I need a template object?  Can I render a file directly?
 
 Use the DMP convenience functions to be more dynamic, to interact directly with template objects, or to render a file of your choosing.
 
@@ -831,9 +833,9 @@ See the [Mako documentation](http://www.makotemplates.org/) for more information
 > The convenience functions are perfectly fine if they suit your needs, but the `dmp_render` function described at the beginning of the tutorial is likely the best choice for most users because it doesn't hard code the app name.  The convenience functions are not Django-API compliant.
 
 
-### Can't I Use the Django Shortcut Functions?  I need to stick with the Django API.
+### Can't I Use the Django Shortcut Functions?
 
-Yep, and you can use the other Django template methods as well:
+If you need/want to use the standard Django template API, you can do that too:
 
         from django.shortcuts import render
         return render(request, 'homepage/index.html', context)
