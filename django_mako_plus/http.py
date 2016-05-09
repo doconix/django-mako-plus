@@ -44,9 +44,9 @@ class HttpResponseJavascriptRedirect(HttpResponse):
     def __init__(self, redirect_to=None, *args, **kwargs):
         # set up the code
         if redirect_to:
-            script = 'window.location.assign("{}");'.format(redirect_to)
+            script = 'window.location.assign("{}");'.format(redirect_to.split('#')[0])
         else:
-            script = 'window.location.assign(window.location.href)'
+            script = 'window.location.assign(window.location.href.split("#")[0])'
         # do we need to add the <script> tag? (that's the default)
         if kwargs.pop('include_script_tag', True):
             script = '<script>{}</script>'.format(script)

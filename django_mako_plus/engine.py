@@ -70,7 +70,7 @@ class MakoTemplates(BaseEngine):
         DMP_OPTIONS['RUNTIME_SCSS_ENABLED'] = False
         SCSS_BINARY = DMP_OPTIONS.get('SCSS_BINARY', None)
         if isinstance(SCSS_BINARY, str):  # for backwards compatability
-            log.warning('DMP :: Future warning: the settings.py variable SCSS_BINARY should be a list of arguments, not a string.')
+            log.warning('Future warning: the settings.py variable SCSS_BINARY should be a list of arguments, not a string.')
             DMP_OPTIONS['RUNTIME_SCSS_ARGUMENTS'] = SCSS_BINARY.split(' ')
             DMP_OPTIONS['RUNTIME_SCSS_ENABLED'] = True
         elif isinstance(SCSS_BINARY, (list, tuple)):
@@ -78,7 +78,7 @@ class MakoTemplates(BaseEngine):
             DMP_OPTIONS['RUNTIME_SCSS_ENABLED'] = True
         elif not SCSS_BINARY:
             DMP_OPTIONS['RUNTIME_SCSS_ARGUMENTS'] = None
-            log.debug('DMP :: Sass integration not enabled.')
+            log.warning('Sass integration not enabled.')
         else:
             raise ImproperlyConfigured('The SCSS_BINARY option in Django Mako Plus settings must be a list of arguments.  See the DMP documentation.')
 

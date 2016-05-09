@@ -37,7 +37,7 @@ class MakoTemplateLoader:
         else:
             template_dir = os.path.abspath(os.path.join(app_path, template_subdir))
         if not os.path.isdir(template_dir):
-            raise ImproperlyConfigured('DMP :: Cannot create template loader because its directory does not exist: %s' % template_dir)
+            raise ImproperlyConfigured('Cannot create template loader because its directory does not exist: %s' % template_dir)
 
         # calculate the cache root and template search directories
         self.cache_root = os.path.join(template_dir, DMP_OPTIONS.get('TEMPLATES_CACHE_DIR', '.cached_templates'))
@@ -63,10 +63,10 @@ class MakoTemplateLoader:
             # wrap the mako template in an adapter that gives the Django template API
             return MakoTemplateAdapter(self.get_mako_template(template))
         except (TopLevelLookupException, TemplateLookupException) as e: # Mako exception raised
-            log.debug('DMP :: template "%s" not found in search path: %s.' % (template, self.template_search_dirs))
+            log.error('template "%s" not found in search path: %s.' % (template, self.template_search_dirs))
             raise TemplateDoesNotExist('Template "%s" not found in search path: %s.' % (template, self.template_search_dirs))
         except (CompileException, SyntaxException) as e: # Mako exception raised
-            log.debug('DMP :: template "%s" not found in search path: %s.' % (template, self.template_search_dirs))
+            log.error('template "%s" not found in search path: %s.' % (template, self.template_search_dirs))
             raise TemplateSyntaxError('Template "%s" raised an error: %s' % (template, e))
 
 
@@ -152,12 +152,12 @@ class MakoTemplateAdapter(object):
             render_obj = self.mako_template.get_def(def_name)
 
         # PRIMARY FUNCTION: render the template
-        log.debug('DMP :: Rendering template %s' % (self.mako_template.filename or 'string'))
+        log.debug('Rendering template %s' % (self.mako_template.filename or 'string'))
         if settings.DEBUG:
             try:
                 content = render_obj.render_unicode(**context_dict)
             except:
-                log.exception('DMP :: Exception raised during template rendering:')  # to the console
+                log.exception('Exception raised during template rendering:')  # to the console
                 content = html_error_template().render_unicode()       # to the browser
         else:  # this is outside the above "try" loop because in non-DEBUG mode, we want to let the exception throw out of here (without having to re-raise it)
             content = render_obj.render_unicode(**context_dict)
@@ -205,9 +205,9 @@ class MakoTemplateAdapter(object):
         except RedirectException: # redirect to another page
             e = sys.exc_info()[1]
             if request == None:
-                log.debug('DMP :: a template redirected processing to %s' % (request.dmp_router_module, request.dmp_router_function, e.redirect_to))
+                log.info('a template redirected processing to %s' % (request.dmp_router_module, request.dmp_router_function, e.redirect_to))
             else:
-                log.debug('DMP :: view function %s.%s redirected processing to %s' % (request.dmp_router_module, request.dmp_router_function, e.redirect_to))
+                log.info('view function %s.%s redirected processing to %s' % (request.dmp_router_module, request.dmp_router_function, e.redirect_to))
             # send the signal
             if DMP_OPTIONS.get('SIGNALS', False):
                 dmp_signal_redirect_exception.send(sender=sys.modules[__name__], request=request, exc=e)

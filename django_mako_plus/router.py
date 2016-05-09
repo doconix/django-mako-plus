@@ -47,7 +47,7 @@ def view_function(f):
 def route_request(request):
     '''The main router for all calls coming in to the system.'''
     # output the variables so the programmer can debug where this is routing
-    log.debug('DMP :: processing: app=%s, page=%s, func=%s, urlparams=%s' % (request.dmp_router_app, request.dmp_router_page, request.dmp_router_function, request.urlparams))
+    log.info('processing: app=%s, page=%s, func=%s, urlparams=%s' % (request.dmp_router_app, request.dmp_router_page, request.dmp_router_function, request.urlparams))
 
     # set the full function location
     request.dmp_router_module = '.'.join([ request.dmp_router_app, 'views', request.dmp_router_page ])
@@ -61,18 +61,18 @@ def route_request(request):
         try:
             # look for the module, and if not found go straight to template
             if not os.path.exists(full_module_filename):
-                log.debug('DMP :: module %s not found; sending processing directly to template %s.html' % (request.dmp_router_module, request.dmp_router_page_full))
+                log.warning('module %s not found; sending processing directly to template %s.html' % (request.dmp_router_module, request.dmp_router_page_full))
                 try:
                     dmp_loader = get_dmp_instance().get_template_loader(request.dmp_router_app)
                     return dmp_loader.get_template('%s.html' % request.dmp_router_page_full).render_to_response(request=request)
                 except (TemplateDoesNotExist, TemplateSyntaxError, ImproperlyConfigured) as e:
-                    log.debug('DMP :: %s' % (e))
+                    log.error('%s' % (e))
                     raise Http404
 
             # find the function
             module_obj = import_module(request.dmp_router_module)
             if not hasattr(module_obj, request.dmp_router_function):
-                log.debug('DMP :: view function/class %s not in module %s; returning 404 not found.' % (request.dmp_router_function, request.dmp_router_module))
+                log.error('view function/class %s not in module %s; returning 404 not found.' % (request.dmp_router_function, request.dmp_router_module))
                 raise Http404
             func_obj = getattr(module_obj, request.dmp_router_function)
 
@@ -81,13 +81,13 @@ def route_request(request):
                 request.dmp_router_class = request.dmp_router_function
                 request.dmp_router_function = request.method.lower()
                 if not hasattr(func_obj, request.dmp_router_function):
-                    log.debug('DMP :: view class %s.%s has no method named %s; returning 404 not found.' % (request.dmp_router_module, request.dmp_router_class, request.dmp_router_function))
+                    log.error('view class %s.%s has no method named %s; returning 404 not found.' % (request.dmp_router_module, request.dmp_router_class, request.dmp_router_function))
                     raise Http404
                 func_obj = getattr(func_obj(), request.dmp_router_function)  # move to the class.get(), class.post(), etc. method
 
             # ensure it is decorated with @view_function - this is for security so only certain functions can be called
             if getattr(func_obj, 'dmp_view_function', False) != True:
-                log.debug('DMP :: view function/class %s found successfully, but it is not decorated with @view_function; returning 404 not found.  Note that if you have multiple decorators on a function, the @view_function decorator must be listed first.' % (request.dmp_router_function))
+                log.error('view function/class %s found successfully, but it is not decorated with @view_function; returning 404 not found.  Note that if you have multiple decorators on a function, the @view_function decorator must be listed first.' % (request.dmp_router_function))
                 raise Http404
 
             # send the pre-signal
@@ -98,9 +98,9 @@ def route_request(request):
 
             # call view function
             if request.dmp_router_class == None:
-                log.debug('DMP :: calling view function %s.%s' % (request.dmp_router_module, request.dmp_router_function))
+                log.info('calling view function %s.%s' % (request.dmp_router_module, request.dmp_router_function))
             else:
-                log.debug('DMP :: calling class-based view function %s.%s.%s' % (request.dmp_router_module, request.dmp_router_class, request.dmp_router_function))
+                log.info('calling class-based view function %s.%s.%s' % (request.dmp_router_module, request.dmp_router_class, request.dmp_router_function))
             response = func_obj(request)
 
             # send the post-signal
@@ -112,9 +112,9 @@ def route_request(request):
             # if we didn't get a correct response back, send a 404
             if not isinstance(response, (HttpResponse, StreamingHttpResponse)):
                 if request.dmp_router_class == None:
-                    log.debug('DMP :: view function %s.%s failed to return an HttpResponse (or the post-signal overwrote it).  Returning Http404.' % (request.dmp_router_module, request.dmp_router_function))
+                    log.error('view function %s.%s failed to return an HttpResponse (or the post-signal overwrote it).  Returning Http404.' % (request.dmp_router_module, request.dmp_router_function))
                 else:
-                    log.debug('DMP :: class-based view function %s.%s.%s failed to return an HttpResponse (or the post-signal overwrote it).  Returning Http404.' % (request.dmp_router_module, request.dmp_router_class, request.dmp_router_function))
+                    log.error('class-based view function %s.%s.%s failed to return an HttpResponse (or the post-signal overwrote it).  Returning Http404.' % (request.dmp_router_module, request.dmp_router_class, request.dmp_router_function))
                 raise Http404
 
             # return the response
@@ -128,13 +128,13 @@ def route_request(request):
             request.dmp_router_module = ivr.redirect_module
             request.dmp_router_function = ivr.redirect_function
             full_module_filename = os.path.normpath(os.path.join(settings.BASE_DIR, request.dmp_router_module.replace('.', '/') + '.py'))
-            log.debug('DMP :: received an InternalViewRedirect to %s -> %s' % (full_module_filename, request.dmp_router_function))
+            log.info('received an InternalViewRedirect to %s -> %s' % (full_module_filename, request.dmp_router_function))
 
         except RedirectException as e: # redirect to another page
             if request.dmp_router_class == None:
-                log.debug('DMP :: view function %s.%s redirected processing to %s' % (request.dmp_router_module, request.dmp_router_function, e.redirect_to))
+                log.info('view function %s.%s redirected processing to %s' % (request.dmp_router_module, request.dmp_router_function, e.redirect_to))
             else:
-                log.debug('DMP :: class-based view function %s.%s.%s redirected processing to %s' % (request.dmp_router_module, request.dmp_router_class, request.dmp_router_function, e.redirect_to))
+                log.info('class-based view function %s.%s.%s redirected processing to %s' % (request.dmp_router_module, request.dmp_router_class, request.dmp_router_function, e.redirect_to))
             # send the signal
             if DMP_OPTIONS.get('SIGNALS', False):
                 dmp_signal_redirect_exception.send(sender=sys.modules[__name__], request=request, exc=e)
