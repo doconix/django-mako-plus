@@ -7,7 +7,7 @@ from .exceptions import InternalRedirectException, RedirectException
 from .signals import dmp_signal_pre_process_request, dmp_signal_post_process_request, dmp_signal_internal_redirect_exception, dmp_signal_redirect_exception
 from .util import get_dmp_instance, log, DMP_OPTIONS
 
-import os, os.path, re, mimetypes, sys
+import os, os.path, re, mimetypes, sys, logging
 from urllib.parse import unquote
 from importlib import import_module
 
@@ -47,7 +47,8 @@ def view_function(f):
 def route_request(request):
     '''The main router for all calls coming in to the system.'''
     # output the variables so the programmer can debug where this is routing
-    log.info('processing: app=%s, page=%s, func=%s, urlparams=%s' % (request.dmp_router_app, request.dmp_router_page, request.dmp_router_function, request.urlparams))
+    if log.isEnabledFor(logging.INFO):
+        log.info('processing: app=%s, page=%s, func=%s, urlparams=%s' % (request.dmp_router_app, request.dmp_router_page, request.dmp_router_function, request.urlparams))
 
     # set the full function location
     request.dmp_router_module = '.'.join([ request.dmp_router_app, 'views', request.dmp_router_page ])
@@ -97,9 +98,9 @@ def route_request(request):
                         return ret_response
 
             # call view function
-            if request.dmp_router_class == None:
+            if request.dmp_router_class == None and log.isEnabledFor(logging.INFO):
                 log.info('calling view function %s.%s' % (request.dmp_router_module, request.dmp_router_function))
-            else:
+            elif log.isEnabledFor(logging.INFO):
                 log.info('calling class-based view function %s.%s.%s' % (request.dmp_router_module, request.dmp_router_class, request.dmp_router_function))
             response = func_obj(request)
 

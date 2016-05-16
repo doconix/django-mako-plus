@@ -11,7 +11,7 @@ from .exceptions import InternalRedirectException, RedirectException
 from .signals import dmp_signal_pre_render_template, dmp_signal_post_render_template, dmp_signal_redirect_exception
 from .util import get_dmp_instance, log, DMP_OPTIONS
 
-import os, os.path, sys, mimetypes
+import os, os.path, sys, mimetypes, logging
 
 
 
@@ -152,7 +152,8 @@ class MakoTemplateAdapter(object):
             render_obj = self.mako_template.get_def(def_name)
 
         # PRIMARY FUNCTION: render the template
-        log.debug('Rendering template %s' % (self.mako_template.filename or 'string'))
+        if log.isEnabledFor(logging.DEBUG):
+            log.debug('Rendering template %s' % (self.mako_template.filename or 'string'))
         if settings.DEBUG:
             try:
                 content = render_obj.render_unicode(**context_dict)
