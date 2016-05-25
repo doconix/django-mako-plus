@@ -22,11 +22,11 @@ def get_template(app, template_name, subdir="templates"):
     return get_dmp_instance().get_template_loader(app, subdir, create=True).get_template(template_name)
 
 
-def render_template(request, app, template_name, context, subdir="templates"):
+def render_template(request, app, template_name, context, subdir="templates", def_name=None):
     '''
     Convenience method that directly renders a template, given the app and template names.
     '''
-    return get_template(app, template_name, subdir).render(context, request)
+    return get_template(app, template_name, subdir).render(context, request, def_name)
 
 
 def get_template_loader_for_path(path, use_cache=True):
@@ -45,8 +45,8 @@ def get_template_for_path(path, use_cache=True):
     return get_dmp_instance().get_template_loader_for_path(app_path, use_cache=use_cache).get_template(template_name)
 
 
-def render_template_for_path(request, path, context, use_cache=True):
+def render_template_for_path(request, path, context, use_cache=True, def_name=None):
     '''
     Convenience method that directly renders a template, given a direct path to it.
     '''
-    return get_template_for_path(path, use_cache).render(context, request)
+    return get_template_for_path(path, use_cache).render(context, request, def_name)

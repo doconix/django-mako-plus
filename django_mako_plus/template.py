@@ -127,13 +127,18 @@ class MakoTemplateAdapter(object):
         '''
         # set up the context dictionary, which is the variables available throughout the template
         context_dict = {}
+        # if request is None, add some default items because the context processors won't happen
+        if request == None:
+            context_dict['settings'] = settings
+            context_dict['STATIC_URL'] = settings.STATIC_URL
         # let the context_processors add variables to the context.
         if not isinstance(context, Context):
             context = Context(context) if request == None else RequestContext(request, context)
         with context.bind_template(self):
             for d in context:
                 context_dict.update(d)
-        context_dict.pop('self', None)  # some contexts have self in them, and it messes up render_unicode below because we get two selfs
+        # some contexts have self in them, and it messes up render_unicode below because we get two selfs
+        context_dict.pop('self', None)
 
         # send the pre-render signal
         if DMP_OPTIONS.get('SIGNALS', False) and request != None:

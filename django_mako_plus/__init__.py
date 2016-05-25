@@ -40,6 +40,7 @@ from .convenience import get_template_loader_for_path
 
 # the utilities
 from .util import get_dmp_instance
+from .util import get_dmp_app_configs
 
 
 # the router
