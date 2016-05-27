@@ -2,7 +2,7 @@
 # This allows it to import into the runtime DMP as well as
 # setup.py during installation.
 
-__version__ = '3.3.13'
+__version__ = '3.3.14'
 
 
 # Reminder on uploading to pypi and removing the build folders:
