@@ -8,16 +8,6 @@ import os, os.path, posixpath, subprocess
 
 
 
-if DMP_OPTIONS.get('MINIFY_JS_CSS', False) and not settings.DEBUG:
-    try:
-        from rjsmin import jsmin
-    except ImportError:
-        raise ImproperlyConfigured('MINIFY_JS_CSS = True in the Django Mako Plus settings, but the "rjsmin" package does not seem to be loaded.')
-    try:
-        from rcssmin import cssmin
-    except ImportError:
-        raise ImproperlyConfigured('MINIFY_JS_CSS = True in the Django Mako Plus settings, but the "rcssmin" package does not seem to be loaded.')
-
 
 # keys to attach TemplateInfo objects and static renderer to the Mako Template itself
 # I attach it to the template objects because they are already cached by mako, so
@@ -271,7 +261,7 @@ class TemplateInfo(object):
             lookup = get_dmp_instance().get_template_loader_for_path(os.path.join(self.app_dir, 'styles'))
             css_text = lookup.get_template(self.cssm).render(request=request, context=context)
             if DMP_OPTIONS.get('RUNTIME_CSSMIN'):
-                css_text = cssmin(css_text)
+                css_text = DMP_OPTIONS['RUNTIME_CSSMIN'](css_text)
             ret.append('<style type="text/css">%s</style>' % css_text)
         # join and return
         return '\n'.join(ret)
@@ -289,7 +279,7 @@ class TemplateInfo(object):
             lookup = get_dmp_instance().get_template_loader_for_path(os.path.join(self.app_dir, 'scripts'))
             js_text = lookup.get_template(self.jsm).render(request=request, context=context)
             if DMP_OPTIONS.get('RUNTIME_JSMIN'):
-                js_text = jsmin(js_text)
+                js_text = DMP_OPTIONS['RUNTIME_JSMIN'](js_text)
             ret.append('<script>%s</script>' % js_text)
         # join and return
         return '\n'.join(ret)

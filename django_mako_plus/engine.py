@@ -54,7 +54,7 @@ class MakoTemplates(BaseEngine):
         # should we minify JS AND CSS FILES?
         DMP_OPTIONS['RUNTIME_JSMIN'] = False
         DMP_OPTIONS['RUNTIME_CSSMIN'] = False
-        if DMP_OPTIONS.get('MINIFY_JS_CSS', False) and not settings.DEBUG:
+        if DMP_OPTIONS.get('MINIFY_JS_CSS', False):# and not settings.DEBUG:
             try:
                 from rjsmin import jsmin
             except ImportError:
@@ -63,8 +63,8 @@ class MakoTemplates(BaseEngine):
                 from rcssmin import cssmin
             except ImportError:
                 raise ImproperlyConfigured('MINIFY_JS_CSS = True in the Django Mako Plus settings, but the "rcssmin" package does not seem to be loaded.')
-            DMP_OPTIONS['RUNTIME_JSMIN'] = True
-            DMP_OPTIONS['RUNTIME_CSSMIN'] = True
+            DMP_OPTIONS['RUNTIME_JSMIN'] = jsmin
+            DMP_OPTIONS['RUNTIME_CSSMIN'] = cssmin
 
         # should we compile SASS files?
         DMP_OPTIONS['RUNTIME_SCSS_ENABLED'] = False
