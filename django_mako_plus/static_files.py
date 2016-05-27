@@ -7,6 +7,18 @@ from .util import run_command, get_dmp_instance, log, DMP_OPTIONS
 import os, os.path, posixpath, subprocess
 
 
+
+if DMP_OPTIONS.get('MINIFY_JS_CSS', False) and not settings.DEBUG:
+    try:
+        from rjsmin import jsmin
+    except ImportError:
+        raise ImproperlyConfigured('MINIFY_JS_CSS = True in the Django Mako Plus settings, but the "rjsmin" package does not seem to be loaded.')
+    try:
+        from rcssmin import cssmin
+    except ImportError:
+        raise ImproperlyConfigured('MINIFY_JS_CSS = True in the Django Mako Plus settings, but the "rcssmin" package does not seem to be loaded.')
+
+
 # keys to attach TemplateInfo objects and static renderer to the Mako Template itself
 # I attach it to the template objects because they are already cached by mako, so
 # caching them again here would result in double-caching.  It's a bit of a
