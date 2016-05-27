@@ -54,7 +54,7 @@ class MakoTemplates(BaseEngine):
         # should we minify JS AND CSS FILES?
         DMP_OPTIONS['RUNTIME_JSMIN'] = False
         DMP_OPTIONS['RUNTIME_CSSMIN'] = False
-        if DMP_OPTIONS.get('MINIFY_JS_CSS', False):# and not settings.DEBUG:
+        if DMP_OPTIONS.get('MINIFY_JS_CSS', False) and not settings.DEBUG:
             try:
                 from rjsmin import jsmin
             except ImportError:
