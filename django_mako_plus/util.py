@@ -2,7 +2,7 @@ from django.apps import apps, AppConfig
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 
-import os, os.path, subprocess
+import os, os.path, subprocess, sys
 
 
 
@@ -52,7 +52,10 @@ def run_command(cmd_parts, raise_exception=True):
     if stdout:
         log.info('%s' % stdout.decode('utf8'))
     if raise_exception and p.returncode != 0:
-        raise subprocess.CalledProcessError(p.returncode, cmd_parts, output=stdout.decode('utf8'), stderr=stderr.decode('utf8'))
+        if sys.version_info >= (3, 5):
+            raise subprocess.CalledProcessError(p.returncode, cmd_parts, output=stdout.decode('utf8'), stderr=stderr.decode('utf8'))
+        else:
+            raise subprocess.CalledProcessError(p.returncode, cmd_parts)
     return p.returncode
 
 
