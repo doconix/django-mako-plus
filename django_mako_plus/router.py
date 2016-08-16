@@ -2,12 +2,14 @@ from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.http import HttpResponse, StreamingHttpResponse, Http404, HttpResponseRedirect, HttpResponsePermanentRedirect
 from django.template import TemplateDoesNotExist, TemplateSyntaxError
+from django.views.generic import View
 
 from .exceptions import InternalRedirectException, RedirectException
 from .signals import dmp_signal_pre_process_request, dmp_signal_post_process_request, dmp_signal_internal_redirect_exception, dmp_signal_redirect_exception
 from .util import get_dmp_instance, log, DMP_OPTIONS
 
 import os, os.path, re, mimetypes, sys, logging
+from inspect import isclass
 from urllib.parse import unquote
 from importlib import import_module
 
@@ -77,18 +79,16 @@ def route_request(request):
                 raise Http404
             func_obj = getattr(module_obj, request.dmp_router_function)
 
-            # see if the func_obj is actually a class -- we might be doing class-based views here
-            if isinstance(func_obj, type):
+            # if the func_obj is a View, we're doing class-based views and it needs converting to a function
+            if isclass(func_obj) and issubclass(func_obj, View):
                 request.dmp_router_class = request.dmp_router_function
                 request.dmp_router_function = request.method.lower()
-                if not hasattr(func_obj, request.dmp_router_function):
-                    log.error('view class %s.%s has no method named %s; returning 404 not found.' % (request.dmp_router_module, request.dmp_router_class, request.dmp_router_function))
-                    raise Http404
-                func_obj = getattr(func_obj(), request.dmp_router_function)  # move to the class.get(), class.post(), etc. method
+                func_obj = func_obj.as_view()  # this Django method wraps the view class with a function, so now we can treat it like a regular dmp call
+                # we don't need the @view_function security check because the class is already subclassed from "View", so we know the site means to expose this class as an endpoint.
 
-            # ensure it is decorated with @view_function - this is for security so only certain functions can be called
-            if getattr(func_obj, 'dmp_view_function', False) != True:
-                log.error('view function/class %s found successfully, but it is not decorated with @view_function; returning 404 not found.  Note that if you have multiple decorators on a function, the @view_function decorator must be listed first.' % (request.dmp_router_function))
+            # if the func_obj is a regular function, so ensure it is decorated with @view_function - this is for security so only certain functions can be called
+            elif getattr(func_obj, 'dmp_view_function', False) != True:
+                log.error('view function %s found successfully, but it is not decorated with @view_function; returning 404 not found.  Note that if you have multiple decorators on a function, the @view_function decorator must be listed first.' % (request.dmp_router_function))
                 raise Http404
 
             # send the pre-signal
