@@ -57,8 +57,9 @@
 	- [Deployment Tutorials](#deployment-tutorials)
 - [Advanced Topics](#advanced-topics)
 	- [Useful Variables](#useful-variables)
-	- [Behind the Curtain](#behind-the-curtain)
+	- [Behind the CSS and JS Curtain](#behind-the-css-and-js-curtain)
 	- [Rending Templates the Standard Way: `render()`](#rending-templates-the-standard-way-render)
+	- [Rendering Partial Templates (Ajax!)](#rendering-partial-templates-ajax)
 	- [Sass Integration](#sass-integration)
 	- [Class-Based Views](#class-based-views)
 	- [Templates Located Elsewhere](#templates-located-elsewhere)
@@ -100,7 +101,7 @@ But don't worry, you'll still get all the Django goodness with its fantastic ORM
 
 ## Where Is DMP Used?
 
-This app was developed at MyEducator.com, primarily by Dr. Conan C. Albrecht <ca@byu.edu>.  Please email me if you find errors with this tutorial or have suggestions/fixes for the DMP framework.  Since I also use the framework in my Django classes at BYU, many students have implemented the framework at their companies upon graduation.  At this point, the framework is quite mature and robust.
+This app was developed at MyEducator.com, primarily by Dr. Conan C. Albrecht <doconix@gmail.com>.  Please email me if you find errors with this tutorial or have suggestions/fixes.  In addition to several production web sites, I use the framework in my Django classes at BYU.  120+ students use the framework each year, and many have taken it to their companies upon graduation.  At this point, the framework is quite mature and robust.
 
 I've been told by some that DMP has a lot in common with Rails.  I've actually never used RoR, but good ideas are good ideas wherever they are found, right? :)
 
@@ -109,14 +110,16 @@ I've been told by some that DMP has a lot in common with Rails.  I've actually n
 
 Python has several mature, excellent templating languages.  Both Mako and Jinja2 are fairly recent yet mature systems.  Both are screaming fast.  Cheetah is an older system but has quite a bit of traction.  It wasn't a clear choice of one over the rest.
 
+Mako itself is very stable, both in terms of "lack of bugs" and in "completed feature set".  Today, the Mako API almost never changes because it does exactly what it needs to do and does it well.  This make it an excellent candidate for server use.
+
 The short answer is I liked Mako's approach the best.  It felt the most Pythonic to me.  Jinja2 may feel more like Django's built-in template system, but Mako won out because it looked more like Python--and the point of DMP is to include Python in templates.
 
 
 ## Can I use DMP with other Django apps?
 
-Many downloadable apps have been created for Django, and you may want to use them as well.  Be assured that DMP plays nicely with the other children.
+Yes.  Be assured that DMP plays nicely with the other children.  DMP plugs in as a regular app and templating engine per the standard Django API.
 
-In particular, most apps add lines to your `urls.py` file.  Just be sure that DMP's line in this file comes *last*.  DMP's line is a wildcard, so it matches everything.  As long as DMP is the last pattern listed, your other apps should run normally.
+In particular, the hook for most apps is the `urls.py` file.  Just be sure that DMP's line in this file comes *last*.  DMP's line is a wildcard, so it matches everything.  As long as DMP is the last pattern listed, your other apps should run normally.
 
 Note also that other apps likely use Django's built-in templating system rather than DMP's Mako templating system.  The two templating systems work fine side by side, so other apps should render fine the normal Django way and your custom apps will render fine with Mako.
 
@@ -293,7 +296,7 @@ ${ random.randint(1, 10) }</code></pre></td>
 
 # Installation
 
-Note: If you need to use DMP 2.7, follow the [old installation instructions](https://github.com/doconix/django-mako-plus/blob/8fb0ccf942546b7ff241fd877315a18764f2dd3f/readme.md).  Be sure to use `pip3 install django-mako-plus==2.7.1` to get the old DMP codebase.
+Note: If you need to use DMP 2.7, follow the [old installation instructions](https://github.com/doconix/django-mako-plus/blob/8fb0ccf942546b7ff241fd877315a18764f2dd3f/readme.md).  Be sure to use `pip3 install django-mako-plus==2.7.1` to get the old DMP codebase.  As of DMP 3.0, I decided to break with Python 2 and exclusively use features of Py3.
 
 ## Upgrade Notes for DMP 3.0
 
@@ -1071,6 +1074,8 @@ Note that this template inherits from `base_ajax.htm`.  If you open `base_ajax.h
 
 Reload your browser page and try the button.  It should reload the time *from the server* every time you push the button.
 
+> You can also render a partial template by specifying one of its `<%block>` or `<%def>` tags directly in `render()`.  See [Rendering Partial Templates](#rendering-partial-templates-ajax) for more information.
+
 
 ## Really, a Whole New File for Ajax?
 
@@ -1337,7 +1342,7 @@ are available throughout the request:
 * `request.urlparams`: A list of parameters specified in the URL.  See the section entitled "URL Parameters" above for more information.
 
 
-## Behind the Curtain
+## Behind the CSS and JS Curtain
 
 After reading about automatic CSS and JS inclusion, you might want to know how it works.  It's all done in the templates (base.htm now, and base_ajax.htm in a later section below) you are inheriting from.  Open `base.htm` and look at the following code:
 
@@ -1401,6 +1406,9 @@ The following is another example of using the standard Django methods.  Note the
 
 
 As you can hopefully see, DMP provides custom functions like `dmp_render` and also allows regular Django functions.  Use whichever best suits your needs.
+
+
+## Rendering Partial Templates (Ajax!)
 
 
 ## Sass Integration
