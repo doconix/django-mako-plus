@@ -1074,7 +1074,7 @@ Note that this template inherits from `base_ajax.htm`.  If you open `base_ajax.h
 
 Reload your browser page and try the button.  It should reload the time *from the server* every time you push the button.
 
-> You can also render a partial template by specifying one of its `<%block>` or `<%def>` tags directly in `render()`.  See [Rendering Partial Templates](#rendering-partial-templates-ajax) for more information.
+> **Hidden powerup alert!** You can also render a partial template by specifying one of its `<%block>` or `<%def>` tags directly in `render()`.  See [Rendering Partial Templates](#rendering-partial-templates-ajax) for more information.
 
 
 ## Really, a Whole New File for Ajax?
@@ -1409,6 +1409,68 @@ As you can hopefully see, DMP provides custom functions like `dmp_render` and al
 
 
 ## Rendering Partial Templates (Ajax!)
+
+One of the hidden features of Mako is its ability to render individual blocks of a template, and this feature can be used to make reloading parts of a page quick and easy.  Are you thinking Ajax here?  The trick is done by specifying the `def_name` parameters in `render()`.  You may want to start by reading about `<%block>` and `<%def>` tags in the [Mako documentation](http://docs.makotemplates.org/en/latest/defs.html).
+
+Suppose you have the following template, view, and JS files:
+
+`index.html` (note the new `server_time` block):
+
+        <%inherit file="base.htm" />
+
+        <%block name="content">
+            <div class="content">
+              <h3>Congratulations -- you've successfully created a new django-mako-plus app!</h3>
+              <h4>Next Up: Go through the django-mako-plus tutorial and add Javascript, CSS, and urlparams to this page.</h4>
+              <p class="server-time">
+                  <%block name="server_time">
+                     The current server time is ${ now }.
+                  </%block>
+              </p>
+              <button id="server-time-button">Refresh Server Time</button>
+              <p class="browser-time">The current browser time is .</p>
+            </div>
+        </%block>
+        
+`index.py` (note the `if` statement and two `dmp_render` calls):
+
+        from django.conf import settings
+        from django_mako_plus import view_function
+        from .. import dmp_render, dmp_render_to_string
+        from datetime import datetime
+        import random
+
+        @view_function
+        def process_request(request):
+          context = {
+            'now': datetime.now().strftime('%H:%M'),
+          }
+          if request.urlparams[0] == 'gettime':
+              return dmp_render(request, 'index.html', context, def_name='server_time')
+          return dmp_render(request, 'index.html', context)
+
+`index.js`:
+
+        // update button
+        $('#server-time-button').click(function() {
+          $('.server-time').load('/homepage/index/gettime/');
+        });
+
+On initial page load, the `if request.urlparams[0] == 'gettime':` statement is false, so the full `index.html` file is rendered.  However, when the update button's click event is run, the statement is **true** because `/gettime` is added as the first url parameter.  This is just one way to switch the `dmp_render` call.  We could also have used a regular CGI parameter, request method (GET or POST), or any other way to perform the logic.
+
+When the `if` statement goes **true**, DMP renders the `server_time` block of the template instead of the entire template.  This corresponds nicely to the way the Ajax call was made: `$('.server-time').load()`.  
+
+Why is this cool?
+
+1. We serve both the initial page *and* the Ajax call with the same code.  Write once, debug once, maintain once.  Single templates, FTW!
+2. The same logic, `index.py`, is run for both the initial call and the Ajax call.  While this example is really simplistic, more complex views may have significant work to do (form handling, table creation, object retrieval) before the page or the Ajax can be rendered.  
+3. By splitting the template into many different blocks, a single view/template can serve many different Ajax calls throughout the page.
+
+> Note that, in the Ajax call, your view will likely perform more logic than is needed (i.e. generate data for the parts of the template outside the block that won't be rendered).  Often, this additional processing is minimal and is outweighed by the benefits above.  When additional processing is not desirable, simply create new `@view_function` functions, one for each Ajax call.  You can still use the single template by having the Ajax endpoints render specific blocks.
+
+
+
+
 
 
 ## Sass Integration
