@@ -1414,7 +1414,7 @@ One of the hidden features of Mako is its ability to render individual blocks of
 
 Suppose you have the following template, view, and JS files:
 
-`index.html` (note the new `server_time` block):
+**`index.html`** (note the new `server_time` block):
 
         <%inherit file="base.htm" />
 
