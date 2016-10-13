@@ -78,7 +78,6 @@ class MakoTemplates(BaseEngine):
             DMP_OPTIONS['RUNTIME_SCSS_ENABLED'] = True
         elif not SCSS_BINARY:
             DMP_OPTIONS['RUNTIME_SCSS_ARGUMENTS'] = None
-            log.warning('Sass integration not enabled.')
         else:
             raise ImproperlyConfigured('The SCSS_BINARY option in Django Mako Plus settings must be a list of arguments.  See the DMP documentation.')
 

@@ -13,29 +13,31 @@ class Command(BaseCommand):
     args = ''
     help = 'Removes compiled template cache folders in your DMP-enabled app directories.'
     can_import_settings = True
-    option_list = BaseCommand.option_list + (
-            make_option(
-              '--trial-run',
-              action='store_true',
-              dest='trial_run',
-              default=False,
-              help='Display the folders that would be removed without actually removing them.'
-            ),
-            make_option(
-              '--verbose',
-              action='store_true',
-              dest='verbose',
-              default=False,
-              help='Set verbosity to level 3 (see --verbosity).'
-            ),
-            make_option(
-              '--quiet',
-              action='store_true',
-              dest='quiet',
-              default=False,
-              help='Set verbosity to level 0, which silences all messages (see --verbosity).'
-            ),
-    )# option_list
+    
+    
+    def add_arguments(self, parser):
+        parser.add_argument(
+            '--trial-run',
+            action='store_true',
+            dest='trial_run',
+            default=False,
+            help='Display the folders that would be removed without actually removing them.'
+        )
+        parser.add_argument(
+            '--verbose',
+            action='store_true',
+            dest='verbose',
+            default=False,
+            help='Set verbosity to level 3 (see --verbosity).'
+        )
+        parser.add_argument(
+            '--quiet',
+            action='store_true',
+            dest='quiet',
+            default=False,
+            help='Set verbosity to level 0, which silences all messages (see --verbosity).'
+        )
+
 
     def handle(self, *args, **options):
         # save the options for later

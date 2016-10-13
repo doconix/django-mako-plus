@@ -14,9 +14,10 @@ class Command(MakeMessagesCommand):
 
 
     def add_arguments(self, parser):
+        # must call super because not directly subclassing BaseCommand
         super(Command, self).add_arguments(parser)
+        # add our additional command
         parser.add_argument('--extra-gettext-option', default=[], dest='extra_gettext_option', action='append', help="Add an additional option to be passed to gettext. Ex: --extra-gettext-option='--keyword=mytrans'")
-
 
 
     def handle(self, *args, **options):

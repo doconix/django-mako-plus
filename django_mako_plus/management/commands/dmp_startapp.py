@@ -11,12 +11,17 @@ class Command(BaseCommand):
     args = '<name>'
     help = 'Creates a new Django-Mako-Plus app.'
     can_import_settings = True
+    missing_args_message = "You must provide an application name."
+    
+    
+    def add_arguments(self, parser):
+        # required argument for the app name
+        parser.add_argument('appname', type=str, help='the name of the new app')
+        
 
     def handle(self, *args, **options):
-        # ensure we have an app name
-        if len(args) == 0:
-            raise CommandError('you must specify an app name.')
-        app_name = args[0]
+        # get the app name
+        app_name = options['appname']
 
         # Check that the app_name doesn't already exist
         try:

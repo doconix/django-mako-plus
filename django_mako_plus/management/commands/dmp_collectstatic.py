@@ -29,21 +29,22 @@ class Command(BaseCommand):
     args = ''
     help = 'Collects static files, such as media, scripts, and styles, to a common directory root. This is done to prepare for deployment.'
     can_import_settings = True
-    option_list = BaseCommand.option_list + (
-            make_option(
-              '--overwrite',
-              action='store_true',
-              dest='overwrite',
-              default=False,
-              help='Overwrite existing files in the directory when necessary.'
-            ),
-            make_option(
-              '--ignore',
-              action='append',
-              dest='ignore_files',
-              help='Ignore the given file/directory.  Unix-style wildcards are acceptable, such as "*.txt".  This option can be specified more than once.'
-            ),
-    )# option_list
+    
+    
+    def add_arguments(self, parser):
+        parser.add_argument(
+            '--overwrite',
+            action='store_true',
+            dest='overwrite',
+            default=False,
+            help='Overwrite existing files in the directory when necessary.'
+        )
+        parser.add_argument(
+            '--ignore',
+            action='append',
+            dest='ignore_files',
+            help='Ignore the given file/directory.  Unix-style wildcards are acceptable, such as "*.txt".  This option can be specified more than once.'
+        )
 
 
     def handle(self, *args, **options):

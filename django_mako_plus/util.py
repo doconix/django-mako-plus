@@ -42,20 +42,23 @@ def get_dmp_app_configs():
             yield config
 
 
-def run_command(cmd_parts, raise_exception=True):
+def run_command(*args, raise_exception=True):
     '''
-    Runs a command, piping all output to the DMP log.  The cmd_parts should be a sequence so paths can have spaces and we are os independent.
+    Runs a command, piping all output to the DMP log.  
+    The args should be separate arguments so paths and subcommands can have spaces in them:
+    
+        run_command('ls', '-l', '/Users/me/My Documents')
     '''
-    log.info('%s' % ' '.join(cmd_parts))
-    p = subprocess.Popen(cmd_parts, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE)
+    log.info('%s' % ' '.join(args))
+    p = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE)
     stdout, stderr = p.communicate()
     if stdout:
         log.info('%s' % stdout.decode('utf8'))
     if raise_exception and p.returncode != 0:
         if sys.version_info >= (3, 5):
-            raise subprocess.CalledProcessError(p.returncode, cmd_parts, output=stdout.decode('utf8'), stderr=stderr.decode('utf8'))
+            raise subprocess.CalledProcessError(p.returncode, args, output=stdout.decode('utf8'), stderr=stderr.decode('utf8'))
         else:
-            raise subprocess.CalledProcessError(p.returncode, cmd_parts)
+            raise subprocess.CalledProcessError(p.returncode, args)
     return p.returncode
 
 

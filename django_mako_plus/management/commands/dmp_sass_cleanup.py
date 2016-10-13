@@ -13,43 +13,45 @@ class Command(BaseCommand):
     args = ''
     help = 'Removes orphaned *.css, *.css.map, *.cssm, and *.cssm.map files from your DMP styles/ folders that no longer have companion *.scss files.'
     can_import_settings = True
-    option_list = BaseCommand.option_list + (
-            make_option(
-              '--trial-run',
-              action='store_true',
-              dest='trial_run',
-              default=False,
-              help='Display the files that would be removed without actually removing them.'
-            ),
-            make_option(
-              '--verbose',
-              action='store_true',
-              dest='verbose',
-              default=False,
-              help='Set verbosity to level 3 (see --verbosity).'
-            ),
-            make_option(
-              '--quiet',
-              action='store_true',
-              dest='quiet',
-              default=False,
-              help='Set verbosity to level 0, which silences all messages (see --verbosity).'
-            ),
-            make_option(
-              '--directory',
-              action='store',
-              dest='directory',
-              default='',
-              help='Check the given directory instead of searching through DMP app styles/ folders.'
-            ),
-            make_option(
-              '--recursive',
-              action='store_true',
-              dest='recursive',
-              default=False,
-              help="Recurse to subdirectories in each search folder.  This option searches subdirectories of each app's styles/ folder, or when specified with --directory, searches subdirectories of the given directory."
-            ),
-    )# option_list
+    
+    
+    def add_arguments(self, parser):
+        parser.add_argument(
+            '--trial-run', 
+            action='store_true',
+            dest='trial_run',
+            default=False,
+            help='Display the files that would be removed without actually removing them.'
+        )
+        parser.add_argument(
+            '--verbose',
+            action='store_true',
+            dest='verbose',
+            default=False,
+            help='Set verbosity to level 3 (see --verbosity).'
+        )
+        parser.add_argument(
+            '--quiet',
+            action='store_true',
+            dest='quiet',
+            default=False,
+            help='Set verbosity to level 0, which silences all messages (see --verbosity).'
+        )
+        parser.add_argument(
+            '--directory',
+            action='store',
+            dest='directory',
+            default='',
+            help='Check the given directory instead of searching through DMP app styles/ folders.'
+        )
+        parser.add_argument(
+            '--recursive',
+            action='store_true',
+            dest='recursive',
+            default=False,
+            help="Recurse to subdirectories in each search folder.  This option searches subdirectories of each app's styles/ folder, or when specified with --directory, searches subdirectories of the given directory."
+        )
+
 
     def handle(self, *args, **options):
         # save the options for later

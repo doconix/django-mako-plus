@@ -58,7 +58,7 @@ def compile_scss_file(scss_file, css_file):
     If the Sass execution fails, this function raises subprocess.CalledProcessError.
     '''
     # run sass on it
-    run_command(DMP_OPTIONS.get('RUNTIME_SCSS_ARGUMENTS') + [ scss_file, css_file ])
+    run_command(*DMP_OPTIONS.get('RUNTIME_SCSS_ARGUMENTS'), scss_file, css_file)
 
 
 def compile_scssm_file(scssm_file, css_file):
