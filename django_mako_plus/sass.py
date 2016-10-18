@@ -58,7 +58,10 @@ def compile_scss_file(scss_file, css_file):
     If the Sass execution fails, this function raises subprocess.CalledProcessError.
     '''
     # run sass on it
-    run_command(*DMP_OPTIONS.get('RUNTIME_SCSS_ARGUMENTS'), scss_file, css_file)
+    args = list(DMP_OPTIONS.get('RUNTIME_SCSS_ARGUMENTS'))
+    args.append(scss_file)
+    args.append(css_file)
+    run_command(*args)
 
 
 def compile_scssm_file(scssm_file, css_file):
@@ -74,11 +77,11 @@ def compile_scssm_file(scssm_file, css_file):
     # this algorithm isn't terribly fast, but it only runs the first time the file is accessed on a production system
     # lock the file so other processes can't access it
     with lock_file(scssm_file):
-        
+
         # read the contents of the file
         with open(scssm_file) as fin:
             contents = fin.read()
-            
+
         try:
             # make a backup just in case something goes wrong (this is for testing)
             # backup_scss = '{}.bak'.format(scssm_file)
