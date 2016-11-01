@@ -57,6 +57,7 @@
 	- [Deployment Tutorials](#deployment-tutorials)
 - [Advanced Topics](#advanced-topics)
 	- [Useful Variables](#useful-variables)
+	- [CSRF Tokens](#csrf-tokens)
 	- [Behind the CSS and JS Curtain](#behind-the-css-and-js-curtain)
 	- [Rending Templates the Standard Way: `render()`](#rending-templates-the-standard-way-render)
 	- [Rendering Partial Templates (Ajax!)](#rendering-partial-templates-ajax)
@@ -1431,7 +1432,7 @@ Suppose you have the following template, view, and JS files:
               <p class="browser-time">The current browser time is .</p>
             </div>
         </%block>
-        
+
 **`index.py`** with an `if` statement and two `dmp_render` calls:
 
         from django.conf import settings
@@ -1458,12 +1459,12 @@ Suppose you have the following template, view, and JS files:
 
 On initial page load, the `if request.urlparams[0] == 'gettime':` statement is false, so the full `index.html` file is rendered.  However, when the update button's click event is run, the statement is **true** because `/gettime` is added as the first url parameter.  This is just one way to switch the `dmp_render` call.  We could also have used a regular CGI parameter, request method (GET or POST), or any other way to perform the logic.
 
-When the `if` statement goes **true**, DMP renders the `server_time` block of the template instead of the entire template.  This corresponds nicely to the way the Ajax call was made: `$('.server-time').load()`.  
+When the `if` statement goes **true**, DMP renders the `server_time` block of the template instead of the entire template.  This corresponds nicely to the way the Ajax call was made: `$('.server-time').load()`.
 
 **Partial templates rock because:**
 
 1. We serve both the initial page *and* the Ajax call with the same code.  Write once, debug once, maintain once.  Single templates, FTW!
-2. The same logic, `index.py`, is run for both the initial call and the Ajax call.  While this example is really simplistic, more complex views may have significant work to do (form handling, table creation, object retrieval) before the page or the Ajax can be rendered.  
+2. The same logic, `index.py`, is run for both the initial call and the Ajax call.  While this example is really simplistic, more complex views may have significant work to do (form handling, table creation, object retrieval) before the page or the Ajax can be rendered.
 3. By splitting the template into many different blocks, a single view/template can serve many different Ajax calls throughout the page.
 
 > Note that, in the Ajax call, your view will likely perform more logic than is needed (i.e. generate data for the parts of the template outside the block that won't be rendered).  Often, this additional processing is minimal and is outweighed by the benefits above.  When additional processing is not desirable, simply create new `@view_function` functions, one for each Ajax call.  You can still use the single template by having the Ajax endpoints render specific blocks.
@@ -1512,8 +1513,8 @@ Since `counter` won't get defined when `def_name='server_time'`, **`index.py`** 
               context['counter'] = 100
               return dmp_render(request, 'index.html', context, def_name='server_time')
           return dmp_render(request, 'index.html', context)
-          
-          
+
+
 
 ## Sass Integration
 

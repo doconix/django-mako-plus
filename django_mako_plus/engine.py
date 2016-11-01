@@ -4,6 +4,7 @@ from django.core.exceptions import ImproperlyConfigured
 from django.template import TemplateDoesNotExist, engines
 from django.template.backends.base import BaseEngine
 from django.utils.module_loading import import_string
+from django.template.context import _builtin_context_processors
 
 from mako.template import Template
 
@@ -13,7 +14,7 @@ from .template import MakoTemplateLoader, MakoTemplateAdapter
 from .util import get_dmp_instance, get_dmp_app_configs, log, DMP_OPTIONS, DMP_INSTANCE_KEY
 
 from copy import deepcopy
-import os, os.path, sys
+import os, os.path, sys, itertools
 
 
 
@@ -46,7 +47,7 @@ class MakoTemplates(BaseEngine):
 
         # set up the context processors
         context_processors = []
-        for processor in DMP_OPTIONS.get('CONTEXT_PROCESSORS', []):
+        for processor in itertools.chain(_builtin_context_processors, DMP_OPTIONS.get('CONTEXT_PROCESSORS', [])):
             context_processors.append(import_string(processor))
         self.template_context_processors = tuple(context_processors)
 
