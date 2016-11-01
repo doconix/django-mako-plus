@@ -1343,6 +1343,15 @@ are available throughout the request:
 * `request.urlparams`: A list of parameters specified in the URL.  See the section entitled "URL Parameters" above for more information.
 
 
+## CSRF Tokens
+
+In support of the Django CSRF framework, DMP includes `csrf_token` in the context of every template.  As with Django, this token is always available and cannot be disabled for security reasons.
+
+Note, however, that you still must include the token in your forms with `${ csrf_token }`.
+
+> Since the CSRF token requires a request object, using an empty request `dmp_render(None, ...)` prevents the token from being included in your templates.
+
+
 ## Behind the CSS and JS Curtain
 
 After reading about automatic CSS and JS inclusion, you might want to know how it works.  It's all done in the templates (base.htm now, and base_ajax.htm in a later section below) you are inheriting from.  Open `base.htm` and look at the following code:
