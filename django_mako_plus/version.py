@@ -2,13 +2,13 @@
 # This allows it to import into the runtime DMP as well as
 # setup.py during installation.
 
-__version__ = '3.4.7'
+__version__ = '3.4.10'
 
 
 # Reminder on uploading to pypi and removing the build folders:
 '''
 
-python setup.py sdist upload
+python3 setup.py sdist upload
 rm -rf dist/ django_mako_plus.egg-info/
 
 '''
