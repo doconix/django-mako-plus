@@ -1,4 +1,5 @@
 from django.core.exceptions import ImproperlyConfigured
+from django.utils.deprecation import MiddlewareMixin
 from urllib.parse import unquote
 
 from .util import URLParamList, get_dmp_app_configs, get_dmp_instance, DMP_OPTIONS
@@ -8,13 +9,14 @@ from .util import URLParamList, get_dmp_app_configs, get_dmp_instance, DMP_OPTIO
 ###   Middleware the prepares the request for
 ###   use with the controller.
 
-class RequestInitMiddleware:
+class RequestInitMiddleware(MiddlewareMixin):
     '''Adds several fields to the request that our controller needs.
 
        This class MUST be included in settings.py -> MIDDLEWARE_CLASSES.
     '''
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
         '''Constructor'''
+        super().__init__(*args, **kwargs)
         self.dmp_app_names = set(( config.name for config in get_dmp_app_configs() ))
 
 
