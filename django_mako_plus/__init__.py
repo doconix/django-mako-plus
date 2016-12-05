@@ -29,7 +29,11 @@ from .http import HttpResponseJavascriptRedirect
 
 
 # the convenience functions
-# Instead of these functions, consider using dmp_render() and dmp_render_to_string()
+#
+# Instead of these functions, consider using dmp_render() and dmp_render_to_string(),
+# which are monkey-patched onto every DMP-enabled app at load time.  See the documentation
+# for information on why we do this.  It is done in engine.MakoTemplates.register_app().
+#
 from .convenience import render_template
 from .convenience import render_template_for_path
 from .convenience import get_template
