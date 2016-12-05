@@ -10,8 +10,6 @@ MODULE_NAME = 'django_mako_plus'
 exec(open('django_mako_plus/version.py').read())
 VERSION = __version__
 
-
-
 CLASSIFIERS = [
   'Framework :: Django',
   'Intended Audience :: Developers',
@@ -29,7 +27,7 @@ install_requires = [
 ]
 
 # remove the __pycache__ directories since the ones in app_template seems to stick around
-os.system('find . -name "__pycache__" -type d -exec rm -r "{}" \;  2> /dev/null')
+os.system('find . -name "__pycache__" -type d -exec rm -r "{}" \; > /dev/null')
 
 # Compile the list of packages available
 packages = []
