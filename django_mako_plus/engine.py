@@ -289,7 +289,6 @@ def _render_to_string(dmp_instance, app_name):
         '''
         template_loader = dmp_instance.get_template_loader(app_name, subdir)
         template_adapter = template_loader.get_template(template)
-        print(1111111111, template_adapter)
         return getattr(template_adapter, 'render')(context=context, request=request, def_name=def_name)
 
     # outer function return
@@ -348,7 +347,6 @@ def _render(dmp_instance, app_name):
         '''
         template_loader = dmp_instance.get_template_loader(app_name, subdir)
         template_adapter = template_loader.get_template(template)
-        print(222222222222, template_adapter)
         return getattr(template_adapter, 'render_to_response')(context=context, request=request, def_name=def_name, content_type=content_type, status=status, charset=charset)
 
     # outer function return
