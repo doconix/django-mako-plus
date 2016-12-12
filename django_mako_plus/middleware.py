@@ -1,8 +1,15 @@
 from django.core.exceptions import ImproperlyConfigured
-from django.utils.deprecation import MiddlewareMixin
 from urllib.parse import unquote
 
+# try to import MiddlewareMixIn (Django 1.10+)
+try:
+    from django.utils.deprecation import MiddlewareMixin
+except ImportError:
+    # create a dummy MiddlewareMixin if older Django
+    MiddlewareMixin = object
+
 from .util import URLParamList, get_dmp_app_configs, get_dmp_instance, DMP_OPTIONS
+
 
 
 ##########################################################
