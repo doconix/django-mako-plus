@@ -73,15 +73,11 @@ def route_request(request):
                     raise Http404
 
             # get the function object
-            import time
-            now = time.time()
-            for i in range(100000):
-                try:
-                    func_obj = engine.get_view_function(request.dmp_router_app, request.dmp_router_module, request.dmp_router_function)
-                except ViewDoesNotExist as e:
-                    log.error(str(e))
-                    raise Http404
-            print('!!!!!!', time.time() - now)
+            try:
+                func_obj = engine.get_view_function(request.dmp_router_app, request.dmp_router_module, request.dmp_router_function)
+            except ViewDoesNotExist as e:
+                log.error(str(e))
+                raise Http404
 
             # if the func_obj came from a class-based view, we need to adjust the request variables to match
             if func_obj._dmp_view_function == DMP_VIEW_CLASS:
