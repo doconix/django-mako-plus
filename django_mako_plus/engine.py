@@ -163,7 +163,7 @@ class MakoTemplates(BaseEngine):
             with self.view_cache_lock:
                 try:
                     func_obj = self.view_cache[cache_key]
-                except KeyError:
+                except KeyError:  # really not in the cache, so let's go get it
                     # import the module and get the function object
                     try:
                         module_obj = import_module(module_name)
@@ -194,7 +194,7 @@ class MakoTemplates(BaseEngine):
                     # cache the result
                     self.view_cache[cache_key] = func_obj
 
-        # if we had a ViewDoesNotExist error (or anything else), raise it
+        # if we had a error, raise it
         if isinstance(func_obj, Exception):
             raise func_obj
 
