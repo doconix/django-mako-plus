@@ -6,9 +6,9 @@ import os, os.path, subprocess, sys, time, base64
 
 
 # specify the type of function for the @view_function decorator
-DMP_VIEW_FUNCTION = 1
-DMP_VIEW_CLASS = 2
-
+DMP_VIEW_FUNCTION = 1   # a regular view function
+DMP_VIEW_CLASS = 2      # a wrapper function that makes a class-based view look like a view function
+DMP_VIEW_TEMPLATE = 3   # a wrapper function that makes a template look like a view function
 
 # this is populated with the dictionary of options in engine.py when
 # Django initializes the template engine

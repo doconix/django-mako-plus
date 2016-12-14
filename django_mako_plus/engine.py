@@ -1,7 +1,7 @@
 from django.apps import apps, AppConfig
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured, ViewDoesNotExist
-from django.template import TemplateDoesNotExist, engines
+from django.template import TemplateDoesNotExist, engines, TemplateSyntaxError
 from django.template.backends.base import BaseEngine
 from django.template.context import _builtin_context_processors
 from django.utils.module_loading import import_string
@@ -9,8 +9,8 @@ from django.views.generic import View
 
 from .exceptions import InternalRedirectException, RedirectException, InaccessibleView
 from .signals import dmp_signal_pre_render_template, dmp_signal_post_render_template, dmp_signal_redirect_exception
-from .template import MakoTemplateLoader, MakoTemplateAdapter
-from .util import get_dmp_instance, get_dmp_app_configs, log, DMP_OPTIONS, DMP_INSTANCE_KEY, DMP_VIEW_FUNCTION, DMP_VIEW_CLASS
+from .template import MakoTemplateLoader, MakoTemplateAdapter, template_view_function
+from .util import get_dmp_instance, get_dmp_app_configs, log, DMP_OPTIONS, DMP_INSTANCE_KEY, DMP_VIEW_FUNCTION, DMP_VIEW_CLASS, DMP_VIEW_TEMPLATE
 
 from mako.template import Template
 
@@ -141,15 +141,18 @@ class MakoTemplates(BaseEngine):
         return MakoTemplateAdapter(mako_template)
 
 
-    def get_view_function(self, app_name, module_name, function_name):
+    def get_view_function(self, app_name, module_name, function_name, fallback_template_name):
         '''
-        Retrieves the given view function within the given module.
+        Returns the view function for the given app_name + module_name + function_name.
+        If not found, it returns the view function for the fallback_template_name within app_name.
+        If still not found, raises a ViewDoesNotExist exception.
+
+        This method uses a cache for a significant speedup.  The cache use is thread safe.
+
+        Regardless of the type of view found (function, class-based, fallback template),
+        a view function is returned by wrapping as needed.
+
         This is primarily used by the DMP router.
-
-        If the name is a function, it must have the @view_function decorator.
-        If the name is a class, it must be a subclass of View (class-based views).
-
-        Returns the view function or
         '''
         # get the function (or error) from the cache
         cache_key = ( app_name, module_name, function_name )
@@ -162,12 +165,22 @@ class MakoTemplates(BaseEngine):
                     func_obj = self.view_cache[cache_key]
                 except KeyError:
                     # import the module and get the function object
-                    module_obj = import_module(module_name)
-                    func_obj = getattr(module_obj, function_name, None)
+                    try:
+                        module_obj = import_module(module_name)
+                        func_obj = getattr(module_obj, function_name, None)
+                    except ImportError:
+                        func_obj = None
 
                     # check for not found, no @view_function, View subclass
                     if func_obj == None:
-                        func_obj = ViewDoesNotExist('View function {} not found in module {}.'.format(function_name, module_name))
+                        # try to load the template directly
+                        try:
+                            dmp_loader = self.get_template_loader(app_name)
+                            template = dmp_loader.get_template(fallback_template_name)
+                            func_obj = template_view_function(template)
+                            func_obj._dmp_view_function =  DMP_VIEW_TEMPLATE  # "decorate" it with the type of view function
+                        except (TemplateDoesNotExist, TemplateSyntaxError, ImproperlyConfigured) as e:
+                            func_obj = ViewDoesNotExist('View function {}.{} not found, and fallback template {} not found.'.format(module_name, function_name, fallback_template_name))
 
                     elif isclass(func_obj) and issubclass(func_obj, View):
                         # this Django method wraps the view class with a function, so now we can treat it like a regular dmp view function
@@ -176,7 +189,7 @@ class MakoTemplates(BaseEngine):
 
                     elif getattr(func_obj, '_dmp_view_function', 0) !=  DMP_VIEW_FUNCTION:
                         # we assume a regular function at this point, so if it doesn't have the decorator, we can't continue
-                        func_obj = ViewDoesNotExist('View function {} found successfully, but it must be decorated with @view_function.  Note that if you have multiple decorators on a function, the @view_function decorator must be listed first.'.format(function_name))
+                        func_obj = ViewDoesNotExist('View function {}.{} found successfully, but it must be decorated with @view_function.  Note that if you have multiple decorators on a function, the @view_function decorator must be listed first.'.format(module_name, function_name))
 
                     # cache the result
                     self.view_cache[cache_key] = func_obj

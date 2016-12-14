@@ -1,7 +1,6 @@
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured, ViewDoesNotExist
 from django.http import HttpResponse, StreamingHttpResponse, Http404, HttpResponseRedirect, HttpResponsePermanentRedirect
-from django.template import TemplateDoesNotExist, TemplateSyntaxError
 
 from .exceptions import InternalRedirectException, RedirectException
 from .signals import dmp_signal_pre_process_request, dmp_signal_post_process_request, dmp_signal_internal_redirect_exception, dmp_signal_redirect_exception
@@ -60,21 +59,11 @@ def route_request(request):
     response = None
 
     while True: # enables the InternalRedirectExceptions to loop around
-        full_module_filename = os.path.normpath(os.path.join(settings.BASE_DIR, request.dmp_router_module.replace('.', '/') + '.py'))
         try:
-            # look for the module, and if not found go straight to template
-            if not os.path.exists(full_module_filename):
-                log.warning('module %s not found; sending processing directly to template %s.html' % (request.dmp_router_module, request.dmp_router_page_full))
-                try:
-                    dmp_loader = engine.get_template_loader(request.dmp_router_app)
-                    return dmp_loader.get_template('%s.html' % request.dmp_router_page_full).render_to_response(request=request)
-                except (TemplateDoesNotExist, TemplateSyntaxError, ImproperlyConfigured) as e:
-                    log.error('%s' % (e))
-                    raise Http404
-
-            # get the function object
+            # get the function object - the return of get_view_function might be a function, a class-based view, or a template
+            # get_view_function does some magic to make all of these act like a regular view function
             try:
-                func_obj = engine.get_view_function(request.dmp_router_app, request.dmp_router_module, request.dmp_router_function)
+                func_obj = engine.get_view_function(request.dmp_router_app, request.dmp_router_module, request.dmp_router_function, request.dmp_router_page_full + '.html')
             except ViewDoesNotExist as e:
                 log.error(str(e))
                 raise Http404
@@ -91,10 +80,11 @@ def route_request(request):
                         return ret_response
 
             # call view function
-            if func_obj._dmp_view_function == DMP_VIEW_FUNCTION and log.isEnabledFor(logging.INFO):
-                log.info('calling view function %s.%s' % (request.dmp_router_module, request.dmp_router_function))
-            elif func_obj._dmp_view_function == DMP_VIEW_CLASS:
-                log.info('calling class-based view function %s.%s.%s' % (request.dmp_router_module, request.dmp_router_class, request.dmp_router_function))
+            if log.isEnabledFor(logging.INFO):
+                if func_obj._dmp_view_function == DMP_VIEW_FUNCTION:
+                    log.info('calling view function %s.%s' % (request.dmp_router_module, request.dmp_router_function))
+                elif func_obj._dmp_view_function == DMP_VIEW_CLASS:
+                    log.info('calling class-based view function %s.%s.%s' % (request.dmp_router_module, request.dmp_router_class, request.dmp_router_function))
             response = func_obj(request)
 
             # send the post-signal

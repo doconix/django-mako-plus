@@ -232,3 +232,25 @@ class MakoTemplateAdapter(object):
                 dmp_signal_redirect_exception.send(sender=sys.modules[__name__], request=request, exc=e)
             # send the browser the redirect command
             return e.get_response(request)
+
+
+
+
+#############################################################
+###   Helper function that calls render_to_response()
+###   for a template.  This makes it look like a view
+###   function.
+###
+
+def template_view_function(template):
+    '''
+    This is used in engine.get_view_function to make a MakoTemplateAdapter
+    object look like a view function.
+
+    This is programmed similar to a decorator.  The outer function
+    keeps a reference to the template.  The inner function is
+    what is actually called.
+    '''
+    def wrap(*args, **kwargs):
+        return template.render_to_response(*args, **kwargs)
+    return wrap
