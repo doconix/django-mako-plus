@@ -1,15 +1,13 @@
 from django.conf import settings
-from django.core.exceptions import ImproperlyConfigured
+from django.core.exceptions import ImproperlyConfigured, ViewDoesNotExist
 from django.http import HttpResponse, StreamingHttpResponse, Http404, HttpResponseRedirect, HttpResponsePermanentRedirect
 from django.template import TemplateDoesNotExist, TemplateSyntaxError
-from django.views.generic import View
 
 from .exceptions import InternalRedirectException, RedirectException
 from .signals import dmp_signal_pre_process_request, dmp_signal_post_process_request, dmp_signal_internal_redirect_exception, dmp_signal_redirect_exception
-from .util import get_dmp_instance, log, DMP_OPTIONS
+from .util import get_dmp_instance, log, DMP_OPTIONS, DMP_VIEW_FUNCTION, DMP_VIEW_CLASS
 
 import os, os.path, re, mimetypes, sys, logging
-from inspect import isclass
 from urllib.parse import unquote
 from importlib import import_module
 
@@ -35,7 +33,7 @@ def view_function(f):
        function to signify that it is callable.  The router checks this flag
        before calling the function.
     '''
-    f.dmp_view_function = True
+    f._dmp_view_function = DMP_VIEW_FUNCTION
     return f
 
 
@@ -48,6 +46,8 @@ def view_function(f):
 
 def route_request(request):
     '''The main router for all calls coming in to the system.'''
+    engine = get_dmp_instance()
+
     # output the variables so the programmer can debug where this is routing
     if log.isEnabledFor(logging.INFO):
         log.info('processing: app=%s, page=%s, func=%s, urlparams=%s' % (request.dmp_router_app, request.dmp_router_page, request.dmp_router_function, request.urlparams))
@@ -66,30 +66,27 @@ def route_request(request):
             if not os.path.exists(full_module_filename):
                 log.warning('module %s not found; sending processing directly to template %s.html' % (request.dmp_router_module, request.dmp_router_page_full))
                 try:
-                    dmp_loader = get_dmp_instance().get_template_loader(request.dmp_router_app)
+                    dmp_loader = engine.get_template_loader(request.dmp_router_app)
                     return dmp_loader.get_template('%s.html' % request.dmp_router_page_full).render_to_response(request=request)
                 except (TemplateDoesNotExist, TemplateSyntaxError, ImproperlyConfigured) as e:
                     log.error('%s' % (e))
                     raise Http404
 
-            # find the function
-            module_obj = import_module(request.dmp_router_module)
-            if not hasattr(module_obj, request.dmp_router_function):
-                log.error('view function/class %s not in module %s; returning 404 not found.' % (request.dmp_router_function, request.dmp_router_module))
-                raise Http404
-            func_obj = getattr(module_obj, request.dmp_router_function)
+            # get the function object
+            import time
+            now = time.time()
+            for i in range(100000):
+                try:
+                    func_obj = engine.get_view_function(request.dmp_router_app, request.dmp_router_module, request.dmp_router_function)
+                except ViewDoesNotExist as e:
+                    log.error(str(e))
+                    raise Http404
+            print('!!!!!!', time.time() - now)
 
-            # if the func_obj is a View, we're doing class-based views and it needs converting to a function
-            if isclass(func_obj) and issubclass(func_obj, View):
+            # if the func_obj came from a class-based view, we need to adjust the request variables to match
+            if func_obj._dmp_view_function == DMP_VIEW_CLASS:
                 request.dmp_router_class = request.dmp_router_function
                 request.dmp_router_function = request.method.lower()
-                func_obj = func_obj.as_view()  # this Django method wraps the view class with a function, so now we can treat it like a regular dmp call
-                # we don't need the @view_function security check because the class is already subclassed from "View", so we know the site means to expose this class as an endpoint.
-
-            # if the func_obj is a regular function, so ensure it is decorated with @view_function - this is for security so only certain functions can be called
-            elif getattr(func_obj, 'dmp_view_function', False) != True:
-                log.error('view function %s found successfully, but it is not decorated with @view_function; returning 404 not found.  Note that if you have multiple decorators on a function, the @view_function decorator must be listed first.' % (request.dmp_router_function))
-                raise Http404
 
             # send the pre-signal
             if DMP_OPTIONS.get('SIGNALS', False):
@@ -98,9 +95,9 @@ def route_request(request):
                         return ret_response
 
             # call view function
-            if request.dmp_router_class == None and log.isEnabledFor(logging.INFO):
+            if func_obj._dmp_view_function == DMP_VIEW_FUNCTION and log.isEnabledFor(logging.INFO):
                 log.info('calling view function %s.%s' % (request.dmp_router_module, request.dmp_router_function))
-            elif log.isEnabledFor(logging.INFO):
+            elif func_obj._dmp_view_function == DMP_VIEW_CLASS:
                 log.info('calling class-based view function %s.%s.%s' % (request.dmp_router_module, request.dmp_router_class, request.dmp_router_function))
             response = func_obj(request)
 

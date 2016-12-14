@@ -1,21 +1,23 @@
 from django.apps import apps, AppConfig
 from django.conf import settings
-from django.core.exceptions import ImproperlyConfigured
+from django.core.exceptions import ImproperlyConfigured, ViewDoesNotExist
 from django.template import TemplateDoesNotExist, engines
 from django.template.backends.base import BaseEngine
-from django.utils.module_loading import import_string
 from django.template.context import _builtin_context_processors
+from django.utils.module_loading import import_string
+from django.views.generic import View
+
+from .exceptions import InternalRedirectException, RedirectException, InaccessibleView
+from .signals import dmp_signal_pre_render_template, dmp_signal_post_render_template, dmp_signal_redirect_exception
+from .template import MakoTemplateLoader, MakoTemplateAdapter
+from .util import get_dmp_instance, get_dmp_app_configs, log, DMP_OPTIONS, DMP_INSTANCE_KEY, DMP_VIEW_FUNCTION, DMP_VIEW_CLASS
 
 from mako.template import Template
 
-from .exceptions import InternalRedirectException, RedirectException
-from .signals import dmp_signal_pre_render_template, dmp_signal_post_render_template, dmp_signal_redirect_exception
-from .template import MakoTemplateLoader, MakoTemplateAdapter
-from .util import get_dmp_instance, get_dmp_app_configs, log, DMP_OPTIONS, DMP_INSTANCE_KEY
-
 from copy import deepcopy
-import os, os.path, sys, itertools
-
+from importlib import import_module
+from inspect import isclass
+import os, os.path, sys, itertools, threading
 
 
 #########################################################
@@ -37,6 +39,10 @@ class MakoTemplates(BaseEngine):
         # cache our instance in the util module for get_dmp_instance
         # this is a bit of a hack, but it makes calling utility methods possible and efficient
         DMP_OPTIONS[DMP_INSTANCE_KEY] = self
+        self.template_loaders = {}
+        self.dmp_enabled_apps = set()
+        self.view_cache = {}
+        self.view_cache_lock = threading.RLock()
 
         # super constructor
         super(MakoTemplates, self).__init__(params)
@@ -83,11 +89,8 @@ class MakoTemplates(BaseEngine):
             raise ImproperlyConfigured('The SCSS_BINARY option in Django Mako Plus settings must be a list of arguments.  See the DMP documentation.')
 
         # add a template renderer for each DMP-enabled app
-        self.template_loaders = {}
-        self.dmp_enabled_apps = set()
         for app_config in get_dmp_app_configs():
             self.register_app(app_config)
-            self.dmp_enabled_apps.add(app_config.name)
 
 
     def register_app(self, app_config):
@@ -100,6 +103,8 @@ class MakoTemplates(BaseEngine):
 
         This method should not normally be called directly.
         '''
+        self.dmp_enabled_apps.add(app_config.name)
+
         # set up the template, script, and style renderers
         # these create and cache just by accessing them
         self.get_template_loader(app_config, 'templates', create=True)
@@ -134,6 +139,54 @@ class MakoTemplates(BaseEngine):
         '''
         mako_template = Template(template_code, imports=DMP_OPTIONS.get('DEFAULT_TEMPLATE_IMPORTS'), input_encoding=DMP_OPTIONS.get('DEFAULT_TEMPLATE_ENCODING', 'utf-8'))
         return MakoTemplateAdapter(mako_template)
+
+
+    def get_view_function(self, app_name, module_name, function_name):
+        '''
+        Retrieves the given view function within the given module.
+        This is primarily used by the DMP router.
+
+        If the name is a function, it must have the @view_function decorator.
+        If the name is a class, it must be a subclass of View (class-based views).
+
+        Returns the view function or
+        '''
+        # get the function (or error) from the cache
+        cache_key = ( app_name, module_name, function_name )
+        try:
+            func_obj = self.view_cache[cache_key]
+        except KeyError:
+            # acquire the lock and try the cache again (another thread might have put it in cache while we are waiting for lock)
+            with self.view_cache_lock:
+                try:
+                    func_obj = self.view_cache[cache_key]
+                except KeyError:
+                    # import the module and get the function object
+                    module_obj = import_module(module_name)
+                    func_obj = getattr(module_obj, function_name, None)
+
+                    # check for not found, no @view_function, View subclass
+                    if func_obj == None:
+                        func_obj = ViewDoesNotExist('View function {} not found in module {}.'.format(function_name, module_name))
+
+                    elif isclass(func_obj) and issubclass(func_obj, View):
+                        # this Django method wraps the view class with a function, so now we can treat it like a regular dmp view function
+                        func_obj = func_obj.as_view()
+                        func_obj._dmp_view_function =  DMP_VIEW_CLASS  # "decorate" it with the type of view function
+
+                    elif getattr(func_obj, '_dmp_view_function', 0) !=  DMP_VIEW_FUNCTION:
+                        # we assume a regular function at this point, so if it doesn't have the decorator, we can't continue
+                        func_obj = ViewDoesNotExist('View function {} found successfully, but it must be decorated with @view_function.  Note that if you have multiple decorators on a function, the @view_function decorator must be listed first.'.format(function_name))
+
+                    # cache the result
+                    self.view_cache[cache_key] = func_obj
+
+        # if we had a ViewDoesNotExist error (or anything else), raise it
+        if isinstance(func_obj, Exception):
+            raise func_obj
+
+        # otherwise, return!
+        return func_obj
 
 
     def get_template(self, template_name):

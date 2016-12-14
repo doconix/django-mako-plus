@@ -82,6 +82,9 @@ class RequestInitMiddleware(MiddlewareMixin):
         else:  # the . not found, and the __ not found, so go to default function name
             request.dmp_router_function = 'process_request'
 
+        # create the full module path
+        request.dmp_router_module = '.'.join([ request.dmp_router_app, 'views', request.dmp_router_page ])
+
         # set the class to be None (it is set later if we find a class-based view)
         request.dmp_router_class = None
 

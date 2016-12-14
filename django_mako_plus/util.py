@@ -5,6 +5,10 @@ from django.core.exceptions import ImproperlyConfigured
 import os, os.path, subprocess, sys, time, base64
 
 
+# specify the type of function for the @view_function decorator
+DMP_VIEW_FUNCTION = 1
+DMP_VIEW_CLASS = 2
+
 
 # this is populated with the dictionary of options in engine.py when
 # Django initializes the template engine
@@ -44,9 +48,9 @@ def get_dmp_app_configs():
 
 def run_command(*args, raise_exception=True):
     '''
-    Runs a command, piping all output to the DMP log.  
+    Runs a command, piping all output to the DMP log.
     The args should be separate arguments so paths and subcommands can have spaces in them:
-    
+
         run_command('ls', '-l', '/Users/me/My Documents')
     '''
     log.info('%s' % ' '.join(args))
@@ -87,20 +91,20 @@ class URLParamList(list):
 
 class lock_file(object):
     '''
-    A context manager that provides a non-blocking file lock on both Unix and Windows.  
+    A context manager that provides a non-blocking file lock on both Unix and Windows.
     Uses a temporary file for the lock - in the same directory as the filename.
     If the lock fails after timeout_seconds, an OSError is raised.
-    
+
     I'm not using fcntl.flock because it is Unix-only and DMP is used on both
     Unix and Windows.  This is a very simplistic locking scheme, but it works
-    for our purposes.    
+    for our purposes.
     '''
     def __init__(self, filename, timeout_seconds=5):
         self.filename = filename
         self.lock_filename = '{}.templock'.format(filename)
         self.timeout_seconds = timeout_seconds
 
-   
+
     def __enter__(self):
         # acquire the lock to it
         for i in range(self.timeout_seconds):
@@ -115,7 +119,7 @@ class lock_file(object):
             raise OSError("Unable to acquire lock on {}; if you are sure no other processes are running, you may need to delete the lock file manually: {}".format(self.filename, self.lock_filename))
         # return
         return self
-        
+
 
     def __exit__(self, exec_type, exec_val, exec_tb):
         # close and remove the temporary file
@@ -124,7 +128,7 @@ class lock_file(object):
             os.remove(self.lock_filename)
         except FileNotFoundError:  # shouldn't ever happen, but just in case
             pass
-        
+
 
 
 
