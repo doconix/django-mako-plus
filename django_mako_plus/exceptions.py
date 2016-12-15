@@ -132,7 +132,3 @@ class SassCompileException(Exception):
     def __str__(self):
         return self.message
 
-
-class InaccessibleView(Exception):
-    '''Raised when a function is accessed that is not a @view_function or class-based view'''
-    pass

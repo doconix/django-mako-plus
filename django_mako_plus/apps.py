@@ -3,6 +3,8 @@ from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.template import engines
 
+from .util import get_dmp_instance, log, DMP_OPTIONS
+
 
 class Config(AppConfig):
     name = 'django_mako_plus'
@@ -14,5 +16,4 @@ class Config(AppConfig):
         # ensure the template engine has been loaded (on the Django shell, it doesn't load them until they are accessed.)
         for name in engines:
             engines[name]  # just accessing each one causes the load of each
-
 

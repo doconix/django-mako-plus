@@ -251,6 +251,6 @@ def template_view_function(template):
     keeps a reference to the template.  The inner function is
     what is actually called.
     '''
-    def wrap(*args, **kwargs):
-        return template.render_to_response(*args, **kwargs)
+    def wrap(request):
+        return template.render_to_response(request=request)
     return wrap

@@ -6,6 +6,7 @@ import os, os.path, subprocess, sys, time, base64
 
 
 # specify the type of function for the @view_function decorator
+DMP_VIEW_ERROR = 0      # a lookup error when finding the view function
 DMP_VIEW_FUNCTION = 1   # a regular view function
 DMP_VIEW_CLASS = 2      # a wrapper function that makes a class-based view look like a view function
 DMP_VIEW_TEMPLATE = 3   # a wrapper function that makes a template look like a view function
@@ -153,3 +154,5 @@ def decode32(st):
         st = st.encode('ascii')     # we now have a byte string of the base64-encoded text instead of the Unicode base32s-encoded st
     byte_st = base64.b32decode(st)   # we now have a byte string of the original text
     return byte_st.decode('utf8')         # we now have a Unicode string of the original text
+
+

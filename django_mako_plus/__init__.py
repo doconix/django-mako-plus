@@ -48,8 +48,7 @@ from .util import get_dmp_app_configs
 
 
 # the router
-from .router import view_function
-from .router import route_request
+from .router import route_request, view_function
 
 
 # the middleware

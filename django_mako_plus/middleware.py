@@ -8,8 +8,7 @@ except ImportError:
     # create a dummy MiddlewareMixin if older Django
     MiddlewareMixin = object
 
-from .util import URLParamList, get_dmp_app_configs, get_dmp_instance, DMP_OPTIONS
-
+from .util import URLParamList, get_dmp_instance, DMP_OPTIONS
 
 
 ##########################################################
@@ -21,11 +20,6 @@ class RequestInitMiddleware(MiddlewareMixin):
 
        This class MUST be included in settings.py -> MIDDLEWARE_CLASSES.
     '''
-    def __init__(self, *args, **kwargs):
-        '''Constructor'''
-        super().__init__(*args, **kwargs)
-        self.dmp_app_names = set(( config.name for config in get_dmp_app_configs() ))
-
 
     def process_request(self, request):
         '''Called for each browser request.  This adds the following fields to the request object:
@@ -40,6 +34,8 @@ class RequestInitMiddleware(MiddlewareMixin):
            This method is run as part of the middleware processing, so it runs long
            before the route_request() method at the top of this file.
         '''
+        engine = get_dmp_instance()
+
         # split the path
         path_parts = request.path[1:].split('/') # [1:] to remove the leading /
 
@@ -55,7 +51,7 @@ class RequestInitMiddleware(MiddlewareMixin):
             path_parts.append(DMP_OPTIONS.get('DEFAULT_PAGE', 'index'))
 
         elif len(path_parts) == 1: # /app or /page
-            if path_parts[0] in self.dmp_app_names:  # one of our apps specified, so insert the default page
+            if path_parts[0] in engine.dmp_enabled_apps:  # one of our apps specified, so insert the default page
                 path_parts.append(DMP_OPTIONS.get('DEFAULT_PAGE', 'index'))
             else:  # not one of our apps, so insert the app and assume path_parts[0] is a page in that app
                 path_parts.insert(0, DMP_OPTIONS.get('DEFAULT_APP', 'homepage'))
@@ -63,7 +59,7 @@ class RequestInitMiddleware(MiddlewareMixin):
                     path_parts[1] = DMP_OPTIONS.get('DEFAULT_PAGE', 'index')
 
         else: # at this point in the elif, we know len(path_parts) >= 2
-            if path_parts[0] not in self.dmp_app_names: # the first part was not one of our apps, so insert the default app
+            if path_parts[0] not in engine.dmp_enabled_apps: # the first part was not one of our apps, so insert the default app
                 path_parts.insert(0, DMP_OPTIONS.get('DEFAULT_APP', 'homepage'))
             if not path_parts[1]:  # is the page empty?
                 path_parts[1] = DMP_OPTIONS.get('DEFAULT_PAGE', 'index')
