@@ -8,7 +8,6 @@
 # Django looks for this exact variable name
 default_app_config = 'django_mako_plus.Config'
 
-
 # the version
 from .version import __version__
 

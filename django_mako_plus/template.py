@@ -36,15 +36,18 @@ class MakoTemplateLoader:
             template_dir = os.path.abspath(app_path)
         else:
             template_dir = os.path.abspath(os.path.join(app_path, template_subdir))
-        if not os.path.isdir(template_dir):
-            raise ImproperlyConfigured('Cannot create template loader because its directory does not exist: %s' % template_dir)
+        # I used to check for the existence of the template dir here, but it caused error
+        # checking at engine load time (too soon).  I now wait until get_template() is called,
+        # which fails with a TemplateDoesNotExist exception if the template_dir doesn't exist.
 
         # calculate the cache root and template search directories
         self.cache_root = os.path.join(template_dir, DMP_OPTIONS.get('TEMPLATES_CACHE_DIR', '.cached_templates'))
         self.template_search_dirs = [ template_dir ]
         if DMP_OPTIONS.get('TEMPLATES_DIRS'):
             self.template_search_dirs.extend(DMP_OPTIONS.get('TEMPLATES_DIRS'))
-        # include the project base directory so template inheritance can cross apps by starting with /
+        # Mako doesn't allow parent directory inheritance, such as <%inherit file="../../otherapp/templates/base.html"/>
+        # including the project base directory allows this through "absolute" like <%inherit file="/otherapp/templates/base.html"/>
+        # (note the leading slash, which means BASE_DIR)
         self.template_search_dirs.append(settings.BASE_DIR)
 
         # create the actual Mako TemplateLookup, which does the actual work
@@ -63,7 +66,7 @@ class MakoTemplateLoader:
             # wrap the mako template in an adapter that gives the Django template API
             return MakoTemplateAdapter(self.get_mako_template(template))
         except (TopLevelLookupException, TemplateLookupException) as e: # Mako exception raised
-            log.error('template "%s" not found in search path: %s.' % (template, self.template_search_dirs))
+            log.error('template "%s" not found in search path: %s' % (template, self.template_search_dirs))
             raise TemplateDoesNotExist('Template "%s" not found in search path: %s.' % (template, self.template_search_dirs))
         except (CompileException, SyntaxException) as e: # Mako exception raised
             log.error('template "%s" not found in search path: %s.' % (template, self.template_search_dirs))

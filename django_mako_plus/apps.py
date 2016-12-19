@@ -13,7 +13,9 @@ class Config(AppConfig):
 
     def ready(self):
         '''Called by Django when the app is ready for use.'''
-        # ensure the template engine has been loaded (on the Django shell, it doesn't load them until they are accessed.)
-        for name in engines:
-            engines[name]  # just accessing each one causes the load of each
+        # ensure the DMP template engine has been loaded (the Django shell doesn't load it until it is accessed)
+        # we just have to access the engine to cause the Django EngineHandler class to initialize it
+        # Django calculates the alias/name based on its package, so it must be called django_mako_plus.
+        # See the creation of EngineHandler.default_name in django.templates.util for this.
+        engines['django_mako_plus']
 
