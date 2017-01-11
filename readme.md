@@ -369,9 +369,9 @@ Don't forget to migrate to synchronize your database.  The apps in a standard Dj
              'django_mako_plus',
          )
 
-2. Add `django_mako_plus.RequestInitMiddleware` to the end of your `MIDDLEWARE CLASSES` list:
+2. Add `django_mako_plus.RequestInitMiddleware` to the end of your `MIDDLEWARE` list:
 
-         MIDDLEWARE_CLASSES = (
+         MIDDLEWARE = (
              ...
              'django_mako_plus.RequestInitMiddleware',
          )
