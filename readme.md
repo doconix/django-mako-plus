@@ -332,11 +332,11 @@ Install Python and ensure you can run "python3" at the command prompt.  The fram
 ## Install Django, Mako, and DMP
 
 Install with the python installer:
-
-        pip3 install django
-        pip3 install mako
-        pip3 install django-mako-plus
-
+```python
+pip3 install django
+pip3 install mako
+pip3 install django-mako-plus
+```
 Note that on Windows, it might be called simply `pip`:
 
         pip install django
