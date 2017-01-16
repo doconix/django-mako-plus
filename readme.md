@@ -552,7 +552,7 @@ Already have an app that you'd like to switch over?  Just do the following:
 
 * Create folders within your app so you match the following structure:
 
-```python
+```
 your-app/
     __init__.py
     media/
