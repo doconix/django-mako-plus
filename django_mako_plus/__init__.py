@@ -3,7 +3,6 @@
 #   License: Apache Open Source License
 #
 
-
 # pointer to our app config
 # Django looks for this exact variable name
 default_app_config = 'django_mako_plus.Config'
@@ -31,7 +30,7 @@ from .http import HttpResponseJavascriptRedirect
 #
 # Instead of these functions, consider using dmp_render() and dmp_render_to_string(),
 # which are monkey-patched onto every DMP-enabled app at load time.  See the documentation
-# for information on why we do this.  It is done in engine.MakoTemplates.register_app().
+# for information on why we do this.
 #
 from .convenience import render_template
 from .convenience import render_template_for_path
@@ -50,8 +49,10 @@ from .util import get_dmp_app_configs
 from .router import route_request, view_function
 
 
-# the middleware
-from .middleware import RequestInitMiddleware
+# the urls
+# I'm specifically not including urls.py here because I want it imported
+# as late as possible (after all the apps are set up).  Django will import it
+# when it processes the project's urls.py file.
 
 
 # the template engine

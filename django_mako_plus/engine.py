@@ -1,5 +1,6 @@
 from django.apps import apps, AppConfig
 from django.conf import settings
+from django.conf.urls import url
 from django.core.exceptions import ImproperlyConfigured, ViewDoesNotExist
 from django.template import TemplateDoesNotExist, engines, TemplateSyntaxError
 from django.template.backends.base import BaseEngine
@@ -8,7 +9,6 @@ from django.utils.module_loading import import_string
 from django.views.generic import View
 
 from .exceptions import InternalRedirectException, RedirectException
-from .middleware import RequestInitMiddleware
 from .signals import dmp_signal_pre_render_template, dmp_signal_post_render_template, dmp_signal_redirect_exception
 from .template import MakoTemplateLoader, MakoTemplateAdapter, template_view_function
 from .util import get_dmp_instance, get_dmp_app_configs, log, DMP_OPTIONS, DMP_INSTANCE_KEY
@@ -99,10 +99,10 @@ class MakoTemplates(BaseEngine):
 
         # add a template renderer for each DMP-enabled app
         for app_config in get_dmp_app_configs():
-            self.register_app(app_config)
+            self._register_app(app_config)
 
 
-    def register_app(self, app=None):
+    def _register_app(self, app):
         '''
         Registers an app as a "DMP-enabled" app.  Registering creates a cached
         template renderer to make processing faster and adds the dmp_render()
@@ -111,14 +111,9 @@ class MakoTemplates(BaseEngine):
         DJANGO_MAKO_PLUS = True in its __init__.py file.
 
         app: The name of the app or an AppConfig instance.
-             If None, all DMP-enabled apps will be registered.
         '''
         # ensure we have an AppConfig object (recurse to all DMP apps if None)
-        if app == None:
-            for app_config in get_dmp_app_configs():
-                self.register_app(app_config)
-            return
-        elif isinstance(app, str):
+        if isinstance(app, str):
             app = apps.get_app_config(app)
 
         # add to the set of DMP-enabled apps

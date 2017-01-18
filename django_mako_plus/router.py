@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.conf.urls import url
 from django.core.exceptions import ImproperlyConfigured, ViewDoesNotExist
 from django.http import HttpResponse, StreamingHttpResponse, Http404, HttpResponseRedirect, HttpResponsePermanentRedirect
 from django.template import TemplateDoesNotExist, TemplateSyntaxError
@@ -7,6 +8,7 @@ from .exceptions import InternalRedirectException, RedirectException
 from .signals import dmp_signal_pre_process_request, dmp_signal_post_process_request, dmp_signal_internal_redirect_exception, dmp_signal_redirect_exception
 from .util import get_dmp_instance, get_dmp_app_configs, log, DMP_OPTIONS
 from .util import DMP_VIEW_ERROR, DMP_VIEW_FUNCTION, DMP_VIEW_CLASS, DMP_VIEW_TEMPLATE
+from .util import URLParamList
 
 import os, os.path, re, mimetypes, sys, logging, pkgutil
 from urllib.parse import unquote
@@ -18,9 +20,12 @@ from importlib import import_module
 ###   The front controller of all views on the site.
 ###   urls.py routes everything through this method.
 
-def route_request(request):
+def route_request(request, *args, **kwargs):
     '''The main router for all calls coming in to the system.'''
     engine = get_dmp_instance()
+
+    # add the url parts to the url
+    parse_path(request, kwargs)
 
     # first try going to the view function for this request
     # we look for a views/name.py file where name is the same name as the HTML file
@@ -133,5 +138,62 @@ def view_function(f):
     # before calling the function.
     f._dmp_view_function = True
     return f
+
+
+
+
+################################################################
+###   Helper functions
+
+RE_DMP_FUNCTION = re.compile('^([^\.]*)\.(.*)$')
+
+def parse_path(request, kwargs):
+    '''
+    Called by route_request() above.  Adds the following to the request object:
+
+        request.dmp_router_app        The Django application (such as "calculator").
+        request.dmp_router_page       The view module (such as "calc" for calc.py).
+        request.dmp_router_page_full  The view module as specified in the URL, including the function name if specified.
+        request.dmp_router_function   The function within the view module to be called (usually "process_request").
+        request.dmp_router_module     The module path in Python terms, such as calculator.views.calc.
+        request.dmp_router_class      This is set to None in this method, but route_request() fills it in if a class-based view.
+        request.urlparams             A list of the remaining url parts (see the calc.py example).
+
+    In each case, it first tries to get the parameter from the kwargs.  The items will be in kwargs
+    when a urls.py pattern contains these names.
+    '''
+    # app and page
+    request.dmp_router_app = kwargs.pop('dmp_router_app', None)
+    request.dmp_router_page = request.dmp_router_page_full = kwargs.pop('dmp_router_page', None)
+
+    # function, parsing from dmp_router_page if the url regex didn't name it
+    request.dmp_router_function = kwargs.pop('dmp_router_function', None)
+    if request.dmp_router_function is None:
+        match = RE_DMP_FUNCTION.search(request.dmp_router_page)
+        if match:
+            request.dmp_router_page = match.group(1)
+            request.dmp_router_function = match.group(2)
+        else:
+            request.dmp_router_function = 'process_request'
+
+    # create the full module path
+    request.dmp_router_module = '.'.join([ request.dmp_router_app, 'views', request.dmp_router_page ])
+
+    # set the class to be None (set in route_request() if a class-based view)
+    request.dmp_router_class = None
+
+    # set up the urlparams with the reamining path parts
+    # note that I'm not using unquote_plus because the + switches to a space *after* the question mark (in the regular parameters)
+    # in the normal url, spaces have to be quoted with %20.  Thanks Rosie for the tip.
+    request.urlparams = URLParamList(( unquote(s) for s in kwargs.pop('urlparams', '').split('/') ))
+
+    print('request.dmp_router_app       ', request.dmp_router_app       )
+    print('request.dmp_router_page      ', request.dmp_router_page      )
+    print('request.dmp_router_page_full ', request.dmp_router_page_full )
+    print('request.dmp_router_function  ', request.dmp_router_function  )
+    print('request.dmp_router_module    ', request.dmp_router_module    )
+    print('request.dmp_router_class     ', request.dmp_router_class     )
+    print('request.urlparams            ', request.urlparams            )
+
 
 
