@@ -57,6 +57,7 @@
 	- [Deployment Tutorials](#deployment-tutorials)
 - [Advanced Topics](#advanced-topics)
 	- [Useful Variables](#useful-variables)
+	- [Customize the URL Pattern](#customize-the-url-pattern)
 	- [CSRF Tokens](#csrf-tokens)
 	- [Behind the CSS and JS Curtain](#behind-the-css-and-js-curtain)
 	- [Rending Templates the Standard Way: `render()`](#rending-templates-the-standard-way-render)
@@ -80,7 +81,9 @@
 
 # Description
 
-This app is a front controller that integrates the excellent Django framework with the also excellent Mako templating engine.  Django comes with its own template system, but it's fairly weak (by design).  Mako, on the other hand, is a fantastic template system that allows full Python code within HTML pages.
+This app is a template engine that integrates the excellent Django framework with the also excellent Mako templating syntax.  It conforms to the Django API and plugs in as a standard engine.
+
+Django comes with its own template system, but it's fairly weak (by design).  Mako, on the other hand, is a fantastic template system that allows full Python code within HTML pages.
 
 > Author's Note: The primary reason Django doesn't allow full Python in its templates is the designers want to encourage you and I to keep template logic simple.  I fully agree with this philosophy.  I just don't agree with the "forced" part of this philosophy.  The Python way is rather to give freedom to the developer but train in the correct way of doing things.  Even though I fully like Python in my templates, I still keep them fairly simple.  Views are where your logic goes.
 
@@ -102,9 +105,9 @@ But don't worry, you'll still get all the Django goodness with its fantastic ORM
 
 ## Where Is DMP Used?
 
-This app was developed at MyEducator.com, primarily by Dr. Conan C. Albrecht <doconix@gmail.com>.  Please email me if you find errors with this tutorial or have suggestions/fixes.  In addition to several production web sites, I use the framework in my Django classes at BYU.  120+ students use the framework each year, and many have taken it to their companies upon graduation.  At this point, the framework is quite mature and robust.
+This app was developed at MyEducator.com, primarily by Dr. Conan C. Albrecht <doconix@gmail.com>.  Please email me if you find errors with this tutorial or have suggestions/fixes.  In addition to several production web sites, I use the framework in my Django classes at BYU.  120+ students use the framework each year, and many have taken it to their companies upon graduation.  At this point, the framework is quite mature and robust.  It is fast and stable.
 
-I've been told by some that DMP has a lot in common with Rails.  I've actually never used RoR, but good ideas are good ideas wherever they are found, right? :)
+I've been told by some that DMP has a lot in common with Rails.  When I developed DMP, I had never used RoR, but good ideas are good ideas wherever they are found, right? :)
 
 
 ## Why Mako instead of Jinja2, Cheetah, or [insert template language here]?
@@ -118,7 +121,7 @@ The short answer is I liked Mako's approach the best.  It felt the most Pythonic
 
 ## Can I use DMP with other Django apps?
 
-Yes.  Be assured that DMP plays nicely with the other children.  DMP plugs in as a regular app and templating engine per the standard Django API.
+Yes.  Be assured that DMP plays nicely with the other children.  DMP plugs in as a regular templating engine per the standard Django API.
 
 In particular, the hook for most apps is the `urls.py` file.  Just be sure that DMP's line in this file comes *last*.  DMP's line is a wildcard, so it matches everything.  As long as DMP is the last pattern listed, your other apps should run normally.
 
@@ -297,39 +300,39 @@ ${ random.randint(1, 10) }</code></pre></td>
 
 # Installation
 
-Note: If you need to use DMP 2.7, follow the [old installation instructions](https://github.com/doconix/django-mako-plus/blob/8fb0ccf942546b7ff241fd877315a18764f2dd3f/readme.md).  Be sure to use `pip3 install django-mako-plus==2.7.1` to get the old DMP codebase.  As of DMP 3.0, I decided to break with Python 2 and exclusively use features of Py3.
+Note: If you need to use DMP 2.7, follow the [old installation instructions](https://github.com/doconix/django-mako-plus/blob/8fb0ccf942546b7ff241fd877315a18764f2dd3f/readme.md).  Be sure to use `pip3 install django-mako-plus==2.7.1` to get the old DMP codebase.  As of DMP 3.0, Python 2 is no longer supported.
 
-## Upgrade Notes for DMP 3.0
 
-In March, 2016, Django-Mako-Plus 3.0 was released.  It is a refactor of the entire codebase, and *it contains many incompatible changes* to all previous versions of DMP.  The primary reason for the incompatible upgrade is to match Django's template API.  DMP predates Django's pluggable template support, so it defined its own methods.  Now that Django supports custom templating engines, a refactor of DMP is in order.
 
-DMP 3.0 also breaks with previous versions of Python and Django.  The new version requires Python 3 and Django 1.8+.
+## Upgrade Notes for DMP 3.7
 
-Suggestions for your upgrade:
+In **January, 2017**, Django-Mako-Plus 3.7 was released.  It requires a few changes to projects created with previous versions.  Please adjust the following in your project:
 
-* Perform some fancy, project-wide search and replace operations:
-    * Replace for all instances of `django_mako_plus.controller` with `django_mako_plus`.
-    * Following the Django format, dmp_render() is now the primary method for rendering to a response.  Replace `dmp_render_to_response` with `dmp_render` and `dmp_render` with `dmp_render_to_string`. I suggest doing three steps:
-        * Replace `dmp_render_to_response` with `dmp_temp_render`.
-        * Replace `dmp_render` with `dmp_render_to_string`.
-        * Replace `dmp_temp_render` with `dmp_render`.
+1. In your `settings.py` file, remove the DMP line from your `MIDDLEWARE` list. Specifically, your middleware list should no longer include `django_mako_plus.RequestInitMiddleware` or any other reference to DMP.
 
-* Ensure `django_mako_plus.controller` in settings.py INSTALLED_APPS changes to `django_mako_plus`.
+2. In your `urls.py` file, change the DMP line to `include` the DMP urls.  A bare bones `urls.py` file would look like the following:
+```
+from django.conf.urls import include, url
 
-* Ensure `django_mako_plus.controller.router.RequestInitMiddleware` in settings.py MIDDLEWARE changes to `django_mako_plus.RequestInitMiddleware`.  It will probably need adjusting.
+urlpatterns = [
+    url('', include('django_mako_plus.urls')),
+]
+```
 
-* Ensure `django_mako_plus.controller.router.router_request` in urls.py changes to `django_mako_plus.route_request`.  It will probably need adjusting.
+3. DMP no longer uses `URL_START_INDEX`.  If you set this to something other than `0`, see [Installing Django in a Subdirectory](#installing-django-in-a-subdirectory) to modify your `urls.py` for your prefix.
 
-* This last one is the most manual change to make.  The DMP options in settings.py have moved into the TEMPLATES section, so you need to integrate your existing DMP settings.py information into it.  Copy #4 below into your settings.py.  Then integrate your existing settings into it.
-    * After you integrate your settings to TEMPLATES, remove the old, top-level DJANGO_MAKO_PLUS = {} from settings.py.
+4. This version of DMP no longer uses `request.dmp_router_page_full`.  If your code happens to use this variable, post a question to the project GitHub page or email me (Conan). I don't think anyone is using this variable outside of the DMP source code.
 
 
 ## Python 3+
 
-Install Python and ensure you can run "python3" at the command prompt.  The framework requires Python 3.x and Django 1.8+.
+Install Python and ensure you can run `python3` (or `python`) at the command prompt.  The framework requires Python 3.x.
+
 
 
 ## Install Django, Mako, and DMP
+
+DMP 3 works with Django 1.8+ and Mako 1.0+.  We will support Django 2.0 when it is released.
 
 Install with the python installer:
 
@@ -346,9 +349,6 @@ pip install django
 pip install mako
 pip install django-mako-plus
 ```
-
-DMP requires Django 1.8+, Python 3+, and Mako 1.0+.
-
 
 
 ## Create a Django project
@@ -378,16 +378,7 @@ INSTALLED_APPS = (
 )
 ```
 
-2. Add `django_mako_plus.RequestInitMiddleware` to the end of your `MIDDLEWARE` list:
-
-```python
-MIDDLEWARE = (
-    ...
-    'django_mako_plus.RequestInitMiddleware',
-)
-```
-
-3. Add a logger to help you debug (optional but highly recommended!):
+2. Add a logger to help you debug (optional but highly recommended!):
 
 ```python
 DEBUG_PROPAGATE_EXCEPTIONS = DEBUG  # never set this True on a live site
@@ -416,7 +407,7 @@ LOGGING = {
 }
 ```
 
-Add the Django-Mako-Plus engine to the TEMPLATES list:
+3. Add the Django-Mako-Plus engine to the `TEMPLATES` list.  You'll already have this `TEMPLATES =` list in your settings file.  Integrate the item below into the existing structure.
 
 ```python
 TEMPLATES = [
@@ -446,9 +437,6 @@ TEMPLATES = [
              'import os, os.path, re, json',
            ],
 
-           # see the DMP online tutorial for information about this setting
-           'URL_START_INDEX': 0,
-
            # whether to send the custom DMP signals -- set to False for a slight speed-up in router processing
            # determines whether DMP will send its custom signals during the process
            'SIGNALS': True,
@@ -476,7 +464,7 @@ TEMPLATES = [
 ]
 ```
 
-5. Add the following to serve your static files.  This step is pure Django; you can read about it in the standard Django docs.  These variables are also explained below in the section entitled "Static Files, Your Web Server, and DMP".
+4. Add the following to serve your static files.  Note that a standard Django project already has the first `STATIC_URL = ` line.
 
 ```python
 STATIC_URL = '/static/'   # you probably already have this
@@ -502,6 +490,15 @@ urlpatterns = [
     # the django_mako_plus controller handles every request - this line is the glue that connects Mako to Django
     url(r'^.*$', route_request),
 ]
+from django.conf.urls import include, url
+
+urlpatterns = [
+    # all other url lines here (such as the admin or any other installed apps)
+
+    # this should be the last line in the list
+    url('', include('django_mako_plus.urls')),
+]
+
 ```
 
 ## Create a DMP-Style App
@@ -512,7 +509,9 @@ Change to your project directory in the terminal/console, then create a new Djan
 python3 manage.py dmp_startapp homepage
 ```
 
-As with any Django app, you need to add your new app to the INSTALLED_APPS list in `settings.py`:
+If Django complains that `dmp_startapp` is an unknown command, you forgot to add DMP to your `INSTALLED_APPS` list.
+
+**After** the new `homepage` app is created, add your new app to the `INSTALLED_APPS` list in `settings.py`:
 
 ```python
 INSTALLED_APPS = (
@@ -580,15 +579,11 @@ This section is for those that need Django is a subdirectory, such as `/mysite`.
 
 In other words, suppose your Django site isn't the only thing on your server.  Instead of the normal url pattern, `http://www.yourdomain.com/`, your Django installation is at `http://www.yourdomain.com/mysite/`.  All apps are contained within this `mysite/` directory.
 
-Since DMP calls your apps and functions based on the URL pattern, you need to tell it to ignore the `mysite/` prefix.  This is accomplished with the `URL_START_INDEX` setting in the `OPTIONS` dictionary we installed earlier:
+This is accomplished in the normal Django way.  Adjust your `urls.py` file to include the prefix:
 
-```python
-'URL_START_INDEX': 1,
 ```
-
-The above setting tells DMP to ignore the first item in your URLs.  With this setting, the URL `http://www.yourdomain.com/mysite/homepage/index/` translates to the `homepage` app and `index` view page.  The first item is skipped.
-
-If your prefix has two subdirectorie prefixes, such as `mysite/mystuff/`, set the `URL_START_INDEX` to 2.  For three directories, set it to 3, and so forth.
+url('^mysite/', include('django_mako_plus.urls')),
+```
 
 # Tutorial
 
@@ -1459,11 +1454,43 @@ are available throughout the request:
 
 * `request.dmp_router_app`: The Django application specified in the URL.  In the URL `http://www.server.com/calculator/index/1/2/3`, the `dmp_router_app` is the string "calculator".
 * `request.dmp_router_page`: The name of the Python module specified in the URL.  In the URL `http://www.server.com/calculator/index/1/2/3`, the `dmp_router_page` is the string "index".  In the URL `http://www.server.com/calculator/index.somefunc/1/2/3`, the `dmp_router_page` is still the string "index".
-* `request.dmp_router_page_full`: The exact module name specified in the URL, including the function name if specified.  In the URL `http://www.server.com/calculator/index/1/2/3`, the `dmp_router_page_full` is the string "index".  In the URL `http://www.server.com/calculator/index.somefunc/1/2/3`, the `dmp_router_page` is the string "index.somefunc".  Note the difference in this last example to what `dmp_router_page` reports.
 * `request.dmp_router_function`: The name of the function within the module that will be called, even if it is not specified in the URL.  In the URL `http://www.server.com/calculator/index/1/2/3`, the `dmp_router_function` is the string "process_request" (the default function).  In the URL `http://www.server.com/calculator/index.somefunc/1/2/3`, the `dmp_router_page` is the string "somefunc".
 * `request.dmp_router_module`: The name of the real Python module specified in the URL, as it will be imported into the runtime module space.  In the URL `http://www.server.com/calculator/index/1/2/3`, the `dmp_router_module` is the string "calculator.views.index".
 * `request.dmp_router_class`: The name of the class if the router sees that the "function" is actually a class-based view.  None otherwise.
 * `request.urlparams`: A list of parameters specified in the URL.  See the section entitled "URL Parameters" above for more information.
+
+
+
+## Customize the URL Pattern
+
+Suppose your project requires a different URL pattern than the normal `/app/page/param1/param2/...`.  For example, you might need the user id in between the app and page: `/app/userid/page/param1/param1...`.  This can be done because DMP uses named parameters in its patterns.
+
+Instead of including the default`django_mako_plus.urls` module in your `urls.py` file, you can instead create the patterns manually.  Start with the [patterns in the DMP source](https://github.com/doconix/django-mako-plus/blob/master/django_mako_plus/urls.py) and modify them as needed.
+
+The following is one of the URL patterns, modified to include the `userid` parameter:
+
+```
+url(r'^(?P<dmp_router_app>[_a-zA-Z0-9]+)/(?P<userid>\d+)/(?P<dmp_router_page>[_a-zA-Z0-9]+)/?(?P<urlparams>.*)$', route_request, name='DMP - /app/page'),
+```
+
+Then, in your process_request method, be sure to include the userid parameter.  This is according to the standard Django documentation with named parameters:
+
+```
+@view_function
+def process_request(request, userid):
+    ...
+```
+
+DMP doesn't use the positional index of the arguments, so you can rearrange patterns as needed. However, you must use named parameters for both DMP and your custom parameters (Django doesn't allow both named and positional parameters in a single pattern).
+
+Use the following named parameters in your patterns to tell DMP which app, page, and function to call:
+
+* `(?P<dmp_router_app>[_a-zA-Z0-9]+)` is the app name.  If omitted, it is set to `DEFAULT_APP` in settings.
+* `(?P<dmp_router_page>[_a-zA-Z0-9]+)` is the view module name.  If omitted, it is set to `DEFAULT_APP` in settings.
+* `(?P<dmp_router_function>[_a-zA-Z0-9]+)` is the app name.  If omitted, it is set to `process_request`.
+* `(?P<urlparams>.*)` is the url parameters.  This value is split on the slash `/` to form the `request.urlparams` list.  If omitted, it is set to and empty list `[]`.
+
+> DMP uses a custom RegexURLPattern object, `DMPRegexPattern`, which not only matches on the pattern, but it also requires the `dmp_router_app` parameter to be a DMP-enabled app for the pattern to match.  If you use this parameter in your custom patterns, you may want to consider using this enhanced pattern object.
 
 
 ## CSRF Tokens

@@ -2,7 +2,7 @@
 # This allows it to import into the runtime DMP as well as
 # setup.py during installation.
 
-__version__ = '3.6.2'
+__version__ = '3.7.1'
 
 
 # Reminder on uploading to pypi and removing the build folders:
@@ -10,5 +10,12 @@ __version__ = '3.6.2'
 
 python3 setup.py sdist upload
 rm -rf dist/ django_mako_plus.egg-info/
+
+
+1. Removed the request variable.
+2. Removed the middleware.
+3. Changed the DMP entry in urls.py.
+4. Enabled named-parameters in urls.
+5. Extra kwargs
 
 '''

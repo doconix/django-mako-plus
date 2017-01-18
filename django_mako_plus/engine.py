@@ -99,10 +99,10 @@ class MakoTemplates(BaseEngine):
 
         # add a template renderer for each DMP-enabled app
         for app_config in get_dmp_app_configs():
-            self._register_app(app_config)
+            self.register_app(app_config)
 
 
-    def _register_app(self, app):
+    def register_app(self, app):
         '''
         Registers an app as a "DMP-enabled" app.  Registering creates a cached
         template renderer to make processing faster and adds the dmp_render()
