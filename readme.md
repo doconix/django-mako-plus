@@ -308,9 +308,9 @@ Note: If you need to use DMP 2.7, follow the [old installation instructions](htt
 
 In **January, 2017**, Django-Mako-Plus 3.7 was released.  It requires a few changes to projects created with previous versions.  Please adjust the following in your project:
 
-1. In your `settings.py` file, remove the DMP line from your `MIDDLEWARE` list. Specifically, your middleware list should no longer include `django_mako_plus.RequestInitMiddleware` or any other reference to DMP.
+* In your `settings.py` file, remove the DMP line from your `MIDDLEWARE` list. Specifically, your middleware list should no longer include `django_mako_plus.RequestInitMiddleware` or any other reference to DMP.
 
-2. In your `urls.py` file, change the DMP line to `include` the DMP urls.  A bare bones `urls.py` file would look like the following:
+* In your `urls.py` file, change the DMP line to `include` the DMP urls.  A bare bones `urls.py` file would look like the following:
 ```
 from django.conf.urls import include, url
 
@@ -319,9 +319,9 @@ urlpatterns = [
 ]
 ```
 
-3. DMP no longer uses `URL_START_INDEX`.  If you set this to something other than `0`, see [Installing Django in a Subdirectory](#installing-django-in-a-subdirectory) to modify your `urls.py` for your prefix.
+* DMP no longer uses `URL_START_INDEX`.  If you set this to something other than `0`, see [Installing Django in a Subdirectory](#installing-django-in-a-subdirectory) to modify your `urls.py` for your prefix.
 
-4. This version of DMP no longer uses `request.dmp_router_page_full`.  If your code happens to use this variable, post a question to the project GitHub page or email me (Conan). I don't think anyone is using this variable outside of the DMP source code.
+* This version of DMP no longer uses `request.dmp_router_page_full`.  If your code happens to use this variable, post a question to the project GitHub page or email me (Conan). I don't think anyone is using this variable outside of the DMP source code.
 
 
 ## Python 3+
