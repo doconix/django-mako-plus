@@ -3,15 +3,15 @@
 ## is composed of.
 
 ## imports
-<%%! from django_mako_plus import get_template_css, get_template_js %%>
+<%! from django_mako_plus import get_template_css, get_template_js %>
 
 ## render the CSS for this template
 ${ get_template_css(self, request, context) }
 
 ## render the ajax content
-<%%block name="content">
+<%block name="content">
   Sub-templates should place their ajax content here.
-</%%block>
+</%block>
 
 ## render the JS for this template (pages load faster when JS is at the end)
 ${ get_template_js(self, request, context) }
