@@ -6,30 +6,30 @@
 
 <!DOCTYPE html>
 <html>
-  <meta charset="UTF-8">
-  <head>
+    <meta charset="UTF-8">
+    <head>
 
-    <title>%(app_name)s</title>
+        <title>{{ app_name }}</title>
 
-    ## add any site-wide scripts or CSS here; for example, jquery:
-    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+        ## add any site-wide scripts or CSS here; for example, jquery:
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 
-    ## render the css with the same name as this page
-    ${ get_template_css(self, request, context) }
+        ## render the css with the same name as this page
+        ${ get_template_css(self, request, context) }
 
-  </head>
-  <body>
+    </head>
+    <body>
 
-    <header>
-      Welcome to the %(app_name)s app!
-    </header>
+        <header>
+            Welcome to the {{ app_name }} app!
+        </header>
 
-    <%block name="content">
-      Site content goes here in sub-templates.
-    </%block>
+        <%block name="content">
+            Site content goes here in sub-templates.
+        </%block>
 
-    ## render the JS with the same name as this page
-    ${ get_template_js(self, request, context) }
+        ## render the JS with the same name as this page
+        ${ get_template_js(self, request, context) }
 
-  </body>
+    </body>
 </html>
