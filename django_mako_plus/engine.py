@@ -195,7 +195,7 @@ class MakoTemplates(BaseEngine):
                             template = dmp_loader.get_template(fallback_template_name)
                             func_obj = template_view_function(template)
                             func_type = DMP_VIEW_TEMPLATE
-                        except (TemplateDoesNotExist, TemplateSyntaxError, ImproperlyConfigured) as e:
+                        except TemplateDoesNotExist as e:
                             func_obj = ViewDoesNotExist('View function {}.{} not found, and fallback template {} not found.'.format(module_name, function_name, fallback_template_name))
                             func_type = DMP_VIEW_ERROR
 

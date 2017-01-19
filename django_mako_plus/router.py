@@ -91,7 +91,7 @@ def route_request(request, *args, **kwargs):
                 elif func_type == DMP_VIEW_CLASS:
                     log.info('calling class-based view function {}.{}.{}'.format(request.dmp_router_module, request.dmp_router_class, request.dmp_router_function))
                 elif func_type == DMP_VIEW_TEMPLATE:
-                    log.info('view function {}.{} not found; rendering template {}'.format(request.dmp_router_module, request.dmp_router_function, request.dmp_router_page_full + '.html'))
+                    log.info('view function {}.{} not found; rendering template {}'.format(request.dmp_router_module, request.dmp_router_function, fallback_template))
             response = func_obj(request, **kwargs)
 
             # send the post-signal

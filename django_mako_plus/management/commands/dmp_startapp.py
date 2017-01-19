@@ -12,12 +12,12 @@ class Command(BaseCommand):
     help = 'Creates a new Django-Mako-Plus app.'
     can_import_settings = True
     missing_args_message = "You must provide an application name."
-    
-    
+
+
     def add_arguments(self, parser):
         # required argument for the app name
         parser.add_argument('appname', type=str, help='the name of the new app')
-        
+
 
     def handle(self, *args, **options):
         # get the app name
@@ -52,29 +52,42 @@ class Command(BaseCommand):
         os.mkdir(app_dir)
         template_dir = os.path.join(os.path.abspath(os.path.dirname(django_mako_plus.__file__)), 'app_template')
         def copy_dir(root):
-            for fname in os.listdir(root):
+            for source_name in os.listdir(root):
                 # skip certain files
-                if fname.startswith('.') or fname == '__pycache__':
+                if source_name.startswith('.') or source_name == '__pycache__':
                     continue
 
-                # process this ile
-                fpath = os.path.join(root, fname)
-                newpath = os.path.join(app_dir, root[len(template_dir)+1:], fname)
-                if os.path.isdir(fpath):
-                    os.mkdir(newpath)
-                    copy_dir(fpath)
+                # calculate the filenames
+                source_path = os.path.join(root, source_name)
+                dest_path = os.path.join(app_dir, root[len(template_dir)+1:], source_name)
 
-                elif os.path.isfile(fpath):
-                    fin = open(fpath)
-                    fout = open(newpath, 'w')
-                    fout.write(fin.read() % {
-                      'app_name': app_name
-                    })
+                # if a directory, make it and then recurse
+                if os.path.isdir(source_path):
+                    os.mkdir(dest_path)
+                    copy_dir(source_path)
+
+                # if a file, copy the bytes
+                elif os.path.isfile(source_path):
+                    # read the contents
+                    fin = open(source_path)
+                    contents = fin.read()
                     fin.close()
+                    # do the string substitution in the contents.
+                    # note I'm not using Mako templates here because escaping all the
+                    # mako sequences in the app_template files is too much.
+                    contents = contents % {
+                        'app_name': app_name,
+                        'camel_case_app_name' : ''.join([ p.capitalize() for p in app_name.split('_') ]),
+                    }
+                    # write the contents to the new file
+                    fout = open(dest_path, 'w')
+                    fout.write(contents)
                     fout.close()
+
         # start the copy process
         copy_dir(template_dir)
 
         self.stdout.write("App %s successfully created!  Don't forget to add your new app name (%s) to " % (app_name, app_name))
         self.stdout.write("the INSTALLED_APPS list in settings.py.  Once this is done, start your server and")
         self.stdout.write("go to http://localhost:8000/%s/index/ in a browser." % app_name)
+
