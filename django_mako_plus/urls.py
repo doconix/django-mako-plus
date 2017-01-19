@@ -51,6 +51,8 @@ class DMPRegexPattern(RegexURLPattern):
 # FYI, even though the valid python identifier is [_A-Za-z][_a-zA-Z0-9]*, I'm simplifying it to [_a-zA-Z0-9]+ because it works for our purposes
 
 urlpatterns = [
+    # these are in order of specificity, with the most specific ones at the top
+
     # /app/page.function/urlparams
     DMPRegexPattern(r'^(?P<dmp_router_app>[_a-zA-Z0-9]+)/(?P<dmp_router_page>[_a-zA-Z0-9]+)\.(?P<dmp_router_function>[_a-zA-Z0-9]+)/?(?P<urlparams>.*)$', route_request, name='DMP - /app/page.function'),
 
