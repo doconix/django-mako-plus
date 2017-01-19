@@ -357,7 +357,7 @@ pip install django-mako-plus
 Create a Django project, but specify that you want a DMP-style project layout:
 
 ```
-python3 -m django startproject --template=https://github.com/doconix/django-mako-plus/tree/master/project_template.zip test_dmp
+python3 -m django startproject --template=https://cdn.rawgit.com/doconix/django-mako-plus/master/project_template.zip test_dmp
 ```
 
 In addition to giving you the DMP project directories, this command automatically adds the required pieces to your `settings.py` and `urls.py` files.
@@ -512,7 +512,7 @@ urlpatterns = [
 Change to your project directory in the terminal/console, then create a new Django-Mako-Plus app with the following:
 
 ```python
-python3 manage.py startapp --template=https://github.com/doconix/django-mako-plus/tree/master/app_template.zip --extension=py,htm,html homepage
+python3 manage.py startapp --template=https://cdn.rawgit.com/doconix/django-mako-plus/master/app_template.zip --extension=py,htm,html homepage
 ```
 
 **After** the new `homepage` app is created, add your new app to the `INSTALLED_APPS` list in `settings.py`:
