@@ -353,13 +353,15 @@ pip install django-mako-plus
 
 ## Create a Django project
 
-Create a Django project with the typical:
+Create a Django project, but specify that you want a DMP-style project layout:
 
 ```
-python3 -m django startproject test_dmp
+python3 -m django startproject --template=https://github.com/doconix/django-mako-plus/tree/master/django_mako_plus/project_template test_dmp
 ```
 
-This step is described in detail in the standard Django tutorial.  You can, of course, name your project anything you want, but in the sections below, I'll assume you called your project `test_dmp`.
+In addition to giving you the DMP project directories, this command automatically adds the required pieces to your `settings.py` and `urls.py` files.
+
+You can, of course, name your project anything you want, but in the sections below, I'll assume you called your project `test_dmp`.
 
 Don't forget to migrate to synchronize your database.  The apps in a standard Django project (such as the session app) need a few tables created for you to run the project.
 
@@ -367,7 +369,18 @@ Don't forget to migrate to synchronize your database.  The apps in a standard Dj
 python3 manage.py migrate
 ```
 
-## Edit Your `settings.py` File:
+That's it!  Skip the next section and go to [Create a DMP-Style App](#create-a-dmp-style-app).
+
+
+
+## Modify an existing Django project
+
+If you need to add DMP to an existing Django project, follow the steps in this section.
+
+If you instead created a project per the previous section, these steps have been done for you.  Stand up, clap your hands together, and skip ahead to [Create a DMP-Style App](#create-a-dmp-style-app).
+
+
+### Edit Your `settings.py` File:
 
 Add `django_mako_plus` to the end of your `INSTALLED_APPS` list:
 
@@ -412,52 +425,54 @@ Add the Django-Mako-Plus engine to the `TEMPLATES` list.  You'll already have th
 ```python
 TEMPLATES = [
     {
-       'BACKEND': 'django_mako_plus.MakoTemplates',
-       'OPTIONS': {
-           # functions to automatically add variables to the params/context before templates are rendered
-           'CONTEXT_PROCESSORS': [
-               'django.template.context_processors.static',            # adds "STATIC_URL" from settings.py
-               'django.template.context_processors.request',           # adds "request" object
-               'django.contrib.auth.context_processors.auth',          # adds "user" and "perms" objects
-               'django_mako_plus.context_processors.settings',         # adds "settings" dictionary
-           ],
+        'BACKEND': 'django_mako_plus.MakoTemplates',
+        'OPTIONS': {
+            # functions to automatically add variables to the params/context before templates are rendered
+            'CONTEXT_PROCESSORS': [
+                'django.template.context_processors.static',            # adds "STATIC_URL" from settings.py
+                'django.template.context_processors.debug',             # adds debug and sql_queries
+                'django.template.context_processors.request',           # adds "request" object
+                'django.contrib.auth.context_processors.auth',          # adds "user" and "perms" objects
+                'django.contrib.messages.context_processors.messages',  # adds messages from the messages framework
+                'django_mako_plus.context_processors.settings',         # adds "settings" dictionary
+            ],
 
-           # identifies where the Mako template cache will be stored, relative to each template directory
-           'TEMPLATES_CACHE_DIR': '.cached_templates',
+            # identifies where the Mako template cache will be stored, relative to each template directory
+            'TEMPLATES_CACHE_DIR': '.cached_templates',
 
-           # the default app and page to render in Mako when the url is too short
-           'DEFAULT_PAGE': 'index',
-           'DEFAULT_APP': 'homepage',
+            # the default app and page to render in Mako when the url is too short
+            'DEFAULT_PAGE': 'index',
+            'DEFAULT_APP': 'homepage',
 
-           # the default encoding of template files
-           'DEFAULT_TEMPLATE_ENCODING': 'utf-8',
+            # the default encoding of template files
+            'DEFAULT_TEMPLATE_ENCODING': 'utf-8',
 
-           # these are included in every template by default - if you put your most-used libraries here, you won't have to import them exlicitly in templates
-           'DEFAULT_TEMPLATE_IMPORTS': [
-             'import os, os.path, re, json',
-           ],
+            # these are included in every template by default - if you put your most-used libraries here, you won't have to import them exlicitly in templates
+            'DEFAULT_TEMPLATE_IMPORTS': [
+              'import os, os.path, re, json',
+            ],
 
-           # whether to send the custom DMP signals -- set to False for a slight speed-up in router processing
-           # determines whether DMP will send its custom signals during the process
-           'SIGNALS': True,
+            # whether to send the custom DMP signals -- set to False for a slight speed-up in router processing
+            # determines whether DMP will send its custom signals during the process
+            'SIGNALS': False,
 
-           # whether to minify using rjsmin, rcssmin during 1) collection of static files, and 2) on the fly as .jsm and .cssm files are rendered
-           # rjsmin and rcssmin are fast enough that doing it on the fly can be done without slowing requests down
-           'MINIFY_JS_CSS': True,
+            # whether to minify using rjsmin, rcssmin during 1) collection of static files, and 2) on the fly as .jsm and .cssm files are rendered
+            # rjsmin and rcssmin are fast enough that doing it on the fly can be done without slowing requests down
+            'MINIFY_JS_CSS': True,
 
-           # the name of the SASS binary to run if a .scss file is newer than the resulting .css file
-           # happens when the corresponding template.html is accessed the first time after server startup
-           # if DEBUG=False, this only happens once per file after server startup, not for every request
-           # specify the binary in a list below -- even if just one item (see subprocess.Popen)
-           #'SCSS_BINARY': [ '/usr/bin/env', 'scss', '--unix-newlines' ],
-           'SCSS_BINARY': None,
+            # the name of the SASS binary to run if a .scss file is newer than the resulting .css file
+            # happens when the corresponding template.html is accessed the first time after server startup
+            # if DEBUG=False, this only happens once per file after server startup, not for every request
+            # specify the binary in a list below -- even if just one item (see subprocess.Popen)
+            #'SCSS_BINARY': [ '/usr/bin/env', 'scss', '--unix-newlines' ],
+            'SCSS_BINARY': None,
 
-           # see the DMP online tutorial for information about this setting
-           # it can normally be empty
-           'TEMPLATES_DIRS': [
-               # '/var/somewhere/templates/',
-           ],
-       },
+            # see the DMP online tutorial for information about this setting
+            # it can normally be empty
+            'TEMPLATES_DIRS': [
+                # '/var/somewhere/templates/',
+            ],
+        },
     },
 
     # you'll likely already have the DjangoTemplates settings here
@@ -481,12 +496,12 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 Add the Django-Mako-Plus router as **the last pattern** in your `urls.py` file (the default admin is also included here for completeness):
 
 ```python
-from django.conf.urls import include, url
+from django.conf.urls import url, include
 
 urlpatterns = [
-    # all other url lines here (such as the admin or any other installed apps)
+    # urls for any third-party apps go here
 
-    # this should be the last line in the list
+    # the DMP router - this should be the last line in the list
     url('', include('django_mako_plus.urls')),
 ]
 ```
@@ -496,10 +511,8 @@ urlpatterns = [
 Change to your project directory in the terminal/console, then create a new Django-Mako-Plus app with the following:
 
 ```python
-python3 manage.py dmp_startapp homepage
+python3 manage.py startapp --template=https://github.com/doconix/django-mako-plus/tree/master/django_mako_plus/app_template --extension=py,htm,html homepage
 ```
-
-If Django complains that `dmp_startapp` is an unknown command, you forgot to add DMP to your `INSTALLED_APPS` list.
 
 **After** the new `homepage` app is created, add your new app to the `INSTALLED_APPS` list in `settings.py`:
 

@@ -13,9 +13,15 @@ Including another URLconf
     1. Import the include() function: from django.conf.urls import url, include
     2. Add a URL to urlpatterns:  url(r'^blog/', include('blog.urls'))
 """
-from django.conf.urls import url
+from django.conf.urls import url, include
 from django.contrib import admin
 
 urlpatterns = [
+    # the built-in Django administrator
     url(r'^admin/', admin.site.urls),
+
+    # urls for any third-party apps go here
+
+    # the DMP router - this should be the last line in the list
+    url('', include('django_mako_plus.urls')),
 ]

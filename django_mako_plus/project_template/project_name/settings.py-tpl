@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_mako_plus',
 ]
 
 MIDDLEWARE = [
@@ -52,6 +53,56 @@ MIDDLEWARE = [
 ROOT_URLCONF = '{{ project_name }}.urls'
 
 TEMPLATES = [
+    {
+        'BACKEND': 'django_mako_plus.MakoTemplates',
+        'OPTIONS': {
+            # functions to automatically add variables to the params/context before templates are rendered
+            'CONTEXT_PROCESSORS': [
+                'django.template.context_processors.static',            # adds "STATIC_URL" from settings.py
+                'django.template.context_processors.debug',             # adds debug and sql_queries
+                'django.template.context_processors.request',           # adds "request" object
+                'django.contrib.auth.context_processors.auth',          # adds "user" and "perms" objects
+                'django.contrib.messages.context_processors.messages',  # adds messages from the messages framework
+                'django_mako_plus.context_processors.settings',         # adds "settings" dictionary
+            ],
+
+            # identifies where the Mako template cache will be stored, relative to each template directory
+            'TEMPLATES_CACHE_DIR': '.cached_templates',
+
+            # the default app and page to render in Mako when the url is too short
+            'DEFAULT_PAGE': 'index',
+            'DEFAULT_APP': 'homepage',
+
+            # the default encoding of template files
+            'DEFAULT_TEMPLATE_ENCODING': 'utf-8',
+
+            # these are included in every template by default - if you put your most-used libraries here, you won't have to import them exlicitly in templates
+            'DEFAULT_TEMPLATE_IMPORTS': [
+              'import os, os.path, re, json',
+            ],
+
+            # whether to send the custom DMP signals -- set to False for a slight speed-up in router processing
+            # determines whether DMP will send its custom signals during the process
+            'SIGNALS': False,
+
+            # whether to minify using rjsmin, rcssmin during 1) collection of static files, and 2) on the fly as .jsm and .cssm files are rendered
+            # rjsmin and rcssmin are fast enough that doing it on the fly can be done without slowing requests down
+            'MINIFY_JS_CSS': True,
+
+            # the name of the SASS binary to run if a .scss file is newer than the resulting .css file
+            # happens when the corresponding template.html is accessed the first time after server startup
+            # if DEBUG=False, this only happens once per file after server startup, not for every request
+            # specify the binary in a list below -- even if just one item (see subprocess.Popen)
+            #'SCSS_BINARY': [ '/usr/bin/env', 'scss', '--unix-newlines' ],
+            'SCSS_BINARY': None,
+
+            # see the DMP online tutorial for information about this setting
+            # it can normally be empty
+            'TEMPLATES_DIRS': [
+                # '/var/somewhere/templates/',
+            ],
+        },
+    },
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [],
@@ -118,3 +169,38 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/{{ docs_version }}/howto/static-files/
 
 STATIC_URL = '/static/'
+STATICFILES_DIRS = (
+    # SECURITY WARNING: this next line must be commented out at deployment
+    BASE_DIR,
+)
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+
+
+# A default logger
+
+DEBUG_PROPAGATE_EXCEPTIONS = DEBUG  # SECURITY WARNING: never set this True on a live site
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': True,
+    'formatters': {
+        'simple': {
+            'format': '%(levelname)s %(message)s'
+        },
+    },
+    'handlers': {
+        'console':{
+            'level':'DEBUG',
+            'class':'logging.StreamHandler',
+            'formatter': 'simple'
+        },
+    },
+    'loggers': {
+        'django_mako_plus': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+    },
+}
+
+
