@@ -369,7 +369,7 @@ python3 manage.py migrate
 
 ## Edit Your `settings.py` File:
 
-1. Add `django_mako_plus` to the end of your `INSTALLED_APPS` list:
+* Add `django_mako_plus` to the end of your `INSTALLED_APPS` list:
 
 ```python
 INSTALLED_APPS = (
@@ -378,7 +378,7 @@ INSTALLED_APPS = (
 )
 ```
 
-2. Add a logger to help you debug (optional but highly recommended!):
+* Add a logger to help you debug (optional but highly recommended!):
 
 ```python
 DEBUG_PROPAGATE_EXCEPTIONS = DEBUG  # never set this True on a live site
@@ -407,7 +407,7 @@ LOGGING = {
 }
 ```
 
-3. Add the Django-Mako-Plus engine to the `TEMPLATES` list.  You'll already have this `TEMPLATES =` list in your settings file.  Integrate the item below into the existing structure.
+* Add the Django-Mako-Plus engine to the `TEMPLATES` list.  You'll already have this `TEMPLATES =` list in your settings file.  Integrate the item below into the existing structure.
 
 ```python
 TEMPLATES = [
@@ -464,7 +464,7 @@ TEMPLATES = [
 ]
 ```
 
-4. Add the following to serve your static files.  Note that a standard Django project already has the first `STATIC_URL = ` line.
+* Add the following to serve your static files.  Note that a standard Django project already has the first `STATIC_URL = ` line.
 
 ```python
 STATIC_URL = '/static/'   # you probably already have this
