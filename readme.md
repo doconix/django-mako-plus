@@ -1,17 +1,47 @@
 
-# Use This If You've Said:
+# Use This If You've Said...
 
 * Is there an alternative to the Django templating language?
 * Why are Django templates weak sauce? Why not just use regular Python in templates?
 * Why does Django make me list every. single. page. in urls.py?
 * I'd like to include Python code in my CSS and Javascript files.
-* My app's views.py file is getting HUGE.  How can I split it intelligently?
+
+
+# Quick Start
+
+
+```
+# install django, mako, and DMP
+pip3 install django mako django-mako-plus
+
+# create a new project with a 'homepage' app
+python3 -m django startproject --template=https://cdn.rawgit.com/doconix/django-mako-plus/master/project_template.zip mysite
+cd mysite
+python3 manage.py startapp --template=https://cdn.rawgit.com/doconix/django-mako-plus/master/app_template.zip --extension=py,htm,html homepage
+
+# open mysite/settings.py and append 'homepage' to the INSTALLED_APPS list
+INSTALLED_APPS = [
+    ...
+    'homepage',
+]
+
+# run initial migrations and run the server
+python3 manage.py migrate
+python3 manage.py runserver
+
+# Open a browser to http://localhost/
+
+```
+
+> Note that on some machines, `pip3` is `pip` and `python3` is `python`.  Python 3+ is required.
 
 
 # Table of Contents
 <!-- TOC depthFrom:1 depthTo:6 withLinks:1 updateOnSave:1 orderedList:0 -->
 
-- [Use This If You've Said:](#use-this-if-youve-said)
+- [Use This If You've Said...](#use-this-if-youve-said)
+- [Quick Start](#quick-start)
+- [Take a browser to http://localhost/](#take-a-browser-to-httplocalhost)
 - [Table of Contents](#table-of-contents)
 - [Description](#description)
 	- [Where Is DMP Used?](#where-is-dmp-used)
@@ -33,6 +63,7 @@
 	- [Installing Django in a Subdirectory](#installing-django-in-a-subdirectory)
 - [Tutorial](#tutorial)
 	- [The DMP Structure](#the-dmp-structure)
+	- [imports](#imports)
 	- [Routing Without urls.py](#routing-without-urlspy)
 	- [Adding a View Function](#adding-a-view-function)
 		- [The Render Functions](#the-render-functions)
@@ -357,12 +388,12 @@ pip install django-mako-plus
 Create a Django project, but specify that you want a DMP-style project layout:
 
 ```
-python3 -m django startproject --template=https://cdn.rawgit.com/doconix/django-mako-plus/master/project_template.zip test_dmp
+python3 -m django startproject --template=https://cdn.rawgit.com/doconix/django-mako-plus/master/project_template.zip mysite
 ```
 
 In addition to giving you the DMP project directories, this command automatically adds the required pieces to your `settings.py` and `urls.py` files.
 
-You can, of course, name your project anything you want, but in the sections below, I'll assume you called your project `test_dmp`.
+You can, of course, name your project anything you want, but in the sections below, I'll assume you called your project `mysite`.
 
 Don't forget to migrate to synchronize your database.  The apps in a standard Django project (such as the session app) need a few tables created for you to run the project.
 
@@ -386,10 +417,10 @@ If you instead created a project per the previous section, these steps have been
 Add `django_mako_plus` to the end of your `INSTALLED_APPS` list:
 
 ```python
-INSTALLED_APPS = (
+INSTALLED_APPS = [
     ...
     'django_mako_plus',
-)
+]
 ```
 
 Add a logger to help you debug (optional but highly recommended!):
@@ -518,10 +549,10 @@ python3 manage.py startapp --template=https://cdn.rawgit.com/doconix/django-mako
 **After** the new `homepage` app is created, add your new app to the `INSTALLED_APPS` list in `settings.py`:
 
 ```python
-INSTALLED_APPS = (
+INSTALLED_APPS = [
     ...
     'homepage',
-)
+]
 ```
 
 Congratulations.  You're ready to go!

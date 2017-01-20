@@ -26,7 +26,7 @@ install_requires = [
   'mako >= 1.0.0',
 ]
 
-# remove the __pycache__ directories since the ones in app_template seems to stick around
+# remove the __pycache__ directories since the ones in project_template seems to stick around
 os.system('find . -name "__pycache__" -type d -exec rm -r "{}" \; > /dev/null')
 
 # Compile the list of packages available
@@ -35,7 +35,7 @@ def walk(root):
   for fname in os.listdir(root):
     fpath = os.path.join(root, fname)
     # skip hidden/cache files
-    if fname.startswith('.') or fname.endswith('.pyc') or fname in ( '__pycache__', 'app_template', ):
+    if fname.startswith('.') or fname.endswith('.pyc') or fname in ( '__pycache__', 'app_template', 'project_template' ):
       continue
     # if a directory, walk it
     elif os.path.isdir(fpath):
@@ -45,8 +45,6 @@ def walk(root):
       packages.append(os.path.dirname(fpath))
 walk(MODULE_NAME)
 
-# add the app_template directory to data files
-# empty directories within app_template/ will cause problems with distutils, so be sure each directory has at least one file
 data_files = []
 # add the readme/license
 data_files.extend([
@@ -55,15 +53,16 @@ data_files.extend([
   ('', [ 'license.txt' ]),
 ])
 
-# add the app_template/ directory
+# add the app_template/ and package_template/ directory
+# empty directories within app_template/ will cause problems with distutils, so be sure each directory has at least one file
 package_data_files = []
-app_template_dir = 'app_template'
-for root, dirs, files in os.walk(os.path.join(MODULE_NAME, app_template_dir)):
-  dirs[:] = [ d for d in dirs if not d.startswith('.') and not d in ( '__pycache__', ) ] # skip hidden and __pycache__ directories
-  for fname in files:
-    if fname.startswith('.') or fname.endswith('.pyc'): # skip hidden/cache files
-      continue
-    package_data_files.append(os.path.join(root[len(MODULE_NAME)+1:], fname))
+for template_dir in ( 'app_template', 'project_template' ):
+    for root, dirs, files in os.walk(os.path.join(MODULE_NAME, template_dir)):
+      dirs[:] = [ d for d in dirs if not d.startswith('.') and not d in ( '__pycache__', ) ] # skip hidden and __pycache__ directories
+      for fname in files:
+        if fname.startswith('.') or fname.endswith('.pyc'): # skip hidden/cache files
+          continue
+        package_data_files.append(os.path.join(root[len(MODULE_NAME)+1:], fname))
 
 # read the long description if sdist
 description = 'Combines Django framework and Mako templating engine, plus a few bonuses.'

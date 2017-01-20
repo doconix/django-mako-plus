@@ -12,10 +12,4 @@ python3 setup.py sdist upload
 rm -rf dist/ django_mako_plus.egg-info/
 
 
-1. Removed the request variable.
-2. Removed the middleware.
-3. Changed the DMP entry in urls.py.
-4. Enabled named-parameters in urls.
-5. Extra kwargs
-
 '''
