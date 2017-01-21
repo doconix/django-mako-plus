@@ -41,7 +41,6 @@ python3 manage.py runserver
 
 - [Use This If You've Said...](#use-this-if-youve-said)
 - [Quick Start](#quick-start)
-- [Take a browser to http://localhost/](#take-a-browser-to-httplocalhost)
 - [Table of Contents](#table-of-contents)
 - [Description](#description)
 	- [Where Is DMP Used?](#where-is-dmp-used)
@@ -116,6 +115,8 @@ python3 manage.py runserver
 This app is a template engine that integrates the excellent Django framework with the also excellent Mako templating syntax.  It conforms to the Django API and plugs in as a standard engine.
 
 Django comes with its own template system, but it's fairly weak (by design).  Mako, on the other hand, is a fantastic template system that allows full Python code within HTML pages.
+
+DMP can be used alongside regular Django templates, Jinja2 templates, and other third-party apps.
 
 > Author's Note: The primary reason Django doesn't allow full Python in its templates is the designers want to encourage you and I to keep template logic simple.  I fully agree with this philosophy.  I just don't agree with the "forced" part of this philosophy.  The Python way is rather to give freedom to the developer but train in the correct way of doing things.  Even though I fully like Python in my templates, I still keep them fairly simple.  Views are where your logic goes.
 
