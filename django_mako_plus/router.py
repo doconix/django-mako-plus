@@ -23,36 +23,7 @@ from importlib import import_module
 def route_request(request, *args, **kwargs):
     '''
     The main router for all calls coming in to the system.  Patterns in urls.py should call this function.
-
-    Adds the following to the request object:
-
-        request.dmp_router_app        The Django application (such as "calculator").
-        request.dmp_router_page       The view module (such as "calc" for calc.py).
-        request.dmp_router_function   The function within the view module to be called (usually "process_request").
-        request.dmp_router_module     The module path in Python terms, such as calculator.views.calc.
-        request.dmp_router_class      This is set to None in this method, but route_request() fills it in if a class-based view.
-        request.urlparams             A list of the remaining url parts (see the calc.py example).
-
     '''
-    # add the variables to the request
-    request.dmp_router_app = kwargs.pop('dmp_router_app', None) or DMP_OPTIONS.get('DEFAULT_APP', 'homepage')
-    request.dmp_router_page = kwargs.pop('dmp_router_page', None) or DMP_OPTIONS.get('DEFAULT_PAGE', 'index')
-    request.dmp_router_function = kwargs.pop('dmp_router_function', None)
-    if request.dmp_router_function:
-        fallback_template = '{}.{}.html'.format(request.dmp_router_page, request.dmp_router_function)
-    else:
-        fallback_template = '{}.html'.format(request.dmp_router_page)
-        request.dmp_router_function = 'process_request'
-    request.dmp_router_class = None  # this is set below if a class-based view
-
-    # add the url parameters to the request
-    # note that I'm not using unquote_plus because the + switches to a space *after* the question mark (in the regular parameters)
-    # in the normal url, spaces should be quoted with %20.  Thanks Rosie for the tip.
-    request.urlparams = URLParamList(( unquote(s) for s in kwargs.pop('urlparams', '').split('/') ))
-
-    # add the full module path to the request
-    request.dmp_router_module = '.'.join([ request.dmp_router_app, 'views', request.dmp_router_page ])
-
     # first try going to the view function for this request
     # we look for a views/name.py file where name is the same name as the HTML file
     response = None
@@ -64,7 +35,7 @@ def route_request(request, *args, **kwargs):
             # get the function object - the return of get_view_function might be a function, a class-based view, or a template
             # get_view_function does some magic to make all of these act like a regular view function
             try:
-                func_obj, func_type = get_dmp_instance().get_view_function(request.dmp_router_app, request.dmp_router_module, request.dmp_router_function, fallback_template)
+                func_obj, func_type = get_dmp_instance().get_view_function(request.dmp_router_app, request.dmp_router_module, request.dmp_router_function, request.dmp_router_fallback)
             except ViewDoesNotExist as e:
                 log.error(str(e))
                 raise Http404
@@ -91,7 +62,7 @@ def route_request(request, *args, **kwargs):
                 elif func_type == DMP_VIEW_CLASS:
                     log.info('calling class-based view function {}.{}.{}'.format(request.dmp_router_module, request.dmp_router_class, request.dmp_router_function))
                 elif func_type == DMP_VIEW_TEMPLATE:
-                    log.info('view function {}.{} not found; rendering template {}'.format(request.dmp_router_module, request.dmp_router_function, fallback_template))
+                    log.info('view function {}.{} not found; rendering template {}'.format(request.dmp_router_module, request.dmp_router_function, request.dmp_router_fallback))
             response = func_obj(request, **kwargs)
 
             # send the post-signal

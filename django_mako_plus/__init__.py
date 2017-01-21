@@ -15,6 +15,13 @@ from .version import __version__
 from .apps import Config
 
 
+# the router
+from .router import route_request, view_function
+
+
+# the middleware
+from .middleware import RequestInitMiddleware
+
 # the exceptions
 from .exceptions import RedirectException
 from .exceptions import PermanentRedirectException
@@ -43,10 +50,6 @@ from .convenience import get_template_loader_for_path
 # the utilities
 from .util import get_dmp_instance
 from .util import get_dmp_app_configs
-
-
-# the router
-from .router import route_request, view_function
 
 
 # the urls

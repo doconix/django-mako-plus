@@ -423,6 +423,15 @@ INSTALLED_APPS = [
 ]
 ```
 
+Add `django_mako_plus.RequestInitMiddleware` to your `MIDDLEWARE` list:
+
+```python
+MIDDLEWARE = [
+    ...
+    'django_mako_plus.RequestInitMiddleware',
+    ...
+```
+
 Add a logger to help you debug (optional but highly recommended!):
 
 ```python
@@ -1498,9 +1507,11 @@ are available throughout the request:
 
 ## Customize the URL Pattern
 
-Suppose your project requires a different URL pattern than the normal `/app/page/param1/param2/...`.  For example, you might need the user id in between the app and page: `/app/userid/page/param1/param1...`.  This can be done because DMP uses named parameters in its patterns.
+Suppose your project requires a different URL pattern than the normal `/app/page/param1/param2/...`.  For example, you might need the user id in between the app and page: `/app/userid/page/param1/param1...`.   This is supported in two different ways.
 
-Instead of including the default`django_mako_plus.urls` module in your `urls.py` file, you can instead create the patterns manually.  Start with the [patterns in the DMP source](https://github.com/doconix/django-mako-plus/blob/master/django_mako_plus/urls.py) and modify them as needed.
+### URL Patterns: Take 1
+
+The first method is done with named parameters, and it is the "normal" way to customize the url pattern.  Instead of including the default`django_mako_plus.urls` module in your `urls.py` file, you can instead create the patterns manually.  Start with the [patterns in the DMP source](https://github.com/doconix/django-mako-plus/blob/master/django_mako_plus/urls.py) and modify them as needed.
 
 The following is one of the URL patterns, modified to include the `userid` parameter:
 
@@ -1526,6 +1537,14 @@ Use the following named parameters in your patterns to tell DMP which app, page,
 * `(?P<urlparams>.*)` is the url parameters.  This value is split on the slash `/` to form the `request.urlparams` list.  If omitted, it is set to and empty list `[]`.
 
 > DMP uses a custom RegexURLPattern object, `DMPRegexPattern`, which not only matches on the pattern, but it also requires the `dmp_router_app` parameter to be a DMP-enabled app for the pattern to match.  If you use this parameter in your custom patterns, you may want to consider using this enhanced pattern object.
+
+### URL Patterns: Take 2
+
+The second method is done by directly modifying the variables created in the middleware.  This can be done through a custom middleware view function that runs after `django_mako_plus.RequestInitMiddleware` (or alternatively, you could create an extension to this class and replace the class in the `MIDDLEWARE` list).
+
+Once `RequestInitMiddleware.process_view` creates the variables, your custom middleware can modify them in any way.  As view middleware, your function will run *after* the DMP middleware by *before* routing takes place in `route_request`.
+
+This method of modifying the URL pattern allows total freedom since you can use python code directly.  However, it would probably be done in an exceptional rather than typical case.
 
 
 ## CSRF Tokens
