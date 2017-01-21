@@ -65,10 +65,10 @@ for template_dir in ( 'app_template', 'project_template' ):
         package_data_files.append(os.path.join(root[len(MODULE_NAME)+1:], fname))
 
 # read the long description if sdist
-description = 'Combines Django framework and Mako templating engine, plus a few bonuses.'
+description = 'Django Mako Connector'
 long_description = description
 if len(sys.argv) > 1 and sys.argv[1] == 'sdist':
-  long_description = open('readme.txt').read()
+  long_description = 'Combines Django framework and Mako templating engine, plus a few bonuses.'
 
 # run the setup
 setup(
