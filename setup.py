@@ -11,19 +11,23 @@ exec(open('django_mako_plus/version.py').read())
 VERSION = __version__
 
 CLASSIFIERS = [
-  'Framework :: Django',
-  'Intended Audience :: Developers',
-  'License :: OSI Approved :: Apache Software License',
-  'Operating System :: OS Independent',
-  'Topic :: Software Development',
-  'Programming Language :: Python :: 3.2',
-  'Programming Language :: Python :: 3.3',
-  'Programming Language :: Python :: 3.4',
-  'Programming Language :: Python :: 3.5',
+    'Development Status :: 5 - Production/Stable',
+    'Programming Language :: Python :: 3 :: Only',
+    'Framework :: Django',
+    'Framework :: Django :: 1.10',
+    'Framework :: Django :: 1.4',
+    'Framework :: Django :: 1.5',
+    'Framework :: Django :: 1.6',
+    'Framework :: Django :: 1.7',
+    'Framework :: Django :: 1.8',
+    'Intended Audience :: Developers',
+    'License :: OSI Approved :: Apache Software License',
+    'Operating System :: OS Independent',
+    'Topic :: Software Development',
 ]
 install_requires = [
-  'django >= 1.8.0',
-  'mako >= 1.0.0',
+    'django >= 1.8.0',
+    'mako >= 1.0.0',
 ]
 
 # remove the __pycache__ directories since the ones in project_template seems to stick around
@@ -48,9 +52,9 @@ walk(MODULE_NAME)
 data_files = []
 # add the readme/license
 data_files.extend([
-  ('', [ 'readme.md' ]),
-  ('', [ 'readme.txt' ]),
-  ('', [ 'license.txt' ]),
+    ('', [ 'readme.md' ]),
+    ('', [ 'readme.txt' ]),
+    ('', [ 'license.txt' ]),
 ])
 
 # add the app_template/ and package_template/ directory
@@ -65,14 +69,14 @@ for template_dir in ( 'app_template', 'project_template' ):
         package_data_files.append(os.path.join(root[len(MODULE_NAME)+1:], fname))
 
 # read the long description if sdist
-description = 'Django Mako Connector'
+description = 'Django+Mako: Advanced, mature connector for Mako templates'
 long_description = description
 if len(sys.argv) > 1 and sys.argv[1] == 'sdist':
-  long_description = 'Combines Django framework and Mako templating engine, plus a few bonuses.'
+  long_description = open('readme.txt').read()
 
 # run the setup
 setup(
-  name=MODULE_NAME,
+  name='django-mako-plus',
   description=description,
   long_description=long_description,
   version=VERSION,
