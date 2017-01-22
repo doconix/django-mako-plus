@@ -1216,7 +1216,7 @@ Reload your browser page and try the button.  It should reload the time *from th
 
 All right, there **is** a shortcut, and a good one at that. The last section showed you how to create an ajax endpoint view.  Since modern web pages have many little ajax calls thoughout their pages, the framework allows you to put several web-accessible methods **in the same .py file**.
 
-Let's get rid of `homepage/templates/index_time.py`.  That's right, just delete the file.  Now rename `homepage/templates/index_time.html` to `homepage/views/index.gettime.html`.  This rename of the html file isn't actually necessary, but it's a nice way to keep the view and template names consistent.
+Let's get rid of `homepage/views/index_time.py`.  That's right, just delete the file.  Now rename `homepage/templates/index_time.html` to `homepage/templates/index.gettime.html`.  This rename of the html file isn't actually necessary, but it's a nice way to keep the view and template names consistent.
 
 Open `homepage/views/index.py` and add the following to the end of the file:
 
