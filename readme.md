@@ -1273,7 +1273,7 @@ or a Python-level block (see the Mako docs for the difference):
 %>
 ```
 
-There may be some modules, such as `re` or `decimal` that are so useful you want them available in every template of your site.  In settings.py, simply add these to the `DEFAULT_TEMPLATE_IMPORTS` variable:
+There may be some modules, such as `re` or `decimal` that are so useful you want them available in every template of your site.  In settings.py, add these to the `DEFAULT_TEMPLATE_IMPORTS` variable:
 
 ```python
 DEFAULT_TEMPLATE_IMPORTS = [
@@ -1411,7 +1411,7 @@ The solution is to run both commands.  Using the options of the two commands, yo
 
 ```
 python3 manage.py collectstatic
-python3 manage.py dmp_collectstatic
+python3 manage.py dmp_collectstatic --overwrite
 ```
 The above two commands will use both methods to bring files into your `/static/` folder.  You might get some duplication of files, but the output of the commands are different enough that it should work without issues.
 
@@ -1421,13 +1421,13 @@ The above two commands will use both methods to bring files into your `/static/`
 
 Redirecting the browser is common in today's sites.  For example, during form submissions, web applications often redirect the browser to the *same* page after a form submission (and handling with a view)--effectively switching the browser from its current POST to a regular GET.  If the user hits the refresh button within his or her browser, the page simply gets refreshed without the form being submitted again. It prevents users from being confused when the browser opens a popup asking if the post data should be submitted again.
 
-DMP provides a Javascript-based redirect response and four exception-based redirects.  The first, HttpResponseJavascriptRedirect, sends a regular HTTP 200 OK response that contains Javascript to redirect the browser: `<script>window.location.href="...";</script>`.  Normally, redirecting should be done via Django's built-in HttpResponseRedirect (HTTP 302), but there are times when a normal 302 doesn't do what you need.  For example, suppose you need to redirect the top-level page from an Ajax response.  Ajax redirects normally only redirects the Ajax itself (not the page that initiated the call), and this default behavior is usually what is needed.  However, there are instances when the entire page must be redirected, even if the call is Ajax-based.  Note that this class doesn't use the <meta> tag or Refresh header method because they aren't predictable within Ajax (for example, JQuery seems to ignore them).
+DMP provides a Javascript-based redirect response and four exception-based redirects.  The first, `HttpResponseJavascriptRedirect`, sends a regular HTTP 200 OK response that contains Javascript to redirect the browser: `<script>window.location.href="...";</script>`.  Normally, redirecting should be done via Django's built-in `HttpResponseRedirect` (HTTP 302), but there are times when a normal 302 doesn't do what you need.  For example, suppose you need to redirect the top-level page from an Ajax response.  Ajax redirects normally only redirects the Ajax itself (not the page that initiated the call), and this default behavior is usually what is needed.  However, there are instances when the entire page must be redirected, even if the call is Ajax-based.  Note that this class doesn't use the <meta> tag or Refresh header method because they aren't predictable within Ajax (for example, JQuery seems to ignore them).
 
-The four exception-based redirects allow you to raise a redirect from anywhere in your code.  For example, the user might not be authenticated correctly, but the code that checks for this can't return a response object.  Since these three are exceptions, they bubbles all the way up the call stack to the DMP router -- where they generate a redirect to the browser.  Exception-based redirects should be used sparingly, but they can help you create clean code.  For example, without the ability to redirect with an exception, you might have to pass and return other variables (often the request/response objects) through many more function calls.
+The four exception-based redirects allow you to raise a redirect from anywhere in your code.  For example, the user might not be authenticated correctly, but the code that checks for this can't return a response object.  Since these three are exceptions, they bubble all the way up the call stack to the DMP router -- where they generate a redirect to the browser.  Exception-based redirects should be used sparingly, but they can help you create clean code.  For example, without the ability to redirect with an exception, you might have to pass and return other variables (often the request/response objects) through many more function calls.
 
-As you might expect, RedirectException sends a normal 302 redirect and PermanentRedirectException sends a permanent 301 redirect.  JavascriptRedirectException sends a redirect HttpResponseJavascriptRedirect as just described.
+As you might expect, `RedirectException` sends a normal 302 redirect and `PermanentRedirectException` sends a permanent 301 redirect.  `JavascriptRedirectException` sends a redirect `HttpResponseJavascriptRedirect` as described above.
 
-The fourth exception, InternalRedirectException, is simpler and faster: it restarts the routing process with a different view/template within the *current* request, without changing the browser url.  Internal redirect exceptions are rare and shouldn't be abused. An example might be returning an "upgrade your browser" page to a client; since the user has an old browser, a regular 302 redirect might not work the way you expect.  Redirecting internally is much safer because your server stays in control the entire time.
+The fourth exception, `InternalRedirectException`, is simpler and faster: it restarts the routing process with a different view/template within the *current* request, without changing the browser url.  Internal redirect exceptions are rare and shouldn't be abused. An example might be returning an "upgrade your browser" page to a client; since the user has an old browser, a regular 302 redirect might not work the way you expect.  Redirecting internally is much safer because your server stays in control the entire time.
 
 The following code shows examples of different methods if redirection:
 
@@ -1473,7 +1473,7 @@ At MyEducator, we've been through all of them at various levels of testing and p
 
 One other decision you'll have to make is which database use.  I'm excluding the "big and beefies" like Oracle or DB2.  Those with sites that need these databases already know who they are.  Most of you will be choosing between MySQL, PostgreSQL, and perhaps another mid-level database.
 
-In choosing between these mid-level databases, you'll find that many, if not most, of the Django developers use PostgreSQL.  The system is likely tested best and first on PG.  We started on MySQL, and we moved to PG after experiencing a few problems.  Since deploying on PG, things have been amazingly smooth.
+In choosing databases, you'll find that many, if not most, of the Django developers use PostgreSQL.  The system is likely tested best and first on PG.  We started on MySQL, and we moved to PG after experiencing a few problems.  Since deploying on PG, things have been amazingly smooth.
 
 Your mileage may vary with everything in this section.  Do your own testing and take it all as advice only.  Best of luck.
 
@@ -1498,6 +1498,7 @@ are available throughout the request:
 * `request.dmp_router_app`: The Django application specified in the URL.  In the URL `http://www.server.com/calculator/index/1/2/3`, the `dmp_router_app` is the string "calculator".
 * `request.dmp_router_page`: The name of the Python module specified in the URL.  In the URL `http://www.server.com/calculator/index/1/2/3`, the `dmp_router_page` is the string "index".  In the URL `http://www.server.com/calculator/index.somefunc/1/2/3`, the `dmp_router_page` is still the string "index".
 * `request.dmp_router_function`: The name of the function within the module that will be called, even if it is not specified in the URL.  In the URL `http://www.server.com/calculator/index/1/2/3`, the `dmp_router_function` is the string "process_request" (the default function).  In the URL `http://www.server.com/calculator/index.somefunc/1/2/3`, the `dmp_router_page` is the string "somefunc".
+* `request.dmp_router_fallback`: The fallback template that is rendered if the page.function is not found.  This variable is set even if it is not used.
 * `request.dmp_router_module`: The name of the real Python module specified in the URL, as it will be imported into the runtime module space.  In the URL `http://www.server.com/calculator/index/1/2/3`, the `dmp_router_module` is the string "calculator.views.index".
 * `request.dmp_router_class`: The name of the class if the router sees that the "function" is actually a class-based view.  None otherwise.
 * `request.urlparams`: A list of parameters specified in the URL.  See the section entitled "URL Parameters" above for more information.
@@ -1512,7 +1513,7 @@ Suppose your project requires a different URL pattern than the normal `/app/page
 
 The first method is done with named parameters, and it is the "normal" way to customize the url pattern.  Instead of including the default`django_mako_plus.urls` module in your `urls.py` file, you can instead create the patterns manually.  Start with the [patterns in the DMP source](https://github.com/doconix/django-mako-plus/blob/master/django_mako_plus/urls.py) and modify them as needed.
 
-The following is one of the URL patterns, modified to include the `userid` parameter:
+The following is one of the URL patterns, modified to include the `userid` parameter in between the app and page:
 
 ```
 url(r'^(?P<dmp_router_app>[_a-zA-Z0-9]+)/(?P<userid>\d+)/(?P<dmp_router_page>[_a-zA-Z0-9]+)/?(?P<urlparams>.*)$', route_request, name='DMP - /app/page'),
@@ -1528,14 +1529,18 @@ def process_request(request, userid):
 
 DMP doesn't use the positional index of the arguments, so you can rearrange patterns as needed. However, you must use named parameters for both DMP and your custom parameters (Django doesn't allow both named and positional parameters in a single pattern).
 
+You can also "hard code" the app or page name in a given pattern.  Suppose you want urls entirely made of numbers (without any slashes) to go the user app:  `/user/views/account.py`.  The pattern would hard code the app and page as [extra options](https://docs.djangoproject.com/en/1.10/topics/http/urls/#passing-extra-options-to-view-functions):
+
+```
+url(r'^(\d+)$', route_request, { 'dmp_router_app': 'user', 'dmp_router_page': 'account' }, name='User Account'),
+```
+
 Use the following named parameters in your patterns to tell DMP which app, page, and function to call:
 
 * `(?P<dmp_router_app>[_a-zA-Z0-9]+)` is the app name.  If omitted, it is set to `DEFAULT_APP` in settings.
 * `(?P<dmp_router_page>[_a-zA-Z0-9]+)` is the view module name.  If omitted, it is set to `DEFAULT_APP` in settings.
 * `(?P<dmp_router_function>[_a-zA-Z0-9]+)` is the app name.  If omitted, it is set to `process_request`.
-* `(?P<urlparams>.*)` is the url parameters.  This value is split on the slash `/` to form the `request.urlparams` list.  If omitted, it is set to and empty list `[]`.
-
-> DMP uses a custom RegexURLPattern object, `DMPRegexPattern`, which not only matches on the pattern, but it also requires the `dmp_router_app` parameter to be a DMP-enabled app for the pattern to match.  If you use this parameter in your custom patterns, you may want to consider using this enhanced pattern object.
+* `(?P<urlparams>.*)` is the url parameters, and it should normally span multiple slashes.  The default patterns set this value to anything after the page name.  This value is split on the slash `/` to form the `request.urlparams` list.  If omitted, it is set to the empty list `[]`.
 
 ### URL Patterns: Take 2
 
