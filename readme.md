@@ -1216,7 +1216,7 @@ Reload your browser page and try the button.  It should reload the time *from th
 
 All right, there **is** a shortcut, and a good one at that. The last section showed you how to create an ajax endpoint view.  Since modern web pages have many little ajax calls thoughout their pages, the framework allows you to put several web-accessible methods **in the same .py file**.
 
-Let's get rid of `homepage/views/index_time.py`.  That's right, just delete the file.  Now rename `homepage/views/index_time.html` to `homepage/views/index.gettime.html`.  This rename of the html file isn't actually necessary, but it's a nice way to keep the view and template names consistent.
+Let's get rid of `homepage/templates/index_time.py`.  That's right, just delete the file.  Now rename `homepage/templates/index_time.html` to `homepage/views/index.gettime.html`.  This rename of the html file isn't actually necessary, but it's a nice way to keep the view and template names consistent.
 
 Open `homepage/views/index.py` and add the following to the end of the file:
 
@@ -1226,7 +1226,7 @@ def gettime(request):
     context = {
         'now': datetime.now(),
     }
-    return dmp_render(request, 'index.time.html', context)
+    return dmp_render(request, 'index.gettime.html', context)
 ```
 
 Note the function is decorated with `@view_function`, and it contains the function body from our now-deleted `index_time.py`.  The framework recognizes **any** function with this decorator as an available endpoint for urls, not just the hard-coded `process_request` function.  In other words, you can actually name your view methods any way you like, as long as you follow the pattern described in this section.
