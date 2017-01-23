@@ -1549,7 +1549,7 @@ Use the following named parameters in your patterns to tell DMP which app, page,
 
 * `(?P<dmp_router_app>[_a-zA-Z0-9]+)` is the app name.  If omitted, it is set to `DEFAULT_APP` in settings.
 * `(?P<dmp_router_page>[_a-zA-Z0-9]+)` is the view module name.  If omitted, it is set to `DEFAULT_APP` in settings.
-* `(?P<dmp_router_function>[_a-zA-Z0-9]+)` is the app name.  If omitted, it is set to `process_request`.
+* `(?P<dmp_router_function>[_a-zA-Z0-9\.]+)` is the app name.  If omitted, it is set to `process_request`.
 * `(?P<urlparams>.*)` is the url parameters, and it should normally span multiple slashes.  The default patterns set this value to anything after the page name.  This value is split on the slash `/` to form the `request.urlparams` list.  If omitted, it is set to the empty list `[]`.
 
 ### URL Patterns: Take 2

@@ -63,7 +63,7 @@ class RequestInitMiddleware(MiddlewareMixin):
         See django_mako_plus/urls.py for the DMP standard patterns.  For example, one pattern
         specifies the router app, page, function, and urlparams: /app/page.function/urlparams
 
-            ^(?P<dmp_router_app>[_a-zA-Z0-9]+)/(?P<dmp_router_page>[_a-zA-Z0-9]+)\.(?P<dmp_router_function>[_a-zA-Z0-9]+)/?(?P<urlparams>.*)$
+            ^(?P<dmp_router_app>[_a-zA-Z0-9]+)/(?P<dmp_router_page>[_a-zA-Z0-9]+)\.(?P<dmp_router_function>[_a-zA-Z0-9\.]+)/?(?P<urlparams>.*)$
 
         As view middleware, this function runs just before the router.route_request is called.
         '''
@@ -77,6 +77,7 @@ class RequestInitMiddleware(MiddlewareMixin):
         request.dmp_router_function = view_kwargs.pop('dmp_router_function', None)
         if request.dmp_router_function:
             request.dmp_router_fallback = '{}.{}.html'.format(request.dmp_router_page, request.dmp_router_function)
+            request.dmp_router_function = request.dmp_router_function.replace('.', '_')  # period cannot be in python functions, but we allow in the url and change to underscore
         else:
             request.dmp_router_fallback = '{}.html'.format(request.dmp_router_page)
             request.dmp_router_function = 'process_request'
