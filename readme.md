@@ -1498,10 +1498,10 @@ are available throughout the request:
 * `request.dmp_router_app`: The Django application specified in the URL.  In the URL `http://www.server.com/calculator/index/1/2/3`, the `dmp_router_app` is the string "calculator".
 * `request.dmp_router_page`: The name of the Python module specified in the URL.  In the URL `http://www.server.com/calculator/index/1/2/3`, the `dmp_router_page` is the string "index".  In the URL `http://www.server.com/calculator/index.somefunc/1/2/3`, the `dmp_router_page` is still the string "index".
 * `request.dmp_router_function`: The name of the function within the module that will be called, even if it is not specified in the URL.  In the URL `http://www.server.com/calculator/index/1/2/3`, the `dmp_router_function` is the string "process_request" (the default function).  In the URL `http://www.server.com/calculator/index.somefunc/1/2/3`, the `dmp_router_page` is the string "somefunc".
-* `request.dmp_router_fallback`: The fallback template that is rendered if the page.function is not found.  This variable is set even if it is not used.
 * `request.dmp_router_module`: The name of the real Python module specified in the URL, as it will be imported into the runtime module space.  In the URL `http://www.server.com/calculator/index/1/2/3`, the `dmp_router_module` is the string "calculator.views.index".
 * `request.dmp_router_class`: The name of the class if the router sees that the "function" is actually a class-based view.  None otherwise.
 * `request.urlparams`: A list of parameters specified in the URL.  See the section entitled "URL Parameters" above for more information.
+* `request.dmp_router_callback`: The view callable (function, method, etc.) to be called by the router.  Of all the variables listed here, this is the one that the router actually uses directly to make the view call.  The other variables are only used to get a reference to this callback.
 
 
 
@@ -1516,7 +1516,12 @@ The first method is done with named parameters, and it is the "normal" way to cu
 The following is one of the URL patterns, modified to include the `userid` parameter in between the app and page:
 
 ```
-url(r'^(?P<dmp_router_app>[_a-zA-Z0-9]+)/(?P<userid>\d+)/(?P<dmp_router_page>[_a-zA-Z0-9]+)/?(?P<urlparams>.*)$', route_request, name='DMP - /app/page'),
+from django_mako_plus import route_request
+urlpatterns = [
+    ...
+    url(r'^(?P<dmp_router_app>[_a-zA-Z0-9]+)/(?P<userid>\d+)/(?P<dmp_router_page>[_a-zA-Z0-9]+)/?(?P<urlparams>.*)$', route_request, name='DMP - /app/page'),
+    ...
+]
 ```
 
 Then, in your process_request method, be sure to include the userid parameter.  This is according to the standard Django documentation with named parameters:
@@ -1529,10 +1534,15 @@ def process_request(request, userid):
 
 DMP doesn't use the positional index of the arguments, so you can rearrange patterns as needed. However, you must use named parameters for both DMP and your custom parameters (Django doesn't allow both named and positional parameters in a single pattern).
 
-You can also "hard code" the app or page name in a given pattern.  Suppose you want urls entirely made of numbers (without any slashes) to go the user app:  `/user/views/account.py`.  The pattern would hard code the app and page as [extra options](https://docs.djangoproject.com/en/1.10/topics/http/urls/#passing-extra-options-to-view-functions):
+You can also "hard code" the app or page name in a given pattern.  Suppose you want urls entirely made of numbers (without any slashes) to go the user app:  `/user/views/account.py`.  The pattern would hard code the app and page as [extra options](https://docs.djangoproject.com/en/1.10/topics/http/urls/#passing-extra-options-to-view-functions).  In urls.py:
 
-```
-url(r'^(\d+)$', route_request, { 'dmp_router_app': 'user', 'dmp_router_page': 'account' }, name='User Account'),
+```python
+from django_mako_plus import route_request
+urlpatterns = [
+    ...
+    url(r'^(?P<userid>\d+)$', route_request, { 'dmp_router_app': 'user', 'dmp_router_page': 'account' }, name='User Account'),
+    ...
+]
 ```
 
 Use the following named parameters in your patterns to tell DMP which app, page, and function to call:

@@ -6,9 +6,9 @@ from django.template import TemplateDoesNotExist, TemplateSyntaxError
 
 from .exceptions import InternalRedirectException, RedirectException
 from .signals import dmp_signal_pre_process_request, dmp_signal_post_process_request, dmp_signal_internal_redirect_exception, dmp_signal_redirect_exception
+from .template import TemplateViewFunction
 from .util import get_dmp_instance, get_dmp_app_configs, log, DMP_OPTIONS
-from .util import DMP_VIEW_ERROR, DMP_VIEW_FUNCTION, DMP_VIEW_CLASS, DMP_VIEW_TEMPLATE
-from .util import URLParamList
+from .util import DMP_VIEW_ERROR, DMP_VIEW_FUNCTION, DMP_VIEW_CLASS_METHOD, DMP_VIEW_TEMPLATE
 
 import os, os.path, re, mimetypes, sys, logging, pkgutil
 from urllib.parse import unquote
@@ -24,27 +24,20 @@ def route_request(request, *args, **kwargs):
     '''
     The main router for all calls coming in to the system.  Patterns in urls.py should call this function.
     '''
-    # first try going to the view function for this request
-    # we look for a views/name.py file where name is the same name as the HTML file
-    response = None
+    # ensure we have a dmp_router_callback variable on request
+    if getattr(request, 'dmp_router_callback', None) is None:
+        raise ImproperlyConfigured("Variable request.dmp_router_callback does not exist (check MIDDLEWARE for `django_mako_plus.RequestInitMiddleware`).")
 
-    while True: # enables the InternalRedirectExceptions to loop around
+    # if we had a view not found, raise a 404
+    if isinstance(request.dmp_router_callback, ViewDoesNotExist) or request.dmp_router_callback._dmp_view_type is DMP_VIEW_ERROR:
+        log.error(str(request.dmp_router_callback))
+        raise Http404
+
+    # wrap to enable the InternalRedirectExceptions to loop around
+    response = None
+    while True:
         # an outer try that catches the redirect exceptions
         try:
-
-            # get the function object - the return of get_view_function might be a function, a class-based view, or a template
-            # get_view_function does some magic to make all of these act like a regular view function
-            try:
-                func_obj, func_type = get_dmp_instance().get_view_function(request.dmp_router_app, request.dmp_router_module, request.dmp_router_function, request.dmp_router_fallback)
-            except ViewDoesNotExist as e:
-                log.error(str(e))
-                raise Http404
-
-            # adjust the request fields for special function types
-            if func_type == DMP_VIEW_CLASS:
-                request.dmp_router_class = request.dmp_router_function
-                request.dmp_router_function = request.method.lower()
-
             # output the variables so the programmer can debug where this is routing
             if log.isEnabledFor(logging.INFO):
                 log.info('processing: app={}, page={}, func={}, urlparams={}'.format(request.dmp_router_app, request.dmp_router_page, request.dmp_router_function, request.urlparams))
@@ -55,15 +48,17 @@ def route_request(request, *args, **kwargs):
                     if isinstance(ret_response, (HttpResponse, StreamingHttpResponse)):
                         return ret_response
 
-            # call view function with any remaining kwargs
+            # log the view
             if log.isEnabledFor(logging.INFO):
-                if func_type == DMP_VIEW_FUNCTION:
-                    log.info('calling view function {}.{}'.format(request.dmp_router_module, request.dmp_router_function))
-                elif func_type == DMP_VIEW_CLASS:
+                if request.dmp_router_callback._dmp_view_type is DMP_VIEW_CLASS_METHOD:
                     log.info('calling class-based view function {}.{}.{}'.format(request.dmp_router_module, request.dmp_router_class, request.dmp_router_function))
-                elif func_type == DMP_VIEW_TEMPLATE:
+                elif request.dmp_router_callback._dmp_view_type is DMP_VIEW_TEMPLATE:
                     log.info('view function {}.{} not found; rendering template {}'.format(request.dmp_router_module, request.dmp_router_function, request.dmp_router_fallback))
-            response = func_obj(request, **kwargs)
+                else: # assume a view function
+                    log.info('calling view function {}.{}'.format(request.dmp_router_module, request.dmp_router_function))
+
+            # call view function with any args and any remaining kwargs
+            response = request.dmp_router_callback(request, *args, **kwargs)
 
             # send the post-signal
             if DMP_OPTIONS.get('SIGNALS', False):
@@ -104,7 +99,7 @@ def route_request(request, *args, **kwargs):
             return e.get_response(request)
 
     # the code should never get here
-    raise Exception("Django-Mako-Plus router error: The route_request() function should not have been able to get to this point.  Please notify the owner of the DMP project.  Thanks.")
+    raise Exception("Django-Mako-Plus error: The route_request() function should not have been able to get to this point.  Please notify the owner of the DMP project.  Thanks.")
 
 
 
@@ -133,7 +128,7 @@ def view_function(f):
     # Rather than the usual inner function pattern, I'm simply setting a flag on the
     # function to signify that it is callable.  The router checks this flag
     # before calling the function.
-    f._dmp_view_function = True
+    f._dmp_view_type = DMP_VIEW_FUNCTION
     return f
 
 

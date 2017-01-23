@@ -1,18 +1,18 @@
 from django.apps import apps, AppConfig
 from django.conf import settings
 from django.conf.urls import url
-from django.core.exceptions import ImproperlyConfigured, ViewDoesNotExist
+from django.core.exceptions import ImproperlyConfigured
 from django.template import TemplateDoesNotExist, engines, TemplateSyntaxError
 from django.template.backends.base import BaseEngine
 from django.template.context import _builtin_context_processors
 from django.utils.module_loading import import_string
 from django.views.generic import View
 
-from .exceptions import InternalRedirectException, RedirectException
+from .exceptions import InternalRedirectException, RedirectException, DMPViewDoesNotExist
 from .signals import dmp_signal_pre_render_template, dmp_signal_post_render_template, dmp_signal_redirect_exception
-from .template import MakoTemplateLoader, MakoTemplateAdapter, template_view_function
+from .template import MakoTemplateLoader, MakoTemplateAdapter, TemplateViewFunction
 from .util import get_dmp_instance, get_dmp_app_configs, log, DMP_OPTIONS, DMP_INSTANCE_KEY
-from .util import DMP_VIEW_ERROR, DMP_VIEW_FUNCTION, DMP_VIEW_CLASS, DMP_VIEW_TEMPLATE
+from .util import DMP_VIEW_FUNCTION, DMP_VIEW_CLASS_METHOD
 
 from mako.template import Template
 
@@ -162,30 +162,28 @@ class MakoTemplates(BaseEngine):
         If not found, it returns the view function for the fallback_template_name within app_name.
         If still not found, raises a ViewDoesNotExist exception.
 
-        Regardless of the type of view found (function, class-based, fallback template),
-        the tuple ( view_function, function_type ) is returned.
-
         This method uses a cache for a significant speedup.  The cache use is thread safe.
         It primarily used by the DMP router.
         '''
         # get the function (or error) from the cache
         cache_key = ( app_name, module_name, function_name )
         try:
-            func_obj, func_type = self.view_cache[cache_key]
+            return self.view_cache[cache_key]
         except KeyError:
             # acquire the lock and try the cache again (another thread might have put it in cache while we are waiting for lock)
             with self.rlock:
                 try:
-                    func_obj, func_type = self.view_cache[cache_key]
+                    return self.view_cache[cache_key]
                 except KeyError:  # really not in the cache, so let's go get it
                     # check if the module exists. i'm not using import_module to know if it exists because it fails on things like syntax error, and the programmer should see these
-                    if find_spec(module_name):
+                    func_obj = None
+                    try:
                         module_obj = import_module(module_name)
                         func_obj = getattr(module_obj, function_name, None)
-                        func_type = DMP_VIEW_FUNCTION
-                    else:
-                        func_obj = None
-                        func_type = DMP_VIEW_ERROR
+                        if func_obj == None:
+                            func_obj = DMPViewDoesNotExist('Module {} found successfully, but view function {} is not defined in the module.'.format(module_name, function_name))
+                    except ImportError:
+                        pass
 
                     # check for not found, no @view_function, View subclass
                     if func_obj == None:
@@ -193,31 +191,27 @@ class MakoTemplates(BaseEngine):
                         try:
                             dmp_loader = self.get_template_loader(app_name)
                             template = dmp_loader.get_template(fallback_template_name)
-                            func_obj = template_view_function(template)
-                            func_type = DMP_VIEW_TEMPLATE
+                            func_obj = TemplateViewFunction(template)
                         except TemplateDoesNotExist as e:
-                            func_obj = ViewDoesNotExist('View function {}.{} not found, and fallback template {} not found.'.format(module_name, function_name, fallback_template_name))
-                            func_type = DMP_VIEW_ERROR
+                            func_obj = DMPViewDoesNotExist('View function {}.{} not found, and fallback template {} not found.'.format(module_name, function_name, fallback_template_name))
 
                     elif isclass(func_obj) and issubclass(func_obj, View):
                         # this Django method wraps the view class with a function, so now we can treat it like a regular dmp view function
                         func_obj = func_obj.as_view()
-                        func_type = DMP_VIEW_CLASS
+                        func_obj._dmp_view_type = DMP_VIEW_CLASS_METHOD  # have to monkey patch in this case because we don't control the as_view() method of View
 
-                    elif getattr(func_obj, '_dmp_view_function', 0) !=  DMP_VIEW_FUNCTION:
-                        # we assume a regular function at this point, so if it doesn't have the decorator, we can't continue
-                        func_obj = ViewDoesNotExist('View function {}.{} found successfully, but it must be decorated with @view_function.  Note that if you have multiple decorators on a function, the @view_function decorator must be listed first.'.format(module_name, function_name))
-                        func_type = DMP_VIEW_ERROR
+                    # the function must be DMP_VIEW_* (see util.py)
+                    if getattr(func_obj, '_dmp_view_type', None) == None:
+                        func_obj = DMPViewDoesNotExist('View function {}.{} found successfully, but it must be decorated with @view_function.  Note that if you have multiple decorators on a function, the @view_function decorator must be listed first.'.format(module_name, function_name))
 
                     # cache the result
-                    self.view_cache[cache_key] = ( func_obj, func_type )
+                    self.view_cache[cache_key] = func_obj
 
-        # if we had a error, raise it
-        if func_type == DMP_VIEW_ERROR:
-            raise func_obj
+                    # return the obj!
+                    return func_obj
 
-        # otherwise, return!
-        return ( func_obj, func_type )
+        # the code should never be able to get here
+        raise Exception("Django-Mako-Plus error: The get_view_function() function should not have been able to get to this point.  Please notify the owner of the DMP project.  Thanks.")
 
 
     def get_template(self, template_name):

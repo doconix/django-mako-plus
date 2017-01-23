@@ -10,6 +10,7 @@ from mako.template import Template
 from .exceptions import InternalRedirectException, RedirectException
 from .signals import dmp_signal_pre_render_template, dmp_signal_post_render_template, dmp_signal_redirect_exception
 from .util import get_dmp_instance, log, DMP_OPTIONS
+from .util import DMP_VIEW_TEMPLATE
 
 import os, os.path, sys, mimetypes, logging
 
@@ -245,15 +246,15 @@ class MakoTemplateAdapter(object):
 ###   function.
 ###
 
-def template_view_function(template):
+class TemplateViewFunction(object):
     '''
     This is used in engine.get_view_function to make a MakoTemplateAdapter
     object look like a view function.
-
-    This is programmed similar to a decorator.  The outer function
-    keeps a reference to the template.  The inner function is
-    what is actually called.
     '''
-    def wrap(request, **kwargs):
-        return template.render_to_response(request=request, context=kwargs)
-    return wrap
+    _dmp_view_type = DMP_VIEW_TEMPLATE
+
+    def __init__(self, template):
+        self.template = template
+
+    def __call__(self, request, *args, **kwargs):
+        return self.template.render_to_response(request=request, context=kwargs)

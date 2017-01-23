@@ -1,4 +1,5 @@
 from django.core.exceptions import ImproperlyConfigured
+from django.views.generic import View
 from urllib.parse import unquote
 
 # try to import MiddlewareMixIn (Django 1.10+)
@@ -8,12 +9,17 @@ except ImportError:
     # create a dummy MiddlewareMixin if older Django
     MiddlewareMixin = object
 
+from .router import route_request
 from .util import URLParamList, get_dmp_instance, DMP_OPTIONS
+from .util import DMP_VIEW_CLASS_METHOD
 
 
 ##########################################################
 ###   Middleware the prepares the request for
 ###   use with the controller.
+
+EMPTY_URLPARAMS = URLParamList()
+
 
 class RequestInitMiddleware(MiddlewareMixin):
     '''
@@ -23,6 +29,24 @@ class RequestInitMiddleware(MiddlewareMixin):
     This class must be included in settings.py -> MIDDLEWARE.
     '''
 
+    def process_request(self, request):
+        '''
+        Adds stubs for the DMP custom variables to the request object.
+
+        We do this early in the middleware process because process_view() below gets called
+        *after* URL resolution.  If an exception occurs before that (a 404, a middleware exception),
+        the variables won't be put on the request object.  Therefore, we put stubs on it at the
+        earliest possible place so they exist even if we don't get to process_view().
+        '''
+        request.dmp_router_app = None
+        request.dmp_router_page = None
+        request.dmp_router_function = None
+        request.dmp_router_module = None
+        request.dmp_router_class = None
+        request.urlparams = EMPTY_URLPARAMS
+        request.dmp_router_callback = None
+
+
     def process_view(self, request, view_func, view_args, view_kwargs):
         '''
         Adds the following to the request object:
@@ -31,9 +55,9 @@ class RequestInitMiddleware(MiddlewareMixin):
             request.dmp_router_page       The view module (such as "index" for index.py), as a string.
             request.dmp_router_function   The function within the view module to be called (usually "process_request"), as a string.
             request.dmp_router_module     The module path in Python terms (such as homepage.views.index), as a string.
-            request.dmp_router_fallback   The fallback template name if the view does not exist, as a string.
             request.dmp_router_class      This is set to None in this method, but route_request() fills it in, as a string, if a class-based view.
             request.urlparams             A list of the remaining url parts, as a list of strings.  See the tutorial for more information on this parameter.
+            request.dmp_router_callback   The view callable (function, method, etc.) to be called by the router.
 
         Named parameters in the url pattern determines the values of these variables.
         See django_mako_plus/urls.py for the DMP standard patterns.  For example, one pattern
@@ -43,6 +67,10 @@ class RequestInitMiddleware(MiddlewareMixin):
 
         As view middleware, this function runs just before the router.route_request is called.
         '''
+        # if urls.py didn't resolve to DMP, we don't need to set any of these variables
+        if view_func is not route_request:
+            return
+
         # add the variables to the request
         request.dmp_router_app = view_kwargs.pop('dmp_router_app', None) or DMP_OPTIONS.get('DEFAULT_APP', 'homepage')
         request.dmp_router_page = view_kwargs.pop('dmp_router_page', None) or DMP_OPTIONS.get('DEFAULT_PAGE', 'index')
@@ -52,14 +80,29 @@ class RequestInitMiddleware(MiddlewareMixin):
         else:
             request.dmp_router_fallback = '{}.html'.format(request.dmp_router_page)
             request.dmp_router_function = 'process_request'
-        request.dmp_router_class = None  # this is set below if a class-based view
+
+        # add the full module path to the request
+        request.dmp_router_module = '.'.join([ request.dmp_router_app, 'views', request.dmp_router_page ])
 
         # add the url parameters to the request
         # note that I'm not using unquote_plus because the + switches to a space *after* the question mark (in the regular parameters)
         # in the normal url, spaces should be quoted with %20.  Thanks Rosie for the tip.
         request.urlparams = URLParamList(( unquote(s) for s in view_kwargs.pop('urlparams', '').split('/') ))
 
-        # add the full module path to the request
-        request.dmp_router_module = '.'.join([ request.dmp_router_app, 'views', request.dmp_router_page ])
+        # get the function object - the return of get_view_function might be a function, a class-based view, or a template
+        # get_view_function does some magic to make all of these act like a regular view function
+        request.dmp_router_callback = get_dmp_instance().get_view_function(request.dmp_router_app, request.dmp_router_module, request.dmp_router_function, request.dmp_router_fallback)
 
+        # adjust the variable values if a class
+        if request.dmp_router_callback._dmp_view_type == DMP_VIEW_CLASS_METHOD:
+            request.dmp_router_class = request.dmp_router_function
+            request.dmp_router_function = request.method.lower()
 
+        # debugging
+        # print('request.dmp_router_app        ', request.dmp_router_app        )
+        # print('request.dmp_router_page       ', request.dmp_router_page       )
+        # print('request.dmp_router_function   ', request.dmp_router_function   )
+        # print('request.dmp_router_module     ', request.dmp_router_module     )
+        # print('request.dmp_router_class      ', request.dmp_router_class      )
+        # print('request.urlparams             ', request.urlparams             )
+        # print('request.dmp_router_callback   ', request.dmp_router_callback   )
