@@ -4,7 +4,7 @@ from django.core.exceptions import ImproperlyConfigured, ViewDoesNotExist
 from django.http import HttpResponse, StreamingHttpResponse, Http404, HttpResponseRedirect, HttpResponsePermanentRedirect
 from django.template import TemplateDoesNotExist, TemplateSyntaxError
 
-from .exceptions import InternalRedirectException, RedirectException
+from .exceptions import InternalRedirectException, RedirectException, DMPViewDoesNotExist
 from .signals import dmp_signal_pre_process_request, dmp_signal_post_process_request, dmp_signal_internal_redirect_exception, dmp_signal_redirect_exception
 from .template import TemplateViewFunction
 from .util import get_dmp_instance, get_dmp_app_configs, log, DMP_OPTIONS
@@ -24,15 +24,6 @@ def route_request(request, *args, **kwargs):
     '''
     The main router for all calls coming in to the system.  Patterns in urls.py should call this function.
     '''
-    # ensure we have a dmp_router_callback variable on request
-    if getattr(request, 'dmp_router_callback', None) is None:
-        raise ImproperlyConfigured("Variable request.dmp_router_callback does not exist (check MIDDLEWARE for `django_mako_plus.RequestInitMiddleware`).")
-
-    # if we had a view not found, raise a 404
-    if isinstance(request.dmp_router_callback, ViewDoesNotExist) or request.dmp_router_callback._dmp_view_type is DMP_VIEW_ERROR:
-        log.error(str(request.dmp_router_callback))
-        raise Http404
-
     # wrap to enable the InternalRedirectExceptions to loop around
     response = None
     while True:
@@ -40,7 +31,16 @@ def route_request(request, *args, **kwargs):
         try:
             # output the variables so the programmer can debug where this is routing
             if log.isEnabledFor(logging.INFO):
-                log.info('processing: app={}, page={}, func={}, urlparams={}'.format(request.dmp_router_app, request.dmp_router_page, request.dmp_router_function, request.urlparams))
+                log.info('processing: app={}, page={}, module={}, func={}, urlparams={}'.format(request.dmp_router_app, request.dmp_router_page, request.dmp_router_module, request.dmp_router_function, request.urlparams))
+
+            # ensure we have a dmp_router_callback variable on request
+            if getattr(request, 'dmp_router_callback', None) is None:
+                raise ImproperlyConfigured("Variable request.dmp_router_callback does not exist (check MIDDLEWARE for `django_mako_plus.RequestInitMiddleware`).")
+
+            # if we had a view not found, raise a 404
+            if isinstance(request.dmp_router_callback, ViewDoesNotExist) or request.dmp_router_callback._dmp_view_type is DMP_VIEW_ERROR:
+                log.error(str(request.dmp_router_callback))
+                raise Http404
 
             # send the pre-signal
             if DMP_OPTIONS.get('SIGNALS', False):
@@ -81,11 +81,18 @@ def route_request(request, *args, **kwargs):
             # send the signal
             if DMP_OPTIONS.get('SIGNALS', False):
                 dmp_signal_internal_redirect_exception.send(sender=sys.modules[__name__], request=request, exc=ivr)
-            # do the internal redirect
+            # resolve to a function
             request.dmp_router_module = ivr.redirect_module
             request.dmp_router_function = ivr.redirect_function
-            full_module_filename = os.path.normpath(os.path.join(settings.BASE_DIR, request.dmp_router_module.replace('.', '/') + '.py'))
-            log.info('received an InternalViewRedirect to {} -> {}'.format(full_module_filename, request.dmp_router_function))
+            try:
+                module_obj = import_module(request.dmp_router_module)
+                request.dmp_router_callback = getattr(module_obj, request.dmp_router_function, None)
+                if request.dmp_router_callback == None:
+                    request.dmp_router_callback = DMPViewDoesNotExist('Module {} found successfully during internal redirect, but view function {} is not defined in the module.'.format(request.dmp_router_module, request.dmp_router_function))
+            except ImportError:
+                request.dmp_router_callback = DMPViewDoesNotExist('View function {}.{} not found during internal redirect.'.format(request.dmp_router_module, request.dmp_router_function))
+            # do the internal redirect
+            log.info('received an InternalViewRedirect to {} -> {}'.format(request.dmp_router_module, request.dmp_router_function))
 
         except RedirectException as e: # redirect to another page
             if request.dmp_router_class == None:
