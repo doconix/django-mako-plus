@@ -1519,7 +1519,7 @@ The following is one of the URL patterns, modified to include the `userid` param
 from django_mako_plus import route_request
 urlpatterns = [
     ...
-    url(r'^(?P<dmp_router_app>[_a-zA-Z0-9]+)/(?P<userid>\d+)/(?P<dmp_router_page>[_a-zA-Z0-9]+)/?(?P<urlparams>.*)$', route_request, name='DMP - /app/page'),
+    url(r'^(?P<dmp_router_app>[_a-zA-Z0-9\.\-]+)/(?P<userid>\d+)/(?P<dmp_router_page>[_a-zA-Z0-9\.\-]+)/?(?P<urlparams>.*)$', route_request, name='DMP - /app/page'),
     ...
 ]
 ```
@@ -1547,9 +1547,9 @@ urlpatterns = [
 
 Use the following named parameters in your patterns to tell DMP which app, page, and function to call:
 
-* `(?P<dmp_router_app>[_a-zA-Z0-9]+)` is the app name.  If omitted, it is set to `DEFAULT_APP` in settings.
-* `(?P<dmp_router_page>[_a-zA-Z0-9]+)` is the view module name.  If omitted, it is set to `DEFAULT_APP` in settings.
-* `(?P<dmp_router_function>[_a-zA-Z0-9\.]+)` is the app name.  If omitted, it is set to `process_request`.
+* `(?P<dmp_router_app>[_a-zA-Z0-9\-]+)` is the app name.  If omitted, it is set to `DEFAULT_APP` in settings.
+* `(?P<dmp_router_page>[_a-zA-Z0-9\-]+)` is the view module name.  If omitted, it is set to `DEFAULT_APP` in settings.
+* `(?P<dmp_router_function>[_a-zA-Z0-9\.\-]+)` is the function name.  If omitted, it is set to `process_request`.
 * `(?P<urlparams>.*)` is the url parameters, and it should normally span multiple slashes.  The default patterns set this value to anything after the page name.  This value is split on the slash `/` to form the `request.urlparams` list.  If omitted, it is set to the empty list `[]`.
 
 ### URL Patterns: Take 2

@@ -54,20 +54,20 @@ urlpatterns = [
     # these are in order of specificity, with the most specific ones at the top
 
     # /app/page.function/urlparams
-    DMPRegexPattern(r'^(?P<dmp_router_app>[_a-zA-Z0-9]+)/(?P<dmp_router_page>[_a-zA-Z0-9]+)\.(?P<dmp_router_function>[_a-zA-Z0-9\.]+)/?(?P<urlparams>.*)$', route_request, name='DMP - /app/page.function'),
+    DMPRegexPattern(r'^(?P<dmp_router_app>[_a-zA-Z0-9\-]+)/(?P<dmp_router_page>[_a-zA-Z0-9\-]+)\.(?P<dmp_router_function>[_a-zA-Z0-9\.\-]+)/?(?P<urlparams>.*)$', route_request, name='DMP - /app/page.function'),
 
     # /app/page/urlparams
-    DMPRegexPattern(r'^(?P<dmp_router_app>[_a-zA-Z0-9]+)/(?P<dmp_router_page>[_a-zA-Z0-9]+)/?(?P<urlparams>.*)$', route_request, name='DMP - /app/page'),
+    DMPRegexPattern(r'^(?P<dmp_router_app>[_a-zA-Z0-9\-]+)/(?P<dmp_router_page>[_a-zA-Z0-9\-]+)/?(?P<urlparams>.*)$', route_request, name='DMP - /app/page'),
 
     # /app
     # FYI: /app/urlparams can't happen because the first urlparam would be captured as /app/page in the previous pattern
-    DMPRegexPattern(r'^(?P<dmp_router_app>[_a-zA-Z0-9]+)/?$', route_request, name='DMP - /app'),
+    DMPRegexPattern(r'^(?P<dmp_router_app>[_a-zA-Z0-9\-]+)/?$', route_request, name='DMP - /app'),
 
     # /page.function/urlparams
-    url(r'^(?P<dmp_router_page>[_a-zA-Z0-9]+)\.(?P<dmp_router_function>[_a-zA-Z0-9\.]*)/?(?P<urlparams>.*)$', route_request, name='DMP - /page.function'),
+    url(r'^(?P<dmp_router_page>[_a-zA-Z0-9\-]+)\.(?P<dmp_router_function>[_a-zA-Z0-9\.\-]*)/?(?P<urlparams>.*)$', route_request, name='DMP - /page.function'),
 
     # /page/urlparams
-    url(r'^(?P<dmp_router_page>[_a-zA-Z0-9]+)/?(?P<urlparams>.*)$', route_request, name='DMP - /page'),
+    url(r'^(?P<dmp_router_page>[_a-zA-Z0-9\-]+)/?(?P<urlparams>.*)$', route_request, name='DMP - /page'),
 
     # / with nothing else
     # FYI: /urlparams can't happen because it would be captured as /page in the previous pattern
