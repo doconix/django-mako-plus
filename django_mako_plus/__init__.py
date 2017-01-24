@@ -23,10 +23,6 @@ from .router import route_request, view_function
 from .middleware import RequestInitMiddleware
 
 
-# template functions
-from .template import TemplateFilter
-
-
 # the exceptions
 from .exceptions import RedirectException
 from .exceptions import PermanentRedirectException

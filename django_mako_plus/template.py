@@ -1,19 +1,16 @@
 from django.conf import settings
-from django.core.exceptions import ImproperlyConfigured
-from django.http import HttpResponse, Http404
-from django.template import TemplateDoesNotExist, TemplateSyntaxError, Context, RequestContext, engines
+from django.template import TemplateDoesNotExist, TemplateSyntaxError, Context, RequestContext
 
 from mako.exceptions import TopLevelLookupException, TemplateLookupException, CompileException, SyntaxException, html_error_template
 from mako.lookup import TemplateLookup
 from mako.template import Template
-from mako.runtime import supports_caller, capture
 
 from .exceptions import InternalRedirectException, RedirectException
 from .signals import dmp_signal_pre_render_template, dmp_signal_post_render_template, dmp_signal_redirect_exception
 from .util import get_dmp_instance, log, DMP_OPTIONS
 from .util import DMP_VIEW_TEMPLATE
 
-import os, os.path, sys, mimetypes, logging, hashlib
+import os, os.path, sys, mimetypes, logging
 
 
 
@@ -237,65 +234,6 @@ class MakoTemplateAdapter(object):
                 dmp_signal_redirect_exception.send(sender=sys.modules[__name__], request=request, exc=e)
             # send the browser the redirect command
             return e.get_response(request)
-
-
-
-
-############################################################################
-###   Rendering Django template blocks
-
-class TemplateFilter(object):
-    '''
-    A Mako filter that renders a block of text from a different template engine,
-    such as the standard Django engine.
-
-    <%
-        # set up the filter with our context (and optional using='engine')
-        from django_mako_plus import TemplateFilter
-        django = TemplateFilter(context)
-    %>
-
-    ## Simple expression in Django syntax:
-    ${ '{{ name }}' | django }
-
-    ## Embedded code block:
-    <%block filter="django">
-        This block uses Django syntax: {{ var1 }}</h1>
-    </%block>
-
-    '''
-    def __init__(self, context, using='django'):
-        self.context = context
-        self.using = using
-        self.request = context['request'] if isinstance(context, RequestContext) else None
-        # cache the compiled blocks in the template
-        self.mako_template = context['local'].template
-        if not hasattr(self.mako_template, '__ns__render_django'):
-            self.mako_template.__ns__render_django = {}
-
-
-    def __call__(self, template_st):
-        '''
-        Renders the given template_st with the template engine.
-        '''
-        # get the template object, or create and cache it
-        key = hashlib.md5(template_st.encode('utf8'))
-        try:
-            template = self.mako_template.__ns__render_django[key]
-        except KeyError:
-            engine = engines[self.using]
-            template = engine.from_string(template_st)
-            self.mako_template.__ns__render_django[key] = template
-
-        # create a copy the context
-        dcontext = dict(self.context)
-
-        # output the variables so the programmer can debug where this is routing
-        if log.isEnabledFor(logging.DEBUG):
-            log.info('processing: embedded render_django block using "{}" template engine'.format(self.using))
-
-        # render the template with the context
-        return template.render(context=dcontext, request=self.request)
 
 
 
