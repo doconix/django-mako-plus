@@ -15,9 +15,9 @@
 pip3 install django mako django-mako-plus
 
 # create a new project with a 'homepage' app
-python3 -m django startproject --template=https://cdn.rawgit.com/doconix/django-mako-plus/master/project_template.zip mysite
+python3 -m django startproject --template=http://cdn.rawgit.com/doconix/django-mako-plus/master/project_template.zip mysite
 cd mysite
-python3 manage.py startapp --template=https://cdn.rawgit.com/doconix/django-mako-plus/master/app_template.zip --extension=py,htm,html homepage
+python3 manage.py startapp --template=http://cdn.rawgit.com/doconix/django-mako-plus/master/app_template.zip --extension=py,htm,html homepage
 
 # open mysite/settings.py and append 'homepage' to the INSTALLED_APPS list
 INSTALLED_APPS = [
@@ -341,7 +341,7 @@ ${ random.randint(1, 10) }</code></pre></td>
 
 # Installation
 
-Note: If you need to use DMP 2.7, follow the [old installation instructions](https://github.com/doconix/django-mako-plus/blob/8fb0ccf942546b7ff241fd877315a18764f2dd3f/readme.md).  Be sure to use `pip3 install django-mako-plus==2.7.1` to get the old DMP codebase.  As of DMP 3.0, Python 2 is no longer supported.
+Note: If you need to use DMP 2.7, follow the [old installation instructions](http://github.com/doconix/django-mako-plus/blob/8fb0ccf942546b7ff241fd877315a18764f2dd3f/readme.md).  Be sure to use `pip3 install django-mako-plus==2.7.1` to get the old DMP codebase.  As of DMP 3.0, Python 2 is no longer supported.
 
 
 
@@ -1479,7 +1479,7 @@ DMP adds a custom header, "Redirect-Exception", to all exception-based redirects
 
 This section has nothing to do with the Django-Mako-Framework, but I want to address a couple issues in hopes that it will save you some headaches.  One of the most difficult decisions in Django development is deciding how to deploy your system.  In particular, there are several ways to connect Django to your web server: mod_wsgi, FastCGI, etc.
 
-At MyEducator, we've been through all of them at various levels of testing and production.  By far, we've had the best success with [uWSGI](https://docs.djangoproject.com/en/dev/howto/deployment/wsgi/uwsgi/).  It is a professional server, and it is stable.
+At MyEducator, we've been through all of them at various levels of testing and production.  By far, we've had the best success with [uWSGI](http://docs.djangoproject.com/en/dev/howto/deployment/wsgi/uwsgi/).  It is a professional server, and it is stable.
 
 One other decision you'll have to make is which database use.  I'm excluding the "big and beefies" like Oracle or DB2.  Those with sites that need these databases already know who they are.  Most of you will be choosing between MySQL, PostgreSQL, and perhaps another mid-level database.
 
@@ -1521,7 +1521,7 @@ Suppose your project requires a different URL pattern than the normal `/app/page
 
 ### URL Patterns: Take 1
 
-The first method is done with named parameters, and it is the "normal" way to customize the url pattern.  Instead of including the default`django_mako_plus.urls` module in your `urls.py` file, you can instead create the patterns manually.  Start with the [patterns in the DMP source](https://github.com/doconix/django-mako-plus/blob/master/django_mako_plus/urls.py) and modify them as needed.
+The first method is done with named parameters, and it is the "normal" way to customize the url pattern.  Instead of including the default`django_mako_plus.urls` module in your `urls.py` file, you can instead create the patterns manually.  Start with the [patterns in the DMP source](http://github.com/doconix/django-mako-plus/blob/master/django_mako_plus/urls.py) and modify them as needed.
 
 The following is one of the URL patterns, modified to include the `userid` parameter in between the app and page:
 
@@ -1544,7 +1544,7 @@ def process_request(request, userid):
 
 DMP doesn't use the positional index of the arguments, so you can rearrange patterns as needed. However, you must use named parameters for both DMP and your custom parameters (Django doesn't allow both named and positional parameters in a single pattern).
 
-You can also "hard code" the app or page name in a given pattern.  Suppose you want urls entirely made of numbers (without any slashes) to go the user app:  `/user/views/account.py`.  The pattern would hard code the app and page as [extra options](https://docs.djangoproject.com/en/1.10/topics/http/urls/#passing-extra-options-to-view-functions).  In urls.py:
+You can also "hard code" the app or page name in a given pattern.  Suppose you want urls entirely made of numbers (without any slashes) to go the user app:  `/user/views/account.py`.  The pattern would hard code the app and page as [extra options](http://docs.djangoproject.com/en/1.10/topics/http/urls/#passing-extra-options-to-view-functions).  In urls.py:
 
 ```python
 from django_mako_plus import route_request
@@ -1606,7 +1606,7 @@ This all works because the `index.html` template extends from the `base.htm` tem
 
 ## Using Django and Jinja2 Tags and Syntax
 
-In most cases, third-party functionality can be called directly from Mako.  For example, use the [Django Paypal](https://django-paypal.readthedocs.io/) form by converting the Django syntax to Mako:
+In most cases, third-party functionality can be called directly from Mako.  For example, use the [Django Paypal](http://django-paypal.readthedocs.io/) form by converting the Django syntax to Mako:
 
 * The docs show: `{{ form.render }}`
 * You use:`${ form.render() }`
@@ -2002,7 +2002,7 @@ See the `django_mako_plus/signals.py` file for all the available signals you can
 ## Translation (Internationalization)
 
 
-If your site needs to be translated into other languages, this section is for you.  I'm sure you are aware that Django has full support for translation to other languages.  If not, you should first read the standard Translation documentation at https://docs.djangoproject.com/en/dev/topics/i18n/translation/.
+If your site needs to be translated into other languages, this section is for you.  I'm sure you are aware that Django has full support for translation to other languages.  If not, you should first read the standard Translation documentation at http://docs.djangoproject.com/en/dev/topics/i18n/translation/.
 
 DMP supports Django's translation functions--with one caveat.  Since Django doesn't know about Mako, it can't translate strings in your Mako files.  DMP fixes this with the `dmp_makemessages` command.  Instead of running `python3 manage.py makemessages` like the Django tutorial shows, run `python3 manage.py dmp_makemessages`.  Since the DMP version is an extension of the standard version, the same command line options apply to both.
 
