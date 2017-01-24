@@ -39,7 +39,7 @@ python3 manage.py runserver
 
 DMP works with Python 3+ and Django 1.8+.
 
-DMP can be used alongside regular Django templates, Jinja2 templates, and other third-party apps.  It plugs in via the regular `urls.py` mechanism, just like any other view.  Be assured that it plays nicely with the other children.
+DMP can be used alongside regular Django templates, Jinja2 templates, and other third-party apps (including embedding these other tags within DMP templates when needed).  It plugs in via the regular `urls.py` mechanism, just like any other view.  Be assured that it plays nicely with the other children.
 
 
 # Table of Contents
@@ -47,10 +47,12 @@ DMP can be used alongside regular Django templates, Jinja2 templates, and other 
 
 - [Use This If You've Said...](#use-this-if-youve-said)
 - [Quick Start](#quick-start)
+- [Open a browser to http://localhost/](#open-a-browser-to-httplocalhost)
+- [Compatability](#compatability)
 - [Table of Contents](#table-of-contents)
 - [Description](#description)
 	- [Where Is DMP Used?](#where-is-dmp-used)
-	- [Why Mako instead of Jinja2, Cheetah, or [insert template language here]?](#why-mako-instead-of-jinja2-cheetah-or-insert-template-language-here)
+	- [Why Mako instead of Jinja2, Cheetah, or <insert template language here>?](#why-mako-instead-of-jinja2-cheetah-or-insert-template-language-here)
 	- [Can I use DMP with other Django apps?](#can-i-use-dmp-with-other-django-apps)
 	- [Comparison with Django Syntax](#comparison-with-django-syntax)
 - [Installation](#installation)
@@ -68,7 +70,6 @@ DMP can be used alongside regular Django templates, Jinja2 templates, and other 
 	- [Installing Django in a Subdirectory](#installing-django-in-a-subdirectory)
 - [Tutorial](#tutorial)
 	- [The DMP Structure](#the-dmp-structure)
-	- [imports](#imports)
 	- [Routing Without urls.py](#routing-without-urlspy)
 	- [Adding a View Function](#adding-a-view-function)
 		- [The Render Functions](#the-render-functions)
@@ -95,8 +96,16 @@ DMP can be used alongside regular Django templates, Jinja2 templates, and other 
 - [Advanced Topics](#advanced-topics)
 	- [Useful Variables](#useful-variables)
 	- [Customize the URL Pattern](#customize-the-url-pattern)
+		- [URL Patterns: Take 1](#url-patterns-take-1)
+		- [URL Patterns: Take 2](#url-patterns-take-2)
 	- [CSRF Tokens](#csrf-tokens)
 	- [Behind the CSS and JS Curtain](#behind-the-css-and-js-curtain)
+	- [Using Django and Jinja2 Tags and Syntax](#using-django-and-jinja2-tags-and-syntax)
+	- [Expression containing Django template syntax (assuming name was created in the view.py)](#expression-containing-django-template-syntax-assuming-name-was-created-in-the-viewpy)
+	- [Full Django code block, with Mako creating the variable first](#full-django-code-block-with-mako-creating-the-variable-first)
+	- [Third-party, crispy form tags (assume my_formset was created in the view.py)](#third-party-crispy-form-tags-assume-myformset-was-created-in-the-viewpy)
+		- [Jinja2, Mustache, Cheetah, and <insert template engine>.](#jinja2-mustache-cheetah-and-insert-template-engine)
+		- [Local Variables](#local-variables)
 	- [Rending Templates the Standard Way: `render()`](#rending-templates-the-standard-way-render)
 	- [Rendering Partial Templates (Ajax!)](#rendering-partial-templates-ajax)
 	- [Sass Integration](#sass-integration)
@@ -114,7 +123,6 @@ DMP can be used alongside regular Django templates, Jinja2 templates, and other 
 - [Where to Now?](#where-to-now)
 
 <!-- /TOC -->
-
 
 # Description
 
@@ -141,7 +149,7 @@ This app was developed at MyEducator.com, primarily by Dr. Conan C. Albrecht <do
 I've been told by some that DMP has a lot in common with Rails.  When I developed DMP, I had never used RoR, but good ideas are good ideas wherever they are found, right? :)
 
 
-## Why Mako instead of Jinja2, Cheetah, or [insert template language here]?
+## Why Mako instead of Jinja2, Cheetah, or <insert template language here>?
 
 Python has several mature, excellent templating languages.  Both Mako and Jinja2 are fairly recent yet mature systems.  Both are screaming fast.  Cheetah is an older system but has quite a bit of traction.  It wasn't a clear choice of one over the rest.
 
@@ -152,11 +160,13 @@ The short answer is I liked Mako's approach the best.  It felt the most Pythonic
 
 ## Can I use DMP with other Django apps?
 
-Yes.  Be assured that DMP plays nicely with the other children.  DMP plugs in as a regular templating engine per the standard Django API.
+Yes. DMP plugs in as a regular templating engine per the standard Django API.
 
-In particular, the hook for most apps is the `urls.py` file.  Just be sure that DMP's line in this file comes *last*.  DMP's line is a wildcard, so it matches everything.  As long as DMP is the last pattern listed, your other apps should run normally.
+The hook for most apps is the `urls.py` file.  Just be sure that DMP's line in this file comes *last*.  DMP's line is a wildcard, so it matches most urls.  As long as the other app urls are listed first, Django will give them preference.
 
 Note also that other apps likely use Django's built-in templating system rather than DMP's Mako templating system.  The two templating systems work fine side by side, so other apps should render fine the normal Django way and your custom apps will render fine with Mako.
+
+Further, if you temporarily need to switch to Django templating syntax, [you can do that with ease](#using-django-and-jinja2-tags-and-syntax).  This allows the use of Django-style tags and syntax right within your Mako code.  No new files needed.
 
 
 ## Comparison with Django Syntax
@@ -1592,6 +1602,53 @@ ${ get_template_css(self, request, context) }
 The first block at the top of the file imports the two functions we'll use.   The next two calls, `get_template_css()` and `get_template_js()` include the `<link>`, `<script>`, and other code based on what it finds.
 
 This all works because the `index.html` template extends from the `base.htm` template.  If you fail to inherit from `base.htm` or `base_ajax.htm`, the `static_renderer` won't be able to include the support files.
+
+
+## Using Django and Jinja2 Tags and Syntax
+
+In most cases, third-party functionality can be called directly from Mako.  For example, use the [Django Paypal](https://django-paypal.readthedocs.io/) form by converting the Django syntax to Mako:
+
+* The docs show: `{{ form.render }}`
+* You use:`${ form.render() }`
+
+However, some third-party apps require real Django syntax, such as the [Crispy Forms](http://django-crispy-forms.readthedocs.io/) library's use of custom tags.  To temporarily enable Django templating, you can include a Django expression or embed an entire block within your Mako template by using a filter.  These filters are included automatically in every DMP template.
+
+Within any template:
+```
+## Expression containing Django template syntax (assuming name was created in the view.py)
+${ '{{ name }}' | django_syntax(context) }
+
+## Full Django code block, with Mako creating the variable first
+<% titles = [ 'First', 'Second', 'Third' ] %>
+<%block filter="django_syntax(context, titles=titles)">
+    {% for title in titles %}
+        <h2>
+            {{ title|upper }}
+        </h2>
+    {% endfor %}
+</%block>
+
+## Third-party, crispy form tags (assume my_formset was created in the view.py)
+<%block filter="django_syntax(context)">
+    {% load crispy_forms_tags %}
+    <form method="post" class="uniForm">
+        {{ my_formset|crispy }}
+    </form>
+</%block>
+```
+
+The `context` parameter passes your context variables to the Django render call.  It is a global Mako variable (available in any template), and it is always included in the filter.  In other words, include `context` every time as shown in the examples above.
+
+### Jinja2, Mustache, Cheetah, and <insert template engine>.
+
+If Jinja2 is needed, replace the filter with `jinja2_syntax(context)` in the above examples.  If another engine is needed, replace the filter with `template_syntax(context, 'engine name')` as specified in `settings.TEMPLATES`.  DMP will render with the appriate engine and put the result in your HTML page.
+
+### Local Variables
+
+Embedded template code has access to any variable passed to your temple (i.e. any variable in the context).  Although not an encouraged practice, variables are sometimes created right in your template, and faithful to the Mako way, are not accessible in embedded blocks.
+
+You can pass locally-created variables as kwargs in the filter call.  This is done with `titles=titles` in the Django code block example above.
+
 
 
 ## Rending Templates the Standard Way: `render()`

@@ -9,6 +9,7 @@ from django.utils.module_loading import import_string
 from django.views.generic import View
 
 from .exceptions import InternalRedirectException, RedirectException, DMPViewDoesNotExist
+from .filters import DMP_TEMPLATE_FILTERS
 from .signals import dmp_signal_pre_render_template, dmp_signal_post_render_template, dmp_signal_redirect_exception
 from .template import MakoTemplateLoader, MakoTemplateAdapter, TemplateViewFunction
 from .util import get_dmp_instance, get_dmp_app_configs, log, DMP_OPTIONS, DMP_INSTANCE_KEY
@@ -96,6 +97,10 @@ class MakoTemplates(BaseEngine):
             DMP_OPTIONS['RUNTIME_SCSS_ARGUMENTS'] = None
         else:
             raise ImproperlyConfigured('The SCSS_BINARY option in Django Mako Plus settings must be a list of arguments.  See the DMP documentation.')
+
+        # set up the template imports
+        DMP_OPTIONS['ALL_TEMPLATE_IMPORTS'] = list(DMP_OPTIONS.get('DEFAULT_TEMPLATE_IMPORTS', []))
+        DMP_OPTIONS['ALL_TEMPLATE_IMPORTS'].extend(DMP_TEMPLATE_FILTERS)
 
         # add a template renderer for each DMP-enabled app
         for app_config in get_dmp_app_configs():

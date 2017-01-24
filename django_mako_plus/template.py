@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.http import HttpResponse, StreamingHttpResponse, Http404, HttpResponseRedirect, HttpResponsePermanentRedirect
 from django.template import TemplateDoesNotExist, TemplateSyntaxError, Context, RequestContext
 
 from mako.exceptions import TopLevelLookupException, TemplateLookupException, CompileException, SyntaxException, html_error_template
@@ -50,7 +51,7 @@ class MakoTemplateLoader:
         self.template_search_dirs.append(settings.BASE_DIR)
 
         # create the actual Mako TemplateLookup, which does the actual work
-        self.tlookup = TemplateLookup(directories=self.template_search_dirs, imports=DMP_OPTIONS.get('DEFAULT_TEMPLATE_IMPORTS'), module_directory=self.cache_root, collection_size=2000, filesystem_checks=settings.DEBUG, input_encoding=DMP_OPTIONS.get('DEFAULT_TEMPLATE_ENCODING', 'utf-8'))
+        self.tlookup = TemplateLookup(directories=self.template_search_dirs, imports=DMP_OPTIONS['ALL_TEMPLATE_IMPORTS'], module_directory=self.cache_root, collection_size=2000, filesystem_checks=settings.DEBUG, input_encoding=DMP_OPTIONS.get('DEFAULT_TEMPLATE_ENCODING', 'utf-8'))
 
 
     def get_template(self, template):
