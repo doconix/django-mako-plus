@@ -227,7 +227,7 @@ Note in the examples how the DMP column normally uses standard Python syntax, wi
   </tr><tr>
     <td colspan="2">Call a Python method:</td>
   </tr><tr>
-    <td style="vertical-align: top;">Requires a custom tag, unless a built-in tag provides the behavior.</td>
+    <td>Requires a custom tag, unless a built-in tag provides the behavior.</td>
     <td>Any Python method can be called:
 <pre><code>&nbsp;&nbsp;&lt;%! import random %&gt;
 &nbsp;&nbsp;${ random.randint(1, 10) }</code></pre></td>
