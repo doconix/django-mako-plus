@@ -178,6 +178,8 @@ Note in the examples how the DMP column normally uses standard Python syntax, wi
 
 <table>
   <tr>
+      <td></td>
+  </tr><tr>
     <th>Django</th>
     <th>DMP (Mako)</th>
   </tr><tr>
