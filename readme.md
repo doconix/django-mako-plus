@@ -178,7 +178,7 @@ Note in the examples how the DMP column normally uses standard Python syntax, wi
 
 <table>
   <tr>
-      <td></td>
+      <td colspan="2"></td>
   </tr><tr>
     <th>Django</th>
     <th>DMP (Mako)</th>
