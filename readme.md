@@ -183,22 +183,22 @@ Note in the examples how the DMP column normally uses standard Python syntax, wi
   </tr><tr>
     <td colspan="2">Output the value of the question variable:</td>
   </tr><tr>
-    <td><pre><code style="background-color: transparent">{{ question }}</code></pre></td>
-    <td><pre><code style="background-color: transparent">${ question }</code></pre></td>
+    <td><pre style="background-color: transparent"><code>{{ question }}</code></pre></td>
+    <td><pre style="background-color: transparent"><code>${ question }</code></pre></td>
   </tr><tr>
     <td colspan="2">Call a method on the User object (DMP version is a normal method call, with parameters if needed):</td>
   </tr><tr>
-    <td><pre><code style="background-color: transparent">{{ user.get_full_name }}</code></pre></td>
-    <td><pre><code style="background-color: transparent">${ user.get_full_name() }</code></pre></td>
+    <td><pre style="background-color: transparent"><code>{{ user.get_full_name }}</code></pre></td>
+    <td><pre style="background-color: transparent"><code>${ user.get_full_name() }</code></pre></td>
   </tr><tr>
     <td colspan="2">Iterate through a relationship:</td>
   </tr><tr>
-    <td><pre><code style="background-color: transparent">&lt;ul&gt;
+    <td><pre style="background-color: transparent"><code>&lt;ul&gt;
 &nbsp;&nbsp;{% for choice in question.choice_set.all %}
 &nbsp;&nbsp;&nbsp;&nbsp;&lt;li&gt;{{ choice.choice_text }}&lt;/li&gt;
 &nbsp;&nbsp;{% endfor %}
 &lt;/ul&gt;</code></pre></td>
-    <td><pre><code style="background-color: transparent">&lt;ul&gt;
+    <td><pre style="background-color: transparent"><code>&lt;ul&gt;
 &nbsp;&nbsp;%for choice in question.choice_set.all():
 &nbsp;&nbsp;&nbsp;&nbsp;&lt;li&gt;${ choice.choice_text }&lt;/li&gt;
 &nbsp;&nbsp;%endfor
@@ -206,46 +206,46 @@ Note in the examples how the DMP column normally uses standard Python syntax, wi
   </tr><tr>
     <td colspan="2">Set a variable:</td>
   </tr><tr>
-    <td><pre><code style="background-color: transparent">{% with name="Sam" %}</code></pre></td>
-    <td><pre><code style="background-color: transparent">&lt;% name = &quot;Sam&quot; %&gt;</code></pre></td>
+    <td><pre style="background-color: transparent"><code>{% with name="Sam" %}</code></pre></td>
+    <td><pre style="background-color: transparent"><code>&lt;% name = &quot;Sam&quot; %&gt;</code></pre></td>
   </tr><tr>
     <td colspan="2">Format a date:</td>
   </tr><tr>
-    <td><pre><code style="background-color: transparent">{{ value|date:"D d M Y" }}</code></pre></td>
-    <td><pre><code style="background-color: transparent">${ value.strftime('%D %d %M %Y') }</code></pre></td>
+    <td><pre style="background-color: transparent"><code>{{ value|date:"D d M Y" }}</code></pre></td>
+    <td><pre style="background-color: transparent"><code>${ value.strftime('%D %d %M %Y') }</code></pre></td>
   </tr><tr>
     <td colspan="2">Join a list:</td>
   </tr><tr>
-    <td><pre><code style="background-color: transparent">{{ mylist | join:', ' }}</code></pre></td>
-    <td><pre><code style="background-color: transparent">${ ', '.join(mylist) }</code></pre></td>
+    <td><pre style="background-color: transparent"><code>{{ mylist | join:', ' }}</code></pre></td>
+    <td><pre style="background-color: transparent"><code>${ ', '.join(mylist) }</code></pre></td>
   </tr><tr>
     <td colspan="2">Use the /static prefix:</td>
   </tr><tr>
-    <td><pre><code style="background-color: transparent">{% load static %}
+    <td><pre style="background-color: transparent"><code>{% load static %}
 &lt;img src=&quot;{% get_static_prefix %}images/hi.jpg&quot;/&gt;</code></pre></td>
-    <td><pre><code style="background-color: transparent">&lt;img src=&quot;${ STATIC_ROOT }images/hi.jpg&quot;/&gt;</code></pre></td>
+    <td><pre style="background-color: transparent"><code>&lt;img src=&quot;${ STATIC_ROOT }images/hi.jpg&quot;/&gt;</code></pre></td>
   </tr><tr>
     <td colspan="2">Call a Python method:</td>
   </tr><tr>
     <td>Requires a custom tag, unless a built-in tag provides the behavior.</td>
     <td>Any Python method can be called:
-<pre><code style="background-color: transparent">&nbsp;&nbsp;&lt;%! import random %&gt;
+<pre style="background-color: transparent"><code>&nbsp;&nbsp;&lt;%! import random %&gt;
 &nbsp;&nbsp;${ random.randint(1, 10) }</code></pre></td>
   </tr><tr>
     <td colspan="2">Output a default if empty:</td>
   </tr><tr>
-    <td><pre><code style="background-color: transparent">{{ value | default:"nothing" }}</code></pre></td>
+    <td><pre style="background-color: transparent"><code>{{ value | default:"nothing" }}</code></pre></td>
     <td>Use a boolean:
-<pre><code style="background-color: transparent">&nbsp;&nbsp;${ value or "nothing" }</code></pre>
+<pre style="background-color: transparent"><code>&nbsp;&nbsp;${ value or "nothing" }</code></pre>
 
 or use a Python if statement:
-<pre><code style="background-color: transparent">&nbsp;&nbsp;${ value if value != None else "nothing" }</code></pre>
+<pre style="background-color: transparent"><code>&nbsp;&nbsp;${ value if value != None else "nothing" }</code></pre>
     </td>
   </tr><tr>
     <td colspan="2">Run arbitrary Python (keep it simple, Tex!):</td>
   </tr><tr>
     <td>Requires a custom tag</td>
-    <td><pre><code style="background-color: transparent">&lt;%
+    <td><pre style="background-color: transparent"><code>&lt;%
 &nbsp;&nbsp;i = 1
 &nbsp;&nbsp;while i &lt; 10:
 &nbsp;&nbsp;&nbsp;&nbsp;context.write(&#x27;&lt;p&gt;Testing {0}&lt;/p&gt;&#x27;.format(i))
@@ -254,18 +254,18 @@ or use a Python if statement:
   </tr><tr>
     <td colspan="2">Inherit another template:</td>
   </tr><tr>
-    <td><pre><code style="background-color: transparent">{% extends "base.html" %}</code></pre></td>
-    <td><pre><code style="background-color: transparent">&lt;%inherit file=&quot;base.htm&quot; /&gt;</code></pre></td>
+    <td><pre style="background-color: transparent"><code>{% extends "base.html" %}</code></pre></td>
+    <td><pre style="background-color: transparent"><code>&lt;%inherit file=&quot;base.htm&quot; /&gt;</code></pre></td>
   </tr><tr>
     <td colspan="2">Override a block:</td>
   </tr><tr>
-    <td><pre><code style="background-color: transparent">{% block title %}My amazing blog{% endblock %}</code></pre></td>
-    <td><pre><code style="background-color: transparent">&lt;%block name="title"&gt;My amazing blog&lt;/%block&gt;</code></pre></td>
+    <td><pre style="background-color: transparent"><code>{% block title %}My amazing blog{% endblock %}</code></pre></td>
+    <td><pre style="background-color: transparent"><code>&lt;%block name="title"&gt;My amazing blog&lt;/%block&gt;</code></pre></td>
   </tr><tr>
     <td colspan="2">Link to a CSS file:</td>
   </tr><tr>
     <td>Place in each template:
-<pre><code style="background-color: transparent">&nbsp;&nbsp;&lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;...&quot;&gt;</code></pre></td>
+<pre style="background-color: transparent"><code>&nbsp;&nbsp;&lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;...&quot;&gt;</code></pre></td>
     <td>Simply name the .css/.js file the same name as your .html template.  DMP will include the link automatically.</td>
   </tr><tr>
     <td colspan="2">Perform per-request logic in CSS or JS files:</td>
