@@ -1548,9 +1548,11 @@ In most cases, third-party functionality can be called directly from Mako.  For 
 * The docs show: `{{ form.render }}`
 * You use:`${ form.render() }`
 
-However, some third-party apps require real Django syntax, such as the [Crispy Forms](http://django-crispy-forms.readthedocs.io/) library's use of custom tags.  To temporarily enable Django templating, you can include a Django expression or embed an entire block within your Mako template by using a filter.  These filters are included automatically in every DMP template.
+However, some third-party apps require real Django syntax.  For example, the [Crispy Forms](http://django-crispy-forms.readthedocs.io/) provides a number of Django-style custom tags.  To temporarily enable Django templating, you can include a Django expression or embed an entire block within your Mako template by using a filter.  These filters are included automatically in every DMP template.
 
-Within any template:
+> Even though some third-party apps (like Crispy) have Django tags, you can often call the tags directly right from Mako.  **Django tags (the simple kind) are just functions.**  It's probably better to find the tag function in the library source code, `<% from its_module import the_tag_function %>`, and run `${ the_tag_function() }` using regular Mako code.
+
+To switch temporarily to Django syntax:
 ```
 ## Expression containing Django template syntax (assuming name was created in the view.py)
 ${ '{{ name }}' | django_syntax(context) }
