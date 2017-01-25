@@ -194,9 +194,8 @@ class MakoTemplates(BaseEngine):
                     if func_obj == None:
                         # try to load the template directly
                         try:
-                            dmp_loader = self.get_template_loader(app_name)
-                            template = dmp_loader.get_template(fallback_template_name)
-                            func_obj = TemplateViewFunction(template)
+                            func_obj = TemplateViewFunction(app_name, fallback_template_name)
+                            func_obj.get_template()  # check whether the template exists
                         except TemplateDoesNotExist as e:
                             func_obj = DMPViewDoesNotExist('View function {}.{} not found, and fallback template {} not found.'.format(module_name, function_name, fallback_template_name))
 

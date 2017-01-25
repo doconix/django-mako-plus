@@ -6,6 +6,7 @@ from mako.exceptions import TopLevelLookupException, TemplateLookupException, Co
 from mako.lookup import TemplateLookup
 from mako.template import Template
 
+from .convenience import get_template as convenience_get_template
 from .exceptions import InternalRedirectException, RedirectException
 from .signals import dmp_signal_pre_render_template, dmp_signal_post_render_template, dmp_signal_redirect_exception
 from .util import get_dmp_instance, log, DMP_OPTIONS
@@ -255,8 +256,17 @@ class TemplateViewFunction(object):
     '''
     _dmp_view_type = DMP_VIEW_TEMPLATE
 
-    def __init__(self, template):
-        self.template = template
+    def __init__(self, app_name, template_name):
+        # we don't keep the actual template objects because we need to get from the loader each time (so Mako can check for updates, etc.)
+        self.app_name = app_name
+        self.template_name = template_name
+
+    def get_template(self):
+        # this is split into a separate method because engine.get_view_function() verifies the existance of the template
+        # raises a TemplateDoesNotExist if not found
+        return convenience_get_template(self.app_name, self.template_name)
+
 
     def __call__(self, request, *args, **kwargs):
-        return self.template.render_to_response(request=request, context=kwargs)
+        # called from the router to process a request
+        return self.get_template().render_to_response(request=request, context=kwargs)
