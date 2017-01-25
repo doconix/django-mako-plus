@@ -1578,7 +1578,7 @@ ${ '{{ name }}' | django_syntax(context) }
 
 The `context` parameter passes your context variables to the Django render call.  It is a global Mako variable (available in any template), and it is always included in the filter.  In other words, include `context` every time as shown in the examples above.
 
-### Jinja2, Mustache, Cheetah, and <insert template engine>.
+### Jinja2, Mustache, Cheetah, and ((insert template engine)).
 
 If Jinja2 is needed, replace the filter with `jinja2_syntax(context)` in the above examples.  If another engine is needed, replace the filter with `template_syntax(context, 'engine name')` as specified in `settings.TEMPLATES`.  DMP will render with the appriate engine and put the result in your HTML page.
 
