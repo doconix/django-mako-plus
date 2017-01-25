@@ -1550,7 +1550,7 @@ In most cases, third-party functionality can be called directly from Mako.  For 
 
 However, some third-party apps require real Django syntax.  For example, the [Crispy Forms](http://django-crispy-forms.readthedocs.io/) provides a number of Django-style custom tags.  To temporarily enable Django templating, you can include a Django expression or embed an entire block within your Mako template by using a filter.  These filters are included automatically in every DMP template.
 
-**Even though some third-party apps (like Crispy) have Django tags, you can often call the tags directly right from Mako.  Django tags (the simple kind) are just functions.**  It's probably better to find the tag function in the library source code, `<% from its_module import the_tag_function %>`, and run `${ the_tag_function() }` using regular Mako code.
+Even though some third-party apps (like Crispy) have Django tags, **you can often call the tags directly right from Mako because Django tags (the simple kind) are just functions.**  It's probably better to find the tag function in the library source code, `<% from its_module import the_tag_function %>`, and run `${ the_tag_function() }` using regular Mako code.
 
 But if you really want/need to switch temporarily to another template syntax, DMP supports it:
 ```
