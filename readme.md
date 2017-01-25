@@ -171,172 +171,135 @@ Further, if you temporarily need to switch to Django templating syntax, [you can
 
 ## Comparison with Django Syntax
 
-If you have read through the Django Tutorial, you've seen examples for templating in Django.  While the rest of Django, such as models, settings, migrations, etc., is the same (with or without DMP), the way you do templates will obviously change with DMP.  The following examples should help you understand the different between standard Django and DMP template syntax.
+If you have read through the Django Tutorial, you've seen examples for templating in Django.  While the rest of Django, such as models, settings, migrations, etc., is the same (with or without DMP), the way you do templates will obviously change with DMP.  The following examples should help you understand the different between two template systems.
 
 Note in the examples how the DMP column normally uses standard Python syntax, with no extra language to learn:
 
-- Output the value of the question variable:
-<table>
+<style type="text/css">
+    #comparison-table {
+        table-layout: fixed;
+        width: 100%;
+    }
+    #comparison-table td {
+        overflow-x: auto;
+        padding: 8px 3px;
+        vertical-align: top;
+        font-size: .9em;
+    }
+    #comparison-table td code{
+        white-space: nowrap;
+        font-size: .8em;
+        background-color: transparent;
+    }
+    #comparison-table tr:nth-child(2n) {
+        background-color: transparent;
+    }
+    #comparison-table tr:nth-child(2n+1) td:nth-child(1), #comparison-table tr:nth-child(2n+1) th:nth-child(1) {
+        background-color: #fff5e5;
+    }
+    #comparison-table tr:nth-child(2n+1) td:nth-child(2), #comparison-table tr:nth-child(2n+1) th:nth-child(2) {
+        background-color: #E5FFE5;
+    }
+</style>
+
+<table id="comparison-table">
   <tr>
-    <th>Django Templates</th>
-    <th>DMP (Mako) Templates</th>
+    <th>Django</th>
+    <th>DMP (Mako)</th>
   </tr><tr>
-    <td nowrap><pre><code>{{ question }}</code></pre></td>
-    <td nowrap><pre><code>${ question }</code></pre></td>
-  </tr>
-</table>
-- Output a user's full name (a method on User):
-<table>
-  <tr>
-    <th>Django Templates</th>
-    <th>DMP (Mako) Templates</th>
+    <td colspan="2">Output the value of the question variable:</td>
   </tr><tr>
-    <td nowrap><pre><code>{{ user.get_full_name }}</code></pre></td>
-    <td nowrap><pre><code>${ user.get_full_name() }</code></pre></td>
-  </tr>
-</table>
-- Iterate through a relationship:
-<table>
-  <tr>
-    <th>Django Templates</th>
-    <th>DMP (Mako) Templates</th>
+    <td><code>{{ question }}</code></td>
+    <td><code>${ question }</code></td>
   </tr><tr>
-    <td nowrap><pre><code>&lt;ul&gt;
-  {% for choice in question.choice_set.all %}
-    &lt;li&gt;{{ choice.choice_text }}&lt;/li&gt;
-  {% endfor %}
-&lt;/ul&gt;</code></pre></td>
-    <td nowrap><pre><code>&lt;ul&gt;
-  %for choice in question.choice_set.all():
-    &lt;li&gt;${ choice.choice_text }&lt;/li&gt;
-  %endfor
-&lt;/ul&gt;</code></pre></td>
-  </tr>
-</table>
-- Set a variable:
-<table>
-  <tr>
-    <th>Django Templates</th>
-    <th>DMP (Mako) Templates</th>
+    <td colspan="2">Call a method on the User object (DMP version is a normal method call, with parameters if needed):</td>
   </tr><tr>
-    <td nowrap><pre><code>{% with name="Sam" %}</code></pre></td>
-    <td nowrap><pre><code>&lt;% name = &quot;Sam&quot; %&gt;</code></pre></td>
-  </tr>
-</table>
-- Format a date:
-<table>
-  <tr>
-    <th>Django Templates</th>
-    <th>DMP (Mako) Templates</th>
+    <td><code>{{ user.get_full_name }}</code></td>
+    <td><code>${ user.get_full_name() }</code></td>
   </tr><tr>
-    <td nowrap><pre><code>{{ value|date:"D d M Y" }}</code></pre></td>
-    <td nowrap><pre><code>${ value.strftime('%D %d %M %Y') }</code></pre></td>
-  </tr>
-</table>
-- Join a list:
-<table>
-  <tr>
-    <th>Django Templates</th>
-    <th>DMP (Mako) Templates</th>
+    <td colspan="2">Iterate through a relationship:</td>
   </tr><tr>
-    <td nowrap><pre><code>{{ mylist | join:', ' }}</code></pre></td>
-    <td nowrap><pre><code>${ ', '.join(mylist) }</code></pre></td>
-  </tr>
-</table>
-- Use the /static prefix:
-<table>
-  <tr>
-    <th>Django Templates</th>
-    <th>DMP (Mako) Templates</th>
+    <td><code>&lt;ul&gt;<br/>
+&nbsp;&nbsp;{% for choice in question.choice_set.all %}<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;li&gt;{{ choice.choice_text }}&lt;/li&gt;<br/>
+&nbsp;&nbsp;{% endfor %}<br/>
+&lt;/ul&gt;</code></td>
+    <td><code>&lt;ul&gt;<br/>
+&nbsp;&nbsp;%for choice in question.choice_set.all():<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;li&gt;${ choice.choice_text }&lt;/li&gt;<br/>
+&nbsp;&nbsp;%endfor<br/>
+&lt;/ul&gt;</code></td>
   </tr><tr>
-    <td nowrap><pre><code>{% load static %}
-&lt;img src=&quot;{% get_static_prefix %}images/hi.jpg&quot;/&gt;</code></pre></td>
-    <td nowrap><pre><code>&lt;img src=&quot;${ STATIC_ROOT }images/hi.jpg&quot;/&gt;</code></pre></td>
-  </tr>
-</table>
-- Call a Python method:
-<table>
-  <tr>
-    <th>Django Templates</th>
-    <th>DMP (Mako) Templates</th>
+    <td colspan="2">Set a variable:</td>
+  </tr><tr>
+    <td><code>{% with name="Sam" %}</code></td>
+    <td><code>&lt;% name = &quot;Sam&quot; %&gt;</code></td>
+  </tr><tr>
+    <td colspan="2">Format a date:</td>
+  </tr><tr>
+    <td><code>{{ value|date:"D d M Y" }}</code></td>
+    <td><code>${ value.strftime('%D %d %M %Y') }</code></td>
+  </tr><tr>
+    <td colspan="2">Join a list:</td>
+  </tr><tr>
+    <td><code>{{ mylist | join:', ' }}</code></td>
+    <td><code>${ ', '.join(mylist) }</code></td>
+  </tr><tr>
+    <td colspan="2">Use the /static prefix:</td>
+  </tr><tr>
+    <td><code>{% load static %}<br/>
+&lt;img src=&quot;{% get_static_prefix %}images/hi.jpg&quot;/&gt;</code></td>
+    <td><code>&lt;img src=&quot;${ STATIC_ROOT }images/hi.jpg&quot;/&gt;</code></td>
+  </tr><tr>
+    <td colspan="2">Call a Python method:</td>
   </tr><tr>
     <td>Requires a custom tag, unless a built-in tag provides the behavior.</td>
-    <td nowrap>Any Python method can be called:
-<pre><code>&lt;%! import random %&gt;
-${ random.randint(1, 10) }</code></pre></td>
-  </tr>
-</table>
-- Output a default if empty:
-<table>
-  <tr>
-    <th>Django Templates</th>
-    <th>DMP (Mako) Templates</th>
+    <td>Any Python method can be called:<br/><br/>
+<code>&nbsp;&nbsp;&lt;%! import random %&gt;<br/>
+&nbsp;&nbsp;${ random.randint(1, 10) }</code></td>
   </tr><tr>
-    <td nowrap><pre><code>{{ value | default:"nothing" }}</code></pre></td>
-    <td nowrap>
-      Use a boolean:
-      <pre><code>${ value or "nothing" }</code></pre>
-      or use a Python if statement:
-      <pre><code>${ value if value != None else "nothing" }</code></pre>
+    <td colspan="2">Output a default if empty:</td>
+  </tr><tr>
+    <td><code>{{ value | default:"nothing" }}</code></td>
+    <td>Use a boolean:<br/>
+<code>&nbsp;&nbsp;${ value or "nothing" }</code><br/>
+<br/>
+or use a Python if statement:<br/>
+<code>&nbsp;&nbsp;${ value if value != None else "nothing" }</code><br/>
     </td>
-  </tr>
-</table>
-- Run arbitrary Python (keep it simple, Tex!):
-<table>
-  <tr>
-    <th>Django Templates</th>
-    <th>DMP (Mako) Templates</th>
   </tr><tr>
-    <td nowrap><pre><code>Requires a custom tag</code></pre></td>
-    <td nowrap><pre><code>&lt;%
-  i = 1
-  while i &lt; 10:
-    context.write(&#x27;&lt;p&gt;Testing {0}&lt;/p&gt;&#x27;.format(i))
-    i += 1
-%&gt;</code></pre></td>
-  </tr>
-</table>
-- Inherit another template:
-<table>
-  <tr>
-    <th>Django Templates</th>
-    <th>DMP (Mako) Templates</th>
+    <td colspan="2">Run arbitrary Python (keep it simple, Tex!):</td>
   </tr><tr>
-    <td nowrap><pre><code>{% extends "base.html" %}</code></pre></td>
-    <td nowrap><pre><code>&lt;%inherit file=&quot;base.htm&quot; /&gt;</code></pre></td>
-  </tr>
-</table>
-- Override a block:
-<table>
-  <tr>
-    <th>Django Templates</th>
-    <th>DMP (Mako) Templates</th>
+    <td>Requires a custom tag</td>
+    <td><code>&lt;%<br/>
+&nbsp;&nbsp;i = 1<br/>
+&nbsp;&nbsp;while i &lt; 10:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;context.write(&#x27;&lt;p&gt;Testing {0}&lt;/p&gt;&#x27;.format(i))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;i += 1<br/>
+%&gt;</code></td>
   </tr><tr>
-    <td nowrap><pre><code>{% block title %}My amazing blog{% endblock %}</code></pre></td>
-    <td nowrap><pre><code>&lt;%block name="title"&gt;My amazing blog&lt;/%block&gt;</code></pre></td>
-  </tr>
-</table>
-- Link to a CSS file:
-<table>
-  <tr>
-    <th>Django Templates</th>
-    <th>DMP (Mako) Templates</th>
+    <td colspan="2">Inherit another template:</td>
   </tr><tr>
-    <td nowrap>Place in each template: <pre><code>&lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;...&quot;&gt;</code></pre></td>
+    <td><code>{% extends "base.html" %}</code></td>
+    <td><code>&lt;%inherit file=&quot;base.htm&quot; /&gt;</code></td>
+  </tr><tr>
+    <td colspan="2">Override a block:</td>
+  </tr><tr>
+    <td><code>{% block title %}My amazing blog{% endblock %}</code></td>
+    <td><code>&lt;%block name="title"&gt;My amazing blog&lt;/%block&gt;</code></td>
+  </tr><tr>
+    <td colspan="2">Link to a CSS file:</td>
+  </tr><tr>
+    <td>Place in each template:<br/>
+<code>&nbsp;&nbsp;&lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;...&quot;&gt;</code></td>
     <td>Simply name the .css/.js file the same name as your .html template.  DMP will include the link automatically.</td>
-  </tr>
-</table>
-- Perform per-request logic in CSS or JS files:
-<table>
-  <tr>
-    <th>Django Templates</th>
-    <th>DMP (Mako) Templates</th>
   </tr><tr>
-    <td>Create an entry in ``urls.py``, create a view, and render a template for the CSS or JS.</td>
-    <td>Simply name the .css file as name.cssm for each name.html template.  DMP will render the template and include it automatically.</td>
+    <td colspan="2">Perform per-request logic in CSS or JS files:</td>
+  </tr><tr>
+    <td style="word-wrap: pre-wrap;">Create an entry in urls.py, create a view, and render a template for the CSS or JS.</td>
+    <td style="word-wrap: pre-wrap;">Simply name the .css file as name.cssm for each name.html template.  DMP will render the template and include it automatically.</td>
   </tr>
 </table>
-
 
 
 # Installation
@@ -348,8 +311,6 @@ Note: If you need to use DMP 2.7, follow the [old installation instructions](htt
 ## Upgrade Notes for DMP 3.7
 
 In **January, 2017**, Django-Mako-Plus 3.7 was released.  It requires a few changes to projects created with previous versions.  Please adjust the following in your project:
-
-* In your `settings.py` file, remove the DMP line from your `MIDDLEWARE` list. Specifically, your middleware list should no longer include `django_mako_plus.RequestInitMiddleware` or any other reference to DMP.
 
 * In your `urls.py` file, change the DMP line to `include` the DMP urls.  A bare bones `urls.py` file would look like the following:
 ```
