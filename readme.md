@@ -841,42 +841,42 @@ You might be wondering: Can I use a dynamically-found app?  What if I need a tem
 
 Use the DMP convenience functions to be more dynamic, to interact directly with template objects, or to render a file of your choosing.
 
-**Render a file from any app's template's directory:**
+*Render a file from any app's template's directory:*
 
 ```python
 from django_mako_plus import render_template
 mystr = render_template(request, 'homepage', 'index.html', context)
 ```
 
-**Render a file from a custom directory within an app:**
+*Render a file from a custom directory within an app:*
 
 ```python
 from django_mako_plus import render_template
 mystr = render_template(request, 'homepage', 'custom.html', context, subdir="customsubdir")
 ```
 
-**Render a file at any location, even outside of Django:**
+*Render a file at any location, even outside of Django:*
 
 ```python
 from django_mako_plus import render_template_for_path
 mystr = render_template_for_path(request, '/var/some/dir/template.html', context)
 ```
 
-**Get a template object from an app:**
+*Get a template object from an app:*
 
 ```python
 from django_mako_plus import get_template
 template = get_template('homepage', 'index.html')
 ```
 
-**Get a template object at any location, even outside of Django:**
+*Get a template object at any location, even outside of Django:*
 
 ```python
 from django_mako_plus import get_template_for_path
 template = get_template_for_path('/var/some/dir/template.html')
 ```
 
-**Get the real Mako template object:**
+*Get the real Mako template object:*
 
 ```python
 from django_mako_plus import get_template_for_path
