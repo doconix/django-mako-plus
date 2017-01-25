@@ -10,9 +10,10 @@ except ImportError:
     MiddlewareMixin = object
 
 from .router import route_request
-from .util import URLParamList, get_dmp_instance, DMP_OPTIONS
+from .util import URLParamList, get_dmp_instance, DMP_OPTIONS, log
 from .util import DMP_VIEW_CLASS_METHOD
 
+import logging
 
 ##########################################################
 ###   Middleware the prepares the request for
@@ -67,6 +68,15 @@ class RequestInitMiddleware(MiddlewareMixin):
 
         As view middleware, this function runs just before the router.route_request is called.
         '''
+        # print debug messages to help with urls.py regex issues
+        if log.isEnabledFor(logging.DEBUG):
+            if view_func is not route_request:
+                log.debug("DMP is not handling this request because the matched urls.py regex did not resolve to route_request. The request.dmp_* variables will not be set.")
+            else:
+                for param in ( 'dmp_router_app', 'dmp_router_page', 'dmp_router_function', 'urlparams' ):
+                    if param not in view_kwargs:
+                        log.debug('The matched urls.py regex did not contain the named parameter "{}"; using the default value from settings.py.'.format(param))
+
         # if urls.py didn't resolve to DMP, we don't need to set any of these variables
         if view_func is not route_request:
             return
