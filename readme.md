@@ -358,7 +358,7 @@ If you need to add DMP to an existing Django project, follow the steps in this s
 If you instead created a project per the previous section, these steps have been done for you.  Stand up, clap your hands together, and skip ahead to [Create a DMP-Style App](#create-a-dmp-style-app).
 
 
-### Edit Your `settings.py` File:
+#### Edit Your `settings.py` File:
 
 Add `django_mako_plus` to the end of your `INSTALLED_APPS` list:
 
@@ -478,7 +478,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 ```
 
 
-### Enable the Django-Mako-Plus Router
+#### Enable the Django-Mako-Plus Router
 
 Add the Django-Mako-Plus router as **the last pattern** in your `urls.py` file (the default admin is also included here for completeness):
 
@@ -770,7 +770,7 @@ Reload your web page and ensure the new view is working correctly.  You should s
 > You might be wondering about the incomplete sentence under the .browser_time paragraph.  Just hold tight.  We'll be using this later in the tutorial.
 
 
-### The Render Functions
+#### The Render Functions
 
 > This section explains the two render functions included with DMP.  If you just want to get things working, skip over this section.  You can always come back later for an explanation of how things are put together.
 
@@ -835,7 +835,7 @@ def process_request(request):
 The above code references an app in a non-standard location and a template subdirectory with a non-standard name.
 
 
-### Convenience Functions
+#### Convenience Functions
 
 You might be wondering: Can I use a dynamically-found app?  What if I need a template object?  Can I render a file directly?
 
@@ -889,7 +889,7 @@ See the [Mako documentation](http://www.makotemplates.org/) for more information
 > The convenience functions are perfectly fine if they suit your needs, but the `dmp_render` function described at the beginning of the tutorial is likely the best choice for most users because it doesn't hard code the app name.  The convenience functions are not Django-API compliant.
 
 
-### Can't I Use the Django API?
+#### Can't I Use the Django API?
 
 If you need/want to use the standard Django template API, you can do that too:
 
@@ -1257,7 +1257,7 @@ Django-Mako-Plus works with static files the same way that traditional Django do
 > If you read nothing else in this tutorial, be sure to read through the Deployment subsection given shortly.  There's a potential security issue with static files that you need to address before deploying.  Specifically, you need to comment out `BASE_DIR` from the setup shown next.
 
 
-### Static File Setup
+#### Static File Setup
 
 In your project's settings.py file, be sure you the following:
 
@@ -1271,7 +1271,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 Note that the last line is a serious security issue if you go to production with it.  More on that later.
 
-### Development
+#### Development
 
 During development, Django will use the `STATICFILES_DIRS` variable to find the files relative to your project root.  You really don't need to do anything special except ensure that the `django.contrib.staticfiles` app is in your list of `INSTALLED_APPS`.  Django's `staticfiles` app is the engine that statics files during development.
 
@@ -1287,7 +1287,7 @@ By using the `STATIC_URL` variable from settings in your urls rather than hard-c
 
 
 
-### Security at Deployment (VERY Important)
+#### Security at Deployment (VERY Important)
 
 At production/deployment, comment out `BASE_DIR` because it essentially makes your entire project available via your static url (a serious security concern):
 
@@ -1321,7 +1321,7 @@ Allow from all
 ```
 
 
-### Collecting Static Files
+#### Collecting Static Files
 
 DMP comes with a manage.py command `dmp_collectstatic` that copies all your static resource files into a single subtree so you can easily place them on your web server.  At development, your static files reside within the apps they support.  For example, the `homepage/media` directory is a sibling to `homepage/views` and `/homepage/templates`.  This combined layout makes for nice development, but a split layout is more optimal for deployment because you have two web servers active at deployment (a traditional server like Apache doing the static files and a Python server doing the dynamic files).
 
@@ -1350,7 +1350,7 @@ python3 manage.py dmp_collectstatic --ignore=.cached_templates --ignore=fixtures
 ```
 
 
-#### Django Apps + DMP Apps
+##### Django Apps + DMP Apps
 
 You might have some traditional Django apps (like the built-in `/admin` app) and some DMP apps (like our `/homepage` in this tutorial).  Your Django apps need the regular `collectstatic` routine, and your DMP apps need the `dmp_collectstatic` routine.
 
@@ -1456,7 +1456,7 @@ are available throughout the request:
 
 Suppose your project requires a different URL pattern than the normal `/app/page/param1/param2/...`.  For example, you might need the user id in between the app and page: `/app/userid/page/param1/param1...`.   This is supported in two different ways.
 
-### URL Patterns: Take 1
+#### URL Patterns: Take 1
 
 The first method is done with named parameters, and it is the "normal" way to customize the url pattern.  Instead of including the default`django_mako_plus.urls` module in your `urls.py` file, you can instead create the patterns manually.  Start with the [patterns in the DMP source](http://github.com/doconix/django-mako-plus/blob/master/django_mako_plus/urls.py) and modify them as needed.
 
@@ -1499,7 +1499,7 @@ Use the following named parameters in your patterns to tell DMP which app, page,
 * `(?P<dmp_router_function>[_a-zA-Z0-9\.\-]+)` is the function name.  If omitted, it is set to `process_request`.
 * `(?P<urlparams>.*)` is the url parameters, and it should normally span multiple slashes.  The default patterns set this value to anything after the page name.  This value is split on the slash `/` to form the `request.urlparams` list.  If omitted, it is set to the empty list `[]`.
 
-### URL Patterns: Take 2
+#### URL Patterns: Take 2
 
 The second method is done by directly modifying the variables created in the middleware.  This can be done through a custom middleware view function that runs after `django_mako_plus.RequestInitMiddleware` (or alternatively, you could create an extension to this class and replace the class in the `MIDDLEWARE` list).
 
@@ -1578,11 +1578,11 @@ ${ '{{ name }}' | django_syntax(context) }
 
 The `context` parameter passes your context variables to the Django render call.  It is a global Mako variable (available in any template), and it is always included in the filter.  In other words, include `context` every time as shown in the examples above.
 
-### Jinja2, Mustache, Cheetah, and ((insert template engine)).
+#### Jinja2, Mustache, Cheetah, and ((insert template engine)).
 
 If Jinja2 is needed, replace the filter with `jinja2_syntax(context)` in the above examples.  If another engine is needed, replace the filter with `template_syntax(context, 'engine name')` as specified in `settings.TEMPLATES`.  DMP will render with the appriate engine and put the result in your HTML page.
 
-### Local Variables
+#### Local Variables
 
 Embedded template code has access to any variable passed to your temple (i.e. any variable in the context).  Although not an encouraged practice, variables are sometimes created right in your template, and faithful to the Mako way, are not accessible in embedded blocks.
 
@@ -1819,7 +1819,7 @@ This impacts few users of DMP, so you may want to skip this section for now.
 Suppose your templates are located in a directory outside your normal project root.  For whatever reason, you don't want to put your templates in the app/templates directory.
 
 
-### Case 1: Templates Within Your Project Directory
+#### Case 1: Templates Within Your Project Directory
 
 If the templates you need to access are within your project directory, no extra setup is required.  Simply reference those templates relative to the root project directory.  For example, to access a template located at BASE_DIR/homepage/mytemplates/sub1/page.html, use the following:
 
@@ -1832,7 +1832,7 @@ Note the starting slash on the path.  That tells DMP to start searching at your 
 Don't confuse the slashes in the above call with the slash used in Django's `render` function.  When you call `render`, the slash separates the app and filename.  The above call uses `dmp_render`, which is a different function.  You should really standardize on one or the other throughout your project.
 
 
-### Case 2: Templates Outside Your Project Directory
+#### Case 2: Templates Outside Your Project Directory
 
 Suppose your templates are located on a different disk or entirely different directory from your project.  DMP allows you to add extra directories to the template search path through the `TEMPLATES_DIRS` setting.  This setting contains a list of directories that are searched by DMP regardless of the app being referenced.  To include the `/var/templates/` directory in the search path, set this variable as follows:
 
@@ -1903,14 +1903,14 @@ DMP sends several custom signals through the Django signal dispatcher.  The purp
 
 Before going further with this section's examples, be sure to read the standard Django signal documentation.  DMP signals are simply additional signals in the same dispatching system, so the following examples should be easy to understand once you know how Django dispatches signals.
 
-### Step 1: Enable DMP Signals
+#### Step 1: Enable DMP Signals
 
 Be sure your settings.py file has the following in it:
 
 ```
 'SIGNALS': True,
 ```
-### Step 2: Create a Signal Receiver
+#### Step 2: Create a Signal Receiver
 
 The following creates two receivers.  The first is called just before the view's process_request function is called.  The second is called just before DMP renders .html templates.
 
