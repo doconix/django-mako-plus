@@ -193,11 +193,13 @@ Note in the examples how the DMP column normally uses standard Python syntax, wi
   </tr><tr>
     <td colspan="2">Iterate through a relationship:</td>
   </tr><tr>
-    <td><code>&lt;ul&gt;</code>
-<code>&nbsp;&nbsp;{% for choice in question.choice_set.all %}</code>
-<code>&nbsp;&nbsp;&nbsp;&nbsp;&lt;li&gt;{{ choice.choice_text }}&lt;/li&gt;</code>
-<code>&nbsp;&nbsp;{% endfor %}</code>
-<code>&lt;/ul&gt;</code></td>
+    <td>```
+&lt;ul&gt;
+&nbsp;&nbsp;{% for choice in question.choice_set.all %}
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;li&gt;{{ choice.choice_text }}&lt;/li&gt;
+&nbsp;&nbsp;{% endfor %}
+&lt;/ul&gt;
+```</td>
     <td><code>&lt;ul&gt;</code>
 <code>&nbsp;&nbsp;%for choice in question.choice_set.all():</code>
 <code>&nbsp;&nbsp;&nbsp;&nbsp;&lt;li&gt;${ choice.choice_text }&lt;/li&gt;</code>
