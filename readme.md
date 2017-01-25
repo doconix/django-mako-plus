@@ -175,34 +175,8 @@ If you have read through the Django Tutorial, you've seen examples for templatin
 
 Note in the examples how the DMP column normally uses standard Python syntax, with no extra language to learn:
 
-<style type="text/css">
-    #comparison-table {
-        table-layout: fixed;
-        width: 100%;
-    }
-    #comparison-table td {
-        overflow-x: auto;
-        padding: 8px 3px;
-        vertical-align: top;
-        font-size: .9em;
-    }
-    #comparison-table td code{
-        white-space: nowrap;
-        font-size: .8em;
-        background-color: transparent;
-    }
-    #comparison-table tr:nth-child(2n) {
-        background-color: transparent;
-    }
-    #comparison-table tr:nth-child(2n+1) td:nth-child(1), #comparison-table tr:nth-child(2n+1) th:nth-child(1) {
-        background-color: #fff5e5;
-    }
-    #comparison-table tr:nth-child(2n+1) td:nth-child(2), #comparison-table tr:nth-child(2n+1) th:nth-child(2) {
-        background-color: #E5FFE5;
-    }
-</style>
 
-<table id="comparison-table">
+<table>
   <tr>
     <th>Django</th>
     <th>DMP (Mako)</th>
@@ -219,16 +193,16 @@ Note in the examples how the DMP column normally uses standard Python syntax, wi
   </tr><tr>
     <td colspan="2">Iterate through a relationship:</td>
   </tr><tr>
-    <td><code>&lt;ul&gt;<br/>
-&nbsp;&nbsp;{% for choice in question.choice_set.all %}<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&lt;li&gt;{{ choice.choice_text }}&lt;/li&gt;<br/>
-&nbsp;&nbsp;{% endfor %}<br/>
-&lt;/ul&gt;</code></td>
-    <td><code>&lt;ul&gt;<br/>
-&nbsp;&nbsp;%for choice in question.choice_set.all():<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&lt;li&gt;${ choice.choice_text }&lt;/li&gt;<br/>
-&nbsp;&nbsp;%endfor<br/>
-&lt;/ul&gt;</code></td>
+    <td><code>&lt;ul&gt;</code>
+<code>&nbsp;&nbsp;{% for choice in question.choice_set.all %}</code>
+<code>&nbsp;&nbsp;&nbsp;&nbsp;&lt;li&gt;{{ choice.choice_text }}&lt;/li&gt;</code>
+<code>&nbsp;&nbsp;{% endfor %}</code>
+<code>&lt;/ul&gt;</code></td>
+    <td><code>&lt;ul&gt;</code>
+<code>&nbsp;&nbsp;%for choice in question.choice_set.all():</code>
+<code>&nbsp;&nbsp;&nbsp;&nbsp;&lt;li&gt;${ choice.choice_text }&lt;/li&gt;</code>
+<code>&nbsp;&nbsp;%endfor</code>
+<code>&lt;/ul&gt;</code></td>
   </tr><tr>
     <td colspan="2">Set a variable:</td>
   </tr><tr>
@@ -247,36 +221,36 @@ Note in the examples how the DMP column normally uses standard Python syntax, wi
   </tr><tr>
     <td colspan="2">Use the /static prefix:</td>
   </tr><tr>
-    <td><code>{% load static %}<br/>
-&lt;img src=&quot;{% get_static_prefix %}images/hi.jpg&quot;/&gt;</code></td>
+    <td><code>{% load static %}</code>
+<code>&lt;img src=&quot;{% get_static_prefix %}images/hi.jpg&quot;/&gt;</code></td>
     <td><code>&lt;img src=&quot;${ STATIC_ROOT }images/hi.jpg&quot;/&gt;</code></td>
   </tr><tr>
     <td colspan="2">Call a Python method:</td>
   </tr><tr>
     <td>Requires a custom tag, unless a built-in tag provides the behavior.</td>
-    <td>Any Python method can be called:<br/><br/>
-<code>&nbsp;&nbsp;&lt;%! import random %&gt;<br/>
-&nbsp;&nbsp;${ random.randint(1, 10) }</code></td>
+    <td>Any Python method can be called:
+<code>&nbsp;&nbsp;&lt;%! import random %&gt;</code>
+<code>&nbsp;&nbsp;${ random.randint(1, 10) }</code></td>
   </tr><tr>
     <td colspan="2">Output a default if empty:</td>
   </tr><tr>
     <td><code>{{ value | default:"nothing" }}</code></td>
-    <td>Use a boolean:<br/>
-<code>&nbsp;&nbsp;${ value or "nothing" }</code><br/>
-<br/>
-or use a Python if statement:<br/>
-<code>&nbsp;&nbsp;${ value if value != None else "nothing" }</code><br/>
+    <td>Use a boolean:
+<code>&nbsp;&nbsp;${ value or "nothing" }</code>
+
+or use a Python if statement:
+<code>&nbsp;&nbsp;${ value if value != None else "nothing" }</code>
     </td>
   </tr><tr>
     <td colspan="2">Run arbitrary Python (keep it simple, Tex!):</td>
   </tr><tr>
     <td>Requires a custom tag</td>
-    <td><code>&lt;%<br/>
-&nbsp;&nbsp;i = 1<br/>
-&nbsp;&nbsp;while i &lt; 10:<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;context.write(&#x27;&lt;p&gt;Testing {0}&lt;/p&gt;&#x27;.format(i))<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;i += 1<br/>
-%&gt;</code></td>
+    <td><code>&lt;%</code>
+<code>&nbsp;&nbsp;i = 1</code>
+<code>&nbsp;&nbsp;while i &lt; 10:</code>
+<code>&nbsp;&nbsp;&nbsp;&nbsp;context.write(&#x27;&lt;p&gt;Testing {0}&lt;/p&gt;&#x27;.format(i))</code>
+<code>&nbsp;&nbsp;&nbsp;&nbsp;i += 1</code>
+<code>%&gt;</code></td>
   </tr><tr>
     <td colspan="2">Inherit another template:</td>
   </tr><tr>
@@ -290,7 +264,7 @@ or use a Python if statement:<br/>
   </tr><tr>
     <td colspan="2">Link to a CSS file:</td>
   </tr><tr>
-    <td>Place in each template:<br/>
+    <td>Place in each template:
 <code>&nbsp;&nbsp;&lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;...&quot;&gt;</code></td>
     <td>Simply name the .css/.js file the same name as your .html template.  DMP will include the link automatically.</td>
   </tr><tr>
