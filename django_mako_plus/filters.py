@@ -6,16 +6,11 @@ from .util import log
 import logging
 
 
-# these imports are included in every template
-DMP_TEMPLATE_FILTERS = [
-    'from django_mako_plus.filters import django_syntax, jinja2_syntax, template_syntax',
-]
-
 
 ############################################################################
 ###   Rendering template blocks in other syntax languages
 
-def django_syntax(context, **kwargs):
+def django_syntax(local, **kwargs):
     '''
     A Mako filter that renders a block of text using the standard Django template engine.
     The Django template engine must be listed in settings.TEMPLATES.
@@ -24,10 +19,10 @@ def django_syntax(context, **kwargs):
     Specify kwargs to add additional variables created within the template.
 
     ## Simple expression in Django syntax:
-    ${ '{{ name }}' | django_syntax(context) }
+    ${ '{{ name }}' | django_mako_plus.django_syntax(local) }
 
     ## Embedded code block:
-    <%block filter="django_syntax(context)">
+    <%block filter="django_mako_plus.django_syntax(local)">
         {% for story in story_list %}
             <h2>
                 {{ story.headline|upper }}
@@ -36,10 +31,10 @@ def django_syntax(context, **kwargs):
     </%block>
 
     '''
-    return template_syntax(context, 'django', **kwargs)
+    return alternate_syntax(local, 'django', **kwargs)
 
 
-def jinja2_syntax(context, **kwargs):
+def jinja2_syntax(local, **kwargs):
     '''
     A Mako filter that renders a block of text using the Jinja2 template engine.
     The Jinja2 template engine must be listed in settings.TEMPLATES.
@@ -48,20 +43,20 @@ def jinja2_syntax(context, **kwargs):
     Specify kwargs to add additional variables created within the template.
 
     ## Simple expression in Jinja2 syntax:
-    ${ '{{ name }}' | jinja2_syntax(context) }
+    ${ '{{ name }}' | django_mako_plus.jinja2_syntax(local) }
 
     ## Embedded Jinja2 code block:
-    <%block filter="jinja2_syntax(context)">
+    <%block filter="django_mako_plus.jinja2_syntax(local)">
         {% for item in navigation %}
             <li><a href="{{ item.href }}">{{ item.caption }}</a></li>
         {% endfor %}
     </%block>
 
     '''
-    return template_syntax(context, 'jinja2', **kwargs)
+    return alternate_syntax(local, 'jinja2', **kwargs)
 
 
-def template_syntax(context, using, **kwargs):
+def alternate_syntax(local, using, **kwargs):
     '''
     A Mako filter that renders a block of text using a different template engine
     than Mako.  The named template engine must be listed in settings.TEMPLATES.
@@ -73,10 +68,10 @@ def template_syntax(context, using, **kwargs):
     engine in settings.py:
 
         ## Simple expression in Mustache syntax:
-        ${ '{{ name }}' | template_syntax(context, 'django_mustache') }
+        ${ '{{ name }}' | django_mako_plus.template_syntax(local, 'django_mustache') }
 
         ## Embedded Mustache code block:
-        <%block filter="template_syntax(context, 'django_mustache')">
+        <%block filter="django_mako_plus.template_syntax(local, 'django_mustache')">
             {{#repo}}
                 <b>{{name}}</b>
             {{/repo}}
@@ -89,10 +84,10 @@ def template_syntax(context, using, **kwargs):
     `jinja2_syntax` because it doesn't require the using parameter.
     '''
     # get the request (the MakoTemplateAdapter above places this in the context)
-    request = context['request'] if isinstance(context, RequestContext) else None
+    request = local.context['request'] if isinstance(local.context, RequestContext) else None
     # get the current Mako template object so we can attach the compiled string for later use
     # Mako caches and automatically recreates this if the file changes
-    mako_template = context['local'].template
+    mako_template = local.template
     if not hasattr(mako_template, '__compiled_template_syntax'):
         mako_template.__compiled_template_syntax = {}
 
@@ -108,12 +103,12 @@ def template_syntax(context, using, **kwargs):
             mako_template.__compiled_template_syntax[template_st] = template
 
         # create a copy the context and add any kwargs to it
-        dcontext = dict(context)
+        dcontext = dict(local.context)
         dcontext.update(kwargs)
 
         # print a debug statement to the log
         if log.isEnabledFor(logging.DEBUG):
-            log.debug('rendering embedded expression or block using "{}" template engine'.format(using))
+            log.debug('rendering embedded expression or block using {} template engine'.format(using))
 
         # render the template with the context
         return template.render(context=dcontext, request=request)

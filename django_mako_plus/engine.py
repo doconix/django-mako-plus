@@ -9,7 +9,6 @@ from django.utils.module_loading import import_string
 from django.views.generic import View
 
 from .exceptions import InternalRedirectException, RedirectException, DMPViewDoesNotExist
-from .filters import DMP_TEMPLATE_FILTERS
 from .signals import dmp_signal_pre_render_template, dmp_signal_post_render_template, dmp_signal_redirect_exception
 from .template import MakoTemplateLoader, MakoTemplateAdapter, TemplateViewFunction
 from .util import get_dmp_instance, get_dmp_app_configs, log, DMP_OPTIONS, DMP_INSTANCE_KEY
@@ -57,10 +56,6 @@ class MakoTemplates(BaseEngine):
         # super constructor
         super(MakoTemplates, self).__init__(params)
 
-        # THIS IS TEMPORARY.  It can be taken out sometime in summer '16
-        if 'CONTEXT_PROESSORS' in DMP_OPTIONS:
-            raise ImproperlyConfigured('Your DMP options in settings.py specifies CONTEXT_PROESSORS, which is misspelled (this probably comes from an error in earlier versions of DMP).  Please correct it to CONTEXT_PROCESSORS. Thanks!')
-
         # set up the context processors
         context_processors = []
         for processor in itertools.chain(_builtin_context_processors, DMP_OPTIONS.get('CONTEXT_PROCESSORS', [])):
@@ -100,7 +95,7 @@ class MakoTemplates(BaseEngine):
 
         # set up the template imports
         DMP_OPTIONS['ALL_TEMPLATE_IMPORTS'] = list(DMP_OPTIONS.get('DEFAULT_TEMPLATE_IMPORTS', []))
-        DMP_OPTIONS['ALL_TEMPLATE_IMPORTS'].extend(DMP_TEMPLATE_FILTERS)
+        DMP_OPTIONS['ALL_TEMPLATE_IMPORTS'].append('import django_mako_plus')
 
         # add a template renderer for each DMP-enabled app
         for app_config in get_dmp_app_configs():

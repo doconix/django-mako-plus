@@ -26,6 +26,28 @@ FAKE_TEMPLATEINFO_CACHE = {}
 ###   should be used
 
 
+def template_css(local, cgi_id=None):
+    '''
+    Renders the styles for a given template.
+
+    The local parameter is simply the "local" namespace
+    accessible within any Mako template.  An example call is:
+
+        ${ django_mako_plus.template_css(local) }
+
+    The optional cgi_id parameter is to overcome browser caches.  On some browsers,
+    changes to your CSS/JS files don't get downloaded because the browser waits a time
+    to check for a new version.  This wait time is set by your web server,
+    and it's normally a good thing to speed everything up.  However,
+    when you upload new CSS/JS files, you want all browsers to download the new
+    files even if their cached versions have't expired yet.
+    By adding an arbitrary id to the end of the .css and .js files, browsers will
+    see the files as *new* anytime that id changes.  The default method
+    for calculating the id is the file modification time (minutes since 1970).
+    '''
+    return _get_cached_static_renderer(local, cgi_id).get_template_css(local.context)
+
+
 def get_template_css(mako_self, request, context, cgi_id=None):
     '''
     Renders the styles for a given template.
@@ -155,7 +177,7 @@ class StaticRenderer(object):
             mako_self = mako_self.inherits
 
 
-    def get_template_css(self, request, context):
+    def template_css(self, request, context):
         '''Retrives the static and mako-rendered CSS for the entire template chain'''
         ret = []
         for template in reversed(self.template_chain):  # reverse so lower CSS overrides higher CSS in the inheritance chain
@@ -163,7 +185,7 @@ class StaticRenderer(object):
         return '\n'.join(ret)
 
 
-    def get_template_js(self, request, context):
+    def template_js(self, request, context):
         '''Retrieves the static and mako_rendered CSS for the entire template chain'''
         ret = []
         for template in self.template_chain:
@@ -172,13 +194,13 @@ class StaticRenderer(object):
 
 
 
-def _get_cached_static_renderer(mako_self, cgi_id=None):
-    '''Internal method to get/cache a StaticRenderer in the current mako_self'''
+def _get_cached_static_renderer(local, cgi_id=None):
+    '''Internal method to get/cache a StaticRenderer in the current local namespace'''
     try:
-        return getattr(mako_self, DMP_STATIC_RENDERER_KEY)
+        return getattr(local, DMP_STATIC_RENDERER_KEY)
     except AttributeError:
-        static_renderer = StaticRenderer(mako_self, cgi_id)
-        setattr(mako_self, DMP_STATIC_RENDERER_KEY, static_renderer)
+        static_renderer = StaticRenderer(local, cgi_id)
+        setattr(local, DMP_STATIC_RENDERER_KEY, static_renderer)
         return static_renderer
 
 

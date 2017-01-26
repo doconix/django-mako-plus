@@ -30,6 +30,10 @@ from .exceptions import JavascriptRedirectException
 from .exceptions import InternalRedirectException
 
 
+# filters
+from .filters import django_syntax, jinja2_syntax, alternate_syntax
+
+
 # the http responses
 from .http import HttpResponseJavascriptRedirect
 
@@ -64,6 +68,8 @@ from .engine import MakoTemplates
 
 
 # the static files shortcuts
+from .static_files import template_css
+#from .static_files import template_js
 from .static_files import get_template_css
 from .static_files import get_template_js
 from .static_files import get_fake_template_css
