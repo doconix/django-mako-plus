@@ -10,7 +10,7 @@
 # Quick Start
 
 
-```python
+```bash
 # install django, mako, and DMP
 pip3 install django mako django-mako-plus
 
