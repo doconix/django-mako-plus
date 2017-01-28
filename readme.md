@@ -309,6 +309,12 @@ urlpatterns = [
 ]
 ```
 
+* Clean out all the cached template files.  This can be done with the command:
+
+```
+python manage.py dmp_cleanup
+```
+
 * DMP no longer uses `URL_START_INDEX`.  If you set this to something other than `0`, see [Installing Django in a Subdirectory](#installing-django-in-a-subdirectory) to modify your `urls.py` for your prefix.
 
 * This version of DMP no longer uses `request.dmp_router_page_full`.  If your code happens to use this variable, post a question to the project GitHub page or email me (Conan). I don't think anyone is using this variable outside of the DMP source code.
