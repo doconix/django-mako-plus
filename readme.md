@@ -56,7 +56,7 @@ DMP can be used alongside regular Django templates, Jinja2 templates, and other 
 	- [Can I use DMP with other Django apps?](#can-i-use-dmp-with-other-django-apps)
 	- [Comparison with Django Syntax](#comparison-with-django-syntax)
 - [Installation](#installation)
-	- [Upgrade Notes for DMP 3.7](#upgrade-notes-for-dmp-37)
+	- [Upgrade Notes for DMP 3.8](#upgrade-notes-for-dmp-38)
 	- [Python 3+](#python-3)
 	- [Install Django, Mako, and DMP](#install-django-mako-and-dmp)
 	- [Create a Django project](#create-a-django-project)
@@ -284,9 +284,18 @@ Note: If you need to use DMP 2.7, follow the [old installation instructions](htt
 
 
 
-## Upgrade Notes for DMP 3.7
+## Upgrade Notes for DMP 3.8
 
-In **January, 2017**, Django-Mako-Plus 3.7 was released.  It requires a few changes to projects created with previous versions.  Please adjust the following in your project:
+In **January, 2017**, Django-Mako-Plus 3.8 was released.  It requires a few changes to projects created with previous versions.  Please adjust the following in your project:
+
+* Do a sitewide search for `get_template_css` and `get_template_js`.  These will normally be found in `base.htm` and `base-ajax.htm`.
+** Remove the `import` line for these two commands.  The import is no longer necessary.
+** Replace them with the new versions of the following functions.  Note that the function signature have changed.
+```
+${ django_mako_plus.link_css(self) }
+
+${ django_mako_plus.link_js(self) }
+```
 
 * In your `urls.py` file, change the DMP line to `include` the DMP urls.  A bare bones `urls.py` file would look like the following:
 ```
@@ -301,6 +310,7 @@ urlpatterns = [
 
 * This version of DMP no longer uses `request.dmp_router_page_full`.  If your code happens to use this variable, post a question to the project GitHub page or email me (Conan). I don't think anyone is using this variable outside of the DMP source code.
 
+* The funtion signatures in the `static_files` module have changed.  If you use any of these directly, please make the appropriate modifications.  I don't think anyone is using these outside of the DMP source code.
 
 ## Python 3+
 
@@ -632,9 +642,6 @@ The real HTML is kept in the `base.htm` file.  It looks like this:
 ```html
 ## this is the skeleton of all pages on in this app - it defines the basic html tags
 
-## imports
-<%! from django_mako_plus import get_template_css, get_template_js %>
-
 <!DOCTYPE html>
 <html>
   <meta charset="UTF-8">
@@ -645,22 +652,22 @@ The real HTML is kept in the `base.htm` file.  It looks like this:
     ## add any site-wide scripts or CSS here; for example, jquery:
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 
-    ## render the css with the same name as this page
-    ${ get_template_css(self, request, context) }
+    ## render the styles with the same name as this template and its supertemplates
+    ${ django_mako_plus.link_css(self) }
 
   </head>
   <body>
 
     <header>
-      Welcome to the homepage app!
+        Welcome to the homepage app!
     </header>
 
     <%block name="content">
-      Site content goes here in sub-templates.
+        Site content goes here in sub-templates.
     </%block>
 
-    ## render the JS with the same name as this page
-    ${ get_template_js(self, request, context) }
+    ## render the scripts with the same name as this template and its supertemplates
+    ${ django_mako_plus.link_js(self) }
 
   </body>
 </html>
@@ -670,7 +677,7 @@ Pay special attention to the `<%block name="content">` section, which is overrid
 
 The purpose of the inheritance from `base.htm` is to get a consistent look, menu, etc. across all pages of your site.  When you create additional pages, simply override the `content` block, similar to the way `index.html` does it.
 
-> Don't erase anything in the base.htm file.  In particular, import, get_template_css, and get_template_js are important parts of DMP.  As much as you probably want to clean up the mess, try your best to leave them alone.  These are not the code lines you are looking for.  Move along.
+> Don't erase anything in the base.htm file.  In particular, link_css, and link_js are important parts of DMP.  As much as you probably want to clean up the mess, try your best to leave them alone.  These are not the code lines you are looking for.  Move along.
 
 
 ## Routing Without urls.py
@@ -1522,23 +1529,18 @@ Note, however, that you still must include the token in your forms with `${ csrf
 After reading about automatic CSS and JS inclusion, you might want to know how it works.  It's all done in the templates (base.htm now, and base_ajax.htm in a later section below) you are inheriting from.  Open `base.htm` and look at the following code:
 
 ```
-## imports
-<%! from django_mako_plus import get_template_css, get_template_js %>
+## render the styles with the same name as this template and its supertemplates
+${ django_mako_plus.link_css(self) }
 
 ...
 
-## render the css with the same name as this page
-${ get_template_css(self, request, context) }
-
-...
-
-## render the JS with the same name as this page
-${ get_template_css(self, request, context) }
+## render the scripts with the same name as this template and its supertemplates
+${ django_mako_plus.link_js(self) }
 ```
 
-The first block at the top of the file imports the two functions we'll use.   The next two calls, `get_template_css()` and `get_template_js()` include the `<link>`, `<script>`, and other code based on what it finds.
+The  two calls, `link_css()` and `link_js()`, include the `<link>` and `<script>` tags for the template name and all of its supertemplates.  The CSS should be linked near the top of your file (`<head>` section), and the JS should be linked near the end (per best practices).
 
-This all works because the `index.html` template extends from the `base.htm` template.  If you fail to inherit from `base.htm` or `base_ajax.htm`, the `static_renderer` won't be able to include the support files.
+This all works because the `index.html` template extends from the `base.htm` template.  If you fail to inherit from `base.htm` or `base_ajax.htm`, DMP won't be able to include the support files.
 
 
 ## Using Django and Jinja2 Tags and Syntax

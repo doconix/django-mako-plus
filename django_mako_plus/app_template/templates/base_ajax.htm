@@ -1,17 +1,13 @@
 ## this is the skeleton of all *ajax* pages on our site - page snippets that are retrieved with Ajax.
-## it's primary function is to insert the CSS and JS for the template hierarchy the ajax return
-## is composed of.
+## it's primary function is to insert the CSS and JS for the ajax file template inheritance
 
-## imports
-<%! from django_mako_plus import get_template_css, get_template_js %>
-
-## render the CSS for this template
-${ get_template_css(self, request, context) }
+## render the styles with the same name as this template and its supertemplates
+${ django_mako_plus.link_css(self) }
 
 ## render the ajax content
 <%block name="content">
     Sub-templates should place their ajax content here.
 </%block>
 
-## render the JS for this template (pages load faster when JS is at the end)
-${ get_template_js(self, request, context) }
+## render the scripts with the same name as this template and its supertemplates
+${ django_mako_plus.link_js(self) }

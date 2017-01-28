@@ -1,9 +1,4 @@
 ## this is the skeleton of all pages on in this app - it defines the basic html tags
-
-## imports
-<%! from django_mako_plus import get_template_css, get_template_js %>
-
-
 <!DOCTYPE html>
 <html>
     <meta charset="UTF-8">
@@ -14,8 +9,8 @@
         ## add any site-wide scripts or CSS here; for example, jquery:
         <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 
-        ## render the css with the same name as this page
-        ${ get_template_css(self, request, context) }
+        ## render the styles with the same name as this template and its supertemplates
+        ${ django_mako_plus.link_css(self) }
 
     </head>
     <body>
@@ -28,8 +23,8 @@
             Site content goes here in sub-templates.
         </%block>
 
-        ## render the JS with the same name as this page
-        ${ get_template_js(self, request, context) }
+        ## render the scripts with the same name as this template and its supertemplates
+        ${ django_mako_plus.link_js(self) }
 
     </body>
 </html>
