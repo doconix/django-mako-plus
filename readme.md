@@ -289,10 +289,11 @@ Note: If you need to use DMP 2.7, follow the [old installation instructions](htt
 In **January, 2017**, Django-Mako-Plus 3.8 was released.  It requires a few changes to projects created with previous versions.  Please adjust the following in your project:
 
 * Do a sitewide search for `get_template_css` and `get_template_js`.  These will normally be found in `base.htm` and `base-ajax.htm`.
-** Remove the `import` line for these two commands.  The import is no longer necessary.
-** Replace them with the new versions of the following functions.  Note that the function signature have changed.
+Remove the `import` line for these two commands.  The import is no longer necessary.  Replace them with the new versions of the following functions (note that the function signature have changed):
 ```
 ${ django_mako_plus.link_css(self) }
+
+...
 
 ${ django_mako_plus.link_js(self) }
 ```
