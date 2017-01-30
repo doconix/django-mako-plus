@@ -7,7 +7,7 @@ import mako.runtime
 
 from .sass import check_template_scss
 from .exceptions import SassCompileException
-from .util import run_command, get_dmp_instance, log, DMP_OPTIONS
+from .util import get_dmp_instance, log, DMP_OPTIONS
 
 import os, os.path, io, posixpath, warnings
 from collections import deque

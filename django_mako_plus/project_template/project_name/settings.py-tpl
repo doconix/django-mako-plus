@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/{{ docs_version }}/ref/settings/
 """
 
 import os
+import shutil
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -95,7 +96,11 @@ TEMPLATES = [
             # happens when the corresponding template.html is accessed the first time after server startup
             # if DEBUG=False, this only happens once per file after server startup, not for every request
             # specify the binary in a list below -- even if just one item (see subprocess.Popen)
-            #'SCSS_BINARY': [ '/usr/bin/env', 'scss', '--unix-newlines' ],
+            # Python 3.3+:
+            #'SCSS_BINARY': [ shutil.which('scss'), '--unix-newlines' ],
+            # Python 3.0 to 3.2:
+            #'SCSS_BINARY': [ '/path/to/scss', '--unix-newlines' ],
+            # Disabled (no sass integration)
             'SCSS_BINARY': None,
 
             # see the DMP online tutorial for information about this setting

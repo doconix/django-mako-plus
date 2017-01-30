@@ -53,6 +53,11 @@ def run_command(*args, raise_exception=True):
     The args should be separate arguments so paths and subcommands can have spaces in them:
 
         run_command('ls', '-l', '/Users/me/My Documents')
+
+    On Windows, the PATH is not followed.  This can be overcome with:
+
+        import shutil
+        run_command(shutil.which('program'), '-l', '/Users/me/My Documents')
     '''
     log.info('%s' % ' '.join(args))
     p = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE)
