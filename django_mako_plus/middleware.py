@@ -113,7 +113,6 @@ class RequestInitMiddleware(MiddlewareMixin):
         if request.dmp_router_callback._dmp_view_type == DMP_VIEW_CLASS_METHOD:
             request.dmp_router_class = request.dmp_router_function
             request.dmp_router_function = request.method.lower()
-
         # debugging
         # print('request.dmp_router_app        ', request.dmp_router_app        )
         # print('request.dmp_router_page       ', request.dmp_router_page       )

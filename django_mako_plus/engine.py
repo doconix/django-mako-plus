@@ -19,6 +19,7 @@ from mako.template import Template
 from copy import deepcopy
 from inspect import isclass
 from importlib import import_module
+from importlib.util import find_spec
 import os, os.path, sys, itertools, threading, collections
 
 try:
@@ -175,15 +176,15 @@ class MakoTemplates(BaseEngine):
                 try:
                     return self.view_cache[cache_key]
                 except KeyError:  # really not in the cache, so let's go get it
-                    # check if the module exists. i'm not using import_module to know if it exists because it fails on things like syntax error, and the programmer should see these
+                    # check if the module exists. i'm using find_spec instead of import_module
+                    # to know if it exists because import_module fails on things like syntax error,
+                    # and the programmer should see these.
                     func_obj = None
-                    try:
+                    if find_spec(module_name) is not None:
                         module_obj = import_module(module_name)
                         func_obj = getattr(module_obj, function_name, None)
                         if func_obj == None:
                             func_obj = DMPViewDoesNotExist('Module {} found successfully, but view function {} is not defined in the module.'.format(module_name, function_name))
-                    except ImportError:
-                        pass
 
                     # check for not found, no @view_function, View subclass
                     if func_obj == None:
@@ -203,8 +204,9 @@ class MakoTemplates(BaseEngine):
                     if getattr(func_obj, '_dmp_view_type', None) == None:
                         func_obj = DMPViewDoesNotExist('View function {}.{} found successfully, but it must be decorated with @view_function.  Note that if you have multiple decorators on a function, the @view_function decorator must be listed first.'.format(module_name, function_name))
 
-                    # cache the result
-                    self.view_cache[cache_key] = func_obj
+                    # cache the result (if production)
+                    if not settings.DEBUG:
+                        self.view_cache[cache_key] = func_obj
 
                     # return the obj!
                     return func_obj
