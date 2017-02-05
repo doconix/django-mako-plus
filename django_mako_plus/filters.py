@@ -19,10 +19,10 @@ def django_syntax(local, **kwargs):
     Specify kwargs to add additional variables created within the template.
 
     ## Simple expression in Django syntax:
-    ${ '{{ name }}' | django_mako_plus.django_syntax(local) }
+    ${ '{{ name }}' | django_syntax(local) }
 
     ## Embedded code block:
-    <%block filter="django_mako_plus.django_syntax(local)">
+    <%block filter="django_syntax(local)">
         {% for story in story_list %}
             <h2>
                 {{ story.headline|upper }}
@@ -43,10 +43,10 @@ def jinja2_syntax(local, **kwargs):
     Specify kwargs to add additional variables created within the template.
 
     ## Simple expression in Jinja2 syntax:
-    ${ '{{ name }}' | django_mako_plus.jinja2_syntax(local) }
+    ${ '{{ name }}' | jinja2_syntax(local) }
 
     ## Embedded Jinja2 code block:
-    <%block filter="django_mako_plus.jinja2_syntax(local)">
+    <%block filter="jinja2_syntax(local)">
         {% for item in navigation %}
             <li><a href="{{ item.href }}">{{ item.caption }}</a></li>
         {% endfor %}
@@ -68,10 +68,10 @@ def alternate_syntax(local, using, **kwargs):
     engine in settings.py:
 
         ## Simple expression in Mustache syntax:
-        ${ '{{ name }}' | django_mako_plus.template_syntax(local, 'django_mustache') }
+        ${ '{{ name }}' | template_syntax(local, 'django_mustache') }
 
         ## Embedded Mustache code block:
-        <%block filter="django_mako_plus.template_syntax(local, 'django_mustache')">
+        <%block filter="template_syntax(local, 'django_mustache')">
             {{#repo}}
                 <b>{{name}}</b>
             {{/repo}}

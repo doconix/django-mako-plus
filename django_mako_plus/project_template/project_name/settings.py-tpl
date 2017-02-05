@@ -79,9 +79,17 @@ TEMPLATES = [
             # the default encoding of template files
             'DEFAULT_TEMPLATE_ENCODING': 'utf-8',
 
-            # these are included in every template by default - if you put your most-used libraries here, you won't have to import them exlicitly in templates
+            # imports for every template
             'DEFAULT_TEMPLATE_IMPORTS': [
-              'import os, os.path, re, json',
+                # import DMP (required)
+                'import django_mako_plus',
+
+                # uncomment this next line to enable alternative syntax blocks within your Mako templates
+                # 'from django_mako_plus import django_syntax, jinja2_syntax, alternate_syntax
+
+                # the next two lines are just examples of including common imports in templates
+                # 'from datetime import datetime',
+                # 'import os, os.path, re, json',
             ],
 
             # whether to send the custom DMP signals -- set to False for a slight speed-up in router processing
@@ -96,10 +104,13 @@ TEMPLATES = [
             # happens when the corresponding template.html is accessed the first time after server startup
             # if DEBUG=False, this only happens once per file after server startup, not for every request
             # specify the binary in a list below -- even if just one item (see subprocess.Popen)
+
             # Python 3.3+:
             #'SCSS_BINARY': [ shutil.which('scss'), '--unix-newlines' ],
+
             # Python 3.0 to 3.2:
             #'SCSS_BINARY': [ '/path/to/scss', '--unix-newlines' ],
+
             # Disabled (no sass integration)
             'SCSS_BINARY': None,
 

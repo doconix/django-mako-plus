@@ -309,6 +309,15 @@ urlpatterns = [
 ]
 ```
 
+* In your `settings.py` file, ensure that DMP is imported in the `DEFAULT_TEMPLATE_IMPORTS` list:
+
+```python
+'DEFAULT_TEMPLATE_IMPORTS': [
+    'import django_mako_plus',
+]
+```
+
+
 * Clean out all the cached template files.  This can be done with the command:
 
 ```
@@ -426,11 +435,12 @@ LOGGING = {
 }
 ```
 
-Add the Django-Mako-Plus engine to the `TEMPLATES` list.  You'll already have this `TEMPLATES =` list in your settings file.  Integrate the item below into the existing structure.
+Add the Django-Mako-Plus engine to the `TEMPLATES` list.   Note that a standard Django project already has the `TEMPLATES = ` line.
 
 ```python
 TEMPLATES = [
     {
+        'NAME': 'django_mako_plus',
         'BACKEND': 'django_mako_plus.MakoTemplates',
         'OPTIONS': {
             # functions to automatically add variables to the params/context before templates are rendered
@@ -453,9 +463,17 @@ TEMPLATES = [
             # the default encoding of template files
             'DEFAULT_TEMPLATE_ENCODING': 'utf-8',
 
-            # these are included in every template by default - if you put your most-used libraries here, you won't have to import them exlicitly in templates
+            # imports for every template
             'DEFAULT_TEMPLATE_IMPORTS': [
-              'import os, os.path, re, json',
+                # import DMP (required)
+                'import django_mako_plus',
+
+                # uncomment this next line to enable alternative syntax blocks within your Mako templates
+                # 'from django_mako_plus import django_syntax, jinja2_syntax, alternate_syntax
+
+                # the next two lines are just examples of including common imports in templates
+                # 'from datetime import datetime',
+                # 'import os, os.path, re, json',
             ],
 
             # whether to send the custom DMP signals -- set to False for a slight speed-up in router processing
@@ -470,7 +488,14 @@ TEMPLATES = [
             # happens when the corresponding template.html is accessed the first time after server startup
             # if DEBUG=False, this only happens once per file after server startup, not for every request
             # specify the binary in a list below -- even if just one item (see subprocess.Popen)
-            #'SCSS_BINARY': [ '/usr/bin/env', 'scss', '--unix-newlines' ],
+
+            # Python 3.3+:
+            #'SCSS_BINARY': [ shutil.which('scss'), '--unix-newlines' ],
+
+            # Python 3.0 to 3.2:
+            #'SCSS_BINARY': [ '/path/to/scss', '--unix-newlines' ],
+
+            # Disabled (no sass integration)
             'SCSS_BINARY': None,
 
             # see the DMP online tutorial for information about this setting
@@ -480,8 +505,20 @@ TEMPLATES = [
             ],
         },
     },
-
-    # you'll likely already have the DjangoTemplates settings here
+    {
+        'NAME': 'django',
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [],
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                'django.template.context_processors.debug',
+                'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
+                'django.contrib.messages.context_processors.messages',
+            ],
+        },
+    },
 ]
 ```
 
@@ -499,7 +536,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 #### Enable the Django-Mako-Plus Router
 
-Add the Django-Mako-Plus router as **the last pattern** in your `urls.py` file (the default admin is also included here for completeness):
+Add the Django-Mako-Plus router **as the last pattern** in your `urls.py` file (the default admin is also included here for completeness):
 
 ```python
 from django.conf.urls import url, include
@@ -687,6 +724,22 @@ Pay special attention to the `<%block name="content">` section, which is overrid
 The purpose of the inheritance from `base.htm` is to get a consistent look, menu, etc. across all pages of your site.  When you create additional pages, simply override the `content` block, similar to the way `index.html` does it.
 
 > Don't erase anything in the base.htm file.  In particular, link_css, and link_js are important parts of DMP.  As much as you probably want to clean up the mess, try your best to leave them alone.  These are not the code lines you are looking for.  Move along.
+
+**AttributeError: 'Undefined' object has no attribute 'link_css' / 'link_js'???**
+
+If you get this error, you might need to update a setting in `settings.py`.  Ensure that DMP is imported in the `DEFAULT_TEMPLATE_IMPORTS` list:
+
+```python
+'DEFAULT_TEMPLATE_IMPORTS': [
+    'import django_mako_plus',
+]
+```
+
+Then clear out the compiled templates caches:
+
+```
+python manage.py dmp_cleanup
+```
 
 
 ## Routing Without urls.py
@@ -1587,7 +1640,23 @@ If you call the `render_crispy_form` method in many templates, you may want to a
 
 > Whenever you modify the DMP settings, be sure to clean out your cached templates with `python manage.py dmp_cleanup`.  This ensures your compiled templates are rebuilt with the new settings.
 
-However, there may be times when you need or want to call real, Django tags.  For example, although [Crispy Forms'](http://django-crispy-forms.readthedocs.io/) functions can be called directly, you may want to use its custom tags.  To temporarily enable Django templating, you can include a Django expression or embed an entire block within your Mako template by using a filter.
+However, there may be times when you need or want to call real, Django tags.  For example, although [Crispy Forms'](http://django-crispy-forms.readthedocs.io/) functions can be called directly, you may want to use its custom tags.
+
+To enable alternative syntaxes, uncomment (or add) the following to your `settings.py` file:
+
+```python
+'DEFAULT_TEMPLATE_IMPORTS': [
+    'from django_mako_plus import django_syntax, jinja2_syntax, alternate_syntax
+],
+```
+
+Then clear out the compiled templates caches:
+
+```
+python manage.py dmp_cleanup
+```
+
+Now that the functions are imported, you can include a Django expression or embed an entire block within your Mako template by using a filter:
 
 ```
 ## Expression containing Django template syntax (assuming name was created in the view.py)
