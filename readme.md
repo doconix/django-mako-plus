@@ -183,7 +183,7 @@ Note in the examples how the DMP column normally uses standard Python syntax, wi
     <th>Django</th>
     <th>DMP (Mako)</th>
   </tr><tr>
-    <td colspan="2">**Output the value of the question variable:**</td>
+    <td colspan="2"><b>Output the value of the question variable:</b></td>
   </tr><tr>
     <td><pre><code>{{ question }}</code></pre></td>
     <td><pre><code>${ question }</code></pre></td>
