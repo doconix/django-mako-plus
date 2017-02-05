@@ -188,10 +188,15 @@ Note in the examples how the DMP column normally uses standard Python syntax, wi
     <td><pre><code>{{ question }}</code></pre></td>
     <td><pre><code>${ question }</code></pre></td>
   </tr><tr>
-    <td colspan="2"><b>Call a method on the User object (DMP version is a normal method call, with parameters if needed):</b></td>
+    <td colspan="2"><b>Call a method on the User object:</b></td>
   </tr><tr>
     <td><pre><code>{{ user.get_full_name }}</code></pre></td>
     <td><pre><code>${ user.get_full_name() }</code></pre></td>
+  </tr><tr>
+    <td colspan="2"><b>Call a method with parameters on the User object:</b></td>
+  </tr><tr>
+    <td><pre>Requires a custom tag.</pre></td>
+    <td><pre><code>${ user.has_perm('app.get_main_view') }</code></pre></td>
   </tr><tr>
     <td colspan="2"><b>Iterate through a relationship:</b></td>
   </tr><tr>
@@ -233,6 +238,23 @@ Note in the examples how the DMP column normally uses standard Python syntax, wi
     <td>Any Python method can be called:
 <pre><code>&nbsp;&nbsp;&lt;%! import random %&gt;
 &nbsp;&nbsp;${ random.randint(1, 10) }</code></pre></td>
+  </tr><tr>
+    <td colspan="2"><b>Print a Django form:</b></td>
+  </tr><tr>
+    <td><pre><code>
+&lt;form action="/your-name/" method="post"&gt;
+&nbsp;&nbsp;{% csrf_token %}
+&nbsp;&nbsp;{{ form }}
+&nbsp;&nbsp;&lt;input type="submit" value="Submit" /&gt;
+&lt;/form&gt;
+    </code></pre></td>
+    <td><pre><code>
+&lt;form action="/your-name/" method="post"&gt;
+&nbsp;&nbsp;${ csrf_input }
+&nbsp;&nbsp;${ form }
+&nbsp;&nbsp;&lt;input type="submit" value="Submit" /&gt;
+&lt;/form&gt;
+    </code></pre></td>
   </tr><tr>
     <td colspan="2"><b>Output a default if empty:</b></td>
   </tr><tr>
