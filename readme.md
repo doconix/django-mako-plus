@@ -1247,6 +1247,7 @@ DEFAULT_TEMPLATE_IMPORTS = [
 
 Any entries in this list will be automatically included in templates throughout all apps of your site.  With the above imports, you'll be able to use `re` and `Decimal` and `os` and `os.path` anywhere in any .html, .cssm, and .jsm file.
 
+>> Whenever you modify the DMP settings, be sure to clean out your cached templates with `python manage.py dmp_cleanup`.  This ensures your compiled templates are rebuilt with the new settings.
 
 
 ## Mime Types and Status Codes
@@ -1565,11 +1566,29 @@ In most cases, third-party functionality can be called directly from Mako.  For 
 * The docs show: `{{ form.render }}`
 * You use:`${ form.render() }`
 
-However, some third-party apps require real Django syntax.  For example, the [Crispy Forms](http://django-crispy-forms.readthedocs.io/) provides a number of Django-style custom tags.  To temporarily enable Django templating, you can include a Django expression or embed an entire block within your Mako template by using a filter.  These filters are included automatically in every DMP template.
+In other words, use regular Python in DMP to call the tags and functions within the third party library.  For example, you can render a [Crispy Form](http://django-crispy-forms.readthedocs.io/) by importing and calling its `render_crispy_form` function right within your template.
 
-Even though some third-party apps (like Crispy) have Django tags, **you can often call the tags directly right from Mako because Django tags (the simple kind) are just functions.**  It's probably better to find the tag function in the library source code, `<% from thirdparty.library.module import the_tag_function %>`, and run `${ the_tag_function() }` using regular Mako code.
+For example, suppose your view constructs a Django form, which is then sent to your template via the context dictionary.  Your template would look like this:
 
-But if you really want/need to switch temporarily to another template syntax, DMP supports it:
+```
+<%! from crispy_forms.utils import render_crispy_form %>
+
+<html>
+<body>
+    <form method="POST">
+        ${ csrf_input }
+        ${ render_crispy_form(form) }
+    </form>
+</body>
+</html>
+```
+
+If you call the `render_crispy_form` method in many templates, you may want to add the import to `DEFAULT_TEMPLATE_IMPORTS` in your `settings.py` file.  Once this import exists in your settings, the function will be globally available in every template on your site.
+
+>> Whenever you modify the DMP settings, be sure to clean out your cached templates with `python manage.py dmp_cleanup`.  This ensures your compiled templates are rebuilt with the new settings.
+
+However, there may be times when you need or want to call real, Django tags.  For example, although [Crispy Forms'](http://django-crispy-forms.readthedocs.io/) functions can be called directly, you may want to use its custom tags.  To temporarily enable Django templating, you can include a Django expression or embed an entire block within your Mako template by using a filter.
+
 ```
 ## Expression containing Django template syntax (assuming name was created in the view.py)
 ${ '{{ name }}' | django_syntax(context) }
