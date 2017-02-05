@@ -4,7 +4,6 @@ from django.conf.urls import url
 from django.core.exceptions import ImproperlyConfigured
 from django.template import TemplateDoesNotExist, engines, TemplateSyntaxError
 from django.template.backends.base import BaseEngine
-from django.template.context import _builtin_context_processors
 from django.utils.module_loading import import_string
 from django.views.generic import View
 
@@ -28,6 +27,11 @@ try:
 except ImportError:
     # python <= 3.3
     from importlib import find_loader as find_spec
+
+
+# Following Django's lead, hard coding the CSRF processor
+_builtin_context_processors = ('django_mako_plus.context_processors.csrf',)
+
 
 
 #########################################################
