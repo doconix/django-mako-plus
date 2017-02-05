@@ -1531,7 +1531,7 @@ In support of the Django CSRF capability, DMP includes `csrf_token` and `csrf_in
 However, slightly different than Django's default templates (but following [Jinja2's lead](https://docs.djangoproject.com/en/dev/ref/csrf/#using-csrf-in-jinja2-templates)), use `csrf_input` to render the CSRF input:
 
 ```
-<form action="..." method="post">
+<form action="" method="post">
     ${ csrf_input }
     ...
 </form>
