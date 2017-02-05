@@ -340,7 +340,7 @@ urlpatterns = [
 ```
 
 
-* Clean out all the cached template files.  This can be done with the command:
+* Clean out all the cached template files.  This should be done **anytime you make a DMP change in settings.py**:
 
 ```
 python manage.py dmp_cleanup
@@ -555,6 +555,11 @@ STATICFILES_DIRS = (
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 ```
 
+Clean out all the cached template files.  This should be done **anytime you make a DMP change in settings.py**:
+
+```
+python manage.py dmp_cleanup
+```
 
 #### Enable the Django-Mako-Plus Router
 
