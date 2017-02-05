@@ -1247,7 +1247,7 @@ DEFAULT_TEMPLATE_IMPORTS = [
 
 Any entries in this list will be automatically included in templates throughout all apps of your site.  With the above imports, you'll be able to use `re` and `Decimal` and `os` and `os.path` anywhere in any .html, .cssm, and .jsm file.
 
->> Whenever you modify the DMP settings, be sure to clean out your cached templates with `python manage.py dmp_cleanup`.  This ensures your compiled templates are rebuilt with the new settings.
+> Whenever you modify the DMP settings, be sure to clean out your cached templates with `python manage.py dmp_cleanup`.  This ensures your compiled templates are rebuilt with the new settings.
 
 
 ## Mime Types and Status Codes
@@ -1585,7 +1585,7 @@ For example, suppose your view constructs a Django form, which is then sent to y
 
 If you call the `render_crispy_form` method in many templates, you may want to add the import to `DEFAULT_TEMPLATE_IMPORTS` in your `settings.py` file.  Once this import exists in your settings, the function will be globally available in every template on your site.
 
->> Whenever you modify the DMP settings, be sure to clean out your cached templates with `python manage.py dmp_cleanup`.  This ensures your compiled templates are rebuilt with the new settings.
+> Whenever you modify the DMP settings, be sure to clean out your cached templates with `python manage.py dmp_cleanup`.  This ensures your compiled templates are rebuilt with the new settings.
 
 However, there may be times when you need or want to call real, Django tags.  For example, although [Crispy Forms'](http://django-crispy-forms.readthedocs.io/) functions can be called directly, you may want to use its custom tags.  To temporarily enable Django templating, you can include a Django expression or embed an entire block within your Mako template by using a filter.
 
