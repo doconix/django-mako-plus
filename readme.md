@@ -1526,10 +1526,16 @@ This method of modifying the URL pattern allows total freedom since you can use 
 
 ## CSRF Tokens
 
-In support of the Django CSRF framework, DMP includes `csrf_token` in the context of every template.  As with Django, this token is always available and cannot be disabled for security reasons.
+In support of the Django CSRF capability, DMP includes `csrf_token` and `csrf_input` in the context of every template.  Following [Django's lead](https://docs.djangoproject.com/en/dev/ref/csrf/), this token is always available and cannot be disabled for security reasons.
 
-Note, however, that you still must include the token in your forms with `${ csrf_token }`.
+However, slightly different than Django's default templates (but following [Jinja2's lead](https://docs.djangoproject.com/en/dev/ref/csrf/#using-csrf-in-jinja2-templates)), use `csrf_input` to render the CSRF input:
 
+```
+<form action="..." method="post">
+    ${ csrf_input }
+    ...
+</form>
+```
 > Since the CSRF token requires a request object, using an empty request `dmp_render(None, ...)` prevents the token from being included in your templates.
 
 
