@@ -52,7 +52,7 @@ DMP can be used alongside regular Django templates, Jinja2 templates, and other 
 - [Table of Contents](#table-of-contents)
 - [Description](#description)
 	- [Where Is DMP Used?](#where-is-dmp-used)
-	- [Why Mako instead Django or Jinja2?](#why-mako-instead-of-jinja2-cheetah-or-insert-template-language-here)
+	- [Why Mako instead Django or Jinja2?](#why-mako-instead-django-or-jinja2)
 	- [Can I use DMP with other Django apps?](#can-i-use-dmp-with-other-django-apps)
 	- [Comparison with Django Syntax](#comparison-with-django-syntax)
 - [Installation](#installation)
@@ -89,7 +89,6 @@ DMP can be used alongside regular Django templates, Jinja2 templates, and other 
 		- [Development](#development)
 		- [Security at Deployment (VERY Important)](#security-at-deployment-very-important)
 		- [Collecting Static Files](#collecting-static-files)
-			- [Django Apps + DMP Apps](#django-apps-dmp-apps)
 	- [Redirecting](#redirecting)
 - [Deployment Recommendations](#deployment-recommendations)
 	- [Deployment Tutorials](#deployment-tutorials)
@@ -101,11 +100,6 @@ DMP can be used alongside regular Django templates, Jinja2 templates, and other 
 	- [CSRF Tokens](#csrf-tokens)
 	- [Behind the CSS and JS Curtain](#behind-the-css-and-js-curtain)
 	- [Using Django and Jinja2 Tags and Syntax](#using-django-and-jinja2-tags-and-syntax)
-	- [Expression containing Django template syntax (assuming name was created in the view.py)](#expression-containing-django-template-syntax-assuming-name-was-created-in-the-viewpy)
-	- [Full Django code block, with Mako creating the variable first](#full-django-code-block-with-mako-creating-the-variable-first)
-	- [Third-party, crispy form tags (assume my_formset was created in the view.py)](#third-party-crispy-form-tags-assume-myformset-was-created-in-the-viewpy)
-		- [Jinja2, Mustache, Cheetah, and <insert template engine>.](#jinja2-mustache-cheetah-and-insert-template-engine)
-		- [Local Variables](#local-variables)
 	- [Rending Templates the Standard Way: `render()`](#rending-templates-the-standard-way-render)
 	- [Rendering Partial Templates (Ajax!)](#rendering-partial-templates-ajax)
 	- [Sass Integration](#sass-integration)
@@ -774,12 +768,19 @@ python manage.py dmp_cleanup
 In the installation procedures above, you set your urls.py file to look something like the following:
 
 ```python
-from django_mako_plus import route_request
+from django.conf.urls import url, include
+from django.contrib import admin
 
 urlpatterns = [
+    # the built-in Django administrator
     url(r'^admin/', admin.site.urls),
-    url(r'^.*$', route_request),
+
+    # urls for any third-party apps go here
+
+    # the DMP router - this should be the last line in the list
+    url('', include('django_mako_plus.urls')),
 ]
+
 ```
 
 The regular expression in the last line, `^.*$`, is a wildcard that matches everything.  It tells every url to go to the Django-Mako-Plus router, where it is further routed according to the pattern: `/app/page`.  We aren't really routing without `urls.py`; we're adding a second, more important router afterward.  In fact, you can still use the `urls.py` file in the normal Django way because we placed the wildcard at the *end* of the file.  Things like the `/admin/` still work the normal, Django way.
@@ -1359,7 +1360,7 @@ Django-Mako-Plus works with static files the same way that traditional Django do
 
 #### Static File Setup
 
-In your project's settings.py file, be sure you the following:
+In your project's settings.py file, be sure you add the following:
 
 ```python
 STATIC_URL = '/static/'
@@ -1369,7 +1370,7 @@ STATICFILES_DIRS = (
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 ```
 
-Note that the last line is a serious security issue if you go to production with it.  More on that later.
+Note that the last line is a serious security issue if you go to production with it (although Django disables it as long as `DEBUG=False`).  More on that later.
 
 #### Development
 
@@ -1476,7 +1477,7 @@ As you might expect, `RedirectException` sends a normal 302 redirect and `Perman
 
 The fourth exception, `InternalRedirectException`, is simpler and faster: it restarts the routing process with a different view/template within the *current* request, without changing the browser url.  Internal redirect exceptions are rare and shouldn't be abused. An example might be returning an "upgrade your browser" page to a client; since the user has an old browser, a regular 302 redirect might not work the way you expect.  Redirecting internally is much safer because your server stays in control the entire time.
 
-The following code shows examples of different methods if redirection:
+The following code shows examples of different redirection methods:
 
 ```python
 from django.http import HttpResponseRedirect
