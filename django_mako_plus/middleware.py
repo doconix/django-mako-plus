@@ -20,7 +20,7 @@ import logging
 ###   use with the controller.
 
 EMPTY_URLPARAMS = URLParamList()
-
+DMP_PARAM_CHECK = ( 'dmp_router_app', 'dmp_router_page', 'dmp_router_function', 'urlparams' )
 
 class RequestInitMiddleware(MiddlewareMixin):
     '''
@@ -68,18 +68,15 @@ class RequestInitMiddleware(MiddlewareMixin):
 
         As view middleware, this function runs just before the router.route_request is called.
         '''
-        # print debug messages to help with urls.py regex issues
-        if log.isEnabledFor(logging.DEBUG):
-            if view_func is not route_request:
-                log.debug("DMP is not handling this request because the matched urls.py regex did not resolve to route_request. The request.dmp_* variables will not be set.")
-            else:
-                for param in ( 'dmp_router_app', 'dmp_router_page', 'dmp_router_function', 'urlparams' ):
-                    if param not in view_kwargs:
-                        log.debug('The matched urls.py regex did not contain the named parameter "{}"; using the default value from settings.py.'.format(param))
-
         # if urls.py didn't resolve to DMP, we don't need to set any of these variables
         if view_func is not route_request:
             return
+
+        # print debug messages to help with urls.py regex issues
+        if log.isEnabledFor(logging.DEBUG):
+            kwarg_params = [ param for param in DMP_PARAM_CHECK if param in view_kwargs ]
+            missing_params = [ param for param in DMP_PARAM_CHECK if param not in view_kwargs ]
+            log.debug('variables set by urls.py: {}; variables set by defaults: {}.'.format(kwarg_params, missing_params))
 
         # add the variables to the request
         request.dmp_router_app = view_kwargs.pop('dmp_router_app', None) or DMP_OPTIONS.get('DEFAULT_APP', 'homepage')
@@ -113,6 +110,7 @@ class RequestInitMiddleware(MiddlewareMixin):
         if request.dmp_router_callback._dmp_view_type == DMP_VIEW_CLASS_METHOD:
             request.dmp_router_class = request.dmp_router_function
             request.dmp_router_function = request.method.lower()
+
         # debugging
         # print('request.dmp_router_app        ', request.dmp_router_app        )
         # print('request.dmp_router_page       ', request.dmp_router_page       )

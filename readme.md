@@ -431,25 +431,25 @@ MIDDLEWARE = [
 Add a logger to help you debug (optional but highly recommended!):
 
 ```python
-DEBUG_PROPAGATE_EXCEPTIONS = DEBUG  # never set this True on a live site
+DEBUG_PROPAGATE_EXCEPTIONS = DEBUG  # SECURITY WARNING: never set this True on a live site
 LOGGING = {
     'version': 1,
-    'disable_existing_loggers': True,
+    'disable_existing_loggers': False,
     'formatters': {
-        'simple': {
-            'format': '%(levelname)s %(message)s'
+        'dmp_simple': {
+            'format': '%(levelname)s::DMP %(message)s'
         },
     },
     'handlers': {
-        'console':{
+        'dmp_console':{
             'level':'DEBUG',
             'class':'logging.StreamHandler',
-            'formatter': 'simple'
+            'formatter': 'dmp_simple'
         },
     },
     'loggers': {
         'django_mako_plus': {
-            'handlers': ['console'],
+            'handlers': ['dmp_console'],
             'level': 'DEBUG',
             'propagate': False,
         },
@@ -820,18 +820,21 @@ Reload your server and browser page, and you should see the exact same page.  It
 Let me pause for a minute and talk about log messages.  If you enabled the logger in the installation, you should see the following in your console:
 
 ```
-DEBUG controller :: processing: app=homepage, page=index, funcname=, urlparams=['']
-DEBUG controller :: calling view function homepage.views.index.process_request
-DEBUG controller :: rendering template .../dmp_test/homepage/templates/index.html
+DEBUG::DMP variables set by urls.py: ['dmp_router_app', 'dmp_router_page', 'urlparams']; variables set by defaults: ['dmp_router_function'].
+INFO::DMP processing: app=homepage, page=index, module=homepage.views.index, func=process_request, urlparams=['']
+INFO::DMP calling view function homepage.views.index.process_request
+DEBUG::DMP rendering template /Users/conan/Documents/data/teaching/2017/IS 411-413/fomoproject/homepage/templates/index.html
 ```
 
-These debug statements are incredibly helpful in figuring out why pages aren't routing right.  If your page didn't load right, you'll probably see why in these statements.  In my log above, the first line lists what the controller assigned the app and page to be.
+These debug statements are incredibly helpful in figuring out why pages aren't routing right.  If your page didn't load right, you'll probably see why in these statements.  In my log above, the first line lists what named parameters were matched in `urls.py`.
 
-The second line tells me the controller found my new `index.py` view, and it called the `process_request` function successfully.  This is important -- the `process_request` function is the "default" view function.  Further, the any web-accessible function must be decorated with `@view_function`.
+The second line shows the how these named (or defaulted) parameters translated into the app, page, module, and function.
 
->This decoration with `@view_function` is done for security.  If the framework let browsers specify any old function, end users could invoke any function of any module on your system!  By requiring the decorator, the framework limits end users to one specifically-named function.
+The third line shows the controller found the `index.py` view, and it called the `process_request` function successfully.  This is important -- the `process_request` function is the "default" view function.  This web-accessible function must be decorated with `@view_function`.
 
-You can have multiple decorators on your function, such as a permissions check and `view_function`:
+>This decoration with `@view_function` is done for security.  If the framework were to allow browsers specify any old function, end users could invoke any function of any module on your system!  By requiring the decorator, the framework limits end users to one specifically-named function.
+
+You can have multiple decorators on your function, such as a permissions check and `view_function`.  Just be sure the `@view_function` decorator is listed first:
 
 ```python
 @view_function
@@ -902,8 +905,8 @@ For an example of `dmp_render_to_string`, scroll lower in this tutorial to the "
 If you need to process templates across apps within a single view.py file (likely a rare case), use absolute imports and give an alias to the functions as you import them:
 
 ```python
-import homepage.dmp_render as homepage_render
-import catalog.dmp_render as catalog_render
+from homepage import dmp_render as homepage_render
+from catalog import  dmp_render as catalog_render
 ```
 
 Once you've imported the functions with aliases, simply use the appropriate function for templates in the two apps.

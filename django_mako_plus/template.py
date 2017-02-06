@@ -166,12 +166,12 @@ class MakoTemplateAdapter(object):
             template_debug_name = self.mako_template.filename or 'string'
             if def_name:
                 template_debug_name = '%s -> %s' % (template_debug_name, def_name)
-            log.debug('Rendering template %s' % template_debug_name)
+            log.debug('rendering template %s' % template_debug_name)
         if settings.DEBUG:
             try:
                 content = render_obj.render_unicode(**context_dict)
             except:
-                log.exception('Exception raised during template rendering:')  # to the console
+                log.exception('exception raised during template rendering:')  # to the console
                 content = html_error_template().render_unicode()       # to the browser
         else:  # this is outside the above "try" loop because in non-DEBUG mode, we want to let the exception throw out of here (without having to re-raise it)
             content = render_obj.render_unicode(**context_dict)

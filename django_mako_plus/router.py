@@ -88,9 +88,9 @@ def route_request(request, *args, **kwargs):
                 module_obj = import_module(request.dmp_router_module)
                 request.dmp_router_callback = getattr(module_obj, request.dmp_router_function, None)
                 if request.dmp_router_callback == None:
-                    request.dmp_router_callback = DMPViewDoesNotExist('Module {} found successfully during internal redirect, but view function {} is not defined in the module.'.format(request.dmp_router_module, request.dmp_router_function))
+                    request.dmp_router_callback = DMPViewDoesNotExist('module {} found successfully during internal redirect, but view function {} is not defined in the module.'.format(request.dmp_router_module, request.dmp_router_function))
             except ImportError:
-                request.dmp_router_callback = DMPViewDoesNotExist('View function {}.{} not found during internal redirect.'.format(request.dmp_router_module, request.dmp_router_function))
+                request.dmp_router_callback = DMPViewDoesNotExist('view function {}.{} not found during internal redirect.'.format(request.dmp_router_module, request.dmp_router_function))
             # do the internal redirect
             log.info('received an InternalViewRedirect to {} -> {}'.format(request.dmp_router_module, request.dmp_router_function))
 

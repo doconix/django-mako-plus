@@ -195,27 +195,26 @@ STATICFILES_DIRS = (
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 
-# A default logger
-
+# A logger for DMP
 DEBUG_PROPAGATE_EXCEPTIONS = DEBUG  # SECURITY WARNING: never set this True on a live site
 LOGGING = {
     'version': 1,
-    'disable_existing_loggers': True,
+    'disable_existing_loggers': False,
     'formatters': {
-        'simple': {
-            'format': '%(levelname)s %(message)s'
+        'dmp_simple': {
+            'format': '%(levelname)s::DMP %(message)s'
         },
     },
     'handlers': {
-        'console':{
+        'dmp_console':{
             'level':'DEBUG',
             'class':'logging.StreamHandler',
-            'formatter': 'simple'
+            'formatter': 'dmp_simple'
         },
     },
     'loggers': {
         'django_mako_plus': {
-            'handlers': ['console'],
+            'handlers': ['dmp_console'],
             'level': 'DEBUG',
             'propagate': False,
         },
