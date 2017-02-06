@@ -29,7 +29,7 @@ INSTALLED_APPS = [
 python3 manage.py migrate
 python3 manage.py runserver
 
-# Open a browser to http://localhost/
+# Open a browser to http://localhost:8000/
 
 ```
 
@@ -52,7 +52,7 @@ DMP can be used alongside regular Django templates, Jinja2 templates, and other 
 - [Table of Contents](#table-of-contents)
 - [Description](#description)
 	- [Where Is DMP Used?](#where-is-dmp-used)
-	- [Why Mako instead of Jinja2, Cheetah, or <insert template language here>?](#why-mako-instead-of-jinja2-cheetah-or-insert-template-language-here)
+	- [Why Mako instead Django or Jinja2?](#why-mako-instead-of-jinja2-cheetah-or-insert-template-language-here)
 	- [Can I use DMP with other Django apps?](#can-i-use-dmp-with-other-django-apps)
 	- [Comparison with Django Syntax](#comparison-with-django-syntax)
 - [Installation](#installation)
@@ -149,9 +149,9 @@ This app was developed at MyEducator.com, primarily by Dr. Conan C. Albrecht <do
 I've been told by some that DMP has a lot in common with Rails.  When I developed DMP, I had never used RoR, but good ideas are good ideas wherever they are found, right? :)
 
 
-## Why Mako instead of Jinja2, Cheetah, or <insert template language here>?
+## Why Mako instead Django or Jinja2?
 
-Python has several mature, excellent templating languages.  Both Mako and Jinja2 are fairly recent yet mature systems.  Both are screaming fast.  Cheetah is an older system but has quite a bit of traction.  It wasn't a clear choice of one over the rest.
+Python has several mature, excellent templating languages.  Both Django and Jinja2 are fairly recent yet mature systems.  Both are screaming fast.
 
 Mako itself is very stable, both in terms of "lack of bugs" and in "completed feature set".  Today, the Mako API almost never changes because it does exactly what it needs to do and does it well.  This make it an excellent candidate for server use.
 
