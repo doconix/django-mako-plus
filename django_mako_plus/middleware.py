@@ -29,7 +29,6 @@ class RequestInitMiddleware(MiddlewareMixin):
 
     This class must be included in settings.py -> MIDDLEWARE.
     '''
-
     def process_request(self, request):
         '''
         Adds stubs for the DMP custom variables to the request object.
@@ -71,6 +70,12 @@ class RequestInitMiddleware(MiddlewareMixin):
         # if urls.py didn't resolve to DMP, we don't need to set any of these variables
         if view_func is not route_request:
             return
+
+        # set a flag on the request to check for double runs (middleware listed twice in settings)
+        # double runs don't work because we pop off the kwargs below
+        if hasattr(request, '_dmp_router_middleware_flag'):
+            raise ImproperlyConfigured('The Django Mako Plus middleware is running twice on this request.  Please check settings.py to see it the middleware might be listed twice.')
+        request._dmp_router_middleware_flag = True
 
         # print debug messages to help with urls.py regex issues
         if log.isEnabledFor(logging.DEBUG):

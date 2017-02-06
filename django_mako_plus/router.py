@@ -24,18 +24,19 @@ def route_request(request, *args, **kwargs):
     '''
     The main router for all calls coming in to the system.  Patterns in urls.py should call this function.
     '''
+    # check to ensure DMP's middleware ran
     # wrap to enable the InternalRedirectExceptions to loop around
     response = None
     while True:
         # an outer try that catches the redirect exceptions
         try:
-            # output the variables so the programmer can debug where this is routing
-            if log.isEnabledFor(logging.INFO):
-                log.info('processing: app={}, page={}, module={}, func={}, urlparams={}'.format(request.dmp_router_app, request.dmp_router_page, request.dmp_router_module, request.dmp_router_function, request.urlparams))
-
             # ensure we have a dmp_router_callback variable on request
             if getattr(request, 'dmp_router_callback', None) is None:
                 raise ImproperlyConfigured("Variable request.dmp_router_callback does not exist (check MIDDLEWARE for `django_mako_plus.RequestInitMiddleware`).")
+
+            # output the variables so the programmer can debug where this is routing
+            if log.isEnabledFor(logging.INFO):
+                log.info('processing: app={}, page={}, module={}, func={}, urlparams={}'.format(request.dmp_router_app, request.dmp_router_page, request.dmp_router_module, request.dmp_router_function, request.urlparams))
 
             # if we had a view not found, raise a 404
             if isinstance(request.dmp_router_callback, ViewDoesNotExist) or request.dmp_router_callback._dmp_view_type is DMP_VIEW_ERROR:

@@ -37,6 +37,7 @@ _builtin_context_processors = ('django_mako_plus.context_processors.csrf',)
 #########################################################
 ###   The main engine
 
+
 class MakoTemplates(BaseEngine):
     '''
     The primary Mako interface that plugs into the Django templating system.
