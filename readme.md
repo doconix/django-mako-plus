@@ -2052,7 +2052,7 @@ The following creates two receivers.  The first is called just before the view's
 
 ```python
 from django.dispatch import receiver
-from django_mako_plus import signals
+from django_mako_plus import signals, get_template_loader
 
 @receiver(signals.dmp_signal_pre_process_request)
 def dmp_signal_pre_process_request(sender, **kwargs):
