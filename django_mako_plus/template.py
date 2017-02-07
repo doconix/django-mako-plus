@@ -67,10 +67,8 @@ class MakoTemplateLoader:
             # wrap the mako template in an adapter that gives the Django template API
             return MakoTemplateAdapter(self.get_mako_template(template))
         except (TopLevelLookupException, TemplateLookupException) as e: # Mako exception raised
-            log.error('template "%s" not found in search path: %s' % (template, self.template_search_dirs))
             raise TemplateDoesNotExist('Template "%s" not found in search path: %s.' % (template, self.template_search_dirs))
         except (CompileException, SyntaxException) as e: # Mako exception raised
-            log.error('template "%s" not found in search path: %s.' % (template, self.template_search_dirs))
             raise TemplateSyntaxError('Template "%s" raised an error: %s' % (template, e))
 
 
