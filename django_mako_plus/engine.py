@@ -194,7 +194,7 @@ class MakoTemplates(BaseEngine):
                             func_obj = TemplateViewFunction(app_name, fallback_template_name)
                             func_obj.get_template()  # check whether the template exists
                         except TemplateDoesNotExist as e:
-                            func_obj = DMPViewDoesNotExist('View function {}.{} not found, and fallback template {} not found.'.format(module_name, function_name, fallback_template_name))
+                            func_obj = DMPViewDoesNotExist('View function {}.{} not found, and fallback template {} not found ({})'.format(module_name, function_name, fallback_template_name, e))
 
                     elif isclass(func_obj) and issubclass(func_obj, View):
                         # this Django method wraps the view class with a function, so now we can treat it like a regular dmp view function
