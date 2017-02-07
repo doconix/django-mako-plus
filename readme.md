@@ -783,9 +783,7 @@ urlpatterns = [
 
 ```
 
-The regular expression in the last line, `^.*$`, is a wildcard that matches everything.  It tells every url to go to the Django-Mako-Plus router, where it is further routed according to the pattern: `/app/page`.  We aren't really routing without `urls.py`; we're adding a second, more important router afterward.  In fact, you can still use the `urls.py` file in the normal Django way because we placed the wildcard at the *end* of the file.  Things like the `/admin/` still work the normal, Django way.
-
-Rather than listing every. single. page. on. your. site. in the `urls.py` file, the router figures out the destination via a convention.  The first url part is taken as the app to go to, and the second url part is taken as the view to call.
+Rather than listing every. single. page. on. your. site. in the `urls.py` file, the router figures out the destination via a convention.  The first url part is taken as the app to go to, and the second url part is taken as the view to call.  See the advanced topics if you want to customize this behavior.
 
 For example, the url `/homepage/index/` routes as follows:
 
