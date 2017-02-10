@@ -67,10 +67,6 @@ class RequestInitMiddleware(MiddlewareMixin):
 
         As view middleware, this function runs just before the router.route_request is called.
         '''
-        # if urls.py didn't resolve to DMP, we don't need to set any of these variables
-        if view_func is not route_request:
-            return
-
         # set a flag on the request to check for double runs (middleware listed twice in settings)
         # double runs don't work because we pop off the kwargs below
         if hasattr(request, '_dmp_router_middleware_flag'):
