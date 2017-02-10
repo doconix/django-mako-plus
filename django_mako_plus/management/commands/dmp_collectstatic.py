@@ -8,6 +8,33 @@ import os, os.path, shutil, fnmatch
 from importlib import import_module
 
 
+class Rule(object):
+    def __init__(self, pattern, level, isdir, ):
+        self.pattern = pattern
+        self.level = level
+        self.isdir = isdir
+
+
+
+
+
+# is a dir, level, filename
+DEFAULT_INCLUDE = (
+    ( True, 0, 'media'   ),
+    ( True, 0, 'scripts' ),
+    ( True, 0, 'styles'  ),
+)
+DEFAULT_IGNORE = (
+    ( True,  None, DMP_OPTIONS.get('TEMPLATES_CACHE_DIR') ),
+    ( True,  None, '__pycache__' ),
+    ( False, 0,    '*') ,             # we don't do any regular files at the main level
+    ( False, None, '*.pyc' ),
+    ( False, None, '__init__.py' ),
+    ( False, 1,    '*.cssm' ),        # rendered at runtime per request, so not a static file
+    ( False, 1,    '*.jsm' ),         # same
+)
+
+
 # import minification if requested
 JSMIN = False
 CSSMIN = False
@@ -29,8 +56,8 @@ class Command(BaseCommand):
     args = ''
     help = 'Collects static files, such as media, scripts, and styles, to a common directory root. This is done to prepare for deployment.'
     can_import_settings = True
-    
-    
+
+
     def add_arguments(self, parser):
         parser.add_argument(
             '--overwrite',
@@ -79,7 +106,23 @@ class Command(BaseCommand):
 
 
 
-    def ignore_file(self, fname):
+    def ignore_file(self, fisdir, flevel, fname):
+        '''Returns whether the given filename should be ignored, based on the default set of names'''
+        # is this directly ignored?
+        for isdir, level, pattern in DEFAULT_IGNORE:
+            if isdir == fisdir and (level is None or level == flevel) and fnmatch.fnmatch(fname, pattern):
+                return True
+        # if it isn't in the included names, it is ignored
+        for pattern in DEFAULT_INCLUDE:
+            if isdir == fisdir and (level is None or level == flevel) and fnmatch.fnmatch(fname, pattern):
+                break
+        else:
+            return True
+        # if we get here, we can include the file
+        return False
+
+
+    def explicit_ignore_file(self, fname):
         '''Returns whether the given filename should be ignored, based on the --ignore options sent into the command'''
         if self.options['ignore_files']:
             for pattern in self.options['ignore_files']:
@@ -99,36 +142,26 @@ class Command(BaseCommand):
             dest_path = os.path.join(dest, fname)
             ext = os.path.splitext(fname)[1].lower()
 
-            ###  EXPLICIT IGNORE  ###
-            if self.ignore_file(fname):
-                pass
+            ###  EXPLICIT IGNORE (command-line args can match dirs or files) ###
+            if self.explicit_ignore_file(fname):
+                continue
 
-            ###  DIRECTORIES  ###
-            # ignore these directories
-            elif os.path.isdir(source_path) and fname in ( 'migrations', 'templates', 'views', DMP_OPTIONS.get('TEMPLATES_CACHE_DIR'), '__pycache__' ):
-                pass
+            ###  DEFAULT IGNORE
+            elif self.ignore_file(os.path.isdir(source_path), level, fname):
+                continue
 
-            # if a directory, create it in the destination and recurse
-            elif os.path.isdir(source_path):
+            ### if we get here, we can copy the file
+
+            # if a directory, recurse to it
+            if os.path.isdir(source_path):
+                # create it in the destination and recurse
                 if not os.path.exists(dest_path):
                     os.mkdir(dest_path)
                 elif not os.path.isdir(dest_path):  # could be a file or link
                     os.unlink(dest_path)
                     os.mkdir(dest_path)
+                print('>>> ', level, source_path)
                 self.copy_dir(source_path, dest_path, level+1)
-
-            ###   FILES   ###
-            # we don't do any regular files at the top level
-            elif level == 0:
-                pass
-
-            # ignore these files
-            elif fname in ( '__init__.py', ):
-                pass
-
-            # ignore these extensions
-            elif ext in ( '.cssm', '.jsm' ):
-                pass
 
             # if a regular Javscript file, minify it
             elif ext == '.js' and DMP_OPTIONS.get('MINIFY_JS_CSS', False) and JSMIN:
@@ -136,11 +169,13 @@ class Command(BaseCommand):
                     with open(dest_path, 'w') as fout:
                         fout.write(jsmin(fin.read()))
 
+            # same with css files
             elif ext == '.css' and DMP_OPTIONS.get('MINIFY_JS_CSS', False) and CSSMIN:
                 with open(source_path) as fin:
                     with open(dest_path, 'w') as fout:
                         fout.write(cssmin(fin.read()))
 
-            # if we get here, it's a binary file like an image, movie, pdf, etc.
+            # if we get here, just copy the file
             else:
+                print('!!!', source_path)
                 shutil.copy2(source_path, dest_path)

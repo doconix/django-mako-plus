@@ -300,52 +300,6 @@ Note: If you need to use DMP 2.7, follow the [old installation instructions](htt
 
 
 
-## Upgrade Notes for DMP 3.8
-
-In **January, 2017**, Django-Mako-Plus 3.8 was released.  It requires a few changes to projects created with previous versions.  Please adjust the following in your project:
-
-* Do a sitewide search for `get_template_css` and `get_template_js`.  These will normally be found in `base.htm` and `base-ajax.htm`.
-Remove the `import` line for these two commands.  The import is no longer necessary.  Replace them with the new versions of the following functions (note that the function signature have changed):
-
-```
-${ django_mako_plus.link_css(self) }
-
-...
-
-${ django_mako_plus.link_js(self) }
-```
-
-* In your `urls.py` file, change the DMP line to `include` the DMP urls.  A bare bones `urls.py` file would look like the following:
-
-```python
-from django.conf.urls import include, url
-
-urlpatterns = [
-    url('', include('django_mako_plus.urls')),
-]
-```
-
-* In your `settings.py` file, ensure that DMP is imported in the `DEFAULT_TEMPLATE_IMPORTS` list:
-
-```python
-'DEFAULT_TEMPLATE_IMPORTS': [
-    'import django_mako_plus',
-]
-```
-
-
-* Clean out all the cached template files.  This should be done **anytime you make a DMP change in settings.py**:
-
-```
-python manage.py dmp_cleanup
-```
-
-* DMP no longer uses `URL_START_INDEX`.  If you set this to something other than `0`, see [Installing Django in a Subdirectory](#installing-django-in-a-subdirectory) to modify your `urls.py` for your prefix.
-
-* This version of DMP no longer uses `request.dmp_router_page_full`.  If your code happens to use this variable, post a question to the project GitHub page or email me (Conan). I don't think anyone is using this variable outside of the DMP source code.
-
-* The funtion signatures in the `static_files` module have changed.  If you use any of these directly, please make the appropriate modifications.  I don't think anyone is using these outside of the DMP source code.
-
 ## Python 3+
 
 Install Python and ensure you can run `python3` (or `python`) at the command prompt.  The framework requires Python 3.x.
@@ -1422,9 +1376,9 @@ Allow from all
 
 #### Collecting Static Files
 
-DMP comes with a manage.py command `dmp_collectstatic` that copies all your static resource files into a single subtree so you can easily place them on your web server.  At development, your static files reside within the apps they support.  For example, the `homepage/media` directory is a sibling to `homepage/views` and `/homepage/templates`.  This combined layout makes for nice development, but a split layout is more optimal for deployment because you have two web servers active at deployment (a traditional server like Apache doing the static files and a Python server doing the dynamic files).
+DMP comes with a management command called `dmp_collectstatic` that copies all your static resource files into a single subtree so you can easily place them on your web server.  At development, your static files reside within the apps they support.  For example, the `homepage/media` directory is a sibling to `homepage/views` and `/homepage/templates`.  This combined layout makes for nice development, but a split layout is more optimal for deployment because you have two web servers active at deployment (a traditional server like Apache doing the static files and a Python server doing the dynamic files).
 
-The Django-Mako-Plus framework has a different layout than traditional Django, so it comes with its own static collection command.  When you are ready to publish your web site, run the following to split out the static files into a single subtree:
+A Django-Mako-Plus app has a different layout than a traditional Django app, so it comes with its own static collection command.  When you are ready to publish your web site, run the following to split out the static files into a single subtree:
 
 ```python
 python3 manage.py dmp_collectstatic
@@ -1432,7 +1386,7 @@ python3 manage.py dmp_collectstatic
 
 This command will copy of the static directories--`/media/`, `/scripts/`, and `/styles/`--to a common subtree called `/static/` (or whatever `STATIC_ROOT` is set to in your settings).  Everything in these directories is copied (except dynamic `*.jsm/*.cssm` files, which aren't static).
 
-> Since this new `/static/` directory tree doesn't contain any of your templates, views, settings, or other files, you can make the entire subtree available via your web server.  This gives you the best combination of speed and security and is the whole point of this exercise.
+> The command copies only these three directorie out of your DMP app folders.  Any other directories, such as `views` and `templates` and `mydir` are skipped.  If you need to include additional directories, use the `--include` option below.
 
 The `dmp_collectstatic` command has the following command-line options:
 
@@ -1445,7 +1399,13 @@ python3 manage.py dmp_collectstatic --overwrite
 * If you need to ignore certain directories or filenames, specify them with the `--ignore` option.  This can be specified more than once, and it accepts Unix-style wildcards:
 
 ```
-python3 manage.py dmp_collectstatic --ignore=.cached_templates --ignore=fixtures --ignore=*.txt
+python3 manage.py dmp_collectstatic --ignore=.cached_templates --ignore=*.txt
+```
+
+* If you need to include additional directories or files, specify them with the `--include` option.  This can be specified more than once, and it accepts Unix-style wildcards:
+
+```
+python3 manage.py dmp_collectstatic --include=global-media
 ```
 
 
@@ -1886,6 +1846,8 @@ def process_request(request):
         return dmp_render(request, 'index.html', context, def_name='server_time')
     return dmp_render(request, 'index.html', context)
 ```
+
+> The `def_name` parameter can be used to call both `<%block>` and `<%def>` tags in your templates.  The two are very similar within the Mako engine.  The primary difference is the `<%def>` tag can define parameters.  When calling these defs directly, be sure each of the parameter names is in your `context` dictionary.
 
 
 ## Sass Integration
