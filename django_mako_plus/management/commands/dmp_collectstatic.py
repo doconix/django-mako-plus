@@ -33,7 +33,7 @@ class Rule(object):
 INITIAL_RULES = (
     # files are included by default
     Rule('*',                                    level=None, filetype=TYPE_FILE,      score=1),
-    # ignore at the app level are skipped
+    # files at the app level are skipped
     Rule('*',                                    level=0,    filetype=TYPE_FILE,      score=-2),
     # directories are recursed by default
     Rule('*',                                    level=None, filetype=TYPE_DIRECTORY, score=1),
@@ -173,7 +173,7 @@ class Command(BaseCommand):
     def message(self, msg, level, tab=0):
         '''Print a message to the console'''
         # verbosity=1 is the default if not specified in the options
-        if self.options['verbosity'] >= level:
+        if self.options['verbosity'] >= min(level, 3):
             print('{}{}'.format('    ' * tab, msg))
 
 
@@ -239,16 +239,35 @@ class Command(BaseCommand):
                 self.message('Including and minifying file with score {}: {}'.format(score, source_path), msglevel, level+1)
                 with open(source_path) as fin:
                     with open(dest_path, 'w') as fout:
-                        fout.write(jsmin(fin.read()))
+                        minified = minify(fin.read(), jsmin)
+                        fout.write(minified)
+
 
             # same with css files
             elif ext == '.css' and DMP_OPTIONS.get('MINIFY_JS_CSS', False) and CSSMIN:
                 self.message('Including and minifying file with score {}: {}'.format(score, source_path), msglevel, level+1)
                 with open(source_path) as fin:
                     with open(dest_path, 'w') as fout:
-                        fout.write(cssmin(fin.read()))
+                        minified = minify(fin.read(), cssmin)
+                        fout.write(minified)
 
             # otherwise, just copy the file
             else:
                 self.message('Including file with score {}: {}'.format(score, source_path), msglevel, level+1)
                 shutil.copy2(source_path, dest_path)
+
+
+
+##############################################
+###   Utility functions
+
+def minify(text, minifier):
+    '''Minifies the source text (if needed)'''
+    # there really isn't a good way to know if a file is already minified.
+    # our heuristic is if source is more than 50 bytes greater of dest OR
+    # if a hard return is found in the first 50 chars, we assume it is not minified.
+    minified = minifier(text)
+    if  abs(len(text) - len(minified)) > 50 or '\n' in text[:50]:
+        return minified
+    return text
+
