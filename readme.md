@@ -1384,9 +1384,9 @@ A Django-Mako-Plus app has a different layout than a traditional Django app, so 
 python3 manage.py dmp_collectstatic
 ```
 
-This command will copy of the static directories--`/media/`, `/scripts/`, and `/styles/`--to a common subtree called `/static/` (or whatever `STATIC_ROOT` is set to in your settings).  Everything in these directories is copied (except dynamic `*.jsm/*.cssm` files, which aren't static).
+This command will copy the static directories--`/media/`, `/scripts/`, and `/styles/`--to a common subtree called `/static/` (or whatever `STATIC_ROOT` is set to in your settings).  Everything in these directories is copied (except dynamic `*.jsm/*.cssm` files, which aren't static).
 
-> The command copies only these three directorie out of your DMP app folders.  Any other directories, such as `views` and `templates` and `mydir` are skipped.  If you need to include additional directories, use the `--include` option below.
+> The command copies only these three directorie out of your DMP app folders.  Any other directories, such as `views` and `templates` and `mydir` are skipped.  If you need to include additional directories or file patterns, use the option below.
 
 The `dmp_collectstatic` command has the following command-line options:
 
@@ -1396,17 +1396,18 @@ The `dmp_collectstatic` command has the following command-line options:
 python3 manage.py dmp_collectstatic --overwrite
 ```
 
-* If you need to ignore certain directories or filenames, specify them with the `--ignore` option.  This can be specified more than once, and it accepts Unix-style wildcards:
+* If you need to ignore certain directories or filenames, specify them with the `--skip-dir` and `--skip-file` options.  These can be specified more than once, and it accepts Unix-style wildcards.
 
 ```
-python3 manage.py dmp_collectstatic --ignore=.cached_templates --ignore=*.txt
+python3 manage.py dmp_collectstatic --skip-dir=.cached_templates --skip-file=*.txt --skip-file=*.md
 ```
 
 * If you need to include additional directories or files, specify them with the `--include` option.  This can be specified more than once, and it accepts Unix-style wildcards:
 
 ```
-python3 manage.py dmp_collectstatic --include=global-media
+python3 manage.py dmp_collectstatic --include-dir=global-media --include-dir=global-styles --include-file=*.png
 ```
+
 
 
 ##### Django Apps + DMP Apps
