@@ -8,31 +8,55 @@ import os, os.path, shutil, fnmatch
 from importlib import import_module
 
 
+
+TYPE_DIRECTORY = 0       # file is a directory
+TYPE_FILE = 1            # file is a regular file
+
+
 class Rule(object):
-    def __init__(self, pattern, level, isdir, ):
+    def __init__(self, pattern, level, filetype, score):
         self.pattern = pattern
         self.level = level
-        self.isdir = isdir
+        self.filetype = filetype
+        self.score = score
+
+    def match(self, fname, flevel, ftype):
+        '''Returns the result score if the file matches this rule'''
+        # if filetype is the same
+        # and level isn't set or level is the same
+        # and pattern matche the filename
+        if self.filetype == ftype and (self.level is None or self.level == flevel) and fnmatch.fnmatch(fname, self.pattern):
+            return self.score
+        return 0
 
 
+INITIAL_RULES = (
+    # files are included by default
+    Rule('*',                                    level=None, filetype=TYPE_FILE,      score=1),
+    # ignore at the app level are skipped
+    Rule('*',                                    level=0,    filetype=TYPE_FILE,      score=-2),
+    # directories are recursed by default
+    Rule('*',                                    level=None, filetype=TYPE_DIRECTORY, score=1),
+    # directories at the app level are skipped
+    Rule('*',                                    level=0,    filetype=TYPE_DIRECTORY, score=-2),
 
+    # media, scripts, styles directories are what we want to copy
+    Rule('media',                                level=0,    filetype=TYPE_DIRECTORY, score=6),
+    Rule('scripts',                              level=0,    filetype=TYPE_DIRECTORY, score=6),
+    Rule('styles',                               level=0,    filetype=TYPE_DIRECTORY, score=6),
 
-
-# is a dir, level, filename
-DEFAULT_INCLUDE = (
-    ( True, 0, 'media'   ),
-    ( True, 0, 'scripts' ),
-    ( True, 0, 'styles'  ),
+    # ignore the template cache directories
+    Rule(DMP_OPTIONS.get('TEMPLATES_CACHE_DIR'), level=None, filetype=TYPE_DIRECTORY, score=-3),
+    # ignore python cache directories
+    Rule('__pycache__',                          level=None, filetype=TYPE_DIRECTORY, score=-3),
+    # ignore compiled python files
+    Rule('*.pyc',                                level=None, filetype=TYPE_FILE,      score=-3),
+    # ignore all cssm and jsm files (these are rendered at runtime, so not static)
+    Rule('*.cssm',                               level=None, filetype=TYPE_FILE,      score=-3),
+    Rule('*.jsm',                                level=None, filetype=TYPE_FILE,      score=-3),
 )
-DEFAULT_IGNORE = (
-    ( True,  None, DMP_OPTIONS.get('TEMPLATES_CACHE_DIR') ),
-    ( True,  None, '__pycache__' ),
-    ( False, 0,    '*') ,             # we don't do any regular files at the main level
-    ( False, None, '*.pyc' ),
-    ( False, None, '__init__.py' ),
-    ( False, 1,    '*.cssm' ),        # rendered at runtime per request, so not a static file
-    ( False, 1,    '*.jsm' ),         # same
-)
+
+
 
 
 # import minification if requested
@@ -67,16 +91,52 @@ class Command(BaseCommand):
             help='Overwrite existing files in the directory when necessary.'
         )
         parser.add_argument(
-            '--ignore',
+            '--verbose',
+            action='store_true',
+            dest='verbose',
+            default=False,
+            help='Set verbosity to level 3 (see --verbosity).'
+        )
+        parser.add_argument(
+            '--quiet',
+            action='store_true',
+            dest='quiet',
+            default=False,
+            help='Set verbosity to level 0, which silences all messages (see --verbosity).'
+        )
+        parser.add_argument(
+            '--include-dir',
             action='append',
-            dest='ignore_files',
-            help='Ignore the given file/directory.  Unix-style wildcards are acceptable, such as "*.txt".  This option can be specified more than once.'
+            dest='include_dir',
+            help='Include directories matching this pattern.  Unix-style wildcards are acceptable, such as "*partial*".  This option can be specified more than once.'
+        )
+        parser.add_argument(
+            '--include-file',
+            action='append',
+            dest='include_file',
+            help='Include files matching this pattern.  Unix-style wildcards are acceptable, such as "*.txt".  This option can be specified more than once.'
+        )
+        parser.add_argument(
+            '--skip-dir',
+            action='append',
+            dest='skip_dir',
+            help='Skip directories matching this pattern.  Unix-style wildcards are acceptable, such as "*partial*".  This option can be specified more than once.'
+        )
+        parser.add_argument(
+            '--skip-file',
+            action='append',
+            dest='skip_file',
+            help='Skip files. matching this pattern.  Unix-style wildcards are acceptable, such as "*.txt".  This option can be specified more than once.'
         )
 
 
     def handle(self, *args, **options):
         # save the options for later
         self.options = options
+        if self.options['verbose']:
+            self.options['verbosity'] = 3
+        if self.options['quiet']:
+            self.options['verbosity'] = 0
 
         # ensure we have a base directory
         try:
@@ -100,82 +160,95 @@ class Command(BaseCommand):
         if not os.path.isdir(dest_root):
             os.makedirs(dest_root)
 
+        # set up the rules
+        self.rules = list(INITIAL_RULES)
+        self.add_user_rules()
+
         # go through the DMP apps and collect the static files
         for config in get_dmp_app_configs():
+            self.message('Processing app {}'.format(config.name), 1)
             self.copy_dir(config.path, os.path.abspath(os.path.join(dest_root, config.name)))
 
 
-
-    def ignore_file(self, fisdir, flevel, fname):
-        '''Returns whether the given filename should be ignored, based on the default set of names'''
-        # is this directly ignored?
-        for isdir, level, pattern in DEFAULT_IGNORE:
-            if isdir == fisdir and (level is None or level == flevel) and fnmatch.fnmatch(fname, pattern):
-                return True
-        # if it isn't in the included names, it is ignored
-        for pattern in DEFAULT_INCLUDE:
-            if isdir == fisdir and (level is None or level == flevel) and fnmatch.fnmatch(fname, pattern):
-                break
-        else:
-            return True
-        # if we get here, we can include the file
-        return False
+    def message(self, msg, level, tab=0):
+        '''Print a message to the console'''
+        # verbosity=1 is the default if not specified in the options
+        if self.options['verbosity'] >= level:
+            print('{}{}'.format('    ' * tab, msg))
 
 
-    def explicit_ignore_file(self, fname):
-        '''Returns whether the given filename should be ignored, based on the --ignore options sent into the command'''
-        if self.options['ignore_files']:
-            for pattern in self.options['ignore_files']:
-                if fnmatch.fnmatch(fname, pattern):
-                    return True
-        return False
+    def add_user_rules(self):
+        '''Adds rules for the command line options'''
+        # include rules have score of 50 because they trump all initial rules
+        for pattern in (self.options['include_dir'] or []):
+            self.message('Setting rule - recurse directories: {}'.format(pattern), 1)
+            self.rules.append(Rule(pattern, level=None, filetype=TYPE_DIRECTORY, score=50))
+        for pattern in (self.options['include_file'] or []):
+            self.message('Setting rule - include files: {}'.format(pattern), 1)
+            self.rules.append(Rule(pattern, level=None, filetype=TYPE_FILE, score=50))
+        # skip rules have score of 100 because they trump everything, including the includes from the command line
+        for pattern in (self.options['skip_dir'] or []):
+            self.message('Setting rule - skip directories: {}'.format(pattern), 1)
+            self.rules.append(Rule(pattern, level=None, filetype=TYPE_DIRECTORY, score=-100))
+        for pattern in (self.options['skip_file'] or []):
+            self.message('Setting rule - skip files: {}'.format(pattern), 1)
+            self.rules.append(Rule(pattern, level=None, filetype=TYPE_FILE, score=-100))
 
 
     def copy_dir(self, source, dest, level=0):
         '''Copies the static files from one directory to another.  If this command is run, we assume the user wants to overwrite any existing files.'''
-        # ensure the destination exists
+        msglevel = 2 if level == 0 else 3
+        self.message('Directory: {}'.format(source), msglevel, level)
+
+        # create a directory for this app
         if not os.path.exists(dest):
+            self.message('Creating directory: {}'.format(dest), msglevel, level+1)
             os.mkdir(dest)
-        # go through the files in this directory
+
+        # go through the files in this app
         for fname in os.listdir(source):
             source_path = os.path.join(source, fname)
             dest_path = os.path.join(dest, fname)
             ext = os.path.splitext(fname)[1].lower()
 
-            ###  EXPLICIT IGNORE (command-line args can match dirs or files) ###
-            if self.explicit_ignore_file(fname):
+            # get the score for this file
+            score = 0
+            for rule in self.rules:
+                score += rule.match(fname, level, TYPE_DIRECTORY if os.path.isdir(source_path) else TYPE_FILE)
+
+            # if score is not above zero, we skip this file
+            if score <= 0:
+                self.message('Skipping file with score {}: {}'.format(score, source_path), msglevel, level+1)
                 continue
 
-            ###  DEFAULT IGNORE
-            elif self.ignore_file(os.path.isdir(source_path), level, fname):
-                continue
-
-            ### if we get here, we can copy the file
+            ### if we get here, we need to copy the file ###
 
             # if a directory, recurse to it
             if os.path.isdir(source_path):
+                self.message('Creating directory with score {}: {}'.format(score, source_path), msglevel, level+1)
                 # create it in the destination and recurse
                 if not os.path.exists(dest_path):
                     os.mkdir(dest_path)
                 elif not os.path.isdir(dest_path):  # could be a file or link
                     os.unlink(dest_path)
                     os.mkdir(dest_path)
-                print('>>> ', level, source_path)
                 self.copy_dir(source_path, dest_path, level+1)
 
             # if a regular Javscript file, minify it
             elif ext == '.js' and DMP_OPTIONS.get('MINIFY_JS_CSS', False) and JSMIN:
+                self.message('Including and minifying file with score {}: {}'.format(score, source_path), msglevel, level+1)
                 with open(source_path) as fin:
                     with open(dest_path, 'w') as fout:
                         fout.write(jsmin(fin.read()))
 
             # same with css files
             elif ext == '.css' and DMP_OPTIONS.get('MINIFY_JS_CSS', False) and CSSMIN:
+                self.message('Including and minifying file with score {}: {}'.format(score, source_path), msglevel, level+1)
                 with open(source_path) as fin:
                     with open(dest_path, 'w') as fout:
                         fout.write(cssmin(fin.read()))
 
-            # if we get here, just copy the file
+            # otherwise, just copy the file
             else:
-                print('!!!', source_path)
+                self.message('Including file with score {}: {}'.format(score, source_path), msglevel, level+1)
                 shutil.copy2(source_path, dest_path)
