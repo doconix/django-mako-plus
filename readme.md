@@ -1581,13 +1581,13 @@ def process_request(request, userid):
 
 DMP doesn't use the positional index of the arguments, so you can rearrange patterns as needed. However, you must use named parameters for both DMP and your custom parameters (Django doesn't allow both named and positional parameters in a single pattern).
 
-You can also "hard code" the app or page name in a given pattern.  Suppose you want urls entirely made of numbers (without any slashes) to go the user app:  `/user/views/account.py`.  The pattern would hard code the app and page as [extra options](http://docs.djangoproject.com/en/1.10/topics/http/urls/#passing-extra-options-to-view-functions).  In urls.py:
+You can also "hard code" the app or page name in a given pattern.  Suppose you want URLs entirely made of numbers (without any slashes) to go the user app:  `/user/views/account.py`.  The pattern would hard-code the app and page as [extra options](http://docs.djangoproject.com/en/1.10/topics/http/urls/#passing-extra-options-to-view-functions).  In urls.py:
 
 ```python
 from django_mako_plus import route_request
 urlpatterns = [
     ...
-    url(r'^(?P<userid>\d+)$', route_request, { 'dmp_router_app': 'user', 'dmp_router_page': 'account' }, name='User Account'),
+    url(r'^(?P<user_id>\d+)$', route_request, { 'dmp_router_app': 'user', 'dmp_router_page': 'account' }, name='User Account'),
     ...
 ]
 ```
@@ -1598,6 +1598,12 @@ Use the following named parameters in your patterns to tell DMP which app, page,
 * `(?P<dmp_router_page>[_a-zA-Z0-9\-]+)` is the view module name.  If omitted, it is set to `DEFAULT_APP` in settings.
 * `(?P<dmp_router_function>[_a-zA-Z0-9\.\-]+)` is the function name.  If omitted, it is set to `process_request`.
 * `(?P<urlparams>.*)` is the url parameters, and it should normally span multiple slashes.  The default patterns set this value to anything after the page name.  This value is split on the slash `/` to form the `request.urlparams` list.  If omitted, it is set to the empty list `[]`.
+
+The following URL pattern can be used to embed an object ID parameter (named 'id' in this case) into DMP's conventional URL pattern (between the app name and the page name):
+
+```
+url(r'^(?P<dmp_router_app>[_a-zA-Z0-9\-]+)/(?P<id>\d+)/(?P<dmp_router_page>[_a-zA-Z0-9\-]+)\.?(?P<dmp_router_function>[_a-zA-Z0-9\-]+)?/?(?P<urlparams>.*)$', route_request, name='/app/id/page(.function)(/urlparams)'),
+```
 
 #### URL Patterns: Take 2
 
