@@ -100,6 +100,7 @@ class MakoTemplates(BaseEngine):
             raise ImproperlyConfigured('The SCSS_BINARY option in Django Mako Plus settings must be a list of arguments.  See the DMP documentation.')
 
         # add a template renderer for each DMP-enabled app
+        print('>>>> DMP register app')
         for app_config in get_dmp_app_configs():
             self.register_app(app_config)
 

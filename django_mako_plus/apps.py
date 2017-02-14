@@ -19,3 +19,5 @@ class Config(AppConfig):
         # See the creation of EngineHandler.default_name in django.templates.util for this.
         engines['django_mako_plus']
 
+
+

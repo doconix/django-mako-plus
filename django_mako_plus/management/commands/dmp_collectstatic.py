@@ -126,7 +126,7 @@ class Command(BaseCommand):
             '--skip-file',
             action='append',
             dest='skip_file',
-            help='Skip files. matching this pattern.  Unix-style wildcards are acceptable, such as "*.txt".  This option can be specified more than once.'
+            help='Skip files matching this pattern.  Unix-style wildcards are acceptable, such as "*.txt".  This option can be specified more than once.'
         )
 
 
