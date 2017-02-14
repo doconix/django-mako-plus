@@ -33,7 +33,7 @@ python3 manage.py runserver
 
 ```
 
-> Note that on some machines, `pip3` is `pip` and `python3` is `python`.  Python 3+ is required.
+> Note that in Windows, `python3` is `python` and `pip3` is `pip`.  Python 3+ is required.
 
 # Compatability
 
@@ -318,7 +318,7 @@ pip3 install mako
 pip3 install django-mako-plus
 ```
 
-Note that on Windows, it might be called simply `pip`:
+Note that on Windows machines, `pip3` may need to be replaced with `pip`:
 
 ```
 pip install django
@@ -329,7 +329,7 @@ pip install django-mako-plus
 
 ## Create a Django project
 
-Create a Django project, but specify that you want a DMP-style project layout:
+Create a Django project, and specify that you want a DMP-style project layout:
 
 ```
 python3 -m django startproject --template=http://cdn.rawgit.com/doconix/django-mako-plus/master/project_template.zip mysite
@@ -962,11 +962,11 @@ Scroll down to [Advanced Topics](#rending-templates-the-standard-way-render) for
 
 ## URL Parameters
 
-Django is all about pretty urls.  In keeping with that philosophy, this framework has URL parameters.  We've already used the first two items in the path: the first specifies the app, the second specifies the view/template.  URL parameters are the third part, fourth part, and so on.
+Django is all about pretty URLs.  In keeping with that philosophy, this framework has URL parameters.  We've already used the first two items in the path: the first specifies the app, the second specifies the view/template.  URL parameters are the third part, fourth part, and so on.
 
 In traditional web links, you'd specify parameters using key=value pairs, as in `/homepage/index?first=abc&second=def`.  That's ugly, of course, and it's certainly not the Django way (it does still work, though).
 
-With DMP, you have another, better option available.  You'll specify parameters as `/homepage/index/abc/def/`.  The controller makes them available to your view as `request.urlparams[0]` and `request.urlparams[1]`.
+With DMP, you have a better option.  You'll specify parameters as `/homepage/index/abc/def/`.  The DMP controller makes the parameters available to your view as `request.urlparams[0]` and `request.urlparams[1]`.
 
 Suppose you have a product detail page that needs the SKU number of the product to display.  A nice way to call that page might be `/catalog/product/142233342/`.  The app=catalog, view=product.py, and urlparams[0]=142233342.
 
@@ -998,6 +998,7 @@ The following links now give the time in different formats:
 
 > If a urlparam doesn't exist, it always returns the empty string ''.  This is slightly different than a regular Python list, which throws an exception when you index it beyond the length of the list.  In DMP, request.urlparams[50] returns the empty string rather than an exception.  The `if` statement in the code above can be used to determine if a urlparam exists or not.  Another way to code a default value for a urlparam is `request.urlparam[2] or 'some default value'`.
 
+In some cases, you may need to use a different URL pattern than the DMP convention of `/app/page/param1/param2/...`.  DMP supports customization of the URL pattern; see [Customize the URL Pattern](#customize-the-url-pattern) in the advanced topics section.
 
 
 ## A Bit of Style
@@ -1541,13 +1542,13 @@ def process_request(request, userid):
 
 DMP doesn't use the positional index of the arguments, so you can rearrange patterns as needed. However, you must use named parameters for both DMP and your custom parameters (Django doesn't allow both named and positional parameters in a single pattern).
 
-You can also "hard code" the app or page name in a given pattern.  Suppose you want urls entirely made of numbers (without any slashes) to go the user app:  `/user/views/account.py`.  The pattern would hard code the app and page as [extra options](http://docs.djangoproject.com/en/1.10/topics/http/urls/#passing-extra-options-to-view-functions).  In urls.py:
+You can also "hard code" the app or page name in a given pattern.  Suppose you want URLs entirely made of numbers (without any slashes) to go the user app:  `/user/views/account.py`.  The pattern would hard-code the app and page as [extra options](http://docs.djangoproject.com/en/1.10/topics/http/urls/#passing-extra-options-to-view-functions).  In urls.py:
 
 ```python
 from django_mako_plus import route_request
 urlpatterns = [
     ...
-    url(r'^(?P<userid>\d+)$', route_request, { 'dmp_router_app': 'user', 'dmp_router_page': 'account' }, name='User Account'),
+    url(r'^(?P<user_id>\d+)$', route_request, { 'dmp_router_app': 'user', 'dmp_router_page': 'account' }, name='User Account'),
     ...
 ]
 ```
@@ -1559,6 +1560,12 @@ Use the following named parameters in your patterns to tell DMP which app, page,
 * `(?P<dmp_router_function>[_a-zA-Z0-9\.\-]+)` is the function name.  If omitted, it is set to `process_request`.
 * `(?P<urlparams>.*)` is the url parameters, and it should normally span multiple slashes.  The default patterns set this value to anything after the page name.  This value is split on the slash `/` to form the `request.urlparams` list.  If omitted, it is set to the empty list `[]`.
 
+The following URL pattern can be used to embed an object ID parameter (named 'id' in this case) into DMP's conventional URL pattern (between the app name and the page name):
+
+```
+url(r'^(?P<dmp_router_app>[_a-zA-Z0-9\-]+)/(?P<id>\d+)/(?P<dmp_router_page>[_a-zA-Z0-9\-]+)\.?(?P<dmp_router_function>[_a-zA-Z0-9\-]+)?/?(?P<urlparams>.*)$', route_request, name='/app/id/page(.function)(/urlparams)'),
+```
+
 #### URL Patterns: Take 2
 
 The second method is done by directly modifying the variables created in the middleware.  This can be done through a custom middleware view function that runs after `django_mako_plus.RequestInitMiddleware` (or alternatively, you could create an extension to this class and replace the class in the `MIDDLEWARE` list).
@@ -1566,6 +1573,7 @@ The second method is done by directly modifying the variables created in the mid
 Once `RequestInitMiddleware.process_view` creates the variables, your custom middleware can modify them in any way.  As view middleware, your function will run *after* the DMP middleware by *before* routing takes place in `route_request`.
 
 This method of modifying the URL pattern allows total freedom since you can use python code directly.  However, it would probably be done in an exceptional rather than typical case.
+
 
 
 ## CSRF Tokens
