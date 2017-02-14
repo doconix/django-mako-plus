@@ -1,8 +1,7 @@
-from django.core.management.base import BaseCommand, CommandError
 from django.conf import settings
-
+from django.core import management
+from django.core.management.base import BaseCommand, CommandError
 import django_mako_plus
-
 import os, os.path
 from importlib import import_module
 
@@ -20,10 +19,15 @@ class Command(BaseCommand):
 
 
     def handle(self, *args, **options):
-        self.stdout.write("Error:")
-        self.stdout.write('')
-        self.stdout.write("As of v1.7, Django-Mako-Plus apps are creted with the standard Django command.")
-        self.stdout.write("Please see https://github.com/doconix/django-mako-plus#create-a-dmp-style-app")
-        self.stdout.write('')
-        self.stdout.write("\t\t\t\t-- The Management")
+        # figure out the DMP app_template directory
+        url = 'http://cdn.rawgit.com/doconix/django-mako-plus/master/app_template.zip'
+        if django_mako_plus.__file__:
+            dmp_dir = os.path.dirname(django_mako_plus.__file__)
+            template_dir = os.path.join(dmp_dir, 'app_template')
+            if os.path.exists(template_dir):
+                url = template_dir
+
+        # redirect
+        self.stdout.write('Redirecting to startapp --template={} --extension=py,htm,html {}'.format(url, options['appname']))
+        management.call_command('startapp', options['appname'], template=url, extension='py,htm,html')
 

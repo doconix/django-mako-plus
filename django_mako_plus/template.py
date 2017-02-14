@@ -116,9 +116,9 @@ class MakoTemplateAdapter(object):
             @request  The request context from Django.  If this is None, any TEMPLATE_CONTEXT_PROCESSORS defined in your settings
                       file will be ignored but the template will otherwise render fine.
             @def_name Limits output to a specific top-level Mako <%block> or <%def> section within the template.
-                      If the section is a <%def>, it must have no parameters.  For example, def_name="foo" will call
-                      <%block name="foo"></%block> or <%def name="foo()"></def> within the template.  This is an
-                      extension to the Django API, so it is optional.
+                      If the section is a <%def>, any parameters must be in the context dictionary.  For example,
+                      def_name="foo" will call <%block name="foo"></%block> or <%def name="foo()"></def> within
+                      the template.  This is an extension to the Django API, so it is optional.
 
         Returns the rendered template as a unicode string.
 
