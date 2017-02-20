@@ -100,7 +100,7 @@ DMP can be used alongside regular Django templates, Jinja2 templates, and other 
 	- [CSRF Tokens](#csrf-tokens)
 	- [Behind the CSS and JS Curtain](#behind-the-css-and-js-curtain)
 	- [Using Django and Jinja2 Tags and Syntax](#using-django-and-jinja2-tags-and-syntax)
-	- [Rending Templates the Standard Way: `render()`](#rending-templates-the-standard-way-render)
+	- [Rendering Mako without DMP Routing](#rendering-mako-without-dmp-routing)
 	- [Rendering Partial Templates (Ajax!)](#rendering-partial-templates-ajax)
 	- [Sass Integration](#sass-integration)
 	- [Class-Based Views](#class-based-views)
