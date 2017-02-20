@@ -374,6 +374,7 @@ MIDDLEWARE = [
     ...
     'django_mako_plus.RequestInitMiddleware',
     ...
+]
 ```
 
 Add a logger to help you debug (optional but highly recommended!):
