@@ -2,7 +2,7 @@
 # This allows it to import into the runtime DMP as well as
 # setup.py during installation.
 
-__version__ = '4.0.1'
+__version__ = '4.0.2'
 
 
 # Reminder on uploading to pypi and removing the build folders:
