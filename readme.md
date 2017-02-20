@@ -351,9 +351,12 @@ That's it!  Skip the next section and go to [Create a DMP-Style App](#create-a-d
 
 ## Modify an existing Django project
 
-If you need to add DMP to an existing Django project, follow the steps in this section.
+If you need to add DMP to an existing Django project, you have two options:
 
-If you instead created a project per the previous section, these steps have been done for you.  Stand up, clap your hands together, and skip ahead to [Create a DMP-Style App](#create-a-dmp-style-app).
+1. **Convert your project to the DMP structure.**  This switches your project over to the layout of a DMP-style project.
+2. **Keep your existing Django-style structure** with minimal changes.
+
+This section describes Option 1, which gives you the full benefit of the automatic DMP router and midleware.  If you need Option 2, jump to [Rending Templates the Standard Way: `render()`](#rending-templates-the-standard-way-render).
 
 
 #### Edit Your `settings.py` File:
@@ -1693,53 +1696,125 @@ Embedded template code has access to any variable passed to your temple (i.e. an
 You can pass locally-created variables as kwargs in the filter call.  This is done with `titles=titles` in the Django code block example above.
 
 
+## Rendering Mako without DMP Routing
 
-## Rending Templates the Standard Way: `render()`
+Just want to render Mako templates within your existing Django project?  Want to skip the DMP autorouter and go with the standard `urls.py` method?  The DMP engine can be used easily with existing Django projects--with very little modification.
 
-If you prefer using the standard Django `render()` methods, as described in the Django tutorial, DMP is behind you all the way.  The code below is now sans the `dmp_render` function; it instead sports the regular `render` method from the shortcuts module:
+The following lists the minimal steps to get DMP running with an existing Django project:
 
-```python
-from django.conf import settings
+**Create (or open) a standard Django project**:
+
+```
+# install dependencies
+pip3 install django mako django-mako-plus
+
+# start your project
+python3 -m django startproject tester
+cd tester
+python3 manage.py startapp homepage
+
+# in tester/settings.py:
+INSTALLED_APPS = [
+    # at end of existing list:
+    'homepage',
+]
+
+# in tester/urls.py:
+import homepage.views
+urlpatterns = [
+    # at end of existing list:
+    url(r'^$', homepage.views.index, name='index'),
+]
+
+# in homepage/views.py:
 from django.shortcuts import render
-from django_mako_plus import view_function
-from datetime import datetime
-
-@view_function
-def process_request(request):
-    context = {
-        'now': datetime.now(),
-    }
-    return render(request, 'homepage/index.html', context)
-    # or
-    return render(request, 'homepage/index.html', context, using='django_mako_plus')
-```
-
-However, *be sure to note one specific requirement* when using the normal Django methods.  You must specify your template with the `app/template.html` format.  Since the DMP engine is specific to your apps, it needs to know which app your template resides in.
-
-The the second version of the `render` call in the example above includes the `using` parameter, which specifically tells Django to use the DMP engine for rendering.  If you omit this, Django starts with the first template engine listed in your settings.py, which may or may not be DMP.  If DMP is the only engine listed, there's no reason to specify the `using` parameter.  This confusion is explained in detail in the Django documentation.
-
-The following is another example of using the standard Django methods.  Note the app/template format in the filename again:
-
-```python
-from django.conf import settings
 from django.http import HttpResponse
-from django.template.loader import get_template
-from django_mako_plus import view_function
-from datetime import datetime
+def index(request):
+    return HttpResponse("Hello, world. You're at the homepage index.")
 
-@view_function
-def process_request(request):
-    context = {
-      'now': datetime.now(),
-    }
-    template = get_template('homepage/index.html')
-    # or
-    template = get_template('homepage/index.html', using='django_mako_plus')
-    return HttpResponse(template.render(context=context, request=request))
+# tested to ensure working
+python3 manage.py runserver
+# browser to http://localhost:8000 (you should see the Hello World response)
 ```
 
+**Add a Django template**
 
-As you can hopefully see, DMP provides custom functions like `dmp_render` and also allows regular Django functions.  Use whichever best suits your needs.
+```
+# in homepage/templates/homepage/index.html:
+Hello, world. One plus one is ${ 1+1 }.
+
+# in homepage/views.py:
+from django.template import loader
+from django.http import HttpResponse
+def index(request):
+    template = loader.get_template('homepage/index.html')
+    return HttpResponse(template.render({}, request))
+
+# tested to ensure working
+python3 manage.py runserver
+# browser to http://localhost:8000 (you should see the page,
+# but ${ 1+1 } won't render yet because we haven't
+# enabled Mako)
+
+```
+
+**Add DMP-specific settings to enable Mako**
+
+1. Follow the [DMP directions for your `settings.py` file](#edit-your-settingspy-file) at the top of this document.
+    1. Add `django_mako_plus` to your INSTALLED_APPS.
+    1. Add `django_mako_plus.RequestInitMiddleware` to your MIDDLEWARE.
+    1. Add the DMP template engine to your TEMPLATES.
+
+2. Modify your views with the app-based location of your templates:
+
+```
+from django.shortcuts import render
+
+def index(request):
+    context = {}
+    return render(request, 'homepage/homepage/index.html', context)
+```
+
+### Location, Location, Location...
+
+One subtle, but very important, change in DMP is the **location of your templates**.  In the above code, homepage is listed twice because the first specifies the app to use, and the second specfies the subdirectory within `app/templates/`.
+
+This is because *Django's concept of "template finding" through a number of app and other directories doesn't exist in DMP.*  Instead, DMP templates are app-aware; if you were using the DMP-specific functions, like `dmp_render()`, you wouldn't even need to specify the app.  However, since this section is about minimal changes, we're using the standard Django functions.
+
+If you don't like the double-homepage whammy (and I would agree), move your template files up one directory.  The following two cases show the options:
+
+```
+# Option 1: your template is located in Django-standard:
+# homepage/templates/homepage/index.html:
+
+from django.template import loader
+from django.http import HttpResponse
+
+def index(request):
+    # Django code would be:
+    template = loader.get_template('homepage/index.html')
+    return HttpResponse(template.render(context, request))
+
+    # DMP code would be (first homepage is the app name):
+    template = loader.get_template('homepage/homepage/index.html')
+    return HttpResponse(template.render(context, request))
+```
+
+```
+# Option 2: your template is located in DMP-standard:
+# homepage/templates/index.html:
+
+from django.template import loader
+from django.http import HttpResponse
+
+def index(request):
+    # Django code wouldn't find it here (without special finders defined)
+
+    # DMP code would be (first homepage is the app name):
+    template = loader.get_template('homepage/index.html')
+    return HttpResponse(template.render(context, request))
+```
+
 
 
 ## Rendering Partial Templates (Ajax!)

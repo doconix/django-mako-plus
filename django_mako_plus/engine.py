@@ -181,7 +181,11 @@ class MakoTemplates(BaseEngine):
                     # to know if it exists because import_module fails on things like syntax error,
                     # and the programmer should see these.
                     func_obj = None
-                    if find_spec(module_name) is not None:
+                    try:
+                        spec = find_spec(module_name)
+                    except AttributeError:  # thrown when path is not valid
+                        spec = None
+                    if spec is not None:
                         module_obj = import_module(module_name)
                         func_obj = getattr(module_obj, function_name, None)
                         if func_obj == None:
