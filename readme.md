@@ -1662,11 +1662,11 @@ Now that the functions are imported, you can include a Django expression or embe
 
 ```
 ## Expression containing Django template syntax (assuming name was created in the view.py)
-${ '{{ name }}' | django_syntax(context) }
+${ '{{ name }}' | django_syntax(self) }
 
 ## Full Django code block, with Mako creating the variable first
 <% titles = [ 'First', 'Second', 'Third' ] %>
-<%block filter="django_syntax(context, titles=titles)">
+<%block filter="django_syntax(self, titles=titles)">
     {% for title in titles %}
         <h2>
             {{ title|upper }}
@@ -1675,7 +1675,7 @@ ${ '{{ name }}' | django_syntax(context) }
 </%block>
 
 ## Third-party, crispy form tags (assume my_formset was created in the view.py)
-<%block filter="django_syntax(context)">
+<%block filter="django_syntax(self)">
     {% load crispy_forms_tags %}
     <form method="post" class="uniForm">
         {{ my_formset|crispy }}
@@ -1683,7 +1683,7 @@ ${ '{{ name }}' | django_syntax(context) }
 </%block>
 ```
 
-The `context` parameter passes your context variables to the Django render call.  It is a global Mako variable (available in any template), and it is always included in the filter.  In other words, include `context` every time as shown in the examples above.
+The `self` parameter passes your context variables to the Django render call.  It is a global Mako variable (available in any template), and it is always included in the filter.  In other words, include `self` every time as shown in the examples above.
 
 #### Jinja2, Mustache, Cheetah, and ((insert template engine)).
 
