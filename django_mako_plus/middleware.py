@@ -9,9 +9,9 @@ except ImportError:
     # create a dummy MiddlewareMixin if older Django
     MiddlewareMixin = object
 
-from .router import route_request
+from .registry import get_view
+from .router import route_request, ClassBasedRouter
 from .util import URLParamList, get_dmp_instance, DMP_OPTIONS, log
-from .util import DMP_VIEW_CLASS_METHOD
 
 import logging
 
@@ -84,9 +84,9 @@ class RequestInitMiddleware(MiddlewareMixin):
         request.dmp_router_page = view_kwargs.pop('dmp_router_page', None) or DMP_OPTIONS.get('DEFAULT_PAGE', 'index')
         request.dmp_router_function = view_kwargs.pop('dmp_router_function', None)
         if request.dmp_router_function:
-            request.dmp_router_fallback = '{}.{}.html'.format(request.dmp_router_page, request.dmp_router_function)
+            fallback_template = '{}.{}.html'.format(request.dmp_router_page, request.dmp_router_function)
         else:
-            request.dmp_router_fallback = '{}.html'.format(request.dmp_router_page)
+            fallback_template = '{}.html'.format(request.dmp_router_page)
             request.dmp_router_function = 'process_request'
 
         # period and dash cannot be in python names, but we allow dash in app and page and (dash or period) in the function
@@ -105,10 +105,10 @@ class RequestInitMiddleware(MiddlewareMixin):
 
         # get the function object - the return of get_view_function might be a function, a class-based view, or a template
         # get_view_function does some magic to make all of these act like a regular view function
-        request.dmp_router_callback = get_dmp_instance().get_view_function(request.dmp_router_app, request.dmp_router_module, request.dmp_router_function, request.dmp_router_fallback)
+        request.dmp_router_callback = get_view(request.dmp_router_app, request.dmp_router_module, request.dmp_router_function, fallback_template)
 
         # adjust the variable values if a class
-        if request.dmp_router_callback._dmp_view_type == DMP_VIEW_CLASS_METHOD:
+        if isinstance(request.dmp_router_callback, ClassBasedRouter):
             request.dmp_router_class = request.dmp_router_function
             request.dmp_router_function = request.method.lower()
 

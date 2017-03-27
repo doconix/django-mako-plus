@@ -2,7 +2,7 @@ from django.apps import apps, AppConfig
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 
-import os, os.path, subprocess, sys, time, base64
+import os, os.path, subprocess, sys, time, base64, importlib
 
 
 # this is populated with the dictionary of options in engine.py when
@@ -12,17 +12,9 @@ DMP_OPTIONS = {}
 # the key for the DMP singleton engine instance (stored in DMP_OPTIONS by engine.py)
 DMP_INSTANCE_KEY = 'django_mako_plus_instance'
 
-# types of view functions
-DMP_VIEW_ERROR = 0         # some type of exception
-DMP_VIEW_FUNCTION = 1      # regular view function
-DMP_VIEW_CLASS_METHOD = 2  # class-based as_view()
-DMP_VIEW_TEMPLATE = 3      # view template
-
 # set up the logger
 import logging
 log = logging.getLogger('django_mako_plus')
-
-
 
 ################################################################
 ###   Utility functions
@@ -40,6 +32,8 @@ def get_dmp_instance():
 def get_dmp_app_configs():
     '''
     Gets the DMP-enabled app configs, which will be a subset of all installed apps.  This is a generator function.
+    This method does not use the registry cache.  Instead, it looks through all Django apps in settings.py and
+    yields any with "DJANGO_MAKO_PLUS = True" in its __init__.py.
     '''
     for config in apps.get_app_configs():
         # check for the DJANGO_MAKO_PLUS = True in the app (should be in app/__init__.py)
@@ -89,6 +83,14 @@ class URLParamList(list):
             return ''
         # else do the regular list function (for int, splice types, etc.)
         return list.__getitem__(self, idx)
+
+    def check_length(self, length):
+        '''
+        Ensures the list has at least `length` number of items,
+        appending empty strings '' if needed.
+        '''
+        while len(self) < length:
+            self.append('')
 
 
 

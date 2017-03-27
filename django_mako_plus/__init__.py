@@ -8,6 +8,7 @@
 # Django looks for this exact variable name
 default_app_config = 'django_mako_plus.Config'
 
+
 # the version
 from .version import __version__
 
@@ -16,12 +17,19 @@ from .version import __version__
 from .apps import Config
 
 
-# the router
-from .router import route_request, view_function
-
-
-# the middleware
+# the router and middleware
 from .middleware import RequestInitMiddleware
+from .router import route_request
+
+
+# view_function decorator and converter classes
+from .router import view_function, view_parameter
+from .converter import URLParamConverter
+
+
+# the middleware and template
+# the template engine
+from .engine import MakoTemplates
 
 
 # the exceptions
@@ -62,10 +70,6 @@ from .util import get_dmp_app_configs
 # I'm specifically not including urls.py here because I want it imported
 # as late as possible (after all the apps are set up).  Django will import it
 # when it processes the project's urls.py file.
-
-
-# the template engine
-from .engine import MakoTemplates
 
 
 # the static files shortcuts

@@ -1,0 +1,136 @@
+from .util import log, DMP_OPTIONS
+
+import inspect
+from collections import defaultdict
+
+
+################################################################
+###  An abstract pass-through decorator.
+
+_UNDEFINED_FUNCTION = object()
+
+class PassthroughDecorator(object):
+    '''
+    A pass-through decorator that can be called with @decorator or @decorator(a=1, b=2).
+    The decorate() method is called to perform the behavior of the decorator on the function.
+    This class instance does not stay in the decorator call chain.  The primary use case
+    of this decorator is place an attribute on the function.
+
+    Note that it is not possible to use this decorator with the first argument being a callable
+    because Python will take it as the decorated function.
+    '''
+    def __new__(cls, func=_UNDEFINED_FUNCTION, *args, **kwargs):
+        # if we have a function, it was called without arguments: @decorator
+        # annotate and return the function (an instance never gets created)
+        if func is not _UNDEFINED_FUNCTION and callable(func) and len(args) == 0 and len(kwargs) == 0:
+            cls.decorate(func)
+            return func
+
+        # if we don't have a function, it was specified with arguments: @decorator(a=1, b=2)
+        # we need to make an object, let __init__ run, and let python call __call__.
+        return super().__new__(cls)
+
+    def __init__(self, func=None, *args, **kwargs):
+        self.args = (func, ) + args
+        self.kwargs = kwargs
+
+    def __call__(self, func):
+        self.decorate(func, *self.args, **self.kwargs)
+        return func
+
+    @classmethod
+    def decorate(cls, func, *args, **kwargs):
+        '''Subclasses should override this method to make the annotation'''
+        raise NotImplementedError('The `annotate` method must be implemented by subclasses.')
+
+
+
+###################################################################
+###  A pass-through decorator that annotates with the
+###  decorator args and kwargs.
+
+ANNOTATION_DECORATOR_KEY = '_dmp_annotation_decorator'
+
+class ArgsDecorator(PassthroughDecorator):
+    '''
+    Caches the args and kwargs given in annotate on the annotated function.
+    Multiple decorators of the same type can be placed on the same function.
+
+    Unless force=True, raises NotDecoratedError if cls is not decorating the function.
+    '''
+    @classmethod
+    def _get_list_for_class(cls, func, force=False):
+        func = inspect.unwrap(func, stop=lambda f: hasattr(f, ANNOTATION_DECORATOR_KEY))  # try to get the actual function
+        if not hasattr(func, ANNOTATION_DECORATOR_KEY):
+            if not force:
+                raise NotDecoratedError('The function is not decorated with decorator: {}'.format(cls.__qualname__))
+            setattr(func, ANNOTATION_DECORATOR_KEY, defaultdict(list))
+        return getattr(func, ANNOTATION_DECORATOR_KEY)[cls]
+
+    @classmethod
+    def decorate(cls, func, *args, **kwargs):
+        '''Caches the args and kwargs of this decorator in the function object'''
+        cls._get_list_for_class(func, force=True).append((args, kwargs))
+
+    @classmethod
+    def get_args(cls, func):
+        '''
+        Returns a list of cached ( args, kwargs ) for this decorator type on the given function.
+        Raises NotDecoratedError if the decorator is not on the function.
+        The list will always have at least one element (or NotDecoratedError would have raised).
+        '''
+        return cls._get_list_for_class(func)
+
+    @classmethod
+    def is_decorated(cls, func):
+        '''Returns whether the function is decorated with this decorator type'''
+        try:
+            cls._get_list_for_class(func)
+        except NotDecoratedError:
+            return False
+        return True
+
+
+class NotDecoratedError(Exception):
+    pass
+
+
+
+##############################################################
+###   Decorators for view functions
+
+class view_function(ArgsDecorator):
+    '''
+    A decorator to signify which view functions are "callable" by web browsers.
+
+    Any endpoint function, such as process_request, must be decorated to be callable:
+
+        @view_function
+        function process_request(request):
+            ...
+
+    The @view_function decorator must be the first one listed if other decorators are present.
+    No_dmp_view_functionass-based views don't need to be decorated because we allow anything that extends Django's View class.
+    '''
+    pass
+
+
+class view_parameter(ArgsDecorator):
+    '''
+    Decorator to manually specify information about a view function parameter.
+    The keyword arguments
+    '''
+    @classmethod
+    def update(cls, func, vp_instance):
+        '''Updates a ViewParameter object with the items in the kwargs'''
+        try:
+            for args, kwargs in cls.get_args(func):
+                if len(args) > 0 and args[0] == vp_instance.name:
+                    # monkey patch the kwargs from the decorator onto the ViewParameter object
+                    for k, v in kwargs.items():
+                        if k != 'name':
+                            setattr(vp_instance, k, v)
+        except NotDecoratedError:
+            pass  # just means we don't update the object
+
+

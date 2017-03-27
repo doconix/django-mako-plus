@@ -791,7 +791,7 @@ The third line shows the controller found the `index.py` view, and it called the
 
 >This decoration with `@view_function` is done for security.  If the framework were to allow browsers specify any old function, end users could invoke any function of any module on your system!  By requiring the decorator, the framework limits end users to one specifically-named function.
 
-You can have multiple decorators on your function, such as a permissions check and `view_function`.  Just be sure the `@view_function` decorator is listed first:
+You can have multiple _dmp_view_function on your function, such as a permissions check and `view_function`.  Just be sure the `@view_function` decorator is listed first:
 
 ```python
 @view_function

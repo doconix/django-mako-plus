@@ -1,8 +1,7 @@
 from django.http import HttpResponseRedirect, HttpResponsePermanentRedirect
-from django.core.exceptions import ImproperlyConfigured, ViewDoesNotExist
+from django.core.exceptions import ImproperlyConfigured
 
 from .http import HttpResponseJavascriptRedirect, REDIRECT_HEADER_KEY
-from .util import DMP_VIEW_ERROR
 
 
 ###############################################################
@@ -135,6 +134,3 @@ class SassCompileException(Exception):
         return self.message
 
 
-class DMPViewDoesNotExist(ViewDoesNotExist):
-    '''Signals that a view does not exist.  Extending Django's exception to add the function type that our router needs.'''
-    _dmp_view_type = DMP_VIEW_ERROR

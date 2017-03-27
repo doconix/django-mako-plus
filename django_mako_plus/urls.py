@@ -3,7 +3,7 @@ from django.urls.resolvers import RegexURLPattern
 from django.urls.exceptions import Resolver404
 
 from .router import route_request
-from .util import get_dmp_instance
+from .registry import is_dmp_app
 
 
 
@@ -36,7 +36,7 @@ class DMPRegexPattern(RegexURLPattern):
         rmatch = super().resolve(path)
 
         # if we have a match, check that the dmp_router_app is DMP-enabled
-        if rmatch is not None and rmatch.kwargs['dmp_router_app'] not in get_dmp_instance().dmp_enabled_apps:
+        if rmatch is not None and not is_dmp_app(rmatch.kwargs['dmp_router_app']):
             raise Resolver404({'path': path})
 
         # return

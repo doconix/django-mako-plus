@@ -5,21 +5,17 @@ from django.core.exceptions import ImproperlyConfigured
 from django.template import TemplateDoesNotExist, engines, TemplateSyntaxError
 from django.template.backends.base import BaseEngine
 from django.utils.module_loading import import_string
-from django.views.generic import View
 
-from .exceptions import InternalRedirectException, RedirectException, DMPViewDoesNotExist
+from .exceptions import InternalRedirectException, RedirectException
 from .signals import dmp_signal_pre_render_template, dmp_signal_post_render_template, dmp_signal_redirect_exception
-from .template import MakoTemplateLoader, MakoTemplateAdapter, TemplateViewFunction
+from .template import MakoTemplateLoader, MakoTemplateAdapter
+from .registry import register_app, is_dmp_app as registry_is_dmp_app
 from .util import get_dmp_instance, get_dmp_app_configs, log, DMP_OPTIONS, DMP_INSTANCE_KEY
-from .util import DMP_VIEW_FUNCTION, DMP_VIEW_CLASS_METHOD
 
 from mako.template import Template
 
 from copy import deepcopy
-from inspect import isclass
-from importlib import import_module
-from importlib.util import find_spec
-import os, os.path, sys, itertools, threading, collections
+import os, os.path, sys, itertools, collections
 
 try:
     # python 3.4+
@@ -55,9 +51,6 @@ class MakoTemplates(BaseEngine):
         # this is a bit of a hack, but it makes calling utility methods possible and efficient
         DMP_OPTIONS[DMP_INSTANCE_KEY] = self
         self.template_loaders = {}
-        self.dmp_enabled_apps = set()
-        self.view_cache = {}
-        self.rlock = threading.RLock()
 
         # super constructor
         super(MakoTemplates, self).__init__(params)
@@ -101,42 +94,7 @@ class MakoTemplates(BaseEngine):
 
         # add a template renderer for each DMP-enabled app
         for app_config in get_dmp_app_configs():
-            self.register_app(app_config)
-
-
-    def register_app(self, app):
-        '''
-        Registers an app as a "DMP-enabled" app.  Registering creates a cached
-        template renderer to make processing faster and adds the dmp_render()
-        and dmp_render_to_string() methods to the app.  When Django starts,
-        this method is called automatically for any app with
-        DJANGO_MAKO_PLUS = True in its __init__.py file.
-
-        app: The name of the app or an AppConfig instance.
-        '''
-        # ensure we have an AppConfig object (recurse to all DMP apps if None)
-        if isinstance(app, str):
-            app = apps.get_app_config(app)
-
-        # add to the set of DMP-enabled apps
-        self.dmp_enabled_apps.add(app.name)
-
-        # set up the template, script, and style renderers
-        # these create and cache just by accessing them
-        self.get_template_loader(app, 'templates', create=True)
-        self.get_template_loader(app, 'scripts', create=True)
-        self.get_template_loader(app, 'styles', create=True)
-
-        # add the shortcut functions (only to the main templates, we don't do to scripts or styles
-        # because people generally don't call those directly).  This is a monkey patch, but it is
-        # an incredibly useful one because it makes calling app-specific rendering functions much
-        # easier.
-        #
-        # Django's shortcut to return an *HttpResponse* is render(), and its template method to render a *string* is also render().
-        # Good job on naming there, folks.  That's going to confuse everyone.  But I'm matching it to be consistent despite the potential confusion.
-        with self.rlock:
-            app.module.dmp_render_to_string = _render_to_string(self, app.name)
-            app.module.dmp_render = _render(self, app.name)
+            register_app(app_config)
 
 
     def is_dmp_app(self, app):
@@ -144,9 +102,7 @@ class MakoTemplates(BaseEngine):
         Returns True if the given app is a DMP-enabled app.  The app parameter can
         be either the name of the app or an AppConfig object.
         '''
-        if isinstance(app, AppConfig):
-            app = app.name
-        return app in self.dmp_enabled_apps
+        return registry_is_dmp_app(app)
 
 
     def from_string(self, template_code):
@@ -156,68 +112,6 @@ class MakoTemplates(BaseEngine):
         '''
         mako_template = Template(template_code, imports=DMP_OPTIONS.get('DEFAULT_TEMPLATE_IMPORTS'), input_encoding=DMP_OPTIONS.get('DEFAULT_TEMPLATE_ENCODING', 'utf-8'))
         return MakoTemplateAdapter(mako_template)
-
-
-    def get_view_function(self, app_name, module_name, function_name, fallback_template_name):
-        '''
-        Returns the view function for the given app_name + module_name + function_name.
-        If not found, it returns the view function for the fallback_template_name within app_name.
-        If still not found, raises a ViewDoesNotExist exception.
-
-        This method uses a cache for a significant speedup.  The cache use is thread safe.
-        It primarily used by the DMP router.
-        '''
-        # get the function (or error) from the cache
-        cache_key = ( app_name, module_name, function_name )
-        try:
-            return self.view_cache[cache_key]
-        except KeyError:
-            # acquire the lock and try the cache again (another thread might have put it in cache while we are waiting for lock)
-            with self.rlock:
-                try:
-                    return self.view_cache[cache_key]
-                except KeyError:  # really not in the cache, so let's go get it
-                    # check if the module exists. i'm using find_spec instead of import_module
-                    # to know if it exists because import_module fails on things like syntax error,
-                    # and the programmer should see these.
-                    func_obj = None
-                    try:
-                        spec = find_spec(module_name)
-                    except AttributeError:  # thrown when path is not valid
-                        spec = None
-                    if spec is not None:
-                        module_obj = import_module(module_name)
-                        func_obj = getattr(module_obj, function_name, None)
-                        if func_obj == None:
-                            func_obj = DMPViewDoesNotExist('Module {} found successfully, but view function {} is not defined in the module.'.format(module_name, function_name))
-
-                    # check for not found, no @view_function, View subclass
-                    if func_obj == None:
-                        # try to load the template directly
-                        try:
-                            func_obj = TemplateViewFunction(app_name, fallback_template_name)
-                            func_obj.get_template()  # check whether the template exists
-                        except TemplateDoesNotExist as e:
-                            func_obj = DMPViewDoesNotExist('View function {}.{} not found, and fallback template {} not found ({})'.format(module_name, function_name, fallback_template_name, e))
-
-                    elif isclass(func_obj) and issubclass(func_obj, View):
-                        # this Django method wraps the view class with a function, so now we can treat it like a regular dmp view function
-                        func_obj = func_obj.as_view()
-                        func_obj._dmp_view_type = DMP_VIEW_CLASS_METHOD  # have to monkey patch in this case because we don't control the as_view() method of View
-
-                    # the function must be DMP_VIEW_* (see util.py)
-                    if getattr(func_obj, '_dmp_view_type', None) == None:
-                        func_obj = DMPViewDoesNotExist('View function {}.{} found successfully, but it must be decorated with @view_function.  Note that if you have multiple decorators on a function, the @view_function decorator must be listed first.'.format(module_name, function_name))
-
-                    # cache the result (if production)
-                    if not settings.DEBUG:
-                        self.view_cache[cache_key] = func_obj
-
-                    # return the obj!
-                    return func_obj
-
-        # the code should never be able to get here
-        raise Exception("Django-Mako-Plus error: The get_view_function() function should not have been able to get to this point.  Please notify the owner of the DMP project.  Thanks.")
 
 
     def get_template(self, template_name):
@@ -314,125 +208,4 @@ class MakoTemplates(BaseEngine):
         # return
         return loader
 
-
-
-############################################################################
-###  Monkey-patch functions to enable render() and render_to_string()
-###  within the app scope of *each* DMP-enabled app.
-
-
-def _render_to_string(dmp_instance, app_name):
-    # I'm doing this inner function for late lookups (get_template_loader), just in case new template loader objects are added after creation.
-    def wrapper(request, template, context=None, def_name=None, subdir='templates'):
-        '''
-        A shortcut to render a template.  This is one of the primary functions in the DMP framework.
-        This method is added to the app space of each DMP-enabled app at load time.
-
-            @request      The request context from Django.  If this is None, any TEMPLATE_CONTEXT_PROCESSORS defined in your settings
-                          file will be ignored but the template will otherwise render fine.
-            @template     The template file path to render.  This is relative to the app_path/controller_TEMPLATES_DIR/ directory.
-                          For example, to render app_path/templates/page1, set template="page1.html", assuming you have
-                          set up the variables as described in the documentation above.
-            @context      A dictionary of name=value variables to send to the template page.  This can be a real dictionary
-                          or a Django Context object.
-            @def_name     Limits output to a specific top-level Mako <%block> or <%def> section within the template.
-                          For example, def_name="foo" will call <%block name="foo"></%block> or <%def name="foo()"></def> within the template.
-            @subdir       The sub-folder within the app where the template resides.  Templates are normally placed
-                          in project/appname/templates/, which is the default value.
-
-        Returns the rendered template as a unicode string.
-
-        Examples of use from within appname/views/someview.py:
-
-            from django_mako_plus import view_function
-            from .. import render
-
-            @view_function
-            def process_request(request):
-                # render an HTML template in appname/templates/sometemplate.html to a string
-                html = render_to_string(request, 'sometemplate.html', { 'var1': 'value' })
-                # (do something with the html)
-
-            @view_function
-            def another_func(request):
-                # render some dynamic JS in appname/scripts/sometemplate.js (which has embedded Mako code)
-                html = render_to_string(request, 'sometemplate.js', { 'var1': 'value' }, subdir="scripts")
-                # (do something with the html)
-
-            @view_function
-            def yet_another(request):
-                # render a single <block name="toolbar"> instead of the entire template in appname/templates/sometemplate.html to a string
-                html = render_to_string(request, 'sometemplate.html', { 'var1': 'value' }, def_name='toolbar')
-                # (do something with the html)
-
-        The method triggers two signals:
-            1. dmp_signal_pre_render_template: you can (optionally) return a new Mako Template object from a receiver to replace
-               the normal template object that is used for the render operation.
-            2. dmp_signal_post_render_template: you can (optionally) return a string to replace the string from the normal
-               template object render.
-        '''
-        template_loader = dmp_instance.get_template_loader(app_name, subdir)
-        template_adapter = template_loader.get_template(template)
-        return getattr(template_adapter, 'render')(context=context, request=request, def_name=def_name)
-
-    # outer function return
-    return wrapper
-
-
-def _render(dmp_instance, app_name):
-    # I'm doing this inner function for late lookups (get_template_loader), just in case new template loader objects are added after creation.
-    def wrapper(request, template, context=None, def_name=None, subdir='templates', content_type=None, status=None, charset=None):
-        '''
-        A shortcut to render a template.  This is one of the primary functions in the DMP framework.
-        This method is added to the app space of each DMP-enabled app at load time.
-
-            @request      The request context from Django.  If this is None, any TEMPLATE_CONTEXT_PROCESSORS defined in your settings
-                          file will be ignored but the template will otherwise render fine.
-            @template     The template file path to render.  This is relative to the app_path/controller_TEMPLATES_DIR/ directory.
-                          For example, to render app_path/templates/page1, set template="page1.html", assuming you have
-                          set up the variables as described in the documentation above.
-            @context      A dictionary of name=value variables to send to the template page.  This can be a real dictionary
-                          or a Django Context object.
-            @def_name     Limits output to a specific top-level Mako <%block> or <%def> section within the template.
-                          For example, def_name="foo" will call <%block name="foo"></%block> or <%def name="foo()"></def> within the template.
-            @subdir       The sub-folder within the app where the template resides.  Templates are normally placed
-                          in project/appname/templates/, which is the default value.
-            @content_type The MIME type of the response.  Defaults to settings.DEFAULT_CONTENT_TYPE (usually 'text/html').
-            @status       The HTTP response status code.  Defaults to 200 (OK).
-            @charset      The charset to encode the processed template string (the output) with.  Defaults to settings.DEFAULT_CHARSET (usually 'utf-8').
-
-        Returns a Django HttpResponse containing the rendered template.
-
-        Examples of use from within appname/views/someview.py:
-
-            from django_mako_plus import view_function
-            from .. import render
-
-            @view_function
-            def process_request(request):
-                # return an HTML template in appname/templates/sometemplate.html
-                return render_to_string(request, 'sometemplate.html', { 'var1': 'value' })
-
-            @view_function
-            def another_func(request):
-                # return some dynamic JS in appname/scripts/sometemplate.js (which has embedded Mako code)
-                return render_to_string(request, 'sometemplate.js', { 'var1': 'value' }, subdir="scripts")
-
-            @view_function
-            def yet_another(request):
-                # return a single <block name="toolbar"> instead of the entire template in appname/templates/sometemplate.html
-                return render_to_string(request, 'sometemplate.html', { 'var1': 'value' }, def_name='toolbar')
-
-        The method triggers two signals:
-            1. dmp_signal_pre_render_template: you can (optionally) return a new Mako Template object from a receiver to replace
-               the normal template object that is used for the render operation.
-            2. dmp_signal_post_render_template: you can (optionally) return a string to replace the string from the normal
-               template object render.
-        '''
-        template_loader = dmp_instance.get_template_loader(app_name, subdir)
-        template_adapter = template_loader.get_template(template)
-        return getattr(template_adapter, 'render_to_response')(context=context, request=request, def_name=def_name, content_type=content_type, status=status, charset=charset)
-
-    # outer function return
-    return wrapper
 
