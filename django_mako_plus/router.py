@@ -22,7 +22,7 @@ from collections import namedtuple
 ###   The front controller of all views on the site.
 ###   urls.py routes everything through this method.
 
-def route_request(request, **kwargs):
+def route_request(request, *args, **kwargs):
     '''
     The main router for all calls coming in to the system.  Patterns in urls.py should call this function.
     '''
@@ -32,17 +32,17 @@ def route_request(request, **kwargs):
     while True:
         # an outer try that catches the redirect exceptions
         try:
-            # ensure we have a dmp_router_callback variable on request
-            if getattr(request, 'dmp_router_callback', None) is None:
-                raise ImproperlyConfigured("Variable request.dmp_router_callback does not exist (check MIDDLEWARE for `django_mako_plus.RequestInitMiddleware`).")
+            # ensure we have a _dmp_router_callable variable on request
+            if getattr(request, '_dmp_router_callable', None) is None:
+                raise ImproperlyConfigured("Variable request._dmp_router_callable does not exist (check MIDDLEWARE for `django_mako_plus.RequestInitMiddleware`).")
 
             # output the variables so the programmer can debug where this is routing
             if log.isEnabledFor(logging.INFO):
                 log.info('processing: app={}, page={}, module={}, func={}, urlparams={}'.format(request.dmp_router_app, request.dmp_router_page, request.dmp_router_module, request.dmp_router_function, request.urlparams))
 
             # if we had a view not found, raise a 404
-            if isinstance(request.dmp_router_callback, ViewDoesNotExist) or isinstance(request.dmp_router_callback, RegistryExceptionRouter):
-                log.error(request.dmp_router_callback.message(request))
+            if isinstance(request._dmp_router_callable, ViewDoesNotExist) or isinstance(request._dmp_router_callable, RegistryExceptionRouter):
+                log.error(request._dmp_router_callable.message(request))
                 raise Http404
 
             # send the pre-signal
@@ -53,10 +53,10 @@ def route_request(request, **kwargs):
 
             # log the view
             if log.isEnabledFor(logging.INFO):
-                log.info('calling {}'.format(request.dmp_router_callback.message(request)))
+                log.info('calling {}'.format(request._dmp_router_callable.message(request)))
 
             # call view function with any args and any remaining kwargs
-            response = request.dmp_router_callback.get_response(request, **kwargs)
+            response = request._dmp_router_callable.get_response(request, *args, **kwargs)
 
             # send the post-signal
             if DMP_OPTIONS.get('SIGNALS', False):
@@ -66,7 +66,7 @@ def route_request(request, **kwargs):
 
             # if we didn't get a correct response back, send a 404
             if not isinstance(response, (HttpResponse, StreamingHttpResponse)):
-                log.error('{} failed to return an HttpResponse (or the post-signal overwrote it).  Returning Http404.'.format(request.dmp_router_callback.message(request)))
+                log.error('{} failed to return an HttpResponse (or the post-signal overwrote it).  Returning Http404.'.format(request._dmp_router_callable.message(request)))
                 raise Http404
 
             # return the response
@@ -81,17 +81,17 @@ def route_request(request, **kwargs):
             request.dmp_router_function = ivr.redirect_function
             try:
                 module = import_module(request.dmp_router_module)
-                request.dmp_router_callback = getattr(module, request.dmp_router_function, None)
-                if request.dmp_router_callback == None:
-                    request.dmp_router_callback = ViewDoesNotExist('module {} found successfully during internal redirect, but view function {} is not defined in the module.'.format(request.dmp_router_module, request.dmp_router_function))
+                request._dmp_router_callable = getattr(module, request.dmp_router_function, None)
+                if request._dmp_router_callable == None:
+                    request._dmp_router_callable = ViewDoesNotExist('module {} found successfully during internal redirect, but view function {} is not defined in the module.'.format(request.dmp_router_module, request.dmp_router_function))
             except ImportError:
-                request.dmp_router_callback = ViewDoesNotExist('view {}.{} not found during internal redirect.'.format(request.dmp_router_module, request.dmp_router_function))
+                request._dmp_router_callable = ViewDoesNotExist('view {}.{} not found during internal redirect.'.format(request.dmp_router_module, request.dmp_router_function))
             # do the internal redirect
             log.info('received an InternalViewRedirect to {} -> {}'.format(request.dmp_router_module, request.dmp_router_function))
 
         except RedirectException as e: # redirect to another page
             if request.dmp_router_class == None:
-                log.error('{} redirected processing to {}.'.format(request.dmp_router_callback.message(request), e.redirect_to))
+                log.error('{} redirected processing to {}.'.format(request._dmp_router_callable.message(request), e.redirect_to))
             # send the signal
             if DMP_OPTIONS.get('SIGNALS', False):
                 dmp_signal_redirect_exception.send(sender=sys.modules[__name__], request=request, exc=e)
@@ -127,7 +127,7 @@ def router_factory(app_name, module_name, function_name, fallback_template):
             except TemplateDoesNotExist as e:
                 raise ViewDoesNotExist('View module {} not found, and fallback template {} could not be loaded ({})'.format(module_name, fallback_template, e))
 
-        # get the function from the module
+        # load the module and function
         module = import_module(module_name)
         try:
             func = getattr(module, function_name)
@@ -138,12 +138,11 @@ def router_factory(app_name, module_name, function_name, fallback_template):
         try:
             decorator_args, decorator_kwargs = view_function.get_args(func)[0]
         except NotDecoratedError:
-            decorator_args, decorator_kwargs = None, None
+            decorator_args, decorator_kwargs = (), {}
         if inspect.isclass(func) and issubclass(func, View):
             return ClassBasedRouter(module, func(), decorator_kwargs)  # func() because func is class (not instance)
 
-        # it's a view function
-        # ensure it was  @view_function, it will have kwargs cached on it.
+        # a view function?
         if not view_function.is_decorated(func):
             raise ViewDoesNotExist("View {}.{} was found successfully, but it must be decorated with @view_function or be a subclass of django.views.generic.View.".format(module_name, function_name))
         return ViewFunctionRouter(module, func, decorator_kwargs)
@@ -158,34 +157,48 @@ class ViewFunctionRouter(object):
         self.module = mod
         self.function = func
         self.decorator_kwargs = decorator_kwargs
-        param_types = getattr(func, '__annotations__', {}) # not using typing.get_type_hints because it adds Optional() to None defaults, and we don't need to follow mro here
+        self.signature = inspect.signature(func)
+        param_types = getattr(func, '__annotations__', {})  # not using typing.get_type_hints because it adds Optional() to None defaults, and we don't need to follow mro here
         params = []
-        for i, p in enumerate(inspect.signature(func).parameters.values()):
-            if i > 0:  # skip the request object
-                vp = ViewParameter(
-                    name=p.name,
-                    type=param_types.get(p.name, inspect.Parameter.empty),
-                    default=p.default,
-                )
-                view_parameter.update(func, vp)  # update from @view_parameter args, if there is one
-                params.append(vp)
+        for i, p in enumerate(self.signature.parameters.values()):
+            vp = ViewParameter(
+                name=p.name,
+                position=i,
+                kind=p.kind,
+                type=param_types.get(p.name, inspect.Parameter.empty),
+                default=p.default,
+                converter=None,
+            )
+            view_parameter.update(func, vp)  # update from @view_parameter args, if there is one
+            params.append(vp)
         self.parameters = tuple(params)
 
-    def get_response(self, request, **kwargs):
-        # build the args list from request.urlparams (kwargs are any extra named groups in the matched url pattern)
-        request.urlparams.check_length(len(self.parameters))
+    def get_response(self, request, *args, **kwargs):
         ctask = ConversionTask(request, self.decorator_kwargs, self.module, self.function)
-        args = [ request ]
+        args = list(args)
+        # add urlparams into the arguments and convert the values
         for i, parameter in enumerate(self.parameters):
-            value = kwargs.pop(parameter.name, request.urlparams[i]) # popping kwargs so we don't have the same param in args and kwargs
-            # converter function should catch conversion errors and raise someting more useful like Http404 or RedirectException
+            if i > 0 and parameter.kind is not inspect.Parameter.VAR_POSITIONAL and parameter.kind is not inspect.Parameter.VAR_KEYWORD: # skip request, *args, **kwargs
+                if parameter.name in kwargs:
+                    kwargs[parameter.name] = self.convert(kwargs[parameter.name], parameter, ctask)
+                elif i < len(args):
+                    args[i] = self.convert(args[i], parameter, ctask)
+                elif i <= len(request.urlparams) and parameter.type is not inspect.Parameter.empty: # only use urlparams on parameters with type hints
+                    kwargs[parameter.name] = self.convert(request.urlparams[i-1], parameter, ctask) # -1 because first arg (request) isn't counted in urlparams
+                elif parameter.default is not inspect.Parameter.empty:
+                    kwargs[parameter.name] = self.convert(parameter.default, parameter, ctask)      # not only apply default, but convert if we have a converter
+        # bind the vars and call the view!
+        bound = self.signature.bind(request, *args, **kwargs)
+        return self.function(*bound.args, **bound.kwargs)
+
+    def convert(self, value, parameter, ctask):
+        # if no type hint or explicit type set, no conversion
+        if parameter.type is not inspect.Parameter.empty:
             if parameter.converter is not None:
-                value = parameter.converter(value, parameter, ctask)  # specified converter for this parameter
-            else:
-                value = ctask.converter(value, parameter, ctask)      # converter for view function (specified or defaulted)
-            args.append(value)
-        # here we go! finally, call the view function!
-        return self.function(*args, **kwargs)
+                return parameter.converter(value, parameter, ctask)
+            elif ctask.converter is not None:
+                return ctask.converter(value, parameter, ctask)
+        return value
 
     def message(self, request):
         return 'view function {}.{}'.format(request.dmp_router_module, request.dmp_router_function)
@@ -200,7 +213,7 @@ class ClassBasedRouter(object):
             if func is not None:
                 self.endpoints[mthd_name] = ViewFunctionRouter(module, func, decorator_kwargs)
 
-    def get_response(self, request, **kwargs):
+    def get_response(self, request, *args, **kwargs):
         endpoint = self.endpoints.get(request.method.lower())
         if endpoint is not None:
             return endpoint.get_response(request, **kwargs)
@@ -220,7 +233,7 @@ class TemplateViewRouter(object):
         # check the template by loading it
         get_dmp_instance().get_template_loader(self.app_name).get_template(self.template_name)
 
-    def get_response(self, request, **kwargs):
+    def get_response(self, request, *args, **kwargs):
         template = get_dmp_instance().get_template_loader(self.app_name).get_template(self.template_name)
         return template.render_to_response(request=request, context=kwargs)
 
@@ -233,7 +246,7 @@ class RegistryExceptionRouter(object):
     def __init__(self, exc):
         self.exc = exc
 
-    def get_response(self, request, **kwargs):
+    def get_response(self, request, *args, **kwargs):
         return HttpResponseNotFound(str(self.exc))
 
     def message(self, request):
@@ -250,9 +263,11 @@ class ViewParameter(object):
     An instance of this class is created for each parameter in a view function
     (except the initial request object argument).
     '''
-    def __init__(self, name, type=None, default=None, converter=None):
+    def __init__(self, name, position, kind, type, default, converter):
         '''
         name:      The name of the parameter.
+        position:  The position of this parameter.
+        kind:      The kind of argument (positional, keyword, etc.). See inspect module.
         type:      The expected type of this parameter.  Converters use this type to
                    convert urlparam strings to the right type.
         default:   Any default value, specified in function type hints.  If no default is
@@ -261,6 +276,8 @@ class ViewParameter(object):
                    normal coverter for this type.
         '''
         self.name = name
+        self.position = position
+        self.kind = kind
         self.type = type
         self.default = default
         self.converter = converter

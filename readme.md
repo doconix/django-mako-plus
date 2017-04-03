@@ -1513,11 +1513,10 @@ are available throughout the request:
 * `request.dmp_router_module`: The name of the real Python module specified in the URL, as it will be imported into the runtime module space.  In the URL `http://www.server.com/calculator/index/1/2/3`, the `dmp_router_module` is the string "calculator.views.index".
 * `request.dmp_router_class`: The name of the class if the router sees that the "function" is actually a class-based view.  None otherwise.
 * `request.urlparams`: A list of parameters specified in the URL.  See the section entitled "URL Parameters" above for more information.
-* `request.dmp_router_callback`: The view callable (function, method, etc.) to be called by the router.  Of all the variables listed here, this is the one that the router actually uses directly to make the view call.  The other variables are only used to get a reference to this callback.
 
 
 
-## Customize the URL Pattern
+## Custo_dmp_router_callablen
 
 Suppose your project requires a different URL pattern than the normal `/app/page/param1/param2/...`.  For example, you might need the user id in between the app and page: `/app/userid/page/param1/param1...`.   This is supported in two different ways.
 

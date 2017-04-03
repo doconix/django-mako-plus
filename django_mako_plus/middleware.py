@@ -44,7 +44,7 @@ class RequestInitMiddleware(MiddlewareMixin):
         request.dmp_router_module = None
         request.dmp_router_class = None
         request.urlparams = EMPTY_URLPARAMS
-        request.dmp_router_callback = None
+        request._dmp_router_callable = None
 
 
     def process_view(self, request, view_func, view_args, view_kwargs):
@@ -57,7 +57,7 @@ class RequestInitMiddleware(MiddlewareMixin):
             request.dmp_router_module     The module path in Python terms (such as homepage.views.index), as a string.
             request.dmp_router_class      This is set to None in this method, but route_request() fills it in, as a string, if a class-based view.
             request.urlparams             A list of the remaining url parts, as a list of strings.  See the tutorial for more information on this parameter.
-            request.dmp_router_callback   The view callable (function, method, etc.) to be called by the router.
+            request._dmp_router_callable   The view callable (function, method, etc.) to be called by the router.
 
         Named parameters in the url pattern determines the values of these variables.
         See django_mako_plus/urls.py for the DMP standard patterns.  For example, one pattern
@@ -105,10 +105,10 @@ class RequestInitMiddleware(MiddlewareMixin):
 
         # get the function object - the return of get_view_function might be a function, a class-based view, or a template
         # get_view_function does some magic to make all of these act like a regular view function
-        request.dmp_router_callback = get_view(request.dmp_router_app, request.dmp_router_module, request.dmp_router_function, fallback_template)
+        request._dmp_router_callable = get_view(request.dmp_router_app, request.dmp_router_module, request.dmp_router_function, fallback_template)
 
         # adjust the variable values if a class
-        if isinstance(request.dmp_router_callback, ClassBasedRouter):
+        if isinstance(request._dmp_router_callable, ClassBasedRouter):
             request.dmp_router_class = request.dmp_router_function
             request.dmp_router_function = request.method.lower()
 
@@ -119,4 +119,4 @@ class RequestInitMiddleware(MiddlewareMixin):
         # print('request.dmp_router_module     ', request.dmp_router_module     )
         # print('request.dmp_router_class      ', request.dmp_router_class      )
         # print('request.urlparams             ', request.urlparams             )
-        # print('request.dmp_router_callback   ', request.dmp_router_callback   )
+        # print('request._dmp_router_callable  ', request._dmp_router_callable  )

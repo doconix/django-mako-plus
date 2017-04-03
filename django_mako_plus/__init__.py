@@ -24,7 +24,7 @@ from .router import route_request
 
 # view_function decorator and converter classes
 from .router import view_function, view_parameter
-from .converter import URLParamConverter
+from .converter import DefaultConverter
 
 
 # the middleware and template

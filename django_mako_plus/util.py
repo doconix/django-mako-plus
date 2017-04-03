@@ -78,20 +78,15 @@ class URLParamList(list):
     '''
     def __getitem__(self, idx):
         '''Returns the element at idx, or '' if idx is beyond the length of the list'''
+        return self.get(idx, '')
+
+    def get(self, idx, default=''):
+        '''Returns the element at idx, or default if idx is beyond the length of the list'''
         # if the index is beyond the length of the list, return ''
         if isinstance(idx, int) and (idx >= len(self) or idx < -1 * len(self)):
-            return ''
-        # else do the regular list function (for int, splice types, etc.)
-        return list.__getitem__(self, idx)
-
-    def check_length(self, length):
-        '''
-        Ensures the list has at least `length` number of items,
-        appending empty strings '' if needed.
-        '''
-        while len(self) < length:
-            self.append('')
-
+            return default
+        # else do the regular list function (for int, slice types, etc.)
+        return super().__getitem__(idx)
 
 
 #################################################################

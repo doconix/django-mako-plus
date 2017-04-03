@@ -26,7 +26,7 @@ class ConversionTask(object):
         # set up the converter
         decorator_converter = self.decorator_kwargs.get('converter')
         if decorator_converter is None:
-            self.converter = URLParamConverter()
+            self.converter = DefaultConverter()
         elif callable(decorator_converter):  # if a function (or any other callable), it is ready as is
             self.converter = decorator_converter
         else:
@@ -40,13 +40,11 @@ class ConversionTask(object):
 ConverterInfo = namedtuple('ConverterInfo', ( 'class_type', 'method' ))
 
 class BaseParamConverter(object):
-    # by default, we skip parameters without specific converters or type hints specified
-    CONVERT_WITHOUT_TYPE_HINTS = False
 
     @staticmethod
     def convert_method(*class_types):
         '''
-        Decorator for converter methods in URLParamConverter.
+        Decorator for converter methods in DefaultConverter.
         '''
         def inner(func):
             func._convert_method_types = class_types
@@ -99,8 +97,8 @@ class BaseParamConverter(object):
                 c. DMP's InternalRedirectException (internally restarts the router with a new view function)
                See the @view_parameter decorator for more information on handling conversion errors.
         '''
-        # if this parameter has no type hints, should we skip it?  Subclasses can override this class-level constant.
-        if not self.CONVERT_WITHOUT_TYPE_HINTS and parameter.type is inspect.Parameter.empty:
+        # we don't convert anything without type hints
+        if parameter.type is inspect.Parameter.empty:
             return value
 
         # find the converter method for this type
@@ -117,7 +115,7 @@ class BaseParamConverter(object):
 
 
 
-class URLParamConverter(BaseParamConverter):
+class DefaultConverter(BaseParamConverter):
     '''
     The default converter that comes with DMP.  URL parameter converters
     can be any callable.  This implementation is an extensible class with pluggable
