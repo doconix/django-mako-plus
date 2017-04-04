@@ -21,7 +21,7 @@ try:
     # python 3.4+
     from importlib.util import find_spec
 except ImportError:
-    # python <= 3.3
+    # python <= 3.4
     from importlib import find_loader as find_spec
 
 

@@ -13,9 +13,9 @@ from .signals import dmp_signal_pre_process_request, dmp_signal_post_process_req
 from .util import get_dmp_instance, get_dmp_app_configs, log, DMP_OPTIONS
 
 import sys, logging, inspect
+from collections import namedtuple
 from importlib import import_module
 from importlib.util import find_spec
-from collections import namedtuple
 
 
 ##############################################################

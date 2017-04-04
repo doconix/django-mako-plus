@@ -19,14 +19,14 @@ CLASSIFIERS = [
     'Framework :: Django :: 1.5',
     'Framework :: Django :: 1.6',
     'Framework :: Django :: 1.7',
-    'Framework :: Django :: 1.8',
+    'Framework :: Django :: 1.9',
     'Intended Audience :: Developers',
     'License :: OSI Approved :: Apache Software License',
     'Operating System :: OS Independent',
     'Topic :: Software Development',
 ]
 install_requires = [
-    'django >= 1.8.0',
+    'django >= 1.9.0',
     'mako >= 1.0.0',
 ]
 

@@ -37,7 +37,7 @@ python3 manage.py runserver
 
 # Compatability
 
-DMP works with Python 3+ and Django 1.8+.
+DMP works with Python 3+ and Django 1.9+.
 
 DMP can be used alongside regular Django templates, Jinja2 templates, and other third-party apps (including embedding these other tags within DMP templates when needed).  It plugs in via the regular `urls.py` mechanism, just like any other view.  Be assured that it plays nicely with the other children.
 
@@ -308,7 +308,7 @@ Install Python and ensure you can run `python3` (or `python`) at the command pro
 
 ## Install Django, Mako, and DMP
 
-DMP 3 works with Django 1.8+ and Mako 1.0+.  We will support Django 2.0 when it is released.
+DMP 3 works with Django 1.9+ and Mako 1.0+.  We will support Django 2.0 when it is released.
 
 Install with the python installer:
 
@@ -463,7 +463,7 @@ TEMPLATES = [
             # if DEBUG=False, this only happens once per file after server startup, not for every request
             # specify the binary in a list below -- even if just one item (see subprocess.Popen)
 
-            # Python 3.3+:
+            # Python 3.4+:
             #'SCSS_BINARY': [ shutil.which('scss'), '--unix-newlines' ],
 
             # Python 3.0 to 3.2:

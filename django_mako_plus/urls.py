@@ -1,7 +1,10 @@
 from django.conf.urls import url
-from django.urls.resolvers import RegexURLPattern
-from django.urls.exceptions import Resolver404
-
+try:
+    from django.urls.resolvers import RegexURLPattern     # Django 1.10+
+    from django.urls.exceptions import Resolver404
+except ImportError:
+    from django.core.urlresolvers import RegexURLPattern  # Django 1.9
+    from django.core.urlresolvers import Resolver404
 from .router import route_request
 from .registry import is_dmp_app
 

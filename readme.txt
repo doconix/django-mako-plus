@@ -16,5 +16,5 @@ Please visit https://github.com/doconix/django-mako-plus or open the readme.md f
 
 DMP can be used alongside regular Django templates, Jinja2 templates, and other third-party apps.  It plugs in via the regular `urls.py` mechanism, just like any other view.  Be assured that it plays nicely with the other children.
 
-DMP was developed at MyEducator.com, but it has been used in many places since. It requires Python 3+ and Django 1.8+.
+DMP was developed at MyEducator.com, but it has been used in many places since. It requires Python 3+ and Django 1.9+.
 

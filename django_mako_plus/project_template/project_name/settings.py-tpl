@@ -105,7 +105,7 @@ TEMPLATES = [
             # if DEBUG=False, this only happens once per file after server startup, not for every request
             # specify the binary in a list below -- even if just one item (see subprocess.Popen)
 
-            # Python 3.3+:
+            # Python 3.4+:
             #'SCSS_BINARY': [ shutil.which('scss'), '--unix-newlines' ],
 
             # Python 3.0 to 3.2:
