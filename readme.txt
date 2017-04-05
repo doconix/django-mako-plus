@@ -1,6 +1,6 @@
 This app is a template engine that integrates the excellent Django framework with the also excellent Mako templating syntax.  It conforms to the Django API and plugs in as a standard engine.
 
-Please visit https://github.com/doconix/django-mako-plus or open the readme.md file.
+Please visit http://django-mako-plus.readthedocs.io/en/latest/ for the documentation.
 
 1. DMP uses the **Mako templating engine** rather than the weaker Django templating engine.  Why would I want to learn a whole new language for templating when Mako uses my favorite language: Python?
 
