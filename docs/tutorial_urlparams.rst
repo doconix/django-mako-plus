@@ -1,4 +1,4 @@
-Tutorial 3: Pretty URLs
+T3: Pretty URL Parameters
 ===================================
 
 

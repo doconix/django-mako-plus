@@ -1,4 +1,4 @@
-Tutorial 5: Ajax
+T5: Ajax
 =========================================
 
 What would the modern web be without Ajax?  Truthfully...a lot simpler. :) In fact, if we reinvented the web with today's requirements, we'd probably end up at a very different place than our current web. Even the name ajax implies the use of xml -- which we don't use much in ajax anymore. Most ajax calls return json or html these days!

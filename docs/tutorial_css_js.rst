@@ -1,4 +1,4 @@
-Tutorial 4: zip(HTML, JS, CSS)
+T4: zip(HTML, JS, CSS)
 ===========================================
 
 Modern web pages are made up of three primary parts: HTML, CSS, and Javascript (media might be a fourth, but we'll go with three for now). Since all of your pages need these three components, this framework combines them intelligently for you. All you have to do is name the .html, the css., and the .js file with the same name, and DMP will automatically generate the ``<link>`` and ``<script>`` tags for you. It will even put them in the "right" spot and order in the html (styles at the beginning, scripts at the end).
@@ -155,3 +155,23 @@ I've done some informal speed testing with dynamic scripts and styles, and minif
 Again, if you want to disable these minifications procedures, simply set ``MINIFY_JS_CSS`` to False.
 
 Minification of ``*.jsm`` and ``*.cssm`` is skipped during development so you can debug your Javascript and CSS. Even if your set ``MINIFY_JS_CSS`` to True, minification only happens when settings.py ``DEBUG`` is False (at production).
+
+
+Behind the CSS and JS Curtain
+-----------------------------
+
+After reading about automatic CSS and JS inclusion, you might want to know how it works. It's all done in the templates (base.htm now, and base\_ajax.htm in a later section below) you are inheriting from. Open ``base.htm`` and look at the following code:
+
+::
+
+    ## render the styles with the same name as this template and its supertemplates
+    ${ django_mako_plus.link_css(self) }
+
+    ...
+
+    ## render the scripts with the same name as this template and its supertemplates
+    ${ django_mako_plus.link_js(self) }
+
+The two calls, ``link_css()`` and ``link_js()``, include the ``<link>`` and ``<script>`` tags for the template name and all of its supertemplates. The CSS should be linked near the top of your file (``<head>`` section), and the JS should be linked near the end (per best practices).
+
+This all works because the ``index.html`` template extends from the ``base.htm`` template. If you fail to inherit from ``base.htm`` or ``base_ajax.htm``, DMP won't be able to include the support files.

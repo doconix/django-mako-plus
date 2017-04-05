@@ -1,15 +1,15 @@
 Tutorials
 ==========================
 
-To quote Django's docs, "Let's learn by example."
+To quote the Django's docs, "Let's learn by example."
 
-In the following tutorials, you'll walk through the basic concepts of DMP.  After installation, this is the best place to be.
+After installation, this is the best place to be.  The examples presented here show the basics of DMP, and they aren't repeated in the Topic sections.
 
 .. toctree::
     :maxdepth: 1
 
-    tutor1
-    tutor2
-    tutor3
-    tutor4
-    tutor5
+    tutorial_meet_dmp
+    tutorial_views
+    tutorial_urlparams
+    tutorial_css_js
+    tutorial_ajax

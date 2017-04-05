@@ -1,4 +1,4 @@
-Tutorial 1: Meet DMP
+T1: Meet DMP
 ==========================
 
 I'll assume you've just installed Django-Mako-Plus according to the instructions above. You should have a ``dmp_test`` project directory that contains a ``homepage`` app. I'll further assume you know how to open a terminal/console and ``cd`` to the ``dmp_test`` directory. Most of the commands below are typed into the terminal in this directory.

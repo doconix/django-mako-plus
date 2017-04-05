@@ -5,6 +5,7 @@
     about
     installation
     tutorial
+    topics
 
 
 Django-Mako-Plus

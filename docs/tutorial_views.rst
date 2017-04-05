@@ -1,4 +1,4 @@
-Tutorial 2: Views
+T2: .py View Files
 ===================================
 
 Let's add some "work" to the process by adding the current server time
@@ -218,6 +218,21 @@ Suppose you need to put your templates in a directory named something other than
 
 The above code references an app in a non-standard location and a template subdirectory with a non-standard name.
 
+
+Mime Types and Status Codes
+---------------------------
+
+The ``dmp_render()`` function determines the mime type from the template extension and returns a *200* status code. What if you need to return JSON, CSV, or a 404 not found? Just wrap the ``dmp_render_to_string`` function in a standard Django ``HttpResponse`` object. A few examples:
+
+.. code:: python
+
+    from django.http import HttpResponse
+
+    # return CSV
+    return HttpResponse(dmp_render_to_string(request, 'my_csv.html', {}), mimetype='text/csv')
+
+    # return a custom error page
+    return HttpResponse(dmp_render_to_string(request, 'custom_error_page.html', {}), status=404)
 
 
 Convenience Functions
