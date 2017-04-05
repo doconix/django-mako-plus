@@ -144,7 +144,7 @@ Save the changes and take your browser to `http://localhost:8000/homepage/index/
 Minification of JS and CSS
 --------------------------
 
-DMP will try to minify your *.js and *.css files using the ``rjsmin`` and ``rcssmin`` modules if the settings.py ``MINIFY_JS_CSS`` is True. Your Python installation must also have these modules installed
+DMP will try to minify your \*.js and \*.css files using the ``rjsmin`` and ``rcssmin`` modules if the settings.py ``MINIFY_JS_CSS`` is True. Your Python installation must also have these modules installed.
 
 These two modules do fairly simplistic minification using regular expressions. They are not as full-featured as other minifiers, but they use pure Python code and are incredibly fast. If you want more complete minification, this probably isn't it.
 

@@ -6,14 +6,18 @@ At the beginning of each request (as part of its middleware), DMP adds a number 
 -  ``request.dmp_router_app``: The Django application specified in the
    URL. In the URL ``http://www.server.com/calculator/index/1/2/3``, the
    ``dmp_router_app`` is the string "calculator".
+
 |
+
 -  ``request.dmp_router_page``: The name of the Python module specified
    in the URL. In the URL
    ``http://www.server.com/calculator/index/1/2/3``, the
    ``dmp_router_page`` is the string "index". In the URL
    ``http://www.server.com/calculator/index.somefunc/1/2/3``, the
    ``dmp_router_page`` is still the string "index".
+
 |
+
 -  ``request.dmp_router_function``: The name of the function within the
    module that will be called, even if it is not specified in the URL.
    In the URL ``http://www.server.com/calculator/index/1/2/3``, the
@@ -21,15 +25,21 @@ At the beginning of each request (as part of its middleware), DMP adds a number 
    function). In the URL
    ``http://www.server.com/calculator/index.somefunc/1/2/3``, the
    ``dmp_router_page`` is the string "somefunc".
+
 |
+
 -  ``request.dmp_router_module``: The name of the real Python module
    specified in the URL, as it will be imported into the runtime module
    space. In the URL ``http://www.server.com/calculator/index/1/2/3``,
    the ``dmp_router_module`` is the string "calculator.views.index".
+
 |
+
 -  ``request.dmp_router_class``: The name of the class if the router
    sees that the "function" is actually a class-based view. None
    otherwise.
+
 |
+
 -  ``request.urlparams``: A list of parameters specified in the URL. See
    the section entitled "URL Parameters" above for more information.
