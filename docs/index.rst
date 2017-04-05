@@ -3,11 +3,8 @@
     :hidden:
 
     about
-    faq
-    comparison
     installation
-
-
+    tutorial
 
 
 Django-Mako-Plus
@@ -61,11 +58,7 @@ Compatability
 
 DMP works with Python 3.4+ and Django 1.9+.
 
-DMP can be used alongside regular Django templates, Jinja2 templates,
-and other third-party apps (including embedding these other tags within
-DMP templates when needed). It plugs in via the regular ``urls.py``
-mechanism, just like any other view.
+DMP can be used alongside regular Django templates, Jinja2 templates, and other third-party apps (including embedding these other tags within DMP templates when needed). It plugs in via the regular ``urls.py`` mechanism, just like any other view.
 
-Be assured that it plays nicely
-with the other children.
+Be assured that it plays nicely with the other children.
 
