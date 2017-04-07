@@ -1,9 +1,9 @@
 Just Mako (Minimal DMP)
 ----------------------------------
 
-Just want to render Mako templates within your existing Django project, but skip the other parts of DMP?  Want to go with the standard ``urls.py`` method?
+Just want to render Mako templates within your existing Django project, but skip the other parts of DMP?  Want to go with standard ``urls.py`` routing?
 
-The DMP engine can be used easily with existing Django projects.  The following lists the minimal steps to get DMP running with an existing Django project:
+The DMP engine can be used without any of the extras.  The following lists the minimal steps to get DMP running with an existing Django project:
 
 **Create (or open) a standard Django project**:
 

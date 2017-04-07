@@ -1,7 +1,9 @@
 T4: zip(HTML, JS, CSS)
 ===========================================
 
-Modern web pages are made up of three primary parts: HTML, CSS, and Javascript (media might be a fourth, but we'll go with three for now). Since all of your pages need these three components, this framework combines them intelligently for you. All you have to do is name the .html, the css., and the .js file with the same name, and DMP will automatically generate the ``<link>`` and ``<script>`` tags for you. It will even put them in the "right" spot and order in the html (styles at the beginning, scripts at the end).
+Modern web pages are made up of three primary parts: HTML, CSS, and Javascript (media might be a fourth, but we'll go with three for now). Since all of your pages need these three components, this framework combines them intelligently for you. All you have to do is name the .html, the css., and the .js files correctly, and DMP will insert the ``<link>`` and ``<script>`` tags automatically for you.
+
+Convention over configuration.  Just like a slice of home-baked apple pie.
 
 A Bit of Style
 ---------------------------------------------------
@@ -43,25 +45,14 @@ Reload your browser, and you should have a nice white on blue header. If you vie
 
 Note that ``base.css`` is included first because it's at the top of the hierarchy. Styles from ``index.css`` override any conflicting styles from ``base.css``, which makes sense because ``index.html`` is the final template in the inheritance chain.
 
-    You might be wondering about the big number after the html source
-    ``<link>``. That's the file modification time, in minutes since
-    1970. This is included because browsers (especially Chrome) don't
-    automatically download new CSS files. They use their cached versions
-    until a specified date, often far in the future (this duration is
-    set by your web server). By adding a number to the end of the file,
-    browsers think the CSS files are "new" because the "filename"
-    changes whenever you change the file. Trixy browserses...
+    You might be wondering about the big number after the html source ``<link>``. That's the file modification time, in minutes since 1970. This is included because browsers (especially Chrome) don't automatically download new CSS files. They use their cached versions until a specified date, often far in the future (this duration is set by your web server). By adding a number to the end of the file, browsers think the CSS files are "new" because the "filename" changes whenever you change the file. Trixy browserses...
 
 A Bit of Style, Reloaded
 ------------------------
 
-The style of a web page is often dependent upon the user, such as a user-definable theme in an online email app or a user-settable font family in an online reader. DMP supports this behavior, mostly because the authors at MyEducator needed it for their online book reader. You can use Mako (hence, any Python code) not only in your .html files, but also in your CSS and JS files. Simply name the file with ``.cssm`` rather than .css. When the framework sees ``index.cssm``, it runs the file through the Mako templating engine before it sends it out.
+The style of a web page is often dependent upon the user, such as a user-definable theme in an online email app or a user-settable font family in an online reader. DMP supports this behavior, mostly because the authors at MyEducator needed it for their online book reader. You can use Mako (hence, any Python code) not only in your .html files, but also in your CSS files. Simply name the file with ``.cssm`` rather than .css. When the framework sees ``index.cssm``, it runs the file through the Mako templating engine before it sends it out.
 
-    Since .cssm files are generated per request, they are embedded
-    directly in the HTML rather than linked. This circumvents a second
-    call to the server, which would happen every time since the CSS is
-    being dynamically generated. Dynamic CSS can't be cached by a
-    browser any more than dynamic HTML can.
+    Since .cssm files are generated per request, they are embedded directly in the HTML rather than linked. This circumvents a second call to the server, which would happen every time since the CSS is being dynamically generated. Dynamic CSS can't be cached by a browser any more than dynamic HTML can.
 
 Let's make the color dynamic by adding a new random variable ``timecolor`` to our index.py view:
 
@@ -94,12 +85,7 @@ Refresh your browser a few times. Hey look, Ma, the color changes with each refr
 
 As shown in the example above, the context dictionary sent the templating engine in ``process_request`` are globally available in .html, .cssm, and .jsm files.
 
-    Note that this behavior is different than CSS engines like Less and
-    Sass. Most developers use Less and Sass for variables at development
-    time. These variables are rendered and stripped out before upload to
-    the server, and they become static, normal CSS files on the server.
-    .cssm files should be used for dynamically-generated, per-request
-    CSS.
+    Note that this behavior is different than CSS engines like Less and Sass. Most developers use Less and Sass for variables at development time. These variables are rendered and stripped out before upload to the server, and they become static, normal CSS files on the server. .cssm files should be used for dynamically-generated, per-request CSS.
 
 Static and Dynamic Javascript
 -----------------------------
@@ -136,10 +122,7 @@ Update your ``homepage/scripts/index.jsm`` file to the following:
 
 Save the changes and take your browser to `http://localhost:8000/homepage/index/%Y/3000/ <http://localhost:8000/homepage/index/%Y/3000/>`__. Since urlparams[1] is 3000 in this link, you should see the date change every three seconds. Feel free to try different intervals, but out of concern for the innocent (e.g. your browser), I'd suggest keeping the interval above 200 ms.
 
-    I should note that letting the user set date formats and timer
-    intervals via the browser url are probably not the most wise or
-    secure ideas. But hopefully, it is illustrative of the capabilities
-    of DMP.
+    I should note that letting the user set date formats and timer intervals via the browser url are probably not the most wise or secure ideas. But hopefully, it is illustrative of the capabilities of DMP.
 
 Minification of JS and CSS
 --------------------------

@@ -27,7 +27,7 @@ Then, in your process\_request method, be sure to include the userid parameter. 
     def process_request(request, userid):
         ...
 
-DMP doesn't use the positional index of the arguments, so you can rearrange patterns as needed. However, you must use named parameters for both DMP and your custom parameters (Django doesn't allow both named and positional parameters in a single pattern).
+Be sure to use named parameters for both DMP and your custom parameters in your regular expression pattern.  Django doesn't allow both named and positional parameters in a single pattern.
 
 You can also "hard code" the app or page name in a given pattern. Suppose you want URLs entirely made of numbers (without any slashes) to go the user app: ``/user/views/account.py``. The pattern would hard-code the app and page as `extra options <http://docs.djangoproject.com/en/1.10/topics/http/urls/#passing-extra-options-to-view-functions>`__. In urls.py:
 
