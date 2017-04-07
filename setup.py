@@ -69,7 +69,7 @@ for template_dir in ( 'app_template', 'project_template' ):
         package_data_files.append(os.path.join(root[len(MODULE_NAME)+1:], fname))
 
 # read the long description if sdist
-description = 'Django+Mako: Advanced, mature connector for Mako templates'
+description = 'Django+Mako: Routing by Convention, Python-Centric Template Language'
 long_description = description
 if len(sys.argv) > 1 and sys.argv[1] == 'sdist':
   long_description = open('readme.txt').read()
@@ -82,7 +82,7 @@ setup(
   version=VERSION,
   author='Conan Albrecht',
   author_email='ca@byu.edu',
-  url="https://github.com/doconix/django-mako-plus",
+  url="http://django-mako-plus.readthedocs.io/",
   download_url="https://github.com/doconix/django-mako-plus/archive/master.zip",
 #  package_dir={ MODULE_NAME: MODULE_NAME },
   packages=packages,

@@ -53,14 +53,14 @@ class PassthroughDecorator(object):
 ANNOTATION_DECORATOR_KEY = '_dmp_annotation_decorator'
 
 
-class ArgsDecorator(PassthroughDecorator):
+class KeywordArgDecorator(PassthroughDecorator):
     '''
-    Caches the args and kwargs given in annotate on the annotated function.
+    Caches the kwargs given in annotate on the annotated function.
     Multiple decorators of the same type can be placed on the same function.
 
     Unless force=True, raises NotDecoratedError if cls is not decorating the function.
     '''
-    VALID_KWARGS = { }
+    DEFAULT_KWARGS = {}
 
     @classmethod
     def _get_list_for_class(cls, func, force=False):
@@ -73,16 +73,16 @@ class ArgsDecorator(PassthroughDecorator):
 
     @classmethod
     def decorate(cls, func, *args, **kwargs):
-        '''Does the work of the decorator: caches the args and kwargs for later retrieval.'''
-        for k in kwargs:
-            if k not in cls.VALID_KWARGS:
-                raise ValueError('Invalid decorator parameter: {}. Valid choices are {}.'.format(k, cls.VALID_KWARGS))
-        cls._get_list_for_class(func, force=True).append((args, kwargs))
+        '''Does the work of the decorator: caches the kwargs for later retrieval.'''
+        updated_kwargs = cls.DEFAULT_KWARGS.copy()
+        updated_kwargs.update(kwargs)
+        cls._get_list_for_class(func, force=True).append(updated_kwargs)
 
     @classmethod
-    def get_args(cls, func):
+    def get_kwargs(cls, func):
         '''
-        Returns a list of cached ( args, kwargs ) for this decorator type on the given function.
+        Returns a list of cached kwargs for this decorator type on the given function.
+        It is a list because the decorator could be set more than once on a given function.
         Raises NotDecoratedError if the decorator is not on the function.
         The list will always have at least one element (or NotDecoratedError would have raised).
         '''
@@ -106,7 +106,7 @@ class NotDecoratedError(Exception):
 ##############################################################
 ###   Decorators for view functions
 
-class view_function(ArgsDecorator):
+class view_function(KeywordArgDecorator):
     '''
     A decorator to signify which view functions are "callable" by web browsers.
 
@@ -118,12 +118,19 @@ class view_function(ArgsDecorator):
 
     Class-based views don't need to be decorated because we allow anything that extends Django's View class.
     '''
-    VALID_KWARGS = { 'converter' }
+    DEFAULT_KWARGS = {
+        'converter': None,
+    }
 
 
-class view_parameter(ArgsDecorator):
+class view_parameter(KeywordArgDecorator):
     '''
     Decorator to manually specify information about a view function parameter.
     '''
-    VALID_KWARGS = { 'name', 'type', 'default', 'converter' }
+    DEFAULT_KWARGS = {
+        'name': None,
+        'type': None,
+        'default': None,
+        'converter': None,
+    }
 

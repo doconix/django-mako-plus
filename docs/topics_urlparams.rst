@@ -155,7 +155,7 @@ Let's simplify the code to convert the ``delta`` parameter.  The boolean paramet
         return timedelta(hours=0)
 
     @view_function
-    @view_parameter('delta', converter=convert_delta)
+    @view_parameter(name='delta', converter=convert_delta)
     def process_request(request, delta, forward:bool=True):
         if forward:
             now = datetime.now() + delta

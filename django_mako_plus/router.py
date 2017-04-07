@@ -136,9 +136,9 @@ def router_factory(app_name, module_name, function_name, fallback_template):
 
         # get the converter from the decorator kwargs, if there is one
         try:
-            decorator_args, decorator_kwargs = view_function.get_args(func)[0]
+            decorator_kwargs = view_function.get_kwargs(func)[0]
         except NotDecoratedError:
-            decorator_args, decorator_kwargs = (), {}
+            decorator_kwargs = {}
         converter = decorator_kwargs.get('converter')
 
         # class-based view?
@@ -166,9 +166,10 @@ class ViewFunctionRouter(object):
         param_types = getattr(func, '__annotations__', {})  # not using typing.get_type_hints because it adds Optional() to None defaults, and we don't need to follow mro here
         # map the @view_parameter decorators on this function
         decorator_kwargs = {}
-        for args, kwargs in view_parameter.get_args(func):
-            name = kwargs.get('name', args[0] if len(args) > 0 else None)
-            if name is None:
+        for kwargs in view_parameter.get_kwargs(func):
+            try:
+                name = kwargs['name']
+            except KeyError:
                 raise ValueError('@view_parameter decorator must specify the parameter name as its first argument (cannot determine which parameter this decorator should be applied to).')
             decorator_kwargs[name] = kwargs
         # inspect the parameters of the view function
@@ -179,9 +180,10 @@ class ViewFunctionRouter(object):
                 name=p.name,
                 position=i,
                 kind=p.kind,
-                type=dec_kwargs.get('type', param_types.get(p.name, inspect.Parameter.empty)),
-                default=dec_kwargs.get('default', p.default),
-                converter=dec_kwargs.get('converter', None),  # this is the parameter-specific converter, not function-level converter
+                type=dec_kwargs.get('type') or param_types.get(p.name) or inspect.Parameter.empty,
+                default=dec_kwargs.get('default') or p.default,
+                converter=dec_kwargs.get('converter'),  # this is the parameter-specific converter, not function-level converter
+                kwargs=dec_kwargs,
             ))
         self.parameters = tuple(params)
 
@@ -298,7 +300,7 @@ class ViewParameter(object):
     An instance of this class is created for each parameter in a view function
     (except the initial request object argument).
     '''
-    def __init__(self, name, position, kind, type, default, converter):
+    def __init__(self, name, position, kind, type, default, converter, kwargs):
         '''
         name:      The name of the parameter.
         position:  The position of this parameter.
@@ -309,6 +311,8 @@ class ViewParameter(object):
                    specified in the function, this is `inspect.Parameter.empty`.
         converter: A callable to convert this parameter.  If set, this overrides the
                    normal coverter for this type.
+        kwargs:    Any extra kwargs on the decorator call.  This allows converters to
+                   add additional name=value pairs.
         '''
         self.name = name
         self.position = position
@@ -316,6 +320,7 @@ class ViewParameter(object):
         self.type = type
         self.default = default
         self.converter = converter
+        self.kwargs = kwargs
 
     def __str__(self):
         return 'ViewParameter: name={}, type={}, default={}, converter={}'.format(

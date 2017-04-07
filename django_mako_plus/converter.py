@@ -42,6 +42,7 @@ class BaseConverter(object):
             return func
         return inner
 
+
     def __init__(self):
         # Discover the converters in this object - these were placed here by the @convert_method decorator.
         self.converters = []
@@ -60,6 +61,7 @@ class BaseConverter(object):
                 # otherwise, insert here so specialized types will match before inherited types
                 else:
                     self.converters.insert(pos, ConverterInfo(class_type, method))
+
 
     def __call__(self, value, parameter, task):
         '''
