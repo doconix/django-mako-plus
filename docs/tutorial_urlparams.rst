@@ -1,6 +1,8 @@
 T3: URL Parameters
 ===================================
 
+.. contents::
+    :depth: 2
 
 Django is all about pretty URLs. In keeping with that philosophy, we present **URL parameters**. You've already used the beginning parts of the URL: the first specifies the app, the second specifies the view/template. **URL parameters are the third part, fourth part, and so on.**
 

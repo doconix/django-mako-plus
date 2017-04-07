@@ -3,10 +3,11 @@ Installation
 
 The easiest way to install DMP is by creating a new project.  This section shows how to install DMP with a new project as well as an existing project.
 
+What kind of project do you have?
 
-.. contents:: New or Existing Project?
-    :local:
-    :depth: 2
+.. contents::
+    :depth: 3
+
 
 New Project
 -----------------------------
@@ -349,7 +350,7 @@ Not a designated DMP app?
 If DMP tells you that an app you're trying to access "is not a designated DMP app", you missed something above. Rather than go above and trying again, go on to the next section on converting existing apps for a summary of everything needed to make a valid DMP app. You're likely missing something in this list, and by going through this next section, you'll ensure all the needed pieces are in place. I'll bet you didn't set the ``DJANGO_MAKO_PLUS = True`` part in your app's init file. Another possible reason is you didn't list ``homepage`` as one of your ``INSTALLED_APPS`` as described above.
 
 
-Django in a Subdirectory
+Subdirectory: /mysite/
 -----------------------------------
 
 This section is for those that need Django is a subdirectory, such as ``/mysite``. If your Django installation is at the root of your domain, skip this section.

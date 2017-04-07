@@ -3,6 +3,9 @@ Custom Parameter Converters
 
 In the tutorial, I showed how to add type hints for automatic parameter conversion.  This toipc shows how to convert additional types.
 
+.. contents::
+    :depth: 2
+
 
 Extending the Default Converter
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

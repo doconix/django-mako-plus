@@ -1,6 +1,9 @@
 Customizing the URL
 ===========================
 
+.. contents::
+    :depth: 2
+
 Suppose your project requires a different URL pattern than the normal ``/app/page/param1/param2/...``. For example, you might need the user id in between the app and page: ``/app/userid/page/param1/param1...``. This is supported in two different ways.
 
 URL Patterns: Take 1

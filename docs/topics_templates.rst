@@ -1,7 +1,9 @@
 More on Templates
 ===========================================
 
-The following are a smattering of topics related to templates.
+.. contents::
+    :depth: 2
+
 
 Template Inheritance Across Apps
 --------------------------------

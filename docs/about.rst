@@ -1,6 +1,9 @@
 About DMP
 ===========
 
+.. contents::
+    :depth: 3
+
 Django-Mako-Plus makes creating web sites faster through **convention-over-configuration** in the Django framework.  It integrates the Mako templating engine, which looks much more like Python than the standard templating language. Yet it still conforms to the Django API and plugs in as a standard engine.
 
 DMP boasts the following advantages:

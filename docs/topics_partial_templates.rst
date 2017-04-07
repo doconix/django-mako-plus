@@ -1,6 +1,9 @@
 Rendering Partial Templates (Ajax!)
 ======================================
 
+.. contents::
+    :depth: 2
+
 One of the hidden easter eggs of Mako is its ability to render individual blocks of a template, and this feature can be used to make reloading parts of a page quick and easy. Are you thinking Ajax here? The trick is done by specifying the ``def_name`` parameters in ``render()``. You may want to start by reading about ``<%block>`` and ``<%def>`` tags in the `Mako documentation <http://docs.makotemplates.org/en/latest/defs.html>`__.
 
 Why Should I Care?

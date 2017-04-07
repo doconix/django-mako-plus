@@ -1,6 +1,9 @@
 T4: zip(HTML, JS, CSS)
 ===========================================
 
+.. contents::
+    :depth: 2
+
 Modern web pages are made up of three primary parts: HTML, CSS, and Javascript (media might be a fourth, but we'll go with three for now). Since all of your pages need these three components, this framework combines them intelligently for you. All you have to do is name the .html, the css., and the .js files correctly, and DMP will insert the ``<link>`` and ``<script>`` tags automatically for you.
 
 Convention over configuration.  Just like a slice of home-baked apple pie.

@@ -1,6 +1,9 @@
 T2: .py View Files
 ===================================
 
+.. contents::
+    :depth: 2
+
 Let's add some "work" to the process by adding the current server time to the index page. Create a new file ``homepage/views/index.py`` and copy this code into it:
 
 .. code:: python

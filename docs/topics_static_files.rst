@@ -1,6 +1,9 @@
 Static Files: Images and Other Media
 ============================================
 
+.. contents::
+    :depth: 2
+
 Static files are files linked into your html documents like ``.css`` and ``.js`` as well as images files like ``.png`` and ``.jpg``. These are served directly by your web server (Apache, Nginx, etc.) rather than by Django because they don't require any processing. They are just copied across the Internet. Serving static files is what web servers were written for, and they are better at it than anything else.
 
 Django-Mako-Plus works with static files the same way that traditional Django does, with one difference: the folder structure is different in DMP. The folllowing subsections describe how you should use static files with DMP.

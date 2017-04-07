@@ -1,6 +1,9 @@
 T1: Meet DMP
 ==========================
 
+.. contents::
+    :depth: 2
+
 I'll assume you've just installed Django-Mako-Plus according to the instructions above. You should have a ``dmp_test`` project directory that contains a ``homepage`` app. I'll further assume you know how to open a terminal/console and ``cd`` to the ``dmp_test`` directory. Most of the commands below are typed into the terminal in this directory.
 
 **Quick Start:** You already have a default page in the new app, so fire up your server with ``python3 manage.py runserver`` and go to http://localhost:8000/homepage/index/.
