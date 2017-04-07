@@ -134,84 +134,112 @@ def router_factory(app_name, module_name, function_name, fallback_template):
         except AttributeError:
             raise ViewDoesNotExist('Module {} found successfully, but view {} is not defined in the module.'.format(module_name, function_name))
 
-        # class-based view?
+        # get the converter from the decorator kwargs, if there is one
         try:
             decorator_args, decorator_kwargs = view_function.get_args(func)[0]
         except NotDecoratedError:
             decorator_args, decorator_kwargs = (), {}
+        converter = decorator_kwargs.get('converter')
+
+        # class-based view?
         if inspect.isclass(func) and issubclass(func, View):
-            return ClassBasedRouter(module, func(), decorator_kwargs)  # func() because func is class (not instance)
+            return ClassBasedRouter(module, func(), converter)  # func() because func is class (not instance)
 
         # a view function?
         if not view_function.is_decorated(func):
             raise ViewDoesNotExist("View {}.{} was found successfully, but it must be decorated with @view_function or be a subclass of django.views.generic.View.".format(module_name, function_name))
-        return ViewFunctionRouter(module, func, decorator_kwargs)
+        return ViewFunctionRouter(module, func, converter)
 
     except ViewDoesNotExist as vdne:
         return RegistryExceptionRouter(vdne)
 
 
+
 class ViewFunctionRouter(object):
     '''Router for view functions and class-based methods'''
-    def __init__(self, mod, func, decorator_kwargs):
+    def __init__(self, mod, func, converter):
         self.module = mod
         self.function = func
-        self.decorator_kwargs = decorator_kwargs
+        self.converter = converter
         self.signature = inspect.signature(func)
+        # map the type hints
         param_types = getattr(func, '__annotations__', {})  # not using typing.get_type_hints because it adds Optional() to None defaults, and we don't need to follow mro here
+        # map the @view_parameter decorators on this function
+        decorator_kwargs = {}
+        for args, kwargs in view_parameter.get_args(func):
+            name = kwargs.get('name', args[0] if len(args) > 0 else None)
+            if name is None:
+                raise ValueError('@view_parameter decorator must specify the parameter name as its first argument (cannot determine which parameter this decorator should be applied to).')
+            decorator_kwargs[name] = kwargs
+        # inspect the parameters of the view function
         params = []
         for i, p in enumerate(self.signature.parameters.values()):
-            vp = ViewParameter(
+            dec_kwargs = decorator_kwargs.get(p.name, {})
+            params.append(ViewParameter(
                 name=p.name,
                 position=i,
                 kind=p.kind,
-                type=param_types.get(p.name, inspect.Parameter.empty),
-                default=p.default,
-                converter=None,
-            )
-            view_parameter.update(func, vp)  # update from @view_parameter args, if there is one
-            params.append(vp)
+                type=dec_kwargs.get('type', param_types.get(p.name, inspect.Parameter.empty)),
+                default=dec_kwargs.get('default', p.default),
+                converter=dec_kwargs.get('converter', None),  # this is the parameter-specific converter, not function-level converter
+            ))
         self.parameters = tuple(params)
 
+
     def get_response(self, request, *args, **kwargs):
-        ctask = ConversionTask(request, self.decorator_kwargs, self.module, self.function)
+        '''Converts urlparams, calls the view function, returns the response'''
+        ctask = ConversionTask(self.converter, request, self.module, self.function)
         args = list(args)
         # add urlparams into the arguments and convert the values
         for i, parameter in enumerate(self.parameters):
-            if i > 0 and parameter.kind is not inspect.Parameter.VAR_POSITIONAL and parameter.kind is not inspect.Parameter.VAR_KEYWORD: # skip request, *args, **kwargs
-                if parameter.name in kwargs:
-                    kwargs[parameter.name] = self.convert(kwargs[parameter.name], parameter, ctask)
-                elif i < len(args):
-                    args[i] = self.convert(args[i], parameter, ctask)
-                elif i <= len(request.urlparams) and parameter.type is not inspect.Parameter.empty: # only use urlparams on parameters with type hints
-                    kwargs[parameter.name] = self.convert(request.urlparams[i-1], parameter, ctask) # -1 because first arg (request) isn't counted in urlparams
-                elif parameter.default is not inspect.Parameter.empty:
-                    kwargs[parameter.name] = self.convert(parameter.default, parameter, ctask)      # not only apply default, but convert if we have a converter
+            # request, *args, **kwargs?  (skip these)
+            if i == 0 or parameter.kind is inspect.Parameter.VAR_POSITIONAL or parameter.kind is inspect.Parameter.VAR_KEYWORD:
+                continue
+            # in kwargs already? (kwargs come from any extra named parameters in the urls.py regex match)
+            elif parameter.name in kwargs:
+                kwargs[parameter.name] = self._convert(kwargs[parameter.name], parameter, ctask)
+            # in args already? (this should not be possible because Django doesn't allow mixing of named and positional parameters in the urls.py regex match, but coding for it)
+            elif i < len(args):
+                args[i] = self._convert(args[i], parameter, ctask)
+            # urlparam value? (<= and -1 because first arg [request] is handled explicitly)
+            elif i <= len(request.urlparams) and request.urlparams[i-1] != '':
+                kwargs[parameter.name] = self._convert(request.urlparams[i-1], parameter, ctask)
+            # default value?
+            elif parameter.default is not inspect.Parameter.empty:
+                kwargs[parameter.name] = self._convert(parameter.default, parameter, ctask)
+            # fallback is empty string
+            else:
+                kwargs[parameter.name] = self._convert('', parameter, ctask)
         # bind the vars and call the view!
-        bound = self.signature.bind(request, *args, **kwargs)
+        bound = self.signature.bind_partial(request, *args, **kwargs)
         return self.function(*bound.args, **bound.kwargs)
 
-    def convert(self, value, parameter, ctask):
-        # if no type hint or explicit type set, no conversion
-        if parameter.type is not inspect.Parameter.empty:
-            if parameter.converter is not None:
-                return parameter.converter(value, parameter, ctask)
-            elif ctask.converter is not None:
-                return ctask.converter(value, parameter, ctask)
+
+    def _convert(self, value, parameter, ctask):
+        '''Converts a value'''
+        # first try the parameter-specific converter, then the function-level converter
+        if parameter.converter is not None:
+            return parameter.converter(value, parameter, ctask)
+        elif ctask.converter is not None:
+            return ctask.converter(value, parameter, ctask)
+        # we shouldn't get here because DefaultConverter is the defaulted function-level converter
         return value
+
 
     def message(self, request):
         return 'view function {}.{}'.format(request.dmp_router_module, request.dmp_router_function)
 
 
+
 class ClassBasedRouter(object):
     '''Router for class-based views.'''
-    def __init__(self, module, instance, decorator_kwargs):
+    def __init__(self, module, instance, converter):
         self.endpoints = {}
         for mthd_name in instance.http_method_names:  # get parameters from the first http-based method (get, post, etc.)
             func = getattr(instance, mthd_name, None)
             if func is not None:
-                self.endpoints[mthd_name] = ViewFunctionRouter(module, func, decorator_kwargs)
+                self.endpoints[mthd_name] = ViewFunctionRouter(module, func, converter)
+
 
     def get_response(self, request, *args, **kwargs):
         endpoint = self.endpoints.get(request.method.lower())
@@ -220,8 +248,10 @@ class ClassBasedRouter(object):
         log.warning('Method Not Allowed (%s): %s', request.method, request.path, extra={'status_code': 405, 'request': request})
         return HttpResponseNotAllowed([ e.upper() for e in self.endpoints.keys() ])
 
+
     def message(self, request):
         return 'class-based view function {}.{}.{}'.format(request.dmp_router_module, request.dmp_router_class, request.dmp_router_function)
+
 
 
 class TemplateViewRouter(object):
@@ -233,12 +263,15 @@ class TemplateViewRouter(object):
         # check the template by loading it
         get_dmp_instance().get_template_loader(self.app_name).get_template(self.template_name)
 
+
     def get_response(self, request, *args, **kwargs):
         template = get_dmp_instance().get_template_loader(self.app_name).get_template(self.template_name)
         return template.render_to_response(request=request, context=kwargs)
 
+
     def message(self, request):
         return 'template {} (view function {}.{} not found)'.format(self.template_name, request.dmp_router_module, request.dmp_router_function)
+
 
 
 class RegistryExceptionRouter(object):
@@ -246,8 +279,10 @@ class RegistryExceptionRouter(object):
     def __init__(self, exc):
         self.exc = exc
 
+
     def get_response(self, request, *args, **kwargs):
         return HttpResponseNotFound(str(self.exc))
+
 
     def message(self, request):
         return str(self.exc)

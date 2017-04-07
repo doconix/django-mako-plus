@@ -7,7 +7,6 @@ from .util import DMP_OPTIONS, log
 import inspect
 from collections import namedtuple
 
-CONVERTER_KEY = 'DEFAULT_CONVERTER'
 
 ##################################################################
 ###   ConversionTask object
@@ -17,29 +16,21 @@ class ConversionTask(object):
     A (mostly) data class that holds meta-information about a conversion
     task.  This object is sent into each converter function.
     '''
-    def __init__(self, request, decorator_kwargs, module, function):
+    def __init__(self, converter, request, module, function):
+        self.converter = _check_converter(converter)
         self.request = request
-        self.decorator_kwargs = decorator_kwargs  # the kwargs from @view_function(...) decorator on the view function
         self.module = module
         self.function = function
-
-        # set up the converter
-        decorator_converter = self.decorator_kwargs.get('converter')
-        if decorator_converter is None:
-            self.converter = DefaultConverter()
-        elif callable(decorator_converter):  # if a function (or any other callable), it is ready as is
-            self.converter = decorator_converter
-        else:
-            raise ValueError('Invalid converter specified @view_function decorator for view.')
 
 
 
 ##################################################################
 ###   Default converter class
 
+CONVERT_TYPES_KEY = '_convert_method_types'
 ConverterInfo = namedtuple('ConverterInfo', ( 'class_type', 'method' ))
 
-class BaseParamConverter(object):
+class BaseConverter(object):
 
     @staticmethod
     def convert_method(*class_types):
@@ -47,7 +38,7 @@ class BaseParamConverter(object):
         Decorator for converter methods in DefaultConverter.
         '''
         def inner(func):
-            func._convert_method_types = class_types
+            setattr(func, CONVERT_TYPES_KEY, class_types)
             return func
         return inner
 
@@ -55,17 +46,20 @@ class BaseParamConverter(object):
         # Discover the converters in this object - these were placed here by the @convert_method decorator.
         self.converters = []
         for name, method in inspect.getmembers(self, inspect.ismethod):
-            if hasattr(method, '_convert_method_types'):
-                for class_type in method._convert_method_types:
-                    pos = 0
-                    for cinfo in self.converters:
-                        if issubclass(class_type, cinfo.class_type):
-                            break
-                        pos += 1
-                    if pos < len(self.converters) and class_type == self.converters[pos].class_type:
-                        self.converters[pos] = ConverterInfo(class_type, method)
-                    else:
-                        self.converters.insert(pos, ConverterInfo(class_type, method))
+            class_types = getattr(method, CONVERT_TYPES_KEY, ())
+            for class_type in class_types:
+                # add so the order is from most specific to most general type
+                pos = 0
+                for cinfo in self.converters:
+                    if issubclass(class_type, cinfo.class_type):
+                        break
+                    pos += 1
+                # if two methods convert the same type, keep the second one
+                if pos < len(self.converters) and class_type == self.converters[pos].class_type:
+                    self.converters[pos] = ConverterInfo(class_type, method)
+                # otherwise, insert here so specialized types will match before inherited types
+                else:
+                    self.converters.insert(pos, ConverterInfo(class_type, method))
 
     def __call__(self, value, parameter, task):
         '''
@@ -82,8 +76,6 @@ class BaseParamConverter(object):
                         converter:          A reference to the currently-running converter callable.
                         urlparams:          The unconverted request.urlparams list of strings from the url,
                                             provided for cases when converting a value depends on another.
-                        decorator_kwargs:   Any kwargs from the @view_function(n1=v1, n2=v2, ...) decorator.
-                                            This allows you to pass view-function-specific settings to common converters.
 
         This method should return one of the following:
 
@@ -101,6 +93,10 @@ class BaseParamConverter(object):
         if parameter.type is inspect.Parameter.empty:
             return value
 
+        # if the value is already the right type, return it
+        if isinstance(value, parameter.type):
+            return value
+
         # find the converter method for this type
         # I'm iterating through the list to find the most specific match first
         # The list is sorted by specificity so subclasses come first
@@ -115,7 +111,7 @@ class BaseParamConverter(object):
 
 
 
-class DefaultConverter(BaseParamConverter):
+class DefaultConverter(BaseConverter):
     '''
     The default converter that comes with DMP.  URL parameter converters
     can be any callable.  This implementation is an extensible class with pluggable
@@ -123,13 +119,13 @@ class DefaultConverter(BaseParamConverter):
 
     Converters are any type of callable; see __call__ below for the primary method.
     '''
-    @BaseParamConverter.convert_method(str)
+    @BaseConverter.convert_method(str)
     def convert_str(self, value, parameter, task):
         '''Pass through for strings'''
         return value
 
-    @BaseParamConverter.convert_method(int, float, bool)
-    def convert_builtin(self, value, parameter, task):
+    @BaseConverter.convert_method(int, float)
+    def convert_int_float(self, value, parameter, task):
         '''Converts the string to float'''
         try:
             return parameter.type(value)
@@ -137,16 +133,24 @@ class DefaultConverter(BaseParamConverter):
             log.warning('Raising Http404 due to parameter conversion error: {}'.format(e))
             raise Http404('Invalid parameter specified in the url')
 
-    @BaseParamConverter.convert_method(Model)  # django models.Model
+    @BaseConverter.convert_method(bool)
+    def convert_boolean(self, value, parameter, task):
+        '''Converts the string to float'''
+        try:
+            return value not in ('', '-', '0')
+        except Exception as e:
+            log.warning('Raising Http404 due to parameter conversion error: {}'.format(e))
+            raise Http404('Invalid parameter specified in the url')
+
+    @BaseConverter.convert_method(Model)  # django models.Model
     def convert_id_to_model(self, value, parameter, task):
         '''
         Converts a urlparam id to a model object.
             - The primary key (id) is expected to be an int (standard django way of doing it).
-            - An empty string or dash "-" returns None.  This parameter 2 in /urlparam1/-/urlparam3 to
-              signify no model (None).
+            - An empty string, dash "-", or 0 returns None.
             - Anything else raises Http404, including a DoesNotExist on the .get() call.
         '''
-        if not value or value.strip() == '-':
+        if value in ('', '-', '0'):
             return None
         try:
             pk = int(value)
@@ -154,9 +158,47 @@ class DefaultConverter(BaseParamConverter):
             log.warning('Raising Http404 due to parameter conversion error: {}'.format(e))
             raise Http404('Invalid parameter specified in the url')
         try:
-            return parameter.type.objects.get(pk=pk)
+            return parameter.type.objects.get(id=pk)
         except ObjectDoesNotExist as e:
             log.warning('Raising Http404 due to parameter conversion error: {}'.format(e))
             raise Http404('Invalid parameter specified in the url')
 
 
+
+####################################################
+###   Setting and getting of default converter
+
+DEFAULT_CONVERTER_KEY = '_dmp_default_converter'
+
+def _check_converter(converter):
+    if converter is None:
+        return get_default_converter()
+    elif inspect.isclass(converter):
+        if hasattr(converter, '__call__'):
+            return converter()
+        else:
+            raise ValueError('Converters must be callable or classes that implements the __call__ method.')
+    elif callable(converter):
+        return converter
+    raise ValueError('Converters must be callable or classes that implements the __call__ method.')
+
+
+def set_default_converter(converter=DefaultConverter):
+    '''
+    Sets the default converter used for view function parameters.
+
+    `converter` should be a callable or a class with a __call__ method.
+    If None, the system returns to the default DMP converter.
+    '''
+    DMP_OPTIONS[DEFAULT_CONVERTER_KEY] = _check_converter(converter)
+
+
+def get_default_converter():
+    '''
+    Returns the default converter in the DMP system.
+    '''
+    return DMP_OPTIONS[DEFAULT_CONVERTER_KEY]
+
+
+# set the intiial converter for the system
+set_default_converter()

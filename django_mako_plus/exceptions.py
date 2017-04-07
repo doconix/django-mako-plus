@@ -1,5 +1,4 @@
 from django.http import HttpResponseRedirect, HttpResponsePermanentRedirect
-from django.core.exceptions import ImproperlyConfigured
 
 from .http import HttpResponseJavascriptRedirect, REDIRECT_HEADER_KEY
 

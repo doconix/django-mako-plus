@@ -1,4 +1,4 @@
-Using Static Files (.png, .pdf, .mp4, ...)
+Static Files: Images and Other Media
 ============================================
 
 Static files are files linked into your html documents like ``.css`` and ``.js`` as well as images files like ``.png`` and ``.jpg``. These are served directly by your web server (Apache, Nginx, etc.) rather than by Django because they don't require any processing. They are just copied across the Internet. Serving static files is what web servers were written for, and they are better at it than anything else.

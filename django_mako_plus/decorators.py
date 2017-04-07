@@ -1,3 +1,4 @@
+
 from .util import log, DMP_OPTIONS
 
 import inspect
@@ -51,6 +52,7 @@ class PassthroughDecorator(object):
 
 ANNOTATION_DECORATOR_KEY = '_dmp_annotation_decorator'
 
+
 class ArgsDecorator(PassthroughDecorator):
     '''
     Caches the args and kwargs given in annotate on the annotated function.
@@ -58,6 +60,8 @@ class ArgsDecorator(PassthroughDecorator):
 
     Unless force=True, raises NotDecoratedError if cls is not decorating the function.
     '''
+    VALID_KWARGS = { }
+
     @classmethod
     def _get_list_for_class(cls, func, force=False):
         func = inspect.unwrap(func, stop=lambda f: hasattr(f, ANNOTATION_DECORATOR_KEY))  # try to get the actual function
@@ -69,7 +73,10 @@ class ArgsDecorator(PassthroughDecorator):
 
     @classmethod
     def decorate(cls, func, *args, **kwargs):
-        '''Caches the args and kwargs of this decorator in the function object'''
+        '''Does the work of the decorator: caches the args and kwargs for later retrieval.'''
+        for k in kwargs:
+            if k not in cls.VALID_KWARGS:
+                raise ValueError('Invalid decorator parameter: {}. Valid choices are {}.'.format(k, cls.VALID_KWARGS))
         cls._get_list_for_class(func, force=True).append((args, kwargs))
 
     @classmethod
@@ -109,28 +116,14 @@ class view_function(ArgsDecorator):
         function process_request(request):
             ...
 
-    The @view_function decorator must be the first one listed if other decorators are present.
-    No_dmp_view_functionass-based views don't need to be decorated because we allow anything that extends Django's View class.
+    Class-based views don't need to be decorated because we allow anything that extends Django's View class.
     '''
-    pass
+    VALID_KWARGS = { 'converter' }
 
 
 class view_parameter(ArgsDecorator):
     '''
     Decorator to manually specify information about a view function parameter.
-    The keyword arguments
     '''
-    @classmethod
-    def update(cls, func, vp_instance):
-        '''Updates a ViewParameter object with the items in the kwargs'''
-        try:
-            for args, kwargs in cls.get_args(func):
-                if len(args) > 0 and args[0] == vp_instance.name:
-                    # monkey patch the kwargs from the decorator onto the ViewParameter object
-                    for k, v in kwargs.items():
-                        if k != 'name':
-                            setattr(vp_instance, k, v)
-        except NotDecoratedError:
-            pass  # just means we don't update the object
-
+    VALID_KWARGS = { 'name', 'type', 'default', 'converter' }
 
