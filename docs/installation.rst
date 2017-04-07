@@ -350,6 +350,7 @@ Not a designated DMP app?
 If DMP tells you that an app you're trying to access "is not a designated DMP app", you missed something above. Rather than go above and trying again, go on to the next section on converting existing apps for a summary of everything needed to make a valid DMP app. You're likely missing something in this list, and by going through this next section, you'll ensure all the needed pieces are in place. I'll bet you didn't set the ``DJANGO_MAKO_PLUS = True`` part in your app's init file. Another possible reason is you didn't list ``homepage`` as one of your ``INSTALLED_APPS`` as described above.
 
 
+
 Subdirectory: /mysite/
 -----------------------------------
 
