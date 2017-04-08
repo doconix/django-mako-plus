@@ -200,9 +200,8 @@ class ViewFunctionRouter(object):
             # fallback is empty string
             else:
                 kwargs[parameter.name] = ctask.converter('', parameter, ctask)
-        # bind the vars and call the view!
-        bound = self.signature.bind_partial(request, *args, **kwargs)
-        return self.function(*bound.args, **bound.kwargs)
+        # call the view!
+        return self.function(request, *args, **kwargs)
 
 
     def message(self, request):
