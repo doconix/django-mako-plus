@@ -16,11 +16,12 @@ class ConversionTask(object):
     A (mostly) data class that holds meta-information about a conversion
     task.  This object is sent into each converter function.
     '''
-    def __init__(self, converter, request, module, function):
-        self.converter = _check_converter(converter)
+    def __init__(self, request, module, function, kwargs):
+        self.converter = _check_converter(kwargs.get('converter'))
         self.request = request
         self.module = module
         self.function = function
+        self.kwargs = kwargs       # kwargs from the @view_function decorator
 
 
 
@@ -121,6 +122,9 @@ class DefaultConverter(BaseConverter):
 
     Converters are any type of callable; see __call__ below for the primary method.
     '''
+    # characters that mean None values in URLs
+    EMPTY_CHARACTERS = { '', '-', '0' }
+
     @BaseConverter.convert_method(str)
     def convert_str(self, value, parameter, task):
         '''Pass through for strings'''
@@ -139,7 +143,7 @@ class DefaultConverter(BaseConverter):
     def convert_boolean(self, value, parameter, task):
         '''Converts the string to float'''
         try:
-            return value not in ('', '-', '0')
+            return value not in self.EMPTY_CHARACTERS
         except Exception as e:
             log.warning('Raising Http404 due to parameter conversion error: {}'.format(e))
             raise Http404('Invalid parameter specified in the url')
@@ -152,7 +156,7 @@ class DefaultConverter(BaseConverter):
             - An empty string, dash "-", or 0 returns None.
             - Anything else raises Http404, including a DoesNotExist on the .get() call.
         '''
-        if value in ('', '-', '0'):
+        if value in self.EMPTY_CHARACTERS:
             return None
         try:
             pk = int(value)

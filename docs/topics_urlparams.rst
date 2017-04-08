@@ -1,8 +1,6 @@
 Custom Parameter Converters
 --------------------------------------
 
-In the tutorial, I showed how to add type hints for automatic parameter conversion.  This toipc shows how to convert additional types.
-
 .. contents::
     :depth: 2
 
@@ -131,3 +129,55 @@ In this case, the converter is called twice: once for ``delta`` and once for ``f
 |                                                   |    (using the default in the function signature).                            |
 +---------------------------------------------------+------------------------------------------------------------------------------+
 
+
+
+@view_parameter(custom='arguments')
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+When you extend (or replace) the default converter, it can be useful to send view-specific settings to the converter functions.  For example, when parameter conversion errors occur, you may want to show a custom message or redirect to a URL instead of raising an Http404.
+
+This can be done with the ``@view_function`` decorator on your view functions.  Although we've only used the decorator to set converters on view functions thus far, the decorator takes an arbitrary number of keyword arguments.  These ``**kwargs`` are sent to the converter function in the task object.
+
+The following is a repeat of the "Extending" example above, modified to raise a redirect exception.  Note the ``raise RedirectException`` in the first block and the ``@view_function(redirect="/some/fallback/url/")`` in the second block.
+
+.. code:: python
+
+    from django_mako_plus import set_default_converter, DefaultConverter, RedirectException
+    from datetime import datetime, timedelta
+    import re
+
+    class CustomConverter(DefaultConverter):
+
+        @DefaultConverter.convert_method(timedelta)
+        def convert_timedelta(self, value, parameter, task):
+            if value not in ('', '-'):
+                match = re.search('(\d+):(\d+)', value)
+                if match is not None:
+                    return timedelta(hours=int(match.group(1)), minutes=int(match.group(2)))
+                else:
+                    raise RedirectException(task.kwargs['redirect'])
+            return timedelta(hours=0)
+
+    # set as the default for all view functions
+    set_default_converter(CustomConverter)
+
+.. code:: python
+
+    from django.conf import settings
+    from django_mako_plus import view_function
+    from datetime import datetime, timedelta
+    from .. import dmp_render, dmp_render_to_string
+
+    @view_function(redirect="/some/fallback/url/")
+    def process_request(request, delta:timedelta='0:00', forward:bool=True):
+        if forward:
+            now = datetime.now() + delta
+        else:
+            now = datetime.now() - delta
+        context = {
+            'now': now,
+        }
+        return dmp_render(request, 'index.html', context)
+
+
+In summary, adding keyword arguments to ``@view_function(...)`` allows you set values *per view function* for use in your common converter functions.

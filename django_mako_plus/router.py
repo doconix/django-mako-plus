@@ -139,16 +139,15 @@ def router_factory(app_name, module_name, function_name, fallback_template):
             decorator_kwargs = view_function.get_kwargs(func)[0]
         except NotDecoratedError:
             decorator_kwargs = {}
-        converter = decorator_kwargs.get('converter')
 
         # class-based view?
         if inspect.isclass(func) and issubclass(func, View):
-            return ClassBasedRouter(module, func(), converter)  # func() because func is class (not instance)
+            return ClassBasedRouter(module, func(), decorator_kwargs)  # func() because func is class (not instance)
 
         # a view function?
         if not view_function.is_decorated(func):
             raise ViewDoesNotExist("View {}.{} was found successfully, but it must be decorated with @view_function or be a subclass of django.views.generic.View.".format(module_name, function_name))
-        return ViewFunctionRouter(module, func, converter)
+        return ViewFunctionRouter(module, func, decorator_kwargs)
 
     except ViewDoesNotExist as vdne:
         return RegistryExceptionRouter(vdne)
@@ -157,10 +156,10 @@ def router_factory(app_name, module_name, function_name, fallback_template):
 
 class ViewFunctionRouter(object):
     '''Router for view functions and class-based methods'''
-    def __init__(self, mod, func, converter):
+    def __init__(self, mod, func, decorator_kwargs):
         self.module = mod
         self.function = func
-        self.converter = converter
+        self.decorator_kwargs = decorator_kwargs
         self.signature = inspect.signature(func)
         # map the type hints
         param_types = getattr(func, '__annotations__', {})  # not using typing.get_type_hints because it adds Optional() to None defaults, and we don't need to follow mro here
@@ -179,7 +178,7 @@ class ViewFunctionRouter(object):
 
     def get_response(self, request, *args, **kwargs):
         '''Converts urlparams, calls the view function, returns the response'''
-        ctask = ConversionTask(self.converter, request, self.module, self.function)
+        ctask = ConversionTask(request, self.module, self.function, self.decorator_kwargs)
         args = list(args)
         # add urlparams into the arguments and convert the values
         for i, parameter in enumerate(self.parameters):
@@ -213,12 +212,12 @@ class ViewFunctionRouter(object):
 
 class ClassBasedRouter(object):
     '''Router for class-based views.'''
-    def __init__(self, module, instance, converter):
+    def __init__(self, module, instance, decorator_kwargs):
         self.endpoints = {}
         for mthd_name in instance.http_method_names:  # get parameters from the first http-based method (get, post, etc.)
             func = getattr(instance, mthd_name, None)
             if func is not None:
-                self.endpoints[mthd_name] = ViewFunctionRouter(module, func, converter)
+                self.endpoints[mthd_name] = ViewFunctionRouter(module, func, decorator_kwargs)
 
 
     def get_response(self, request, *args, **kwargs):

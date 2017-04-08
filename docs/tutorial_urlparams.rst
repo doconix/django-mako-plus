@@ -227,4 +227,3 @@ If you feel confused, consult the following table for advice:
 +----------------------------------------------+---------------------------------------------------------------------------------------------+
 | Directly access the URL parts.               | Simply `access the request.urlparams list <request.urlparams_>`_ directly.                  |
 +----------------------------------------------+---------------------------------------------------------------------------------------------+
-/topics_urlparams.html#replacing-the-default-converter
