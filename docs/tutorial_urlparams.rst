@@ -210,24 +210,21 @@ The point of this tutorial has been, "How do I get values from the URL into my v
 
 If you feel confused, consult the following table for advice:
 
-+----------------------------------------------+--------------------------------------------------------------------------------------------+
-| If your view function needs:                 | Then use this approach:                                                                    |
-+==============================================+============================================================================================+
-| String values in the URL                     | `Add new parameters to your view function <The Automated Way_>`_.                          |
-|                                              | No type hints or defaults are needed for strings.                                          |
-+----------------------------------------------+--------------------------------------------------------------------------------------------+
-| Integer, float, or boolean values,           | `Add type hints in your function signature <Adding Type Hints_>`_.                         |
-| or Model object ids in the URL               | DMP will convert the URL values automatically.                                             |
-+----------------------------------------------+--------------------------------------------------------------------------------------------+
-| Values of other types in the URL             | See the                                                                                    |
-|                                              | `Extending the Default Converter <topics_urlparams.html#extending-the-default-converter>`_ |
-|                                              | topic.                                                                                     |
-+----------------------------------------------+--------------------------------------------------------------------------------------------+
-| Your own, custom conversion process          | See the `Conversion Functions <topics_urlparams.html#conversion-functions>`_ topic.        |
-+----------------------------------------------+--------------------------------------------------------------------------------------------+
-| Specialized conversion of a single           | See the `Parameter Converters <topics_urlparams.html#parameter-converters>`_ topic.        |
-| parameter                                    |                                                                                            |
-|                                              |                                                                                            |
-+----------------------------------------------+--------------------------------------------------------------------------------------------+
-| Directly access the URL parts.               | Simply `access the request.urlparams list <request.urlparams_>`_ directly.                 |
-+----------------------------------------------+--------------------------------------------------------------------------------------------+
++----------------------------------------------+---------------------------------------------------------------------------------------------+
+| If your view function needs:                 | Then use this approach:                                                                     |
++==============================================+=============================================================================================+
+| String values in the URL                     | `Add new parameters to your view function <The Automated Way_>`_.                           |
+|                                              | No type hints or defaults are needed for strings.                                           |
++----------------------------------------------+---------------------------------------------------------------------------------------------+
+| Integer, float, or boolean values,           | `Add type hints in your function signature <Adding Type Hints_>`_.                          |
+| or Model object ids in the URL               | DMP will convert the URL values automatically.                                              |
++----------------------------------------------+---------------------------------------------------------------------------------------------+
+| Values of other types in the URL             | See                                                                                         |
+|                                              | `Extending the Default Converter <topics_urlparams.html#extending-the-default-converter>`_. |
++----------------------------------------------+---------------------------------------------------------------------------------------------+
+| Your own, custom conversion process          | See                                                                                         |
+|                                              | `Replacing the Default Converter <topics_urlparams.html#replacing-the-default-converter>`_. |
++----------------------------------------------+---------------------------------------------------------------------------------------------+
+| Directly access the URL parts.               | Simply `access the request.urlparams list <request.urlparams_>`_ directly.                  |
++----------------------------------------------+---------------------------------------------------------------------------------------------+
+/topics_urlparams.html#replacing-the-default-converter

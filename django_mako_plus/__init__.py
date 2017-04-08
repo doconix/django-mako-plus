@@ -23,7 +23,7 @@ from .router import route_request
 
 
 # view_function decorator and converter classes
-from .router import view_function, view_parameter
+from .router import view_function
 from .converter import DefaultConverter, set_default_converter, get_default_converter
 
 

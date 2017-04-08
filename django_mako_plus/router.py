@@ -7,7 +7,7 @@ from django.template import TemplateDoesNotExist
 from django.views.generic import View
 
 from .converter import ConversionTask
-from .decorators import view_function, view_parameter, NotDecoratedError
+from .decorators import view_function, NotDecoratedError
 from .exceptions import InternalRedirectException, RedirectException
 from .signals import dmp_signal_pre_process_request, dmp_signal_post_process_request, dmp_signal_internal_redirect_exception, dmp_signal_redirect_exception
 from .util import get_dmp_instance, get_dmp_app_configs, log, DMP_OPTIONS
@@ -164,26 +164,15 @@ class ViewFunctionRouter(object):
         self.signature = inspect.signature(func)
         # map the type hints
         param_types = getattr(func, '__annotations__', {})  # not using typing.get_type_hints because it adds Optional() to None defaults, and we don't need to follow mro here
-        # map the @view_parameter decorators on this function
-        decorator_kwargs = {}
-        for kwargs in view_parameter.get_kwargs(func):
-            try:
-                name = kwargs['name']
-            except KeyError:
-                raise ValueError('@view_parameter decorator must specify the parameter name as its first argument (cannot determine which parameter this decorator should be applied to).')
-            decorator_kwargs[name] = kwargs
         # inspect the parameters of the view function
         params = []
         for i, p in enumerate(self.signature.parameters.values()):
-            dec_kwargs = decorator_kwargs.get(p.name, {})
             params.append(ViewParameter(
                 name=p.name,
                 position=i,
                 kind=p.kind,
-                type=dec_kwargs.get('type') or param_types.get(p.name) or inspect.Parameter.empty,
-                default=dec_kwargs.get('default') or p.default,
-                converter=dec_kwargs.get('converter'),  # this is the parameter-specific converter, not function-level converter
-                kwargs=dec_kwargs,
+                type=param_types.get(p.name) or inspect.Parameter.empty,
+                default=p.default,
             ))
         self.parameters = tuple(params)
 
@@ -199,33 +188,22 @@ class ViewFunctionRouter(object):
                 continue
             # in kwargs already? (kwargs come from any extra named parameters in the urls.py regex match)
             elif parameter.name in kwargs:
-                kwargs[parameter.name] = self._convert(kwargs[parameter.name], parameter, ctask)
+                kwargs[parameter.name] = ctask.converter(kwargs[parameter.name], parameter, ctask)
             # in args already? (this should not be possible because Django doesn't allow mixing of named and positional parameters in the urls.py regex match, but coding for it)
             elif i < len(args):
-                args[i] = self._convert(args[i], parameter, ctask)
+                args[i] = ctask.converter(args[i], parameter, ctask)
             # urlparam value? (<= and -1 because first arg [request] is handled explicitly)
             elif i <= len(request.urlparams) and request.urlparams[i-1] != '':
-                kwargs[parameter.name] = self._convert(request.urlparams[i-1], parameter, ctask)
+                kwargs[parameter.name] = ctask.converter(request.urlparams[i-1], parameter, ctask)
             # default value?
             elif parameter.default is not inspect.Parameter.empty:
-                kwargs[parameter.name] = self._convert(parameter.default, parameter, ctask)
+                kwargs[parameter.name] = ctask.converter(parameter.default, parameter, ctask)
             # fallback is empty string
             else:
-                kwargs[parameter.name] = self._convert('', parameter, ctask)
+                kwargs[parameter.name] = ctask.converter('', parameter, ctask)
         # bind the vars and call the view!
         bound = self.signature.bind_partial(request, *args, **kwargs)
         return self.function(*bound.args, **bound.kwargs)
-
-
-    def _convert(self, value, parameter, ctask):
-        '''Converts a value'''
-        # first try the parameter-specific converter, then the function-level converter
-        if parameter.converter is not None:
-            return parameter.converter(value, parameter, ctask)
-        elif ctask.converter is not None:
-            return ctask.converter(value, parameter, ctask)
-        # we shouldn't get here because DefaultConverter is the defaulted function-level converter
-        return value
 
 
     def message(self, request):
@@ -300,7 +278,7 @@ class ViewParameter(object):
     An instance of this class is created for each parameter in a view function
     (except the initial request object argument).
     '''
-    def __init__(self, name, position, kind, type, default, converter, kwargs):
+    def __init__(self, name, position, kind, type, default):
         '''
         name:      The name of the parameter.
         position:  The position of this parameter.
@@ -309,25 +287,18 @@ class ViewParameter(object):
                    convert urlparam strings to the right type.
         default:   Any default value, specified in function type hints.  If no default is
                    specified in the function, this is `inspect.Parameter.empty`.
-        converter: A callable to convert this parameter.  If set, this overrides the
-                   normal coverter for this type.
-        kwargs:    Any extra kwargs on the decorator call.  This allows converters to
-                   add additional name=value pairs.
         '''
         self.name = name
         self.position = position
         self.kind = kind
         self.type = type
         self.default = default
-        self.converter = converter
-        self.kwargs = kwargs
 
     def __str__(self):
-        return 'ViewParameter: name={}, type={}, default={}, converter={}'.format(
+        return 'ViewParameter: name={}, type={}, default={}'.format(
             self.name,
             self.type.__qualname__ if self.type is not None else '<not specified>',
             self.default,
-            self.converter,
         )
 
 

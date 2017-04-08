@@ -58,8 +58,8 @@ Conversion methods are linked to types with the ``@DefaultConverter.convert_meth
 
 
 
-Conversion Functions
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Replacing the Default Converter
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 If the default converter class doesn't work for you, or if one of your view functions needs special conversion, set a custom function in the ``@view_function`` decorator.  Converters can be any callable, including functions, lambdas, or classes that define ``__call__``.
 
@@ -130,48 +130,4 @@ In this case, the converter is called twice: once for ``delta`` and once for ``f
 |                                                   | | ``convert(True, ...)`` is called for the ``forward`` parameter             |
 |                                                   |    (using the default in the function signature).                            |
 +---------------------------------------------------+------------------------------------------------------------------------------+
-
-
-Parameter Converters
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-When only some parameters need conversion, specify converters at the parameter level instead of the function level.
-
-Let's simplify the code to convert the ``delta`` parameter.  The boolean parameter can be handled by the DMP default converter.
-
-.. code:: python
-
-    from django.conf import settings
-    from django_mako_plus import view_function, view_parameter
-    from datetime import datetime, timedelta
-    from .. import dmp_render, dmp_render_to_string
-    import re
-
-    def convert_delta(value, parameter, task):
-        if value not in ('', '-'):
-            match = re.search('(\d+):(\d+)', value)
-            if match is not None:
-                return timedelta(hours=int(match.group(1)), minutes=int(match.group(2)))
-        return timedelta(hours=0)
-
-    @view_function
-    @view_parameter(name='delta', converter=convert_delta)
-    def process_request(request, delta, forward:bool=True):
-        if forward:
-            now = datetime.now() + delta
-        else:
-            now = datetime.now() - delta
-        context = {
-            'now': now,
-        }
-        return dmp_render(request, 'index.html', context)
-
-Our new function uses the ``custom_delta`` converter for the first parameter, but allows the default DMP converter to handle the boolean.
-
-In addition to the converter, you can specify the type and default in the decorator.  The following arguments are valid in the ``@view_parameter`` decorator:
-
-* ``name`` (required) - The parameter name in the signature this decorator is for.
-* ``type`` - The type of the parameter.  This overrides any type hint given in the function signature.
-* ``default`` - The default value for the parameter.  This overrides any default given in the function signature.
-* ``converter`` - A function, lambda, or other callable that takes the three parameters described in the previous section.  This function is called to convert the value from the urlparams.
 

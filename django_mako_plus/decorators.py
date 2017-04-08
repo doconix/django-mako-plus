@@ -122,15 +122,3 @@ class view_function(KeywordArgDecorator):
         'converter': None,
     }
 
-
-class view_parameter(KeywordArgDecorator):
-    '''
-    Decorator to manually specify information about a view function parameter.
-    '''
-    DEFAULT_KWARGS = {
-        'name': None,
-        'type': None,
-        'default': None,
-        'converter': None,
-    }
-
