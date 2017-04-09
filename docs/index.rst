@@ -1,11 +1,9 @@
-.. toctree::
-    :maxdepth: 2
-    :hidden:
+.. sidebar:: Show Me the Code:
 
-    about
-    installation
-    tutorial
-    topics
+    1. `Django Syntax vs. DMP Syntax <about.html#comparison-with-django>`_
+    2. `Simple Template <tutorial_meet_dmp.html#your-new-app>`_
+    3. `Basic View (.py file) <tutorial_views.html#t2-py-view-files>`_
+    4. `Ajax Example <tutorial_ajax.html#a-simple-example>`_
 
 
 Django-Mako-Plus
@@ -13,15 +11,13 @@ Django-Mako-Plus
 
 Routing Django to Mako since 2013.
 
-
 Use If You've Said...
 --------------------------
 
--  Why are Django templates weak sauce? Why not just use regular Python
-   in templates?
--  Why does Django make me list every. single. page. in urls.py?
+-  Why are Django templates weak sauce? Why not just use regular Python snippets in templates?  Why do I have to learn a whole new language?
+-  Why does Django make me list every. single. page. in urls.py?  Can't it just route by convention?
 -  Is there a better way to connect my HTML files to related CSS and JS files?
--  Can I include Python code in my CSS and Javascript files.
+-  Can I include Python code in my CSS and Javascript files?
 
 
 
@@ -52,10 +48,21 @@ Quick Start
 
 Note that on Windows, ``python3`` is ``python`` and ``pip3`` is ``pip``. Python 3+ is required.
 
+Contents
+------------
+
+.. toctree::
+    :maxdepth: 2
+
+    about
+    installation
+    tutorial
+    topics
+
 
 
 Compatability
-=================
+----------------
 
 DMP works with Python 3.4+ and Django 1.9+.
 
