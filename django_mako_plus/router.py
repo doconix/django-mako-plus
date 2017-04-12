@@ -81,8 +81,10 @@ def route_request(request, *args, **kwargs):
             request.dmp_router_function = ivr.redirect_function
             try:
                 module = import_module(request.dmp_router_module)
-                request._dmp_router_callable = getattr(module, request.dmp_router_function, None)
-                if request._dmp_router_callable == None:
+                func = getattr(module, request.dmp_router_function, None)
+                if func != None:
+                    request._dmp_router_callable = ViewFunctionRouter(module, func, {})
+                else:
                     request._dmp_router_callable = ViewDoesNotExist('module {} found successfully during internal redirect, but view function {} is not defined in the module.'.format(request.dmp_router_module, request.dmp_router_function))
             except ImportError:
                 request._dmp_router_callable = ViewDoesNotExist('view {}.{} not found during internal redirect.'.format(request.dmp_router_module, request.dmp_router_function))
