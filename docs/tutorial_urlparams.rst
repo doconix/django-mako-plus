@@ -36,19 +36,22 @@ request.urlparams
 
 DMP populates the ``request.urlparams[ ]`` list with all URL parts *after* the first two parts (``/homepage/index/``), up to the ``?`` (query string).  For example, the URL ``/homepage/index/144/A58UX/`` has two urlparams: ``144`` and ``A58UX``.  These can be accessed as ``request.urlparams[0]`` and ``request.urlparams[1]`` anywhere you have access to the request object.
 
-The following table gives examples; note that an ending slash creates an extra, empty item in the list.
+The following table gives examples:
 
 +--------------------------------------------------+-----------------------------------------------------------+
-| ``/homepage/index/first/second/``                | ``request.urlparam = [ 'first', 'second', '' ]``          |
+| ``/homepage/index/first/second/``                | ``request.urlparam = [ 'first', 'second' ]``              |
 +--------------------------------------------------+-----------------------------------------------------------+
 | ``/homepage/index/first/second``                 | ``request.urlparam = [ 'first', 'second' ]``              |
 +--------------------------------------------------+-----------------------------------------------------------+
-| ``/homepage/index/first//``                      | ``request.urlparam = [ 'first', '', '' ]``                |
+| ``/homepage/index/first//``                      | ``request.urlparam = [ 'first', '' ]``                    |
 +--------------------------------------------------+-----------------------------------------------------------+
 | ``/homepage/index``                              | ``request.urlparam = [ ]``                                |
 +--------------------------------------------------+-----------------------------------------------------------+
-| ``/homepage/index/``                             | ``request.urlparam = [ '', ]``                            |
-+--------------------------------------------------+-----------------------------------------------------------+
+
+In the examples above, the first and second URL result in the *same* list, even though the first URL has an ending slash.  The ending slash is optional and can be used to make the URL prettier.
+
+    The ending slash is optional because DMP's default ``urls.py`` patterns ignore it.  If you define custom URL patterns instead of including the default ones, be sure to add the ending ``/?`` (unless you explicitly want the slash to be explicitly counted).
+
 
 
 The Automated Way
@@ -150,13 +153,7 @@ In the example above, ``forward`` has a type hint *and* a default value, making 
 | ``http://localhost:8000/homepage/index/6/30``     | Evaluates True because the third parameter is missing.  It is assigned the   |
 |                                                   | default value of True (per the function signature).                          |
 +---------------------------------------------------+------------------------------------------------------------------------------+
-| ``http://localhost:8000/homepage/index/6/30/``    | Evaluates False because the third parameter is present, with a value of      |
-|                                                   | the empty string (the ending slash denotes the presence of this third        |
-|                                                   | parameter).                                                                  |
-+---------------------------------------------------+------------------------------------------------------------------------------+
-| ``http://localhost:8000/homepage/index/6/30/-/``  | Evaluates False because the third parameter is a dash `-`.  Note that a      |
-|                                                   | fourth parameter is also present (after the ending slash), but it is ignored |
-|                                                   | because ``process_request`` only takes three parameters.                     |
+| ``http://localhost:8000/homepage/index/6/30/-/``  | Evaluates False because the third parameter is a dash `-`.                   |
 +---------------------------------------------------+------------------------------------------------------------------------------+
 | ``http://localhost:8000/homepage/index/6/30/%20/``| Evaluates True because the third parameter is a space (not one of the        |
 |                                                   | False characters).                                                           |
@@ -194,9 +191,8 @@ In the Python language, the empty string and None have a special relationship.  
 
 Denoting "empty" parameters in the url is uncertain because:
 
-1. URLs that end with a slash, such as ``http://localhost:8000/storefront/receipt/first/second/``, essentially add an extra parameter to the urlparams list.
-2. Unless told otherwise, many web servers compact double slashes into single slashes. ``http://localhost:8000/storefront/receipt//second/`` becomes ``http://localhost:8000/storefront/receipt/second/``, preventing you from ever seeing the empty first paramter.
-3. There is no real concept of "None" in a URL, only an empty string or some character *denoting* a None.
+1. Unless told otherwise, many web servers compact double slashes into single slashes. ``http://localhost:8000/storefront/receipt//second/`` becomes ``http://localhost:8000/storefront/receipt/second/``, preventing you from ever seeing the empty first paramter.
+2. There is no real concept of "None" in a URL, only an empty string or some character *denoting* the absence of value.
 
 Because of these difficulties, the urlparams list is programmed to never return None and never raise IndexError.  Even in a short URL with only a few parameters, accessing ``request.urlparams[50]`` returns an empty string.
 
@@ -227,3 +223,9 @@ If you feel confused, consult the following table for advice:
 +----------------------------------------------+---------------------------------------------------------------------------------------------+
 | Directly access the URL parts.               | Simply `access the request.urlparams list <request.urlparams_>`_ directly.                  |
 +----------------------------------------------+---------------------------------------------------------------------------------------------+
+
+
+For More Information
+----------------------------
+
+The `advanced topic on conversion <topics_urlparams.html>`_ expands the topics above.  Come back later if you want to continue the discussion on parameter conversion.

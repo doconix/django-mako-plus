@@ -8,9 +8,9 @@ Custom Parameter Converters
 Extending the Default Converter
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The built-in DMP converter is built to be extended.  When you need to add a new type, simply plug a new method into the converter.  Let's add the ``timedelta`` type to the default converter.
+The built-in DMP converter is built to be extended.  When you need to add a new type, simply plug a new method into the converter.  Let's add a conversion method for the ``timedelta`` type.  We can then use this type in any view function in the system.
 
-Add the following to the end of ``homepage/__init__.py``.  The ``__init__.py`` file of one of your apps is a reliable location for this code, but you can actually put it in any module of your project that loads at Django startup.
+Add the following to the end of ``homepage/__init__.py``.  The ``__init__.py`` file of one of your apps is a reliable location for this code, but you can actually put it in any module of your project that imports at Django startup.
 
 .. code:: python
 
@@ -51,7 +51,9 @@ Then change your view function code to the following:
         }
         return dmp_render(request, 'index.html', context)
 
-Conversion methods are linked to types with the ``@DefaultConverter.convert_method`` decorator.  At system startup, the class registers these types and methods, sorted by type specificity.  On each request, the converter object searches its registered methods based on the type hints.  It calls ``isinstance`` to find the right converter, which enables it to match both exact types and inherited types.
+Conversion methods are linked to types with the ``@DefaultConverter.convert_method`` decorator.  At system startup, the class registers these types and methods, sorted by type specificity.  On each request, the converter object searches its registered methods based on the type hints.
+
+    The converter uses ``isinstance`` to find the right converter, so it matches both exact types and inherited types.  This is how the automatic model converter is done: the single converter method for ``models.Model`` is called for all custom-defined models in your project because the superclass is listed as the type.
 
 
 
@@ -59,7 +61,7 @@ Conversion methods are linked to types with the ``@DefaultConverter.convert_meth
 Replacing the Default Converter
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-If the default converter class doesn't work for you, or if one of your view functions needs special conversion, set a custom function in the ``@view_function`` decorator.  Converters can be any callable, including functions, lambdas, or classes that define ``__call__``.
+If the default converter class doesn't work for you, or if one of your view functions needs special conversion, send a custom function to the ``@view_function`` decorator.  Converters can be any callable, including functions, lambdas, or classes that define ``__call__``.
 
 Conversion functions have the following signature and parameters:
 
@@ -105,40 +107,36 @@ In most cases, ``value`` and ``parameter.type`` are all you need to make a conve
 
 In this case, the converter is called twice: once for ``delta`` and once for ``forward``.  This will happen *even if the URL is too short*.  Consider how the following URLs would be handled:
 
-+---------------------------------------------------+------------------------------------------------------------------------------+
-| ``http://localhost:8000/homepage/index/6:30/T/``  | | ``convert('6:30', ...)`` is called for the ``delta`` parameter.            |
-|                                                   | | ``convert('T', ...)`` is called for the ``forward`` parameter.             |
-|                                                   | | The third urlparam (specified in the url after the last slash) is ignored. |
-+---------------------------------------------------+------------------------------------------------------------------------------+
-| ``http://localhost:8000/homepage/index/6:30/``    | | ``convert('6:30', ...)`` is called for the ``delta`` parameter.            |
-|                                                   | | ``convert('', ...)`` is called for the ``forward`` parameter               |
-|                                                   |    (the last slash creates the empty string value).                          |
-+---------------------------------------------------+------------------------------------------------------------------------------+
-| ``http://localhost:8000/homepage/index/00:00``    | | ``convert('00:00', ...)`` is called for the ``delta`` parameter.           |
-|                                                   | | ``convert(True, ...)`` is called for the ``forward`` parameter             |
-|                                                   |    (using the default in the function signature).                            |
-+---------------------------------------------------+------------------------------------------------------------------------------+
-| ``http://localhost:8000/homepage/index/``         | | ``convert('', ...)`` is called for the ``delta`` parameter                 |
-|                                                   |    (the last slash creates the empty string value).                          |
-|                                                   | | ``convert(True, ...)`` is called for the ``forward`` parameter             |
-|                                                   |    (using the default in the function signature).                            |
-+---------------------------------------------------+------------------------------------------------------------------------------+
-| ``http://localhost:8000/homepage/index``          | | ``convert('0:00', ...)`` is called for the ``delta`` parameter             |
-|                                                   |    (using the default in the function signature).                            |
-|                                                   | | ``convert(True, ...)`` is called for the ``forward`` parameter             |
-|                                                   |    (using the default in the function signature).                            |
-+---------------------------------------------------+------------------------------------------------------------------------------+
++---------------------------------------------------+-------------------------------------------------------------------------------+
+| ``http://localhost:8000/homepage/index/6:30/T/``  | | ``convert('6:30', ...)`` is called for the ``delta`` parameter.             |
+|                                                   | | ``convert('T', ...)`` is called for the ``forward`` parameter.              |
++---------------------------------------------------+-------------------------------------------------------------------------------+
+| ``http://localhost:8000/homepage/index/6:30/T/1`` | | ``convert('6:30', ...)`` is called for the ``delta`` parameter.             |
+|                                                   | | ``convert('T', ...)`` is called for the ``forward`` parameter.              |
+|                                                   |    (the last parameter, "1", is ignored because not in the function signature |
++---------------------------------------------------+-------------------------------------------------------------------------------+
+| ``http://localhost:8000/homepage/index/00:00/``   | | ``convert('00:00', ...)`` is called for the ``delta`` parameter.            |
+|                                                   | | ``convert(True, ...)`` is called for the ``forward`` parameter              |
+|                                                   |    (using the default in the function signature).                             |
++---------------------------------------------------+-------------------------------------------------------------------------------+
+| ``http://localhost:8000/homepage/index/``         | | ``convert('0:00', ...)`` is called for the ``delta`` parameter              |
+|                                                   |    (using the default in the function signature).                             |
+|                                                   | | ``convert(True, ...)`` is called for the ``forward`` parameter              |
+|                                                   |    (using the default in the function signature).                             |
++---------------------------------------------------+-------------------------------------------------------------------------------+
 
 
 
 @view_parameter(custom='arguments')
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+An an alternative to creating custom converter functions, you can instead send custom values to the normal converter functions.  This allows you to have common converter functions to your whole system, and yet still have function-specific logic in those functions.  This represents a middle ground between common converters and view-specific converters.
+
 When you extend (or replace) the default converter, it can be useful to send view-specific settings to the converter functions.  For example, when parameter conversion errors occur, you may want to show a custom message or redirect to a URL instead of raising an Http404.
 
-This can be done with the ``@view_function`` decorator on your view functions.  Although we've only used the decorator to set converters on view functions thus far, the decorator takes an arbitrary number of keyword arguments.  These ``**kwargs`` are sent to the converter function in the task object.
+This can be done with the ``@view_function`` decorator on your view functions.  In addition to the "converter" parameter, ``@view_function`` allows an arbitrary number of keyword arguments.  These ``**kwargs`` are sent to the converter function in the task object, allowing you to send view-function-specific settings (kwargs) to your custom converters.
 
-The following is a repeat of the "Extending" example above, modified to raise a redirect exception.  Note the ``raise RedirectException`` in the first block and the ``@view_function(redirect="/some/fallback/url/")`` in the second block.
+The following is a repeat of the "Extending" example above, modified to raise a redirect exception.  Note ``raise RedirectException`` in the first block and ``@view_function(redirect="/some/fallback/url/")`` in the second block.
 
 .. code:: python
 
@@ -179,5 +177,4 @@ The following is a repeat of the "Extending" example above, modified to raise a 
         }
         return dmp_render(request, 'index.html', context)
 
-
-In summary, adding keyword arguments to ``@view_function(...)`` allows you set values *per view function* for use in your common converter functions.
+In summary, adding keyword arguments to ``@view_function(...)`` allows you set values *per view function*, which enables common converter functions to contain per-function logic.
