@@ -136,7 +136,7 @@ class DefaultConverter(BaseConverter):
         try:
             return parameter.type(value)
         except Exception as e:
-            log.warning('Raising Http404 due to parameter conversion error: {}'.format(e))
+            log.warning('Raising Http404 due to parameter conversion error: %s', e)
             raise Http404('Invalid parameter specified in the url')
 
     @BaseConverter.convert_method(bool)
@@ -145,7 +145,7 @@ class DefaultConverter(BaseConverter):
         try:
             return value not in self.EMPTY_CHARACTERS
         except Exception as e:
-            log.warning('Raising Http404 due to parameter conversion error: {}'.format(e))
+            log.warning('Raising Http404 due to parameter conversion error: %s', e)
             raise Http404('Invalid parameter specified in the url')
 
     @BaseConverter.convert_method(Model)  # django models.Model
@@ -161,12 +161,12 @@ class DefaultConverter(BaseConverter):
         try:
             pk = int(value)
         except Exception as e:
-            log.warning('Raising Http404 due to parameter conversion error: {}'.format(e))
+            log.warning('Raising Http404 due to parameter conversion error: %s', e)
             raise Http404('Invalid parameter specified in the url')
         try:
             return parameter.type.objects.get(id=pk)
         except ObjectDoesNotExist as e:
-            log.warning('Raising Http404 due to parameter conversion error: {}'.format(e))
+            log.warning('Raising Http404 due to parameter conversion error: %s', e)
             raise Http404('Invalid parameter specified in the url')
 
 

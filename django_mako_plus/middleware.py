@@ -77,7 +77,7 @@ class RequestInitMiddleware(MiddlewareMixin):
         if log.isEnabledFor(logging.DEBUG):
             kwarg_params = [ param for param in DMP_PARAM_CHECK if param in view_kwargs ]
             missing_params = [ param for param in DMP_PARAM_CHECK if param not in view_kwargs ]
-            log.debug('variables set by urls.py: {}; variables set by defaults: {}.'.format(kwarg_params, missing_params))
+            log.debug('variables set by urls.py: %s; variables set by defaults: %s', kwarg_params, missing_params)
 
         # add the variables to the request
         request.dmp_router_app = view_kwargs.pop('dmp_router_app', None) or DMP_OPTIONS.get('DEFAULT_APP', 'homepage')

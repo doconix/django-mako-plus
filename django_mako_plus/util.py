@@ -53,11 +53,11 @@ def run_command(*args, raise_exception=True):
         import shutil
         run_command(shutil.which('program'), '-l', '/Users/me/My Documents')
     '''
-    log.info('%s' % ' '.join(args))
+    log.info('%s', ' '.join(args))
     p = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE)
     stdout, stderr = p.communicate()
     if stdout:
-        log.info('%s' % stdout.decode('utf8'))
+        log.info('%s', stdout.decode('utf8'))
     if raise_exception and p.returncode != 0:
         if sys.version_info >= (3, 5):
             raise subprocess.CalledProcessError(p.returncode, args, output=stdout.decode('utf8'), stderr=stderr.decode('utf8'))

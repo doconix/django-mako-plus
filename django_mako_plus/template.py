@@ -162,12 +162,12 @@ class MakoTemplateAdapter(object):
             template_debug_name = self.mako_template.filename or 'string'
             if def_name:
                 template_debug_name = '%s -> %s' % (template_debug_name, def_name)
-            log.debug('rendering template %s' % template_debug_name)
+            log.debug('rendering template %s', template_debug_name)
         if settings.DEBUG:
             try:
                 content = render_obj.render_unicode(**context_dict)
-            except:
-                log.exception('exception raised during template rendering:')  # to the console
+            except Exception as e:
+                log.exception('exception raised during template rendering:', e)  # to the console
                 content = html_error_template().render_unicode()       # to the browser
         else:  # this is outside the above "try" loop because in non-DEBUG mode, we want to let the exception throw out of here (without having to re-raise it)
             content = render_obj.render_unicode(**context_dict)
@@ -224,9 +224,9 @@ class MakoTemplateAdapter(object):
         except RedirectException: # redirect to another page
             e = sys.exc_info()[1]
             if request == None:
-                log.info('a template redirected processing to %s' % (request.dmp_router_module, request.dmp_router_function, e.redirect_to))
+                log.info('a template redirected processing to %s', request.dmp_router_module, request.dmp_router_function, e.redirect_to)
             else:
-                log.info('view function %s.%s redirected processing to %s' % (request.dmp_router_module, request.dmp_router_function, e.redirect_to))
+                log.info('view function %s.%s redirected processing to %s', request.dmp_router_module, request.dmp_router_function, e.redirect_to)
             # send the signal
             if DMP_OPTIONS.get('SIGNALS', False):
                 dmp_signal_redirect_exception.send(sender=sys.modules[__name__], request=request, exc=e)

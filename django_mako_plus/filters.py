@@ -107,8 +107,7 @@ def alternate_syntax(local, using, **kwargs):
         dcontext.update(kwargs)
 
         # print a debug statement to the log
-        if log.isEnabledFor(logging.DEBUG):
-            log.debug('rendering embedded expression or block using {} template engine'.format(using))
+        log.debug('rendering embedded expression or block using %s template engine', using)
 
         # render the template with the context
         return template.render(context=dcontext, request=request)

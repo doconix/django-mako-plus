@@ -37,8 +37,7 @@ def route_request(request, *args, **kwargs):
                 raise ImproperlyConfigured("Variable request._dmp_router_callable does not exist (check MIDDLEWARE for `django_mako_plus.RequestInitMiddleware`).")
 
             # output the variables so the programmer can debug where this is routing
-            if log.isEnabledFor(logging.INFO):
-                log.info('processing: app={}, page={}, module={}, func={}, urlparams={}'.format(request.dmp_router_app, request.dmp_router_page, request.dmp_router_module, request.dmp_router_function, request.urlparams))
+            log.info('processing: app=%s, page=%s, module=%s, func=%s, urlparams=%s', request.dmp_router_app, request.dmp_router_page, request.dmp_router_module, request.dmp_router_function, request.urlparams)
 
             # if we had a view not found, raise a 404
             if isinstance(request._dmp_router_callable, ViewDoesNotExist) or isinstance(request._dmp_router_callable, RegistryExceptionRouter):
@@ -52,8 +51,7 @@ def route_request(request, *args, **kwargs):
                         return ret_response
 
             # log the view
-            if log.isEnabledFor(logging.INFO):
-                log.info('calling {}'.format(request._dmp_router_callable.message(request)))
+            log.info('calling %s', request._dmp_router_callable.message(request))
 
             # call view function with any args and any remaining kwargs
             response = request._dmp_router_callable.get_response(request, *args, **kwargs)
@@ -66,7 +64,7 @@ def route_request(request, *args, **kwargs):
 
             # if we didn't get a correct response back, send a 404
             if not isinstance(response, (HttpResponse, StreamingHttpResponse)):
-                log.error('{} failed to return an HttpResponse (or the post-signal overwrote it).  Returning Http404.'.format(request._dmp_router_callable.message(request)))
+                log.error('%s failed to return an HttpResponse (or the post-signal overwrote it).  Returning Http404.', request._dmp_router_callable.message(request))
                 raise Http404
 
             # return the response
@@ -89,11 +87,11 @@ def route_request(request, *args, **kwargs):
             except ImportError:
                 request._dmp_router_callable = ViewDoesNotExist('view {}.{} not found during internal redirect.'.format(request.dmp_router_module, request.dmp_router_function))
             # do the internal redirect
-            log.info('received an InternalViewRedirect to {} -> {}'.format(request.dmp_router_module, request.dmp_router_function))
+            log.info('received an InternalViewRedirect to %s -> %s', request.dmp_router_module, request.dmp_router_function)
 
         except RedirectException as e: # redirect to another page
             if request.dmp_router_class == None:
-                log.error('{} redirected processing to {}.'.format(request._dmp_router_callable.message(request), e.redirect_to))
+                log.error('%s redirected processing to %s', request._dmp_router_callable.message(request), e.redirect_to)
             # send the signal
             if DMP_OPTIONS.get('SIGNALS', False):
                 dmp_signal_redirect_exception.send(sender=sys.modules[__name__], request=request, exc=e)
