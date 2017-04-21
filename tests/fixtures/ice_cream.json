@@ -1,0 +1,34 @@
+[
+    {
+        "model": "tests.icecream",
+        "pk": 1,
+        "fields": {
+            "name": "Mint Chocolate Chip",
+            "rating": 10
+        }
+    },
+    {
+        "model": "tests.icecream",
+        "pk": 2,
+        "fields": {
+            "name": "Burnt Almond Fudge",
+            "rating": 10
+        }
+    },
+    {
+        "model": "tests.icecream",
+        "pk": 3,
+        "fields": {
+            "name": "Cherry",
+            "rating": 3
+        }
+    },
+    {
+        "model": "tests.icecream",
+        "pk": 4,
+        "fields": {
+            "name": "Sherbet",
+            "rating": 1
+        }
+    }
+]

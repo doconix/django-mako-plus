@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+    <meta charset="UTF-8">
+    <head>
+
+        <title>Testing_App</title>
+
+        ## render the css with the same name as this page
+        ${ django_mako_plus.link_css(self) }
+
+    </head>
+    <body>
+        <%block name="content">
+        </%block>
+
+        ## render the JS with the same name as this page
+        ${ django_mako_plus.link_js(self) }
+
+    </body>
+</html>

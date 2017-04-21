@@ -101,7 +101,11 @@ class RequestInitMiddleware(MiddlewareMixin):
         # add the url parameters to the request
         # note that I'm not using unquote_plus because the + switches to a space *after* the question mark (in the regular parameters)
         # in the normal url, spaces should be quoted with %20.  Thanks Rosie for the tip.
-        request.urlparams = URLParamList(( unquote(s) for s in view_kwargs.pop('urlparams', '').split('/') ))
+        kwarg_urlparams = view_kwargs.pop('urlparams', '').strip()
+        if kwarg_urlparams:
+            request.urlparams = URLParamList(( unquote(s) for s in kwarg_urlparams.split('/') ))
+        else:
+            request.urlparams = []
 
         # get the function object - the return of get_view_function might be a function, a class-based view, or a template
         # get_view_function does some magic to make all of these act like a regular view function

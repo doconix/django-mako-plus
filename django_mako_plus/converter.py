@@ -1,11 +1,13 @@
+from django.conf import settings
 from django.http import Http404
 from django.db.models import Model, ObjectDoesNotExist
 
 from .exceptions import RedirectException
 from .util import DMP_OPTIONS, log
 
-import inspect
+import inspect, datetime, decimal
 from collections import namedtuple
+from operator import attrgetter
 
 
 ##################################################################
@@ -24,12 +26,28 @@ class ConversionTask(object):
         self.kwargs = kwargs       # kwargs from the @view_function decorator
 
 
+##################################################################
+###   ConverterInfo class: see @convert_method below
+
+class ConverterInfo(object):
+    '''
+    Used by @convert_method to track types on a converter method.
+    '''
+    CONVERT_TYPES_KEY = '_dmp_converter_infos'
+    COUNTER = 0
+
+    def __init__(self, convert_type, convert_func):
+        self.convert_type = convert_type
+        self.convert_func = convert_func
+        self.counter = ConverterInfo.COUNTER
+        ConverterInfo.COUNTER += 1
+
+
+
 
 ##################################################################
 ###   Default converter class
 
-CONVERT_TYPES_KEY = '_convert_method_types'
-ConverterInfo = namedtuple('ConverterInfo', ( 'class_type', 'method' ))
 
 class BaseConverter(object):
 
@@ -39,29 +57,18 @@ class BaseConverter(object):
         Decorator for converter methods in DefaultConverter.
         '''
         def inner(func):
-            setattr(func, CONVERT_TYPES_KEY, class_types)
+            setattr(func, ConverterInfo.CONVERT_TYPES_KEY, ( ConverterInfo(ct, func) for ct in class_types ))
             return func
         return inner
 
 
     def __init__(self):
         # Discover the converters in this object - these were placed here by the @convert_method decorator.
+        # Order them by their counter so decorators on subclasses override decorators on superclasses (for the same type)
         self.converters = []
         for name, method in inspect.getmembers(self, inspect.ismethod):
-            class_types = getattr(method, CONVERT_TYPES_KEY, ())
-            for class_type in class_types:
-                # add so the order is from most specific to most general type
-                pos = 0
-                for cinfo in self.converters:
-                    if issubclass(class_type, cinfo.class_type):
-                        break
-                    pos += 1
-                # if two methods convert the same type, keep the second one
-                if pos < len(self.converters) and class_type == self.converters[pos].class_type:
-                    self.converters[pos] = ConverterInfo(class_type, method)
-                # otherwise, insert here so specialized types will match before inherited types
-                else:
-                    self.converters.insert(pos, ConverterInfo(class_type, method))
+            self.converters.extend(getattr(method, ConverterInfo.CONVERT_TYPES_KEY, ()))
+        self.converters.sort(key=attrgetter('counter'))
 
 
     def __call__(self, value, parameter, task):
@@ -103,9 +110,9 @@ class BaseConverter(object):
         # find the converter method for this type
         # I'm iterating through the list to find the most specific match first
         # The list is sorted by specificity so subclasses come first
-        for match_cls, func in self.converters:
-            if issubclass(parameter.type, match_cls):
-                return func.__get__(self, self.__class__)(value, parameter, task)
+        for ci in self.converters:
+            if issubclass(parameter.type, ci.convert_type):
+                return ci.convert_func.__get__(self, self.__class__)(value, parameter, task)
 
         # if we get here, we don't have a converter for this type
         if parameter.type is inspect.Parameter.empty:
@@ -123,21 +130,37 @@ class DefaultConverter(BaseConverter):
     Converters are any type of callable; see __call__ below for the primary method.
     '''
     # characters that mean None values in URLs
-    EMPTY_CHARACTERS = { '', '-', '0' }
+    EMPTY_CHARACTERS = { '', '-', '0', None }
 
     @BaseConverter.convert_method(str)
     def convert_str(self, value, parameter, task):
         '''Pass through for strings'''
         return value
 
+
     @BaseConverter.convert_method(int, float)
-    def convert_int_float(self, value, parameter, task):
-        '''Converts the string to float'''
+    def convert_number(self, value, parameter, task):
+        '''Converts the string to an int or float'''
+        if value is None:
+            value = 0
         try:
             return parameter.type(value)
         except Exception as e:
-            log.warning('Raising Http404 due to parameter conversion error: %s', e)
+            log.info('Raising Http404 due to parameter conversion error: %s', e)
             raise Http404('Invalid parameter specified in the url')
+
+
+    @BaseConverter.convert_method(decimal.Decimal)
+    def convert_decimal(self, value, parameter, task):
+        '''Converts the string to a decimal.Decimal'''
+        if value in self.EMPTY_CHARACTERS:
+            return None
+        try:
+            return parameter.type(value)
+        except Exception as e:
+            log.info('Raising Http404 due to parameter conversion error: %s', e)
+            raise Http404('Invalid parameter specified in the url')
+
 
     @BaseConverter.convert_method(bool)
     def convert_boolean(self, value, parameter, task):
@@ -145,8 +168,43 @@ class DefaultConverter(BaseConverter):
         try:
             return value not in self.EMPTY_CHARACTERS
         except Exception as e:
-            log.warning('Raising Http404 due to parameter conversion error: %s', e)
+            log.info('Raising Http404 due to parameter conversion error: %s', e)
             raise Http404('Invalid parameter specified in the url')
+
+
+    @BaseConverter.convert_method(datetime.datetime)
+    def convert_datetime(self, value, parameter, task):
+        '''Converts the string to datetime.datetime'''
+        if value in self.EMPTY_CHARACTERS:
+            return None
+        try:
+            for fmt in settings.DATETIME_INPUT_FORMATS:
+                try:
+                    return datetime.datetime.strptime(value, fmt)
+                except (ValueError, TypeError):
+                    continue
+            raise ValueError("value '{}' does not match any formats in settings.DATETIME_INPUT_FORMATS".format(value))
+        except Exception as e:
+            log.info('Raising Http404 due to parameter conversion error: %s', e)
+            raise Http404('Invalid parameter specified in the url')
+
+
+    @BaseConverter.convert_method(datetime.date)
+    def convert_date(self, value, parameter, task):
+        '''Converts the string to datetime.date'''
+        if value in self.EMPTY_CHARACTERS:
+            return None
+        try:
+            for fmt in settings.DATE_INPUT_FORMATS:
+                try:
+                    return datetime.datetime.strptime(value, fmt).date()
+                except (ValueError, TypeError):
+                    continue
+            raise ValueError("value '{}' does not match any formats in settings.DATE_INPUT_FORMATS".format(value))
+        except Exception as e:
+            log.info('Raising Http404 due to parameter conversion error: %s', e)
+            raise Http404('Invalid parameter specified in the url')
+
 
     @BaseConverter.convert_method(Model)  # django models.Model
     def convert_id_to_model(self, value, parameter, task):
@@ -161,12 +219,12 @@ class DefaultConverter(BaseConverter):
         try:
             pk = int(value)
         except Exception as e:
-            log.warning('Raising Http404 due to parameter conversion error: %s', e)
+            log.info('Raising Http404 due to parameter conversion error: %s', e)
             raise Http404('Invalid parameter specified in the url')
         try:
             return parameter.type.objects.get(id=pk)
         except ObjectDoesNotExist as e:
-            log.warning('Raising Http404 due to parameter conversion error: %s', e)
+            log.info('Raising Http404 due to parameter conversion error: %s', e)
             raise Http404('Invalid parameter specified in the url')
 
 

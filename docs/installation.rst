@@ -23,16 +23,12 @@ Install with the python installer:
 
 ::
 
-    pip3 install django
-    pip3 install mako
     pip3 install django-mako-plus
 
 Note that on Windows machines, ``pip3`` may need to be replaced with ``pip``:
 
 ::
 
-    pip install django
-    pip install mako
     pip install django-mako-plus
 
 Create a Django project
@@ -109,16 +105,12 @@ Install with the python installer:
 
 ::
 
-    pip3 install django
-    pip3 install mako
     pip3 install django-mako-plus
 
 Note that on Windows machines, ``pip3`` may need to be replaced with ``pip``:
 
 ::
 
-    pip install django
-    pip install mako
     pip install django-mako-plus
 
 

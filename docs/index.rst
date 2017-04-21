@@ -27,7 +27,7 @@ Quick Start
 .. code:: bash
 
     # install django, mako, and DMP
-    pip3 install django mako django-mako-plus
+    pip3 install django-mako-plus
 
     # create a new project with a 'homepage' app
     python3 -m django startproject --template=http://cdn.rawgit.com/doconix/django-mako-plus/master/project_template.zip mysite

@@ -197,9 +197,9 @@ class ViewFunctionRouter(object):
             # default value?
             elif parameter.default is not inspect.Parameter.empty:
                 kwargs[parameter.name] = ctask.converter(parameter.default, parameter, ctask)
-            # fallback is empty string
+            # fallback is None
             else:
-                kwargs[parameter.name] = ctask.converter('', parameter, ctask)
+                kwargs[parameter.name] = ctask.converter(None, parameter, ctask)
         # call the view!
         return self.function(request, *args, **kwargs)
 

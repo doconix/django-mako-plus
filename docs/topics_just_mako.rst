@@ -10,7 +10,7 @@ The DMP engine can be used without any of the extras.  The following lists the m
 ::
 
     # install dependencies
-    pip3 install django mako django-mako-plus
+    pip3 install django-mako-plus
 
     # start your project
     python3 -m django startproject tester
