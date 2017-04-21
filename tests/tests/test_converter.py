@@ -5,7 +5,7 @@ from django.template import TemplateDoesNotExist, TemplateSyntaxError
 
 from django_mako_plus import DefaultConverter, set_default_converter, get_default_converter
 from django_mako_plus.util import log
-from tests.models import IceCream
+from tests.models import IceCream, MyInt
 import logging
 import os, os.path, datetime, decimal
 
@@ -126,39 +126,47 @@ class ConvenienceTest(TestCase):
         self.assertIsNone(req.converted_params['dttm'])
 
     def test_datetime(self):
-        resp = self.client.get('/tests/converter.more_testing/1.23/2006-10-25/2006-10-25%2014:30:59/')
+        resp = self.client.get('/tests/converter.more_testing/1.23/2026-10-25/2026-10-25%2014:30:59/3/')
         self.assertEqual(resp.status_code, 200)
         req = resp.wsgi_request
         self.assertIsInstance(req.converted_params['dt'], datetime.date)
         self.assertIsInstance(req.converted_params['dttm'], datetime.datetime)
         # bad date
-        resp = self.client.get('/tests/converter.more_testing/1.23/abcd/2006-10-25%2014:30:59/')
+        resp = self.client.get('/tests/converter.more_testing/1.23/abcd/2026-10-25%2014:30:59/3/')
         self.assertEqual(resp.status_code, 404)
         # bad datetime
-        resp = self.client.get('/tests/converter.more_testing/1.23/2006-10-25/abcd/')
+        resp = self.client.get('/tests/converter.more_testing/1.23/2026-10-25/abcd/3/')
         self.assertEqual(resp.status_code, 404)
 
     def test_decimal(self):
-        resp = self.client.get('/tests/converter.more_testing/1.23/2006-10-25/2006-10-25%2014:30:59/')
+        resp = self.client.get('/tests/converter.more_testing/1.23/2026-10-25/2026-10-25%2014:30:59/3/')
         self.assertEqual(resp.status_code, 200)
         req = resp.wsgi_request
         self.assertIsInstance(req.converted_params['d'], decimal.Decimal)
         self.assertEqual(req.converted_params['d'], decimal.Decimal('1.23'))
         # bad decimal
-        resp = self.client.get('/tests/converter.more_testing/abcd/2006-10-25/2006-10-25%2014:30:59/')
+        resp = self.client.get('/tests/converter.more_testing/abcd/2026-10-25/2026-10-25%2014:30:59/3/')
         self.assertEqual(resp.status_code, 404)
         # empty decimal
-        resp = self.client.get('/tests/converter.more_testing/-/2006-10-25/2006-10-25%2014:30:59/')
+        resp = self.client.get('/tests/converter.more_testing/-/2026-10-25/2026-10-25%2014:30:59/3/')
         self.assertEqual(resp.status_code, 200)
         req = resp.wsgi_request
         self.assertIsNone(req.converted_params['d'])
 
-    def test_override_int(self):
+    def test_override_with_myint(self):
         set_default_converter(TestingConverter2)
-        resp = self.client.get('/tests/converter/s/3/4/1/-/')
+        resp = self.client.get('/tests/converter.more_testing/-/-/-/3/')
         self.assertEqual(resp.status_code, 200)
         req = resp.wsgi_request
-        self.assertEqual(req.converted_params['i'], 300)
+        self.assertEqual(req.converted_params['mi'], 103)
+        self.assertIsInstance(req.converted_params['mi'], MyInt)
+
+    def test_custom_convert_function(self):
+        resp = self.client.get('/tests/converter.custom_convert_function/1/2/3/4/5/6/')
+        self.assertEqual(resp.status_code, 200)
+        # this hard coded value comes from the convert function, which is also testing
+        # the decorator kwargs
+        self.assertEqual(resp.content, 'h1h2-h1h2-h1h2'.encode())
 
 
 
@@ -176,14 +184,13 @@ class TestingConverter(DefaultConverter):
         task.request.converted_params[parameter.name] = value
         return value
 
-# Override a type and to check a custom converter
+
+# Override a type and ensure it gets called instead of regular int converter
 class TestingConverter2(TestingConverter):
-    @DefaultConverter.convert_method(int)
-    def convert_int(self, value, parameter, task):
-        if value is None:
-            return None
+    @DefaultConverter.convert_method(MyInt)
+    def convert_myint(self, value, parameter, task):
         try:
-            return parameter.type(value) + 100
+            return MyInt(int(value) + 100)
         except Exception as e:
             log.info('Raising Http404 due to parameter conversion error: %s', e)
             raise Http404('Invalid parameter specified in the url')

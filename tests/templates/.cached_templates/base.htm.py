@@ -5,9 +5,9 @@ STOP_RENDERING = runtime.STOP_RENDERING
 __M_dict_builtin = dict
 __M_locals_builtin = locals
 _magic_number = 10
-_modified_time = 1492747574.045729
+_modified_time = 1492811712.129292
 _enable_loop = True
-_template_filename = '/Users/conan/Documents/data/programming/django-mako-plus/testing_app/templates/base.htm'
+_template_filename = '/Users/conan/Documents/data/programming/django-mako-plus/tests/templates/base.htm'
 _template_uri = 'base.htm'
 _source_encoding = 'utf-8'
 import django_mako_plus
@@ -54,6 +54,6 @@ def render_content(context,**pageargs):
 
 """
 __M_BEGIN_METADATA
-{"source_encoding": "utf-8", "filename": "/Users/conan/Documents/data/programming/django-mako-plus/testing_app/templates/base.htm", "line_map": {"34": 14, "35": 17, "36": 17, "37": 17, "43": 13, "49": 13, "18": 0, "55": 49, "26": 1, "27": 9, "28": 9, "29": 9}, "uri": "base.htm"}
+{"uri": "base.htm", "line_map": {"34": 14, "35": 17, "36": 17, "37": 17, "43": 13, "49": 13, "18": 0, "55": 49, "26": 1, "27": 9, "28": 9, "29": 9}, "filename": "/Users/conan/Documents/data/programming/django-mako-plus/tests/templates/base.htm", "source_encoding": "utf-8"}
 __M_END_METADATA
 """

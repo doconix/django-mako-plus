@@ -5,7 +5,7 @@ from django.db.models import Model, ObjectDoesNotExist
 from .exceptions import RedirectException
 from .util import DMP_OPTIONS, log
 
-import inspect, datetime, decimal
+import inspect, datetime, decimal, sys
 from collections import namedtuple
 from operator import attrgetter
 
@@ -34,15 +34,14 @@ class ConverterInfo(object):
     Used by @convert_method to track types on a converter method.
     '''
     CONVERT_TYPES_KEY = '_dmp_converter_infos'
-    COUNTER = 0
+    DECLARED_ORDER = 0
 
     def __init__(self, convert_type, convert_func):
         self.convert_type = convert_type
         self.convert_func = convert_func
-        self.counter = ConverterInfo.COUNTER
-        ConverterInfo.COUNTER += 1
-
-
+        # we sort by reversed( len(mro), DECLARED_ORDER ) so subclasses match first
+        self.sort_key = ( -1 * len(inspect.getmro(convert_type)), -1 * ConverterInfo.DECLARED_ORDER )
+        ConverterInfo.DECLARED_ORDER = 0 if ConverterInfo.DECLARED_ORDER == sys.maxsize else ConverterInfo.DECLARED_ORDER + 1
 
 
 ##################################################################
@@ -57,18 +56,17 @@ class BaseConverter(object):
         Decorator for converter methods in DefaultConverter.
         '''
         def inner(func):
-            setattr(func, ConverterInfo.CONVERT_TYPES_KEY, ( ConverterInfo(ct, func) for ct in class_types ))
+            setattr(func, ConverterInfo.CONVERT_TYPES_KEY, [ ConverterInfo(ct, func) for ct in class_types ])
             return func
         return inner
 
 
     def __init__(self):
         # Discover the converters in this object - these were placed here by the @convert_method decorator.
-        # Order them by their counter so decorators on subclasses override decorators on superclasses (for the same type)
         self.converters = []
         for name, method in inspect.getmembers(self, inspect.ismethod):
             self.converters.extend(getattr(method, ConverterInfo.CONVERT_TYPES_KEY, ()))
-        self.converters.sort(key=attrgetter('counter'))
+        self.converters.sort(key=attrgetter('sort_key'))
 
 
     def __call__(self, value, parameter, task):

@@ -5,7 +5,7 @@ STOP_RENDERING = runtime.STOP_RENDERING
 __M_dict_builtin = dict
 __M_locals_builtin = locals
 _magic_number = 10
-_modified_time = 1492781823.435266
+_modified_time = 1492811712.121209
 _enable_loop = True
 _template_filename = '/Users/conan/Documents/data/programming/django-mako-plus/tests/templates/basic.html'
 _template_uri = 'basic.html'
@@ -57,6 +57,6 @@ def render_content(context,**pageargs):
 
 """
 __M_BEGIN_METADATA
-{"source_encoding": "utf-8", "filename": "/Users/conan/Documents/data/programming/django-mako-plus/tests/templates/basic.html", "line_map": {"52": 3, "58": 52, "36": 1, "29": 0, "46": 3}, "uri": "basic.html"}
+{"uri": "basic.html", "line_map": {"52": 3, "58": 52, "36": 1, "29": 0, "46": 3}, "filename": "/Users/conan/Documents/data/programming/django-mako-plus/tests/templates/basic.html", "source_encoding": "utf-8"}
 __M_END_METADATA
 """
