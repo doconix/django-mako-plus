@@ -35,19 +35,19 @@ class Tester(TestCase):
         self.assertEqual(template.render(None), "4")
 
     def test_get_template(self):
-        template = get_dmp_instance().get_template('tests/basic.html')
+        template = get_dmp_instance().get_template('tests/index.basic.html')
         self.assertIsInstance(template, MakoTemplateAdapter)
         self.assertRaises(TemplateDoesNotExist, get_dmp_instance().get_template, 'tests/nonexistent_template.html')
 
     def test_get_template_loader(self):
         loader = get_dmp_instance().get_template_loader('tests', create=False)
         self.assertIsInstance(loader, MakoTemplateLoader)
-        template = loader.get_template('basic.html')
+        template = loader.get_template('index.basic.html')
         self.assertIsInstance(template, MakoTemplateAdapter)
 
     def test_get_template_loader_for_path(self):
         path = os.path.join(self.tests_app.path, 'templates')
         loader = get_dmp_instance().get_template_loader_for_path(path, use_cache=False)
         self.assertIsInstance(loader, MakoTemplateLoader)
-        template = loader.get_template('basic.html')
+        template = loader.get_template('index.basic.html')
         self.assertIsInstance(template, MakoTemplateAdapter)

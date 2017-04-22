@@ -39,28 +39,28 @@ class Tester(TestCase):
 
     def test_get_template(self):
         # should succeed
-        template = get_template('tests', 'basic.html')
+        template = get_template('tests', 'index.basic.html')
         self.assertIsInstance(template, MakoTemplateAdapter)
         # these should fail
-        self.assertRaises(LookupError, get_template, 'nonexistent_app', 'basic.html')
+        self.assertRaises(LookupError, get_template, 'nonexistent_app', 'index.basic.html')
         self.assertRaises(TemplateDoesNotExist, get_template, 'tests', 'nonexistent_template.html')
         self.assertRaises(TemplateSyntaxError, get_template, 'tests', 'syntax_error.html')
 
     def test_render_template(self):
         # should succeed
-        html = render_template(None, 'tests', 'basic.html')
+        html = render_template(None, 'tests', 'index.basic.html')
         self.assertIsInstance(html, str)
         # these should fail
-        self.assertRaises(LookupError, render_template, None, 'nonexistent_app', 'basic.html')
+        self.assertRaises(LookupError, render_template, None, 'nonexistent_app', 'index.basic.html')
         self.assertRaises(TemplateDoesNotExist, render_template, None, 'tests', 'nonexistent_template.html')
         self.assertRaises(TemplateSyntaxError, render_template, None, 'tests', 'syntax_error.html')
 
     def test_def_name(self):
         # test a def name
-        html = render_template(None, 'tests', 'basic.html', def_name='content')
+        html = render_template(None, 'tests', 'index.basic.html', def_name='content')
         self.assertIsInstance(html, str)
         # this def doesn't exist
-        self.assertRaises(AttributeError, render_template, None, 'tests', 'basic.html', def_name='nonexistent_def')
+        self.assertRaises(AttributeError, render_template, None, 'tests', 'index.basic.html', def_name='nonexistent_def')
 
     def test_get_template_loader_for_path(self):
         path = os.path.join(self.tests_app.path, 'templates')
@@ -70,9 +70,9 @@ class Tester(TestCase):
         self.assertIsInstance(loader, MakoTemplateLoader)
 
     def test_get_template_for_path(self):
-        path = os.path.join(self.tests_app.path, 'templates', 'basic.html')
+        path = os.path.join(self.tests_app.path, 'templates', 'index.basic.html')
         bad_path = os.path.join(self.tests_app.path, 'templates', 'nonexistent_template.html')
-        bad_path2 = os.path.join(self.tests_app.path, 'nonexistent_dir', 'basic.html')
+        bad_path2 = os.path.join(self.tests_app.path, 'nonexistent_dir', 'index.basic.html')
         # should succeed
         template = get_template_for_path(path, use_cache=False)
         self.assertIsInstance(template, MakoTemplateAdapter)
@@ -83,9 +83,9 @@ class Tester(TestCase):
         self.assertRaises(TemplateDoesNotExist, get_template_for_path, bad_path2)
 
     def test_render_template_for_path(self):
-        path = os.path.join(self.tests_app.path, 'templates', 'basic.html')
+        path = os.path.join(self.tests_app.path, 'templates', 'index.basic.html')
         bad_path = os.path.join(self.tests_app.path, 'templates', 'nonexistent_template.html')
-        bad_path2 = os.path.join(self.tests_app.path, 'nonexistent_dir', 'basic.html')
+        bad_path2 = os.path.join(self.tests_app.path, 'nonexistent_dir', 'index.basic.html')
         bad_syntax_path = os.path.join(self.tests_app.path, 'templates', 'syntax_error.html')
         # should succeed
         html = render_template_for_path(None, path, use_cache=False)

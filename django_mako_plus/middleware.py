@@ -9,8 +9,7 @@ except ImportError:
     # create a dummy MiddlewareMixin if older Django
     MiddlewareMixin = object
 
-from .registry import get_view
-from .router import route_request, ClassBasedRouter
+from .router import get_router, route_request, ClassBasedRouter
 from .util import URLParamList, get_dmp_instance, DMP_OPTIONS, log
 
 import logging
@@ -107,9 +106,9 @@ class RequestInitMiddleware(MiddlewareMixin):
         else:
             request.urlparams = URLParamList()
 
-        # get the function object - the return of get_view_function might be a function, a class-based view, or a template
-        # get_view_function does some magic to make all of these act like a regular view function
-        request._dmp_router_callable = get_view(request.dmp_router_app, request.dmp_router_module, request.dmp_router_function, fallback_template)
+        # get the function object - the return of get_router_function might be a function, a class-based view, or a template
+        # get_router_function does some magic to make all of these act like a regular view function
+        request._dmp_router_callable = get_router(request.dmp_router_module, request.dmp_router_function, request.dmp_router_app, fallback_template)
 
         # adjust the variable values if a class
         if isinstance(request._dmp_router_callable, ClassBasedRouter):

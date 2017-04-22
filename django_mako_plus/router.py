@@ -12,10 +12,17 @@ from .exceptions import InternalRedirectException, RedirectException
 from .signals import dmp_signal_pre_process_request, dmp_signal_post_process_request, dmp_signal_internal_redirect_exception, dmp_signal_redirect_exception
 from .util import get_dmp_instance, get_dmp_app_configs, log, DMP_OPTIONS
 
-import sys, logging, inspect
+import sys, logging, inspect, threading
 from collections import namedtuple
 from importlib import import_module
 from importlib.util import find_spec
+
+
+# lock to keep get_router() thread safe
+rlock = threading.RLock()
+
+# the cache of mini-routers
+CACHED_ROUTERS = {}
 
 
 ##############################################################
@@ -78,17 +85,11 @@ def route_request(request, *args, **kwargs):
             # resolve to a function
             request.dmp_router_module = ivr.redirect_module
             request.dmp_router_function = ivr.redirect_function
-            try:
-                module = import_module(request.dmp_router_module)
-                func = getattr(module, request.dmp_router_function, None)
-                if func != None:
-                    request._dmp_router_callable = ViewFunctionRouter(module, func, {})
-                else:
-                    request._dmp_router_callable = ViewDoesNotExist('module {} found successfully during internal redirect, but view function {} is not defined in the module.'.format(request.dmp_router_module, request.dmp_router_function))
-            except ImportError:
-                request._dmp_router_callable = ViewDoesNotExist('view {}.{} not found during internal redirect.'.format(request.dmp_router_module, request.dmp_router_function))
-            # do the internal redirect
-            log.info('received an InternalViewRedirect to %s -> %s', request.dmp_router_module, request.dmp_router_function)
+            log.info('received an InternalViewRedirect to %s.%s', request.dmp_router_module, request.dmp_router_function)
+            request._dmp_router_callable = get_router(request.dmp_router_module, request.dmp_router_function, verify_decorator=False)
+            if isinstance(request._dmp_router_callable, RegistryExceptionRouter):
+                log.error('could not fulfill InternalViewRedirect because %s.%s does not exist.', request.dmp_router_module, request.dmp_router_function)
+            # let it wrap back to the top of the "while True" loop to restart the routing
 
         except RedirectException as e: # redirect to another page
             if request.dmp_router_class == None:
@@ -104,15 +105,39 @@ def route_request(request, *args, **kwargs):
 
 
 
+########################################################
+###   Cache of mini routers
+
+def get_router(module_name, function_name, fallback_app=None, fallback_template=None, verify_decorator=True):
+    '''
+    Gets or creates a mini-router for module_name.function_name.
+    Returns one of the four mini-routers defined later in this file.
+    If the module or function cannot be found, ViewDoesNotExist is raised.
+    '''
+    # first check the cache
+    key = ( module_name, function_name )
+    try:
+        return CACHED_ROUTERS[key]
+    except KeyError:
+        with rlock:
+            # try again now that we're locked
+            try:
+                return CACHED_ROUTERS[key]
+            except KeyError:
+                func = router_factory(module_name, function_name, fallback_app, fallback_template, verify_decorator)
+                if not settings.DEBUG:  # only cache in production mode
+                    CACHED_ROUTERS[key] = func
+                return func
+
+    # the code should never be able to get here
+    raise Exception("Django-Mako-Plus error: registry.get_router() should not have been able to get to this point.  Please notify the owner of the DMP project.  Thanks.")
 
 
-########################################################################################
-###   Router classes for the different types of views.  When a view is first accessed,
-###   one of the "mini" routers is created for that view and cached in the registry
-###   for future calls.
-
-def router_factory(app_name, module_name, function_name, fallback_template):
-    '''Factory method to create a view-specific router in the system. In production mode, these are cached in the registry.'''
+def router_factory(module_name, function_name, fallback_app=None, fallback_template=None, verify_decorator=True):
+    '''
+    Factory method to create a view-specific router in the system.
+    See the four mini-routers at the end of this file.
+    '''
     try:
         # I'm first calling find_spec first here beacuse I don't want import_module in
         # a try/except -- there are lots of reasons that importing can fail, and I just want to
@@ -124,7 +149,7 @@ def router_factory(app_name, module_name, function_name, fallback_template):
         if spec is None:
             # no view module, can we call the template directly?
             try:
-                return TemplateViewRouter(app_name, fallback_template)
+                return TemplateViewRouter(fallback_app, fallback_template)
             except TemplateDoesNotExist as e:
                 raise ViewDoesNotExist('View module {} not found, and fallback template {} could not be loaded ({})'.format(module_name, fallback_template, e))
 
@@ -148,13 +173,19 @@ def router_factory(app_name, module_name, function_name, fallback_template):
             return ClassBasedRouter(module, func(), decorator_kwargs)  # func() because func is class (not instance)
 
         # a view function?
-        if not view_function.is_decorated(func):
+        if verify_decorator and not view_function.is_decorated(func):
             raise ViewDoesNotExist("View {}.{} was found successfully, but it must be decorated with @view_function or be a subclass of django.views.generic.View.".format(module_name, function_name))
         return ViewFunctionRouter(module, func, decorator_kwargs)
 
     except ViewDoesNotExist as vdne:
         return RegistryExceptionRouter(vdne)
 
+
+
+
+########################################################################################
+###   Router classes for single endpoints.  When a view is first accessed, one
+###   of these "mini" routers is created for it and cached for future calls.
 
 
 class ViewFunctionRouter(object):
