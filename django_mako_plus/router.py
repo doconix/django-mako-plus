@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.conf.urls import url
 from django.core.exceptions import ImproperlyConfigured, ViewDoesNotExist
-from django.http import HttpRequest, HttpResponse, StreamingHttpResponse
+from django.http import HttpRequest, HttpResponse, HttpResponseNotFound, StreamingHttpResponse, HttpResponseServerError
 from django.http import Http404, HttpResponseNotAllowed
 from django.template import TemplateDoesNotExist
 from django.views.generic import View
@@ -41,8 +41,8 @@ def route_request(request, *args, **kwargs):
 
             # if we had a view not found, raise a 404
             if isinstance(request._dmp_router_callable, ViewDoesNotExist) or isinstance(request._dmp_router_callable, RegistryExceptionRouter):
-                log.error(request._dmp_router_callable.message(request))
-                raise Http404
+                log.info(request._dmp_router_callable.message(request))
+                return request._dmp_router_callable.get_response(request, *args, **kwargs)
 
             # send the pre-signal
             if DMP_OPTIONS.get('SIGNALS', False):
@@ -64,8 +64,9 @@ def route_request(request, *args, **kwargs):
 
             # if we didn't get a correct response back, send a 404
             if not isinstance(response, (HttpResponse, StreamingHttpResponse)):
-                log.error('%s failed to return an HttpResponse (or the post-signal overwrote it).  Returning Http404.', request._dmp_router_callable.message(request))
-                raise Http404
+                msg = '%s failed to return an HttpResponse (or the post-signal overwrote it).  Returning 500 error.' % request._dmp_router_callable.message(request)
+                log.error(msg)
+                return HttpResponseServerError(msg)
 
             # return the response
             return response
@@ -91,7 +92,7 @@ def route_request(request, *args, **kwargs):
 
         except RedirectException as e: # redirect to another page
             if request.dmp_router_class == None:
-                log.error('%s redirected processing to %s', request._dmp_router_callable.message(request), e.redirect_to)
+                log.info('%s redirected processing to %s', request._dmp_router_callable.message(request), e.redirect_to)
             # send the signal
             if DMP_OPTIONS.get('SIGNALS', False):
                 dmp_signal_redirect_exception.send(sender=sys.modules[__name__], request=request, exc=e)
@@ -128,9 +129,11 @@ def router_factory(app_name, module_name, function_name, fallback_template):
                 raise ViewDoesNotExist('View module {} not found, and fallback template {} could not be loaded ({})'.format(module_name, fallback_template, e))
 
         # load the module and function
-        module = import_module(module_name)
         try:
+            module = import_module(module_name)
             func = getattr(module, function_name)
+        except ImportError:
+            raise ViewDoesNotExist('Module {} could not be imported ({})'.format(module_name, e))
         except AttributeError:
             raise ViewDoesNotExist('Module {} found successfully, but view {} is not defined in the module.'.format(module_name, function_name))
 
@@ -223,7 +226,7 @@ class ClassBasedRouter(object):
         endpoint = self.endpoints.get(request.method.lower())
         if endpoint is not None:
             return endpoint.get_response(request, **kwargs)
-        log.warning('Method Not Allowed (%s): %s', request.method, request.path, extra={'status_code': 405, 'request': request})
+        log.info('Method Not Allowed (%s): %s', request.method, request.path, extra={'status_code': 405, 'request': request})
         return HttpResponseNotAllowed([ e.upper() for e in self.endpoints.keys() ])
 
 

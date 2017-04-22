@@ -105,7 +105,7 @@ class RequestInitMiddleware(MiddlewareMixin):
         if kwarg_urlparams:
             request.urlparams = URLParamList(( unquote(s) for s in kwarg_urlparams.split('/') ))
         else:
-            request.urlparams = []
+            request.urlparams = URLParamList()
 
         # get the function object - the return of get_view_function might be a function, a class-based view, or a template
         # get_view_function does some magic to make all of these act like a regular view function

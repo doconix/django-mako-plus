@@ -36,7 +36,7 @@ To enable alternative syntaxes, uncomment (or add) the following to your ``setti
 .. code:: python
 
     'DEFAULT_TEMPLATE_IMPORTS': [
-        'from django_mako_plus import django_syntax, jinja2_syntax, alternate_syntax
+        'from django_mako_plus import django_syntax, jinja2_syntax, alternate_syntax',
     ],
 
 Then clear out the compiled templates caches:
@@ -45,16 +45,39 @@ Then clear out the compiled templates caches:
 
     python manage.py dmp_cleanup
 
+Next, ensure the engine you are using is enabled in ``settings.py``.  For example, including Django syntax means including the following:
+
+TEMPLATES = [
+    {
+        'NAME': 'django_mako_plus',
+        # all the other settings here
+    },
+    {
+        'NAME': 'django',
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [],
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                'django.template.context_processors.debug',
+                'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
+                'django.contrib.messages.context_processors.messages',
+            ],
+        },
+    },
+]
+
 Now that the functions are imported, you can include a Django expression or embed an entire block within your Mako template by using a filter:
 
 ::
 
     ## Expression containing Django template syntax (assuming name was created in the view.py)
-    ${ '{{ name }}' | django_syntax(self) }
+    ${ '{{ name }}' | django_syntax(local) }
 
     ## Full Django code block, with Mako creating the variable first
     <% titles = [ 'First', 'Second', 'Third' ] %>
-    <%block filter="django_syntax(self, titles=titles)">
+    <%block filter="django_syntax(local, titles=titles)">
         {% for title in titles %}
             <h2>
                 {{ title|upper }}
@@ -63,19 +86,21 @@ Now that the functions are imported, you can include a Django expression or embe
     </%block>
 
     ## Third-party, crispy form tags (assume my_formset was created in the view.py)
-    <%block filter="django_syntax(self)">
+    <%block filter="django_syntax(local)">
         {% load crispy_forms_tags %}
         <form method="post" class="uniForm">
             {{ my_formset|crispy }}
         </form>
     </%block>
 
-The ``self`` parameter passes your context variables to the Django render call. It is a global Mako variable (available in any template), and it is always included in the filter. In other words, include ``self`` every time as shown in the examples above.
+The ``local`` parameter passes your context variables to the Django render call. It is a global Mako variable (available in any template), and it is always included in the filter. In other words, include ``local`` every time as shown in the examples above.
 
 Jinja2 or ((insert template engine))
 ------------------------------------------------------------------------------
 
 If Jinja2 is needed, replace the filter with ``jinja2_syntax(context)`` in the above examples. If another engine is needed, replace the filter with ``template_syntax(context, 'engine name')`` as specified in ``settings.TEMPLATES``. DMP will render with the appriate engine and put the result in your HTML page.
+
+    Don't forget to include the ``TEMPLATES`` declaration for Jinja2 in your ``settings.py`` file.
 
 Local Variables
 ---------------------------------------

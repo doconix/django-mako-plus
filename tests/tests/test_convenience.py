@@ -16,7 +16,7 @@ import logging
 import os, os.path
 
 
-class ConvenienceTest(TestCase):
+class Tester(TestCase):
 
     @classmethod
     def setUpTestData(cls):

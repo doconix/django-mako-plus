@@ -10,7 +10,7 @@ import logging
 import os, os.path, datetime, decimal
 
 
-class ConvenienceTest(TestCase):
+class Tester(TestCase):
     fixtures = [ 'ice_cream.json' ]
 
     @classmethod
@@ -167,6 +167,22 @@ class ConvenienceTest(TestCase):
         # this hard coded value comes from the convert function, which is also testing
         # the decorator kwargs
         self.assertEqual(resp.content, 'h1h2-h1h2-h1h2'.encode())
+
+    def test_class_based(self):
+        # GET
+        resp = self.client.get('/tests/converter.class_based/1/2/')
+        self.assertEqual(resp.status_code, 200)
+        req = resp.wsgi_request
+        self.assertEquals(req.urlparams, [ '1', '2' ])
+        self.assertEquals(req.converted_params['i'], 1)
+        self.assertEquals(req.converted_params['f'], 2)
+        # POST
+        resp = self.client.post('/tests/converter.class_based/1/2/')
+        self.assertEqual(resp.status_code, 200)
+        req = resp.wsgi_request
+        self.assertEquals(req.urlparams, [ '1', '2' ])
+        self.assertEquals(req.converted_params['i'], 1)
+        self.assertEquals(req.converted_params['f'], 2)
 
 
 

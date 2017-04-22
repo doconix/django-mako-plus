@@ -5,7 +5,7 @@ import random, string
 import logging
 
 
-class UtilTests(TestCase):
+class Tester(TestCase):
 
     @classmethod
     def setUpTestData(cls):

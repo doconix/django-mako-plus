@@ -77,6 +77,9 @@ class MakoTemplateLoader:
            This method is an alternative to get_template().  Use it when you need the actual Mako template object.
            This method raises a Mako exception if the template is not found or cannot compile.
         '''
+        if template is None:
+            raise TemplateLookupException('Template "%s" not found in search path: %s.' % (template, self.template_search_dirs))
+
         # get the template
         template_obj = self.tlookup.get_template(template)
 

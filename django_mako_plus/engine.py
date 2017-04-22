@@ -158,6 +158,8 @@ class MakoTemplates(BaseEngine):
              behavior.
         '''
         # ensure we have an AppConfig
+        if app is None:
+            raise TemplateDoesNotExist("Cannot locate loader when app is None")
         if not isinstance(app, AppConfig):
             app = apps.get_app_config(app)
 
