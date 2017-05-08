@@ -157,8 +157,8 @@ def router_factory(module_name, function_name, fallback_app=None, fallback_templ
         try:
             module = import_module(module_name)
             func = getattr(module, function_name)
-        except ImportError:
-            raise ViewDoesNotExist('Module {} could not be imported ({})'.format(module_name, e))
+        except ImportError as e:
+            raise ViewDoesNotExist('Module {} could not be imported: {}'.format(module_name, e))
         except AttributeError:
             raise ViewDoesNotExist('Module {} found successfully, but view {} is not defined in the module.'.format(module_name, function_name))
 
