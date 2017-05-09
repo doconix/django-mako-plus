@@ -47,26 +47,28 @@ Then clear out the compiled templates caches:
 
 Next, ensure the engine you are using is enabled in ``settings.py``.  For example, including Django syntax means including the following:
 
-TEMPLATES = [
-    {
-        'NAME': 'django_mako_plus',
-        # all the other settings here
-    },
-    {
-        'NAME': 'django',
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.debug',
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
-            ],
+.. code:: python
+
+    TEMPLATES = [
+        {
+            'NAME': 'django_mako_plus',
+            # all the other settings here
         },
-    },
-]
+        {
+            'NAME': 'django',
+            'BACKEND': 'django.template.backends.django.DjangoTemplates',
+            'DIRS': [],
+            'APP_DIRS': True,
+            'OPTIONS': {
+                'context_processors': [
+                    'django.template.context_processors.debug',
+                    'django.template.context_processors.request',
+                    'django.contrib.auth.context_processors.auth',
+                    'django.contrib.messages.context_processors.messages',
+                ],
+            },
+        },
+    ]
 
 Now that the functions are imported, you can include a Django expression or embed an entire block within your Mako template by using a filter:
 

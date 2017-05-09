@@ -9,16 +9,29 @@
 Django-Mako-Plus
 ================================================
 
-Routing Django to Mako since 2013.
+*Routing Django to Mako since 2013*
 
-Use If You've Said...
+Code
+-------------------------
+
+https://github.com/doconix/django-mako-plus
+
+Features
 --------------------------
 
--  Why are Django templates weak sauce? Why not just use regular Python snippets in templates?  Why do I have to learn a whole new language?
--  Why does Django make me list every. single. page. in urls.py?  Can't it just route by convention?
--  Is there a better way to connect my HTML files to related CSS and JS files?
--  Can I include Python code in my CSS and Javascript files?
+*DMP adds convention-over-configuration to Django:*
 
+- `Uses standard Python </tutorial_meet_dmp.html>`_ in templates; no more weak-sauce Django templating.
+- `Calls any view function </tutorial_views.html>`_ by convention instead of listing every. single. page. in urls.py.
+- `Converts parameters </tutorial_urlparams.html>`_ in the URL and loads model objects by convention.
+- Automatically `links .js and .css </tutorial_css_js.html>`_ in your HTML documents by convention.
+- Includes `per-user logic </tutorial_css_js.html#static-and-dynamic-javascript>`_ in .js and .css files.
+- Provides `Django-style signals </topics_signals.html>`_.
+- Extends Django's redirecting with `exception-based redirecting </topics_redirecting.html>`_.
+- Supports `language translations </topics_translation.html>`_, `class-based views </topics_class_views.html>`_, and collection of `static files </topics_static_files.html>`_.
+- Includes a comprehensive `test suite <https://github.com/doconix/django-mako-plus/tree/master/tests>`_.
+
+DMP doesn't replace Django; the standard router and template engine can be used alongside it.
 
 
 Quick Start
@@ -64,9 +77,7 @@ Contents
 Compatability
 ----------------
 
-DMP works with Python 3.4+ and Django 1.9+.
+DMP requires Python 3.4+ and Django 1.9+.
 
-DMP can be used alongside regular Django templates, Jinja2 templates, and other third-party apps (including embedding these other tags within DMP templates when needed). It plugs in via the regular ``urls.py`` mechanism, just like any other view.
-
-Be assured that it plays nicely with the other children.
+It will continue with Django 2.0 when released.
 
