@@ -26,4 +26,4 @@ If Sass isn't running right, check the DMP log statements. When the log is enabl
 
     You might be wondering if DMP supports ``.scssm`` files (Mako embedded in Sass files). Through a bit of hacking the process, it's a qualified Yes!
 
-    Consider ``.scssm`` support in beta status.  Even if it was working perfectly, it's a *franken-mako* that should probably be avoided anyway. But the supported things work do work, which more plainly stated, means Mako expressions work: ``${ ... }``. Any other Mako constructs get stripped out by the compiler.
+    Consider ``.scssm`` support in beta status.  Even if it was working perfectly, it's a *franken-mako* that should probably be avoided anyway. But the supported things do work, which means (more plainly stated) that Mako expressions work: ``${ ... }``. Any other Mako constructs get stripped out by the compiler.
