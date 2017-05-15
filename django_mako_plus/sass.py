@@ -76,19 +76,20 @@ def compile_scssm_file(scssm_file, css_file):
     '''
     # this algorithm isn't terribly fast, but it only runs the first time the file is accessed on a production system
     # lock the file so other processes can't access it
+    encoding = settings.DEFAULT_CHARSET or 'utf8'
     with lock_file(scssm_file):
 
         # read the contents of the file
-        with open(scssm_file) as fin:
+        with open(scssm_file, encoding=encoding) as fin:
             contents = fin.read()
 
         try:
             # make a backup just in case something goes wrong (this is for testing)
             # backup_scss = '{}.bak'.format(scssm_file)
-            # with open(backup_scss, 'w') as fout:
+            # with open(backup_scss, 'w', encoding=encoding) as fout:
             #     fout.write(contents)
             # embed mako codes in markers that are acceptable to sass
-            with open(scssm_file, 'w') as fout:
+            with open(scssm_file, 'w', encoding=encoding) as fout:
                 for node in Lexer(text=contents).parse().nodes:
                     if isinstance(node, parsetree.Expression):
                         fout.write('{}_{}_{}'.format(MAKO_EXPRESSION_MARKERS[0], encode32(node.text), MAKO_EXPRESSION_MARKERS[1]))
@@ -97,19 +98,19 @@ def compile_scssm_file(scssm_file, css_file):
             # run sass on it
             compile_scss_file(scssm_file, css_file)
             # read the contents of the generated file
-            with open(css_file) as fin:
+            with open(css_file, encoding=encoding) as fin:
                 csscontents = fin.read()
             # unencode all the mako expressions
             csscontents = RE_MAKO_EXPRESSION.sub(lambda match: '${{{}}}'.format(decode32(match.group(1))), csscontents)
             # write the contents
-            with open(css_file, 'w') as fout:
+            with open(css_file, 'w', encoding=encoding) as fout:
                 fout.write(csscontents)
             # erase the backup
             # os.remove(backup_scss)
 
         finally:
             # replace the original contents back in the scss file
-            with open(scssm_file, 'w') as fout:
+            with open(scssm_file, 'w', encoding=encoding) as fout:
                 fout.write(contents)
             # update the modified timestamp on the css file so the scssm_file is older than it (we just rewrote the scssm)
             os.utime(css_file)

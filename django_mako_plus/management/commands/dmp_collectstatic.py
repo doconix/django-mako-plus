@@ -197,6 +197,7 @@ class Command(BaseCommand):
 
     def copy_dir(self, source, dest, level=0):
         '''Copies the static files from one directory to another.  If this command is run, we assume the user wants to overwrite any existing files.'''
+        encoding = settings.DEFAULT_CHARSET or 'utf8'
         msglevel = 2 if level == 0 else 3
         self.message('Directory: {}'.format(source), msglevel, level)
 
@@ -237,8 +238,8 @@ class Command(BaseCommand):
             # if a regular Javscript file, minify it
             elif ext == '.js' and DMP_OPTIONS.get('MINIFY_JS_CSS', False) and JSMIN:
                 self.message('Including and minifying file with score {}: {}'.format(score, source_path), msglevel, level+1)
-                with open(source_path) as fin:
-                    with open(dest_path, 'w') as fout:
+                with open(source_path, encoding=encoding) as fin:
+                    with open(dest_path, 'w', encoding=encoding) as fout:
                         minified = minify(fin.read(), jsmin)
                         fout.write(minified)
 
@@ -246,8 +247,8 @@ class Command(BaseCommand):
             # same with css files
             elif ext == '.css' and DMP_OPTIONS.get('MINIFY_JS_CSS', False) and CSSMIN:
                 self.message('Including and minifying file with score {}: {}'.format(score, source_path), msglevel, level+1)
-                with open(source_path) as fin:
-                    with open(dest_path, 'w') as fout:
+                with open(source_path, encoding=encoding) as fin:
+                    with open(dest_path, 'w', encoding=encoding) as fout:
                         minified = minify(fin.read(), cssmin)
                         fout.write(minified)
 
