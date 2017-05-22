@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.conf.urls import url
 from django.core.exceptions import ImproperlyConfigured, ViewDoesNotExist
-from django.http import HttpRequest, HttpResponse, HttpResponseNotFound, StreamingHttpResponse, HttpResponseServerError
+from django.http import HttpRequest, HttpResponse, StreamingHttpResponse, HttpResponseServerError
 from django.http import Http404, HttpResponseNotAllowed
 from django.template import TemplateDoesNotExist
 from django.views.generic import View
@@ -293,7 +293,7 @@ class RegistryExceptionRouter(object):
 
 
     def get_response(self, request, *args, **kwargs):
-        return HttpResponseNotFound(str(self.exc))
+        raise Http404(str(self.exc))
 
 
     def message(self, request):
