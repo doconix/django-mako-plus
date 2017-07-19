@@ -161,3 +161,4 @@ After reading about automatic CSS and JS inclusion, you might want to know how i
 The two calls, ``link_css()`` and ``link_js()``, include the ``<link>`` and ``<script>`` tags for the template name and all of its supertemplates. The CSS should be linked near the top of your file (``<head>`` section), and the JS should be linked near the end (per best practices).
 
 This all works because the ``index.html`` template extends from the ``base.htm`` template. If you fail to inherit from ``base.htm`` or ``base_ajax.htm``, DMP won't be able to include the support files.
+
