@@ -161,11 +161,9 @@ class MakoTemplateAdapter(object):
             render_obj = self.mako_template.get_def(def_name)
 
         # PRIMARY FUNCTION: render the template
+        template_name = '%s::%s' % (self.mako_template.filename or 'string', def_name or 'body')
         if log.isEnabledFor(logging.DEBUG):
-            template_debug_name = self.mako_template.filename or 'string'
-            if def_name:
-                template_debug_name = '%s -> %s' % (template_debug_name, def_name)
-            log.debug('rendering template %s', template_debug_name)
+            log.debug('rendering template %s', template_name)
         if settings.DEBUG:
             try:
                 content = render_obj.render_unicode(**context_dict)
@@ -174,13 +172,14 @@ class MakoTemplateAdapter(object):
                 content = html_error_template().render_unicode()       # to the browser
         else:  # this is outside the above "try" loop because in non-DEBUG mode, we want to let the exception throw out of here (without having to re-raise it)
             content = render_obj.render_unicode(**context_dict)
+        request._dmp_rendered_files.add(template_name)
 
         # send the post-render signal
         if DMP_OPTIONS.get('SIGNALS', False) and request != None:
             for receiver, ret_content in dmp_signal_post_render_template.send(sender=self, request=request, context=context, template=self.mako_template, content=content):
                 if ret_content != None:
                     content = ret_content  # sets it to the last non-None return in the signal receiver chain
-
+            
         # return
         return content
 
