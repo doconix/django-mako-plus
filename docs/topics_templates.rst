@@ -1,4 +1,4 @@
-More on Templates
+Template Location/Import
 ===========================================
 
 .. contents::

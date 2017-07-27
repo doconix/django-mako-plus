@@ -16,7 +16,7 @@ The following sections explore the capabilities of DMP beyond the tutorials.  If
     topics_redirecting
     topics_partial_templates
     topics_class_views
-    topics_urlparams
+    topics_converters
     topics_urls_py
     topics_scss
     topics_just_mako

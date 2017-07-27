@@ -158,9 +158,9 @@ def router_factory(module_name, function_name, fallback_app=None, fallback_templ
             module = import_module(module_name)
             func = getattr(module, function_name)
         except ImportError as e:
-            raise ViewDoesNotExist('Module {} could not be imported: {}'.format(module_name, e))
-        except AttributeError:
-            raise ViewDoesNotExist('Module {} found successfully, but view {} is not defined in the module.'.format(module_name, function_name))
+            raise ViewDoesNotExist('Module "{}" could not be imported: {}'.format(module_name, e))
+        except AttributeError as e:
+            raise ViewDoesNotExist('Module "{}" found successfully, but "{}" was not found: {}'.format(module_name, function_name, e))
 
         # get the converter from the decorator kwargs, if there is one
         try:

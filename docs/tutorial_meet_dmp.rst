@@ -18,7 +18,6 @@ Let's explore the directory structure of your new app:
 ::
 
     homepage/
-        __init__.py
         media/
         scripts/
         styles/
@@ -28,8 +27,14 @@ Let's explore the directory structure of your new app:
             index.html
         views/
             __init__.py
+        __init__.py
+        apps.py
+        models.py
+        tests.py
+        
+The directories should be fairly self-explanatory. Note they are **different** than a traditional Django app structure.  In short, put images and other support files in media/, Javascript in scripts/, CSS in styles/, html files in templates/, and Django views in views/.
 
-The directories should be fairly self-explanatory. Note they are **different** than a traditional Django app structure. Put images and other support files in media/, Javascript in scripts/, CSS in styles/, html files in templates/, and Django views in views/.
+    Note that a common pattern among Django developers is converting several files to directories: ``models.py`` to ``models/`` and ``tests.py`` to ``tests/``, but that's a discussion outside of DMP.
 
 The following setting is automatically done when you run ``dmp_startapp``, but if you created your app structure manually, DMP-enabled apps must have the following in the ``appname/__init__.py`` file:
 

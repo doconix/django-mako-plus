@@ -43,3 +43,6 @@ At the beginning of each request (as part of its middleware), DMP adds a number 
 
 -  ``request.urlparams``: A list of parameters specified in the URL. See
    the section entitled "URL Parameters" above for more information.
+
+
+    These variables are created at the very beginning of the request, but they are not given values **until the view middleware stage**.

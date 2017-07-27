@@ -1,4 +1,4 @@
-Rendering CSS and JS, part 2
+Rendering CSS and JS
 ================================
 
 In the `tutorial <tutorial_css_js.html>`_, you learned how to automatically include CSS and JS based on your page name .  

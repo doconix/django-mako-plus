@@ -1,9 +1,7 @@
 Tutorial
 ==========================
 
-To quote the Django's docs, "Let's learn by example."  The examples presented here show the basics of DMP, and they aren't repeated in the Topic sections.
-
-First, ensure you have gone through the installation instructions.
+These five tutorial pages are the best way to learn about DMP.  Assuming you have gone through the installation instructions, this is your jumping off point.
 
 .. toctree::
     :maxdepth: 1

@@ -1,4 +1,4 @@
-Customizing the URL
+Custom URL Pattern
 ===========================
 
 .. contents::

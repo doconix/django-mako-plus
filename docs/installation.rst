@@ -44,11 +44,13 @@ In addition to giving you the DMP project directories, this command automaticall
 
 You can, of course, name your project anything you want, but in the sections below, I'll assume you called your project ``mysite``.
 
-Don't forget to migrate to synchronize your database. The apps in a standard Django project (such as the session app) need a few tables created for you to run the project.
+Don't forget to migrate to synchronize your database and create a superuser:
 
 ::
 
+    cd mysite
     python3 manage.py migrate
+    python3 manage.py createsuperuser
 
 
 Create a DMP-Style App
@@ -84,7 +86,7 @@ If you get a message about unapplied migrations, ignore it for now and continue.
 
 Open your web browser to http://localhost:8000/. You should see a message welcoming you to the homepage app.
 
-If everything is working, skip ahead to the tutorial.
+If everything is working, `skip ahead to the tutorial <tutorial.html>`_.
 
 
 

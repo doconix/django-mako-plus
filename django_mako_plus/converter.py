@@ -1,6 +1,8 @@
-from django.conf import settings
-from django.http import Http404
+from django.apps import apps
 from django.db.models import Model, ObjectDoesNotExist
+from django.conf import settings
+from django.core.exceptions import ImproperlyConfigured
+from django.http import Http404
 
 from .exceptions import RedirectException
 from .util import DMP_OPTIONS, log
@@ -39,9 +41,27 @@ class ConverterInfo(object):
     def __init__(self, convert_type, convert_func):
         self.convert_type = convert_type
         self.convert_func = convert_func
-        # we sort by reversed( len(mro), DECLARED_ORDER ) so subclasses match first
-        self.sort_key = ( -1 * len(inspect.getmro(convert_type)), -1 * ConverterInfo.DECLARED_ORDER )
+        self.sort_key = None
+        self.declared_order = ConverterInfo.DECLARED_ORDER  # order it was declared in source code
         ConverterInfo.DECLARED_ORDER = 0 if ConverterInfo.DECLARED_ORDER == sys.maxsize else ConverterInfo.DECLARED_ORDER + 1
+        
+    def _delayed_init(self):
+        # we allow the type for models to be declared as a string, such as "auth.User"
+        # because real types can't be referenced until Django finishes initialization
+        # switch any strings over to the real type now
+        if isinstance(self.convert_type, str):
+            try:
+                app_name, model_name = self.convert_type.split('.')
+            except ValueError:
+                raise ImproperlyConfigured('"{}" is not a valid converter type. String-based converter types must be specified in "app.Model" format.'.format(self.convert_type))
+            try:
+                self.convert_type = apps.get_model(app_name, model_name)
+            except LookupError as e:
+                raise ImproperlyConfigured('"{}" is not a valid model name. {}'.format(self.convert_type, e))
+        
+        # we reverse sort by ( len(mro), source code order ) so subclasses match first
+        # on same types, last declared method sorts first
+        self.sort_key = ( -1 * len(inspect.getmro(self.convert_type)), -1 * self.declared_order )
 
 
 ##################################################################
@@ -62,10 +82,37 @@ class BaseConverter(object):
 
 
     def __init__(self):
-        # Discover the converters in this object - these were placed here by the @convert_method decorator.
         self.converters = []
+        self._delayed_init_run = False
+        
+    
+    def _delayed_init(self):
+        '''
+        Populates the registry of types to converters for this Converter object.  This method is
+        called each time a request is processed, so if overridden, be sure to short circuit as needed.
+        This implementation short circuits until all apps are ready.
+        '''
+        # This is called by _check_converter() below, and it is delayed (instead of using __init__)
+        # because model class strings can't be switched to models until the app registry is populated.  
+        # This could be called once from DMP's AppConfig.ready(), but since each view function can have
+        # a separate converters, and since the default converter can be changed at any time, I'm doing
+        # it when a ConversionTask object is created (part of DMP request processing).
+        if self._delayed_init_run or not apps.ready:
+            return
+        self._delayed_init_run = True
+        
+        # converter methods within this class (subclass) were tagged earlier by the decorator
+        # with the CONVERT_TYPES_KEY.  go through all methods in this class (subclass) and 
+        # gather the ConverterInfo objects into a big list
         for name, method in inspect.getmembers(self, inspect.ismethod):
             self.converters.extend(getattr(method, ConverterInfo.CONVERT_TYPES_KEY, ()))
+            
+        # allow each ConverterInfo to init, such as convert any model string "auth.User" to real class type
+        for ci in self.converters:
+            ci._delayed_init()
+            
+        # sort the most specialized types to be first.  this allows subclass types to match instead 
+        # of their superclasses (if both are in the list).
         self.converters.sort(key=attrgetter('sort_key'))
 
 
@@ -233,16 +280,24 @@ class DefaultConverter(BaseConverter):
 DEFAULT_CONVERTER_KEY = '_dmp_default_converter'
 
 def _check_converter(converter):
+    '''
+    Checks the given converter and returns a (potentially) modified converter.
+    If None: returns the system default converter.
+    If a class: returns an instance of the class.
+    '''
+    # default or instantiate if necessary
     if converter is None:
-        return get_default_converter()
-    elif inspect.isclass(converter):
-        if hasattr(converter, '__call__'):
-            return converter()
-        else:
-            raise ValueError('Converters must be callable or classes that implements the __call__ method.')
-    elif callable(converter):
-        return converter
-    raise ValueError('Converters must be callable or classes that implements the __call__ method.')
+        converter = get_default_converter()
+    elif inspect.isclass(converter): 
+        converter = converter()
+    # ensure callable
+    if not callable(converter):
+        raise ValueError('Converters must be callable or classes that implements the __call__ method.')
+    # if a subclass of BaseConverter, allow it to initialize
+    if isinstance(converter, BaseConverter):
+        converter._delayed_init()
+    # return
+    return converter
 
 
 def set_default_converter(converter=DefaultConverter):
