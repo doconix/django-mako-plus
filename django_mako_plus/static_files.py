@@ -336,40 +336,56 @@ class TemplateInfo(object):
             self.jsm = self.template_name + '.jsm'
         except OSError:
             self.jsm = None
+            
+            
+    def _is_duplicate(self, request, filepath):
+        '''Returns true if the given filepath has already been appended in this request'''
+        if request is None or not hasattr(request, '_dmp_static_files'):
+            return False
+        return filepath in request._dmp_static_files
+            
 
+    def _set_duplicate(self, request, filepath):
+        '''Adds the filepath to the rendered static files, making future calls to _is_duplicate() return True'''
+        if request is None:
+            return
+        if not hasattr(request, '_dmp_static_files'):
+            request._dmp_static_files = set()
+        request._dmp_static_files.add(filepath)
+        
 
     def append_css(self, request, context, html, duplicates=True):
         '''Appends the CSS for this template's .css and .cssm files, if they exist, to the html list.'''
         # do we have a css?
-        if self.css and (duplicates or self.css_file not in request._dmp_static_files):
+        if self.css and (duplicates or not self._is_duplicate(request, self.css_file)):
             html.append(self.css)  # the <link> was already created once in the constructor
-            request._dmp_static_files.add(self.css_file)
+            self._set_duplicate(request, self.css_file)
         # do we have a cssm?
-        if self.cssm and (duplicates or self.cssm_file not in request._dmp_static_files):
+        if self.cssm and (duplicates or not self._is_duplicate(request, self.cssm_file)):
             # engine.py already caches these loaders, so no need to cache them again here
             lookup = get_dmp_instance().get_template_loader_for_path(os.path.join(self.app_dir, 'styles'))
             css_text = lookup.get_template(self.cssm).render(request=request, context=context)
             if DMP_OPTIONS.get('RUNTIME_CSSMIN'):
                 css_text = DMP_OPTIONS['RUNTIME_CSSMIN'](css_text)
             html.append('<style type="text/css">%s</style>' % css_text)
-            request._dmp_static_files.add(self.cssm_file)
+            self._set_duplicate(request, self.cssm_file)
 
 
     def append_js(self, request, context, html, duplicates=True):
         '''Appends the Javascript for this template's .js and .jsm files, if they exist to the html list.'''
         # do we have a js?
-        if self.js and (duplicates or self.js_file not in request._dmp_static_files):
+        if self.js and (duplicates or self._is_duplicate(request, self.js_file)):
             html.append(self.js)  # the <script> was already created once in the constructor
-            request._dmp_static_files.add(self.js_file)
+            self._set_duplicate(request, self.js_file)
         # do we have a jsm?
-        if self.jsm and (duplicates or self.jsm_file not in request._dmp_static_files):
+        if self.jsm and (duplicates or not self._is_duplicate(request, self.jsm_file)):
             # engine.py already caches these loaders, so no need to cache them again here
             lookup = get_dmp_instance().get_template_loader_for_path(os.path.join(self.app_dir, 'scripts'))
             js_text = lookup.get_template(self.jsm).render(request=request, context=context)
             if DMP_OPTIONS.get('RUNTIME_JSMIN'):
                 js_text = DMP_OPTIONS['RUNTIME_JSMIN'](js_text)
             html.append('<script>%s</script>' % js_text)
-            request._dmp_static_files.add(self.jsm_file)
+            self._set_duplicate(request, self.jsm_file)
 
 
 

@@ -115,10 +115,6 @@ class RequestInitMiddleware(MiddlewareMixin):
             request.dmp_router_class = request.dmp_router_function
             request.dmp_router_function = request.method.lower()
             
-        # caches of files that have been rendered/included in a given request
-        request._dmp_rendered_files = set()
-        request._dmp_static_files = set()
-            
         # debugging
         # print('request.dmp_router_app        ', request.dmp_router_app        )
         # print('request.dmp_router_page       ', request.dmp_router_page       )
