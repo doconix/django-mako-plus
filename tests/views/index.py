@@ -4,8 +4,6 @@ from django.views.generic import View
 
 from django_mako_plus import view_function
 
-from .. import dmp_render, dmp_render_to_string
-
 import datetime
 
 
@@ -14,14 +12,14 @@ import datetime
 
 @view_function
 def process_request(request):
-    return dmp_render(request, 'index.html', {
+    return request.dmp_render('index.html', {
         'current_time': datetime.datetime.now(),
     })
 
 
 @view_function
 def basic(request):
-    return dmp_render(request, 'index.basic.html', {})
+    return request.dmp_render('index.basic.html', {})
 
 
 ###  Class-based endpoint  ###

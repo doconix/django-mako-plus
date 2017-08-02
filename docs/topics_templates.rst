@@ -67,7 +67,7 @@ If the templates you need to access are within your project directory, no extra 
 
 .. code:: python
 
-    return dmp_render(request, '/homepage/mytemplates/sub1/page.html', context)
+    return request.dmp_render('/homepage/mytemplates/sub1/page.html', context)
 
 Note the starting slash on the path. That tells DMP to start searching at your project root.
 
@@ -88,7 +88,7 @@ Suppose, after making the above change, you need to render the '/var/templates/p
 
 .. code:: python
 
-    return dmp_render(request, 'page1.html', context)
+    return request.dmp_render('page1.html', context)
 
 DMP will first search the current app's ``templates`` directory (i.e. the normal way), then it will search the ``TEMPLATES_DIRS`` list, which in this case contains ``/var/templates/``. Your ``page1.html`` template will be found and rendered.
 

@@ -66,7 +66,6 @@ Let's modify ``homepage/views/index.py`` to support adjusting the current date b
     from django.conf import settings
     from django_mako_plus import view_function
     from datetime import datetime, timedelta
-    from .. import dmp_render, dmp_render_to_string
 
     @view_function
     def process_request(request, hrs, mins, forward='+'):
@@ -78,7 +77,7 @@ Let's modify ``homepage/views/index.py`` to support adjusting the current date b
         context = {
             'now': now,
         }
-        return dmp_render(request, 'index.html', context)
+        return request.dmp_render('index.html', context)
 
 
 We'll use the ``homepage/templates/index.html`` file we created in previous tutorial parts:
@@ -114,7 +113,6 @@ Add the following type hints to your ``process_request`` function, and remove th
     from django.conf import settings
     from django_mako_plus import view_function
     from datetime import datetime, timedelta
-    from .. import dmp_render, dmp_render_to_string
 
     @view_function
     def process_request(request, hrs:int, mins:int, forward:bool=True):
@@ -126,7 +124,7 @@ Add the following type hints to your ``process_request`` function, and remove th
         context = {
             'now': now,
         }
-        return dmp_render(request, 'index.html', context)
+        return request.dmp_render('index.html', context)
 
 DMP casts the parameters by inspecting the method signature of ``process_request`` which specifies the parameter name, a color, and the type.  If a conversion error occurs, the default converter raises Http404.  All of this is configurable and extensible (read on).
 

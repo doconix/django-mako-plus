@@ -8,8 +8,6 @@ from django_mako_plus import PermanentRedirectException
 from django_mako_plus import InternalRedirectException
 from django_mako_plus import JavascriptRedirectException
 
-from .. import dmp_render, dmp_render_to_string
-
 import datetime
 
 

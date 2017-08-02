@@ -47,7 +47,7 @@ def route_request(request, *args, **kwargs):
             log.info('processing: app=%s, page=%s, module=%s, func=%s, urlparams=%s', request.dmp_router_app, request.dmp_router_page, request.dmp_router_module, request.dmp_router_function, request.urlparams)
 
             # if we had a view not found, raise a 404
-            if isinstance(request._dmp_router_callable, ViewDoesNotExist) or isinstance(request._dmp_router_callable, RegistryExceptionRouter):
+            if isinstance(request._dmp_router_callable, RegistryExceptionRouter):
                 log.info(request._dmp_router_callable.message(request))
                 return request._dmp_router_callable.get_response(request, *args, **kwargs)
 
@@ -72,7 +72,7 @@ def route_request(request, *args, **kwargs):
             # if we didn't get a correct response back, send a 404
             if not isinstance(response, (HttpResponse, StreamingHttpResponse)):
                 msg = '%s failed to return an HttpResponse (or the post-signal overwrote it).  Returning 500 error.' % request._dmp_router_callable.message(request)
-                log.error(msg)
+                log.info(msg)
                 return HttpResponseServerError(msg)
 
             # return the response
@@ -88,7 +88,7 @@ def route_request(request, *args, **kwargs):
             log.info('received an InternalViewRedirect to %s.%s', request.dmp_router_module, request.dmp_router_function)
             request._dmp_router_callable = get_router(request.dmp_router_module, request.dmp_router_function, verify_decorator=False)
             if isinstance(request._dmp_router_callable, RegistryExceptionRouter):
-                log.error('could not fulfill InternalViewRedirect because %s.%s does not exist.', request.dmp_router_module, request.dmp_router_function)
+                log.info('could not fulfill InternalViewRedirect because %s.%s does not exist.', request.dmp_router_module, request.dmp_router_function)
             # let it wrap back to the top of the "while True" loop to restart the routing
 
         except RedirectException as e: # redirect to another page

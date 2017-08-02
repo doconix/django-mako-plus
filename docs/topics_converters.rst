@@ -58,14 +58,13 @@ Then create ``homepage/views/userinfo.py``:
     from django.conf import settings
     from django.contrib.auth.models import User
     from django_mako_plus import view_function
-    from .. import dmp_render, dmp_render_to_string
 
     @view_function
     def process_request(request, user:User):
         context = {
             'user': user,
         }
-        return dmp_render(request, 'userinfo.html', context)
+        return request.dmp_render('userinfo.html', context)
     
 Finally, create ``homepage/templates/userinfo.html``:
 
@@ -157,7 +156,6 @@ Then change ``/homepage/views/index.py`` to the following:
     from django.conf import settings
     from django_mako_plus import view_function
     from datetime import datetime, timedelta
-    from .. import dmp_render, dmp_render_to_string
 
     @view_function
     def process_request(request, delta:timedelta='0:00', forward:bool=True):
@@ -168,7 +166,7 @@ Then change ``/homepage/views/index.py`` to the following:
         context = {
             'now': now,
         }
-        return dmp_render(request, 'index.html', context)
+        return request.dmp_render('index.html', context)
 
 When you load http://localhost:8000/homepage/index/6:30/ in your browser, DMP will use ``convert_timedelta()`` to parse the hours and minutes from the first url parameter.
 
@@ -208,7 +206,6 @@ The following is a repeat of the "Extending" example above, modified to raise a 
     from django.conf import settings
     from django_mako_plus import view_function
     from datetime import datetime, timedelta
-    from .. import dmp_render, dmp_render_to_string
 
     @view_function(redirect="/some/fallback/url/")
     def process_request(request, delta:timedelta='0:00', forward:bool=True):
@@ -219,7 +216,7 @@ The following is a repeat of the "Extending" example above, modified to raise a 
         context = {
             'now': now,
         }
-        return dmp_render(request, 'index.html', context)
+        return request.dmp_render('index.html', context)
 
 In summary, adding keyword arguments to ``@view_function(...)`` allows you set values *per view function*, which enables common converter functions to contain per-function logic.
 
@@ -245,7 +242,6 @@ In most cases, ``value`` and ``parameter.type`` are all you need to make a conve
     from django.conf import settings
     from django_mako_plus import view_function, view_parameter
     from datetime import datetime, timedelta
-    from .. import dmp_render, dmp_render_to_string
     import re
 
     def convert(value, parameter, task):
@@ -270,7 +266,7 @@ In most cases, ``value`` and ``parameter.type`` are all you need to make a conve
         context = {
             'now': now,
         }
-        return dmp_render(request, 'index.html', context)
+        return request.dmp_render('index.html', context)
 
 In this case, the converter is called twice: once for ``delta`` and once for ``forward``.  This will happen *even if the URL is too short*.  Consider how the following URLs would be handled:
 

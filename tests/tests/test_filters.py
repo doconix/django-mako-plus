@@ -5,10 +5,10 @@ from django.test import TestCase
 
 from django_mako_plus.util import log
 from django_mako_plus.filters import django_syntax
+from django_mako_plus import render_template
 
 import logging, os, os.path
 
-from .. import dmp_render_to_string
 
 
 class Tester(TestCase):
@@ -25,7 +25,7 @@ class Tester(TestCase):
         log.setLevel(cls.loglevel)
 
     def test_filters(self):
-        html = dmp_render_to_string(None, 'filters.html', {
+        html = render_template(None, 'tests', 'filters.html', {
             'django_var': '::django::',
             'jinja2_var': '~~jinja2~~',
         })

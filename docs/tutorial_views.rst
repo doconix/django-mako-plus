@@ -11,14 +11,13 @@ Let's add some "work" to the process by adding the current server time to the in
     from django.conf import settings
     from django_mako_plus import view_function
     from datetime import datetime
-    from .. import dmp_render, dmp_render_to_string
 
     @view_function
     def process_request(request):
         context = {
             'now': datetime.now(),
         }
-        return dmp_render(request, 'index.html', context)
+        return request.dmp_render('index.html', context)
 
 Reload your server and browser page, and you should see the exact same page. It might look the same, but something very important happened in the routing. Rather than going straight to the ``index.html`` page, processing went to your new ``index.py`` file. At the end of the ``process_request`` function above, we manually render the ``index.html`` file. In other words, we're now doing extra "work" before the rendering. This is the place to do database connections, modify objects, prepare and handle forms, etc. It keeps complex code out of your html pages.
 
@@ -79,46 +78,18 @@ The Render Functions
 
     This section explains the two render functions included with DMP. If you just want to get things working, skip over this section. You can always come back later for an explanation of how things are put together.
 
-In the example above, we used the ``dmp_render`` function to render our template. It's the DMP equivalent of Django's ``render`` shortcut function. The primary difference between the two functions (other than, obviously, the names) is DMP's function must be **connected to an app**. Django searches for templates in a flat list of directories -- while your apps might have templates in them, Django just searches through them in order. DMP's structure is logically app-based: each of your apps contains a ``templates`` directory, and DMP always searches the *current* app directly. With DMP, there are no worries about template name clashes or finding issues.
+In the example above, we used the ``dmp_render`` function to render our template. It's the DMP equivalent of Django's ``render`` shortcut function. The primary difference between the two functions (other than, obviously, the names) is DMP's function is **coupled to the current app**. In contrast, Django searches for templates in a flat list of directories -- while your apps might have templates in them, Django just searches through them in order. DMP's structure is logically app-based: each of your apps contains a ``templates`` directory, and DMP always searches the *current* app directly. With DMP, there are no worries about template name clashes or finding issues.
 
-Because DMP is app-aware, it creates more than one render function -- one per app. You'll have one version of ``dmp_render`` in your homepage app, another version of ``dmp_render`` in your catalog app, and so forth through your apps. The function is named the same in each module for consistency.
+At the beginning of each request, DMP's middleware determines the current app (i.e. the first item in the url) and adds two render functions to the request object.  These are available throughout your request, with no imports needed.  As long as you are rendering a template in the request's current app, DMP knows where to find the template file.
 
-**Practically, you don't need to worry about any of this.** DMP is smart enough to know which render is connected to which app. You just need to import the function correctly in each of your views, like this:
+DMP provides a second function, ``dmp_render_to_string``. This is nearly the same as ``dmp_render``, but ``dmp_render_to_string`` returns a string rather than an ``HttpResponse`` object. Scroll to `Mime Types and Status Codes`_ to see an example of the ``dmp_render_to_string`` function.
 
-.. code:: python
-
-    # this works in any app/views/*.py file:
-    from .. import dmp_render, dmp_render_to_string
-
-If relative imports (the double dot) make you want to take a shower, absolute imports are fine too.  Just be sure you use the appropriate app name, depending on the location of your template.  A common copy-and-paste mistake is duplicating a view.py file across apps and forgetting to change the app name.
-
-.. code:: python
-
-    # this also works in any app/views/*.py file:
-    from homepage import dmp_render, dmp_render_to_string
-
-By using one of the above import lines, you'll always get a template renderer that is app-aware and that processes template inheritance, includes, CSS, and JS files correctly.
-
-    Some Python programmers have strong feelings about relative vs. absolute imports. Use whichever you prefer. Personally, I favor the first one (relative importing) because it requires me to think less when I copy view files.
-
-DMP provides a second function, ``dmp_render_to_string``. This is nearly the same as ``dmp_render``, but ``dmp_render_to_string`` returns a string rather than an ``HttpResponse`` object. If you need a custom response, or if you simply need the rendered string, ``dmp_render_to_string`` is the ticket. Most of the time, ``dmp_render`` is the appropriate method because Django expects the full response object (not just the content string) returned from your views.
-
-Scroll to `Mime Types and Status Codes`_ to see an example of the ``dmp_render_to_string`` function.
-
-If you need to process templates across apps within a single view.py file (likely a rare case), use absolute imports and give an alias to the functions as you import them:
-
-.. code:: python
-
-    from homepage import dmp_render as homepage_render
-    from catalog import dmp_render as catalog_render
-
-Suppose you need to put your templates in a directory named something other than ``/appname/templates/``. Or perhaps you have a non-traditional app path. The two above methods are really just convenience methods to make rendering easier. If you need a custom template instance, switch to the paddle shifters:
+**You really don't need to worry about any of this.**  Templates are rendered in the current app 99% of the time, so just use this code unless you are in a special use case:
 
 .. code:: python
 
     from django.conf import settings
     from django_mako_plus import view_function
-    from django_mako_plus.template import get_template_loader
     from datetime import datetime
 
     @view_function
@@ -126,13 +97,48 @@ Suppose you need to put your templates in a directory named something other than
         context = {
             'now': datetime.now(),
         }
+        return request.dmp_render('index.html', context)
 
-        # this syntax is only needed if you need to customize the way template rendering works
-        tlookup = get_template_loader('/app/path/', subdir="my_templates")
-        template = tlookup.get_template('index.html')
-        return template.render_to_response(request=request, context=context)
 
-The above code references an app in a non-standard location and a template subdirectory with a non-standard name.  `A shorter version of this <Convenience Functions_>`_ also exists.
+
+Templates in Other Apps
+--------------------------
+
+You're in a special use case?  Need to render templates from a different app?  There's two ways to do it.  Note the imports in the code below:  
+
+First Way:
+
+.. code:: python
+
+    from django.conf import settings
+    from django.http import HttpResponse
+    from django_mako_plus import view_function, render_template
+    from datetime import datetime
+
+    @view_function
+    def process_request(request):
+        context = {
+            'now': datetime.now(),
+        }
+        # replace 'homepage' with the name of any DMP-enabled app:
+        return HttpResponse(render_template(request, 'homepage', 'index.html', context))
+
+Second Way (this way uses the standard Django API):
+
+.. code:: python
+
+    from django.conf import settings
+    from django.shortcuts import render
+    from django_mako_plus import view_function
+    from datetime import datetime
+
+    @view_function
+    def process_request(request):
+        context = {
+            'now': datetime.now(),
+        }
+        # replace 'homepage' with the name of any DMP-enabled app:
+        return render(request, 'homepage/index.html', context)
 
 
 Mime Types and Status Codes
@@ -145,10 +151,10 @@ The ``dmp_render()`` function determines the mime type from the template extensi
     from django.http import HttpResponse
 
     # return CSV
-    return HttpResponse(dmp_render_to_string(request, 'my_csv.html', {}), mimetype='text/csv')
+    return HttpResponse(request.dmp_render_to_string('my_csv.html', {}), mimetype='text/csv')
 
     # return a custom error page
-    return HttpResponse(dmp_render_to_string(request, 'custom_error_page.html', {}), status=404)
+    return HttpResponse(request.dmp_render_to_string('custom_error_page.html', {}), status=404)
 
 
 Convenience Functions
@@ -205,6 +211,7 @@ See the `Mako documentation <http://www.makotemplates.org/>`__ for more informat
 
     The convenience functions are perfectly fine if they suit your needs, but the ``dmp_render`` function described at the beginning of the tutorial is likely the best choice for most users because it doesn't hard code the app name. The convenience functions are not Django-API compliant.
 
+
 Django API Calls
 --------------------------------
 
@@ -221,3 +228,5 @@ or to be more explicit with Django:
 
     from django.shortcuts import render
     return render(request, 'homepage/index.html', context, using='django_mako_plus')
+
+Note in the above code that you need to specify the template in the format ``app/template``.  This allows DMP find the right app to load the template from.

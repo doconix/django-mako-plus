@@ -13,5 +13,6 @@ However, slightly different than Django's default templates (but following `Jinj
     </form>
 
     Since the CSRF token requires a request object, using an empty
-    request ``dmp_render(None, ...)`` prevents the token from being
+    request in the convenience functions, such as ``render_template(None, ...)``,
+    prevents the token from being
     included in your templates.

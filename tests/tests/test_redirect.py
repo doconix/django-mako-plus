@@ -51,10 +51,3 @@ class Tester(TestCase):
         resp = self.client.get('/tests/redirects.bad_internal_redirect_exception2/')
         self.assertEqual(resp.status_code, 404)
 
-
-    def test_bad_internal_redirect_exception(self):
-        resp = self.client.get('/tests/redirects.bad_internal_redirect_exception/')
-        self.assertEqual(resp.status_code, 404)
-        resp = self.client.get('/tests/redirects.bad_internal_redirect_exception2/')
-        self.assertEqual(resp.status_code, 404)
-

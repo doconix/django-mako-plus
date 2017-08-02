@@ -61,7 +61,6 @@ Suppose you have the following template, view, and JS files:
 
     from django.conf import settings
     from django_mako_plus import view_function
-    from .. import dmp_render, dmp_render_to_string
     from datetime import datetime
     import random
 
@@ -71,8 +70,8 @@ Suppose you have the following template, view, and JS files:
             'now': datetime.now().strftime('%H:%M'),
         }
         if request.urlparams[0] == 'gettime':
-            return dmp_render(request, 'index.html', context, def_name='server_time')
-        return dmp_render(request, 'index.html', context)
+            return request.dmp_render('index.html', context, def_name='server_time')
+        return request.dmp_render('index.html', context)
 
 **``index.js``**:
 
@@ -133,7 +132,6 @@ Since ``counter`` won't get defined when ``def_name='server_time'``, **``index.p
 
     from django.conf import settings
     from django_mako_plus import view_function
-    from .. import dmp_render, dmp_render_to_string
     from datetime import datetime
     import random
 
@@ -144,8 +142,8 @@ Since ``counter`` won't get defined when ``def_name='server_time'``, **``index.p
         }
         if request.urlparams[0] == 'gettime':
             context['counter'] = 100
-            return dmp_render(request, 'index.html', context, def_name='server_time')
-        return dmp_render(request, 'index.html', context)
+            return request.dmp_render('index.html', context, def_name='server_time')
+        return request.dmp_render('index.html', context)
 
     The ``def_name`` parameter can be used to call both ``<%block>`` and
     ``<%def>`` tags in your templates. The two are very similar within

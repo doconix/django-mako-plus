@@ -1,3 +1,4 @@
+from django.apps import apps
 from django.core.exceptions import ImproperlyConfigured
 from django.views.generic import View
 from urllib.parse import unquote
@@ -9,8 +10,10 @@ except ImportError:
     # create a dummy MiddlewareMixin if older Django
     MiddlewareMixin = object
 
+from .registry import is_dmp_app
 from .router import get_router, route_request, ClassBasedRouter
 from .util import URLParamList, get_dmp_instance, DMP_OPTIONS, log
+from .template import render_to_response_shortcut, render_to_string_shortcut
 
 import logging
 
@@ -20,6 +23,15 @@ import logging
 
 EMPTY_URLPARAMS = URLParamList()
 DMP_PARAM_CHECK = ( 'dmp_router_app', 'dmp_router_page', 'dmp_router_function', 'urlparams' )
+
+def default_render(*args, **kwargs):
+    '''This function is set as the initial render function (below) until process_view sets the app-specific one (also below)'''
+    raise ImproperlyConfigured(
+        "DMP's app-specific render functions were not placed on the request object. "
+        "This app is 1) not a DMP-enabled app or 2) rendering was done before the middleware's process_view() method was called. "
+        "Fix the middleware issue, or if this instance needs to render without dependence on middleware, use DMP's render_template() convenience method instead. "
+    )
+
 
 class RequestInitMiddleware(MiddlewareMixin):
     '''
@@ -43,6 +55,8 @@ class RequestInitMiddleware(MiddlewareMixin):
         request.dmp_router_module = None
         request.dmp_router_class = None
         request.urlparams = EMPTY_URLPARAMS
+        request.dmp_render = default_render
+        request.dmp_render_to_response = default_render
         request._dmp_router_callable = None
 
 
@@ -69,7 +83,10 @@ class RequestInitMiddleware(MiddlewareMixin):
         # set a flag on the request to check for double runs (middleware listed twice in settings)
         # double runs don't work because we pop off the kwargs below
         if hasattr(request, '_dmp_router_middleware_flag'):
-            raise ImproperlyConfigured('The Django Mako Plus middleware is running twice on this request.  Please check settings.py to see it the middleware might be listed twice.')
+            raise ImproperlyConfigured(
+                "The Django Mako Plus middleware is running twice on this request."
+                "Please check settings.py to see it the middleware might be listed twice."
+            )
         request._dmp_router_middleware_flag = True
 
         # print debug messages to help with urls.py regex issues
@@ -80,6 +97,9 @@ class RequestInitMiddleware(MiddlewareMixin):
 
         # add the variables to the request
         request.dmp_router_app = view_kwargs.pop('dmp_router_app', None) or DMP_OPTIONS.get('DEFAULT_APP', 'homepage')
+        if is_dmp_app(request.dmp_router_app):
+            request.dmp_render = render_to_response_shortcut(request.dmp_router_app, request)
+            request.dmp_render_to_string = render_to_string_shortcut(request.dmp_router_app, request)
         request.dmp_router_page = view_kwargs.pop('dmp_router_page', None) or DMP_OPTIONS.get('DEFAULT_PAGE', 'index')
         request.dmp_router_function = view_kwargs.pop('dmp_router_function', None)
         if request.dmp_router_function:
@@ -88,8 +108,7 @@ class RequestInitMiddleware(MiddlewareMixin):
             fallback_template = '{}.html'.format(request.dmp_router_page)
             request.dmp_router_function = 'process_request'
 
-        # period and dash cannot be in python names, but we allow dash in app and page and (dash or period) in the function
-        # these change into underscores
+        # period and dash cannot be in python names, but we allow dash in app, dash in page, and dash/period in function
         request.dmp_router_app = request.dmp_router_app.replace('-', '_')
         request.dmp_router_page = request.dmp_router_page.replace('-', '_')
         request.dmp_router_function = request.dmp_router_function.replace('.', '_').replace('-', '_')
@@ -116,10 +135,15 @@ class RequestInitMiddleware(MiddlewareMixin):
             request.dmp_router_function = request.method.lower()
             
         # debugging
-        # print('request.dmp_router_app        ', request.dmp_router_app        )
-        # print('request.dmp_router_page       ', request.dmp_router_page       )
-        # print('request.dmp_router_function   ', request.dmp_router_function   )
-        # print('request.dmp_router_module     ', request.dmp_router_module     )
-        # print('request.dmp_router_class      ', request.dmp_router_class      )
-        # print('request.urlparams             ', request.urlparams             )
-        # print('request._dmp_router_callable  ', request._dmp_router_callable  )
+        # for attr in (
+        #     'dmp_router_app',
+        #     'dmp_router_page',
+        #     'dmp_router_function',
+        #     'dmp_router_module',
+        #     'dmp_router_class',
+        #     'urlparams',
+        #     'dmp_render',
+        #     'dmp_render_to_string',
+        #     '_dmp_router_callable',
+        # ):
+        #     print('{:30} {}'.format('request.' + attr + ':', getattr(request, attr)))

@@ -10,7 +10,6 @@ With DMP, your class-based view will be discovered via request url, so you have 
     from django.conf import settings
     from django.http import HttpResponse
     from django.views.generic import View
-    from .. import dmp_render, dmp_render_to_string
     from datetime import datetime
 
     class process_request(View):
@@ -18,7 +17,7 @@ With DMP, your class-based view will be discovered via request url, so you have 
             context = {
                 'now': datetime.now().strftime(request.urlparams[0] if request.urlparams[0] else '%H:%M'),
             }
-            return dmp_render(request, 'index.html', context)
+            return request.dmp_render('index.html', context)
 
     class discovery_section(View):
         def get(self, request):

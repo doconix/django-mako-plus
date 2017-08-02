@@ -5,7 +5,7 @@
 from django.conf import settings
 from django.apps import apps, AppConfig
 
-from .template import render_to_string_shortcut, render_shortcut
+from .template import render_to_string_shortcut_deprecated, render_to_response_shortcut_deprecated
 from .util import get_dmp_instance
 
 import threading
@@ -34,9 +34,8 @@ def is_dmp_app(app):
 
 def register_app(app):
     '''
-    Registers an app as a "DMP-enabled" app.  Registering creates a cached
-    template renderer to make processing faster and adds the dmp_render()
-    and dmp_render_to_string() methods to the app.   The app parameter can
+    Registers an app as a "DMP-enabled" app and creates a cached
+    template renderer to make processing faster. The app parameter can
     be either the name of the app or an AppConfig object.
 
     This is called by MakoTemplates (engine.py) during system startup.
@@ -44,6 +43,7 @@ def register_app(app):
     if isinstance(app, str):
         app = apps.get_app_config(app)
 
+    # since this only runs at startup, this lock doesn't affect performance
     with rlock:
         # short circuit if already in the DMP_ENABLED_APPS
         if app.name in DMP_ENABLED_APPS:
@@ -63,6 +63,8 @@ def register_app(app):
         get_dmp_instance().get_template_loader(app, 'scripts', create=True)
         get_dmp_instance().get_template_loader(app, 'styles', create=True)
 
+        # DEPRECATED: will remove these module-level functions at some point
+        #
         # add the shortcut functions (only to the main templates, we don't do to scripts or styles
         # because people generally don't call those directly).  This is a monkey patch, but it is
         # an incredibly useful one because it makes calling app-specific rendering functions much
@@ -70,7 +72,8 @@ def register_app(app):
         #
         # Django's shortcut to return an *HttpResponse* is render(), and its template method to render a *string* is also render().
         # Good job on naming there, folks.  That's going to confuse everyone.  But I'm matching it to be consistent despite the potential confusion.
-        app.module.dmp_render_to_string = render_to_string_shortcut(app.name)
-        app.module.dmp_render = render_shortcut(app.name)
+        #
+        app.module.dmp_render_to_string = render_to_string_shortcut_deprecated(app.name)
+        app.module.dmp_render = render_to_response_shortcut_deprecated(app.name)
 
 

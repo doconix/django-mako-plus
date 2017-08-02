@@ -53,7 +53,6 @@ The client side is now ready, so let's create the
 
     from django.conf import settings
     from django_mako_plus import view_function
-    from .. import dmp_render, dmp_render_to_string
     from datetime import datetime
     import random
 
@@ -62,7 +61,7 @@ The client side is now ready, so let's create the
         context = {
             'now': datetime.now(),
         }
-        return dmp_render(request, 'index_time.html', context)
+        return request.dmp_render('index_time.html', context)
 
 Finally, create the ``/homepage/templates/index_time.html`` template,
 which is rendered at the end of ``process_request()`` above:
@@ -111,7 +110,7 @@ file:
         context = {
             'now': datetime.now(),
         }
-        return dmp_render(request, 'index.gettime.html', context)
+        return request.dmp_render('index.gettime.html', context)
 
 Note the function is decorated with ``@view_function``, and it contains the function body from our now-deleted ``index_time.py``. The framework recognizes **any** function with this decorator as an available endpoint for urls, not just the hard-coded ``process_request`` function. In other words, you can actually name your view methods any way you like, as long as you follow the pattern described in this section.
 

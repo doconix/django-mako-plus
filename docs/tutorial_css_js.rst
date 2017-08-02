@@ -63,7 +63,6 @@ Let's make the color dynamic by adding a new random variable ``timecolor`` to ou
 
     from django.conf import settings
     from django_mako_plus import view_function
-    from .. import dmp_render, dmp_render_to_string
     from datetime import datetime
     import random
 
@@ -73,7 +72,7 @@ Let's make the color dynamic by adding a new random variable ``timecolor`` to ou
             'now': datetime.now().strftime(request.urlparams[0] if request.urlparams[0] else '%H:%M'),
             'timecolor': random.choice([ 'red', 'blue', 'green', 'brown' ]),
         }
-        return dmp_render(request, 'index.html', context)
+        return request.dmp_render('index.html', context)
 
 Now, rename your index.css file to ``index.cssm``. Then set the content of index.cssm to the following:
 
