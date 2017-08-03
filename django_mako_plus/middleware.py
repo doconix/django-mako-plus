@@ -21,7 +21,6 @@ import logging
 ###   Middleware the prepares the request for
 ###   use with the controller.
 
-EMPTY_URLPARAMS = URLParamList()
 DMP_PARAM_CHECK = ( 'dmp_router_app', 'dmp_router_page', 'dmp_router_function', 'urlparams' )
 
 def default_render(*args, **kwargs):
@@ -54,7 +53,7 @@ class RequestInitMiddleware(MiddlewareMixin):
         request.dmp_router_function = None
         request.dmp_router_module = None
         request.dmp_router_class = None
-        request.urlparams = EMPTY_URLPARAMS
+        request.urlparams = URLParamList()
         request.dmp_render = default_render
         request.dmp_render_to_response = default_render
         request._dmp_router_callable = None
@@ -121,9 +120,7 @@ class RequestInitMiddleware(MiddlewareMixin):
         # in the normal url, spaces should be quoted with %20.  Thanks Rosie for the tip.
         kwarg_urlparams = view_kwargs.pop('urlparams', '').strip()
         if kwarg_urlparams:
-            request.urlparams = URLParamList(( unquote(s) for s in kwarg_urlparams.split('/') ))
-        else:
-            request.urlparams = URLParamList()
+            request.urlparams.extend(( unquote(s) for s in kwarg_urlparams.split('/') ))
 
         # get the function object - the return of get_router_function might be a function, a class-based view, or a template
         # get_router_function does some magic to make all of these act like a regular view function

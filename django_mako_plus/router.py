@@ -216,17 +216,23 @@ class ViewFunctionRouter(object):
         args = list(args)
         # add urlparams into the arguments and convert the values
         for i, parameter in enumerate(self.parameters):
-            # request, *args, **kwargs?  (skip these)
-            if i == 0 or parameter.kind is inspect.Parameter.VAR_POSITIONAL or parameter.kind is inspect.Parameter.VAR_KEYWORD:
+            # skip *args, **kwargs
+            if parameter.kind is inspect.Parameter.VAR_POSITIONAL or parameter.kind is inspect.Parameter.VAR_KEYWORD:
                 continue
             # in kwargs already? (kwargs come from any extra named parameters in the urls.py regex match)
             elif parameter.name in kwargs:
                 kwargs[parameter.name] = ctask.converter(kwargs[parameter.name], parameter, ctask)
+            # the request object (we convert it just like everything else for consistency)
+            elif i == 0: 
+                if len(args) == 0:
+                    args.append(ctask.converter(request, parameter, ctask))
+                else:
+                    args[0] = ctask.converter(request, parameter, ctask)
             # in args already? (this should not be possible because Django doesn't allow mixing of named and positional parameters in the urls.py regex match, but coding for it)
             elif i < len(args):
                 args[i] = ctask.converter(args[i], parameter, ctask)
-            # urlparam value? (<= and -1 because first arg [request] is handled explicitly)
-            elif i <= len(request.urlparams) and request.urlparams[i-1] != '':
+            # urlparam value? (<= and -1 because first arg (request) is not part of urlparams list)
+            elif i <= len(request.urlparams):
                 kwargs[parameter.name] = ctask.converter(request.urlparams[i-1], parameter, ctask)
             # default value?
             elif parameter.default is not inspect.Parameter.empty:
@@ -235,7 +241,7 @@ class ViewFunctionRouter(object):
             else:
                 kwargs[parameter.name] = ctask.converter(None, parameter, ctask)
         # call the view!
-        return self.function(request, *args, **kwargs)
+        return self.function(*args, **kwargs)
 
 
     def message(self, request):

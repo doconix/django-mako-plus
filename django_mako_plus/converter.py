@@ -2,7 +2,7 @@ from django.apps import apps
 from django.db.models import Model, ObjectDoesNotExist
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
-from django.http import Http404
+from django.http import HttpRequest, Http404
 
 from .exceptions import RedirectException
 from .util import DMP_OPTIONS, log
@@ -159,10 +159,9 @@ class BaseConverter(object):
             if issubclass(parameter.type, ci.convert_type):
                 return ci.convert_func.__get__(self, self.__class__)(value, parameter, task)
 
-        # if we get here, we don't have a converter for this type
-        if parameter.type is inspect.Parameter.empty:
-            raise ValueError('Cannot convert parameter named {} because it has no type hint and CONVERT_WITHOUT_TYPE_HINTS is True'.format(parameter.name))
-        raise ValueError('No parameter converter exists for type: {}'.format(parameter.type))
+        # we should never get here because the default converter has a converter for <object>
+        # but it could occur if the DefaultConverter is swapped out entirely by a project
+        raise ValueError('No parameter converter exists for type: {}. Either remove the type hint or subclass the DMP DefaultConverter class.'.format(parameter.type))
 
 
 
@@ -176,6 +175,28 @@ class DefaultConverter(BaseConverter):
     '''
     # characters that mean None values in URLs
     EMPTY_CHARACTERS = { '', '-', '0', None }
+
+    
+    @BaseConverter.convert_method(object)
+    def convert_http_request(self, value, parameter, task):
+        '''
+        Fallback converter when nothing else matches.
+        '''
+        return value
+
+
+    @BaseConverter.convert_method(HttpRequest)
+    def convert_http_request(self, value, parameter, task):
+        '''
+        Pass through for the request object (first parameter in every view call).
+        The request is run through the conversion process, even though it will almost
+        never need to be converted to something else. This is just to be consistent in
+        "converting" each parameter in a view call. It also allows projects to use
+        this hook to make modifications to the request object, although a middleware
+        class is better suited in most cases.
+        '''
+        return value
+        
 
     @BaseConverter.convert_method(str)
     def convert_str(self, value, parameter, task):
