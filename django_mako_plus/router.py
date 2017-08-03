@@ -170,7 +170,7 @@ def router_factory(module_name, function_name, fallback_app=None, fallback_templ
 
         # class-based view?
         if inspect.isclass(func) and issubclass(func, View):
-            return ClassBasedRouter(module, func(), decorator_kwargs)  # func() because func is class (not instance)
+            return ClassBasedRouter(module, func(), decorator_kwargs)  # func() to instantiate because func is class (not instance)
 
         # a view function?
         if verify_decorator and not view_function.is_decorated(func):

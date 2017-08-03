@@ -189,7 +189,7 @@ class DefaultConverter(BaseConverter):
         if value is None:
             value = 0
         try:
-            return parameter.type(value)
+            return parameter.type(value)  # int() or float()
         except Exception as e:
             log.info('Raising Http404 due to parameter conversion error: %s', e)
             raise Http404('Invalid parameter specified in the url')
@@ -198,8 +198,11 @@ class DefaultConverter(BaseConverter):
     @BaseConverter.convert_method(decimal.Decimal)
     def convert_decimal(self, value, parameter, task):
         '''Converts the string to a decimal.Decimal'''
-        if value in self.EMPTY_CHARACTERS:
-            return None
+        try:
+            if value in self.EMPTY_CHARACTERS:
+                return None
+        except TypeError:
+            pass # not hashable
         try:
             return parameter.type(value)
         except Exception as e:
@@ -211,7 +214,7 @@ class DefaultConverter(BaseConverter):
     def convert_boolean(self, value, parameter, task):
         '''Converts the string to float'''
         try:
-            return value not in self.EMPTY_CHARACTERS
+            return value is not False and value not in self.EMPTY_CHARACTERS
         except Exception as e:
             log.info('Raising Http404 due to parameter conversion error: %s', e)
             raise Http404('Invalid parameter specified in the url')
@@ -220,8 +223,11 @@ class DefaultConverter(BaseConverter):
     @BaseConverter.convert_method(datetime.datetime)
     def convert_datetime(self, value, parameter, task):
         '''Converts the string to datetime.datetime'''
-        if value in self.EMPTY_CHARACTERS:
-            return None
+        try:
+            if value in self.EMPTY_CHARACTERS:
+                return None
+        except TypeError:
+            pass # not hashable
         try:
             for fmt in settings.DATETIME_INPUT_FORMATS:
                 try:
@@ -237,8 +243,11 @@ class DefaultConverter(BaseConverter):
     @BaseConverter.convert_method(datetime.date)
     def convert_date(self, value, parameter, task):
         '''Converts the string to datetime.date'''
-        if value in self.EMPTY_CHARACTERS:
-            return None
+        try:
+            if value in self.EMPTY_CHARACTERS:
+                return None
+        except TypeError:
+            pass # not hashable
         try:
             for fmt in settings.DATE_INPUT_FORMATS:
                 try:
@@ -259,8 +268,11 @@ class DefaultConverter(BaseConverter):
             - An empty string, dash "-", or 0 returns None.
             - Anything else raises Http404, including a DoesNotExist on the .get() call.
         '''
-        if value in self.EMPTY_CHARACTERS:
-            return None
+        try:
+            if value in self.EMPTY_CHARACTERS:
+                return None
+        except TypeError:
+            pass # not hashable
         try:
             pk = int(value)
         except Exception as e:

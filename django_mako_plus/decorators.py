@@ -16,6 +16,9 @@ class PassthroughDecorator(object):
     The decorate() method is called to perform the behavior of the decorator on the function.
     This class instance does not stay in the decorator call chain.  The primary use case
     of this decorator is place an attribute on the function.
+    
+    @wraps is not used with this because it is a pass-through.  The decorator disappears
+    after doing its initial work and does not stay within the call chain.
 
     Note that it is not possible to use this decorator with the first argument being a callable
     because Python will take it as the decorated function.
@@ -76,6 +79,7 @@ class KeywordArgDecorator(PassthroughDecorator):
         '''Does the work of the decorator: caches the kwargs for later retrieval.'''
         updated_kwargs = cls.DEFAULT_KWARGS.copy()
         updated_kwargs.update(kwargs)
+        # add the ANNOTATION_DECORATOR_KEY to the function
         cls._get_list_for_class(func, force=True).append(updated_kwargs)
 
     @classmethod

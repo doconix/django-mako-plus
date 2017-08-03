@@ -99,6 +99,7 @@ Since ``forward`` has a default value, it can be omitted: http://localhost:8000/
 
 This first example shows how DMP sends URL parts into view functions.  It separates the URL parts by the slash ``/``, and positionally matches them to functions.  In this simplest of view function signatures, the parameters are strings.
 
+    If you are using multiple decorators on your endpoints, you can save a lot of trouble by checking that your decorators `are wrapping correctly <topics_converters.html>`_.
 
 
 Adding Type Hints
@@ -127,7 +128,6 @@ Add the following type hints to your ``process_request`` function, and remove th
         return request.dmp_render('index.html', context)
 
 DMP casts the parameters by inspecting the method signature of ``process_request`` which specifies the parameter name, a color, and the type.  If a conversion error occurs, the default converter raises Http404.  All of this is configurable and extensible (read on).
-
 
 Supported Types
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
