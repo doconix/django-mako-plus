@@ -198,32 +198,30 @@ class ViewFunctionRouter(object):
         self.parameters = tuple(params)
 
 
-    def get_response(self, request, *args, **kwargs):
+    def get_response(self, *args, **kwargs):
         '''Converts urlparams, calls the view function, returns the response'''
+        # leaving request inside *args (or kwargs) so we can convert it like anything else (and parameter indices aren't off by one)
+        request = kwargs.get('request', args[0])
         ctask = ConversionTask(request, self.module, self.function, self.decorator_kwargs)
         args = list(args)
+        urlparam_i = 0  
         # add urlparams into the arguments and convert the values
-        for i, parameter in enumerate(self.parameters):
+        for parameter_i, parameter in enumerate(self.parameters):
             try:
                 # skip *args, **kwargs
                 if parameter.kind is inspect.Parameter.VAR_POSITIONAL or parameter.kind is inspect.Parameter.VAR_KEYWORD:
                     continue
-                # in kwargs already? (kwargs come from any extra named parameters in the urls.py regex match)
+                # value in kwargs?
                 elif parameter.name in kwargs:
                     kwargs[parameter.name] = ctask.converter(kwargs[parameter.name], parameter, ctask)
-                # the request object (we convert it just like everything else for consistency)
-                elif i == 0: 
-                    if len(args) == 0:
-                        args.append(ctask.converter(request, parameter, ctask))
-                    else:
-                        args[0] = ctask.converter(request, parameter, ctask)
-                # in args already? (this should not be possible because Django doesn't allow mixing of named and positional parameters in the urls.py regex match, but coding for it)
-                elif i < len(args):
-                    args[i] = ctask.converter(args[i], parameter, ctask)
-                # urlparam value? (<= and -1 because first arg (request) is not part of urlparams list)
-                elif i <= len(request.urlparams):
-                    kwargs[parameter.name] = ctask.converter(request.urlparams[i-1], parameter, ctask)
-                # default value?
+                # value in args?
+                elif parameter_i < len(args):
+                    args[parameter_i] = ctask.converter(args[parameter_i], parameter, ctask)
+                # urlparam value?
+                elif urlparam_i < len(request.urlparams):
+                    kwargs[parameter.name] = ctask.converter(request.urlparams[urlparam_i], parameter, ctask)
+                    urlparam_i += 1
+                # can we assign a default value?
                 elif parameter.default is not inspect.Parameter.empty:
                     kwargs[parameter.name] = ctask.converter(parameter.default, parameter, ctask)
                 # fallback is None
