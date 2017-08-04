@@ -312,7 +312,7 @@ class TemplateInfo(object):
         # the static templatename.css file
         try:
             fstat = os.stat(self.css_file)
-            self.css = '<link rel="stylesheet" type="text/css" href="%s?%s" />' % (posixpath.join(settings.STATIC_URL, self.app_url, 'styles', self.template_name + '.css'), cgi_id if cgi_id != None else int(fstat.st_mtime))
+            self.css = '<link rel="stylesheet" type="text/css" href="%s?%s" />' % (posixpath.join(settings.STATIC_URL, self.app_url, 'styles', self.template_name + '.css'), cgi_id if cgi_id is not None else int(fstat.st_mtime))
         except OSError:
             self.css = None
 
@@ -326,7 +326,7 @@ class TemplateInfo(object):
         # the static templatename.js file
         try:
             fstat = os.stat(self.js_file)
-            self.js = '<script src="%s?%s"></script>' % (posixpath.join(settings.STATIC_URL, self.app_url, 'scripts', self.template_name + '.js'), cgi_id if cgi_id != None else int(fstat.st_mtime))
+            self.js = '<script src="%s?%s"></script>' % (posixpath.join(settings.STATIC_URL, self.app_url, 'scripts', self.template_name + '.js'), cgi_id if cgi_id is not None else int(fstat.st_mtime))
         except OSError:
             self.js = None
 

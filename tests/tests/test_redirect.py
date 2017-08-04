@@ -9,18 +9,6 @@ import os, os.path
 
 class Tester(TestCase):
 
-    @classmethod
-    def setUpTestData(cls):
-        # skip debug messages during testing
-        cls.loglevel = log.getEffectiveLevel()
-        log.setLevel(logging.WARNING)
-
-    @classmethod
-    def tearDownTestData(cls):
-        # set log level back to normal
-        log.setLevel(cls.loglevel)
-
-
     def test_redirect_exception(self):
         resp = self.client.get('/tests/redirects.redirect_exception/')
         self.assertEqual(resp.status_code, 302)

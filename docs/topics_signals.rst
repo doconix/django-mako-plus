@@ -25,15 +25,11 @@ The following creates two receivers. The first is called just before the view's 
     from django_mako_plus import signals, get_template_loader
 
     @receiver(signals.dmp_signal_pre_process_request)
-    def dmp_signal_pre_process_request(sender, **kwargs):
-        request = kwargs['request']
+    def pre_process_request(sender, request, view_args, view_kwargs, **kwargs):
         print('>>> process_request signal received!')
 
     @receiver(signals.dmp_signal_pre_render_template)
-    def dmp_signal_pre_render_template(sender, **kwargs):
-        request = kwargs['request']
-        context = kwargs['context']            # the template variables
-        template = kwargs['template']          # the Mako template object that will do the rendering
+    def pre_render_template(sender, request, context, template, **kwargs):
         print('>>> render_template signal received!')
         # let's return a different template to be used - DMP will use this instead of kwargs['template']
         tlookup = get_template_loader('myapp')
@@ -41,4 +37,4 @@ The following creates two receivers. The first is called just before the view's 
 
 The above code should be in a code file that is called during Django initialization. Good locations might be in a ``models.py`` file or your app's ``__init__.py`` file.
 
-See the ``django_mako_plus/signals.py`` file for all the available signals you can listen for.
+See `signals.py <https://github.com/doconix/django-mako-plus/blob/master/django_mako_plus/signals.py>`_ for all the full list of DMP signals and their keyword arguments.

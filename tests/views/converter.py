@@ -16,7 +16,7 @@ def process_request(request, s:str='', i:int=1, f:float=2, b:bool=False, ic:IceC
     return HttpResponse('parameter conversion tests')
 
 @view_function
-def more_testing(request, d:decimal.Decimal, dt:datetime.date, dttm:datetime.datetime, mi:MyInt):
+def more_testing(request, d:decimal.Decimal=None, dt:datetime.date=None, dttm:datetime.datetime=None, mi:MyInt=None):
     return HttpResponse('more parameter conversion tests')
 
 
@@ -34,8 +34,8 @@ def custom_convert_function(request, s:str, i:int, f:float):
 ###  Class-based endpoint  ###
 
 class class_based(View):
-    def get(self, request, i:int, f:float):
+    def get(self, request, i:int=None, f:float=None):
         return HttpResponse('Get was called.')
 
-    def post(self, request, i:int, f:float):
+    def post(self, request, i:int=None, f:float=None):
         return HttpResponse('Post was called.')

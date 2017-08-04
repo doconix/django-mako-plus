@@ -15,15 +15,7 @@ class Tester(TestCase):
 
     @classmethod
     def setUp(cls):
-        # skip debug messages during testing
-        cls.loglevel = log.getEffectiveLevel()
-        log.setLevel(logging.WARNING)
         set_default_converter(TestingConverter)
-
-    @classmethod
-    def tearDown(cls):
-        # set log level back to normal
-        log.setLevel(cls.loglevel)
 
     def test_default_converter(self):
         conv = get_default_converter()

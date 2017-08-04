@@ -33,6 +33,7 @@ from .engine import MakoTemplates
 
 
 # the exceptions
+from .exceptions import BaseRedirectException
 from .exceptions import RedirectException
 from .exceptions import PermanentRedirectException
 from .exceptions import JavascriptRedirectException

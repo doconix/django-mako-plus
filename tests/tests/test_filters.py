@@ -13,17 +13,6 @@ import logging, os, os.path
 
 class Tester(TestCase):
 
-    @classmethod
-    def setUpTestData(cls):
-        # skip debug messages during testing
-        cls.loglevel = log.getEffectiveLevel()
-        log.setLevel(logging.WARNING)
-
-    @classmethod
-    def tearDownTestData(cls):
-        # set log level back to normal
-        log.setLevel(cls.loglevel)
-
     def test_filters(self):
         html = render_template(None, 'tests', 'filters.html', {
             'django_var': '::django::',

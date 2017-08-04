@@ -9,17 +9,6 @@ import os, os.path
 
 class Tester(TestCase):
 
-    @classmethod
-    def setUpTestData(cls):
-        # skip debug messages during testing
-        cls.loglevel = log.getEffectiveLevel()
-        log.setLevel(logging.WARNING)
-
-    @classmethod
-    def tearDownTestData(cls):
-        # set log level back to normal
-        log.setLevel(cls.loglevel)
-
     # /app/page.function/urlparams
     def test_app_page_function(self):
         resp = self.client.get('/tests/index.basic/1/2/3/')

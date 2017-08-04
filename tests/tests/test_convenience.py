@@ -20,15 +20,7 @@ class Tester(TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        # skip debug messages during testing
-        cls.loglevel = log.getEffectiveLevel()
-        log.setLevel(logging.WARNING)
         cls.tests_app = apps.get_app_config('tests')
-
-    @classmethod
-    def tearDownTestData(cls):
-        # set log level back to normal
-        log.setLevel(cls.loglevel)
 
     def test_get_template_loader(self):
         # should succeed

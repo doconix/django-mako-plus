@@ -1,14 +1,14 @@
 from django.conf import settings
 from django.conf.urls import url
 from django.core.exceptions import ImproperlyConfigured, ViewDoesNotExist
-from django.http import HttpRequest, HttpResponse, StreamingHttpResponse, HttpResponseServerError
+from django.http import HttpRequest, HttpResponse, StreamingHttpResponse, HttpResponseServerError, Http404
 from django.http import Http404, HttpResponseNotAllowed
 from django.template import TemplateDoesNotExist
 from django.views.generic import View
 
 from .converter import ConversionTask
 from .decorators import view_function, NotDecoratedError
-from .exceptions import InternalRedirectException, RedirectException
+from .exceptions import BaseRedirectException, InternalRedirectException, RedirectException
 from .signals import dmp_signal_pre_process_request, dmp_signal_post_process_request, dmp_signal_internal_redirect_exception, dmp_signal_redirect_exception
 from .util import get_dmp_instance, get_dmp_app_configs, log, DMP_OPTIONS
 
@@ -51,25 +51,13 @@ def route_request(request, *args, **kwargs):
                 log.info(request._dmp_router_callable.message(request))
                 return request._dmp_router_callable.get_response(request, *args, **kwargs)
 
-            # send the pre-signal
-            if DMP_OPTIONS.get('SIGNALS', False):
-                for receiver, ret_response in dmp_signal_pre_process_request.send(sender=sys.modules[__name__], request=request):
-                    if isinstance(ret_response, (HttpResponse, StreamingHttpResponse)):
-                        return ret_response
-
             # log the view
             log.info('calling %s', request._dmp_router_callable.message(request))
 
             # call view function with any args and any remaining kwargs
             response = request._dmp_router_callable.get_response(request, *args, **kwargs)
 
-            # send the post-signal
-            if DMP_OPTIONS.get('SIGNALS', False):
-                for receiver, ret_response in dmp_signal_post_process_request.send(sender=sys.modules[__name__], request=request, response=response):
-                    if ret_response != None:
-                        response = ret_response # sets it to the last non-None in the signal receiver chain
-
-            # if we didn't get a correct response back, send a 404
+            # if we didn't get a correct response back, send a 500
             if not isinstance(response, (HttpResponse, StreamingHttpResponse)):
                 msg = '%s failed to return an HttpResponse (or the post-signal overwrote it).  Returning 500 error.' % request._dmp_router_callable.message(request)
                 log.info(msg)
@@ -77,7 +65,7 @@ def route_request(request, *args, **kwargs):
 
             # return the response
             return response
-
+            
         except InternalRedirectException as ivr:
             # send the signal
             if DMP_OPTIONS.get('SIGNALS', False):
@@ -92,7 +80,7 @@ def route_request(request, *args, **kwargs):
             # let it wrap back to the top of the "while True" loop to restart the routing
 
         except RedirectException as e: # redirect to another page
-            if request.dmp_router_class == None:
+            if request.dmp_router_class is None:
                 log.info('%s redirected processing to %s', request._dmp_router_callable.message(request), e.redirect_to)
             # send the signal
             if DMP_OPTIONS.get('SIGNALS', False):
@@ -216,32 +204,59 @@ class ViewFunctionRouter(object):
         args = list(args)
         # add urlparams into the arguments and convert the values
         for i, parameter in enumerate(self.parameters):
-            # skip *args, **kwargs
-            if parameter.kind is inspect.Parameter.VAR_POSITIONAL or parameter.kind is inspect.Parameter.VAR_KEYWORD:
-                continue
-            # in kwargs already? (kwargs come from any extra named parameters in the urls.py regex match)
-            elif parameter.name in kwargs:
-                kwargs[parameter.name] = ctask.converter(kwargs[parameter.name], parameter, ctask)
-            # the request object (we convert it just like everything else for consistency)
-            elif i == 0: 
-                if len(args) == 0:
-                    args.append(ctask.converter(request, parameter, ctask))
+            try:
+                # skip *args, **kwargs
+                if parameter.kind is inspect.Parameter.VAR_POSITIONAL or parameter.kind is inspect.Parameter.VAR_KEYWORD:
+                    continue
+                # in kwargs already? (kwargs come from any extra named parameters in the urls.py regex match)
+                elif parameter.name in kwargs:
+                    kwargs[parameter.name] = ctask.converter(kwargs[parameter.name], parameter, ctask)
+                # the request object (we convert it just like everything else for consistency)
+                elif i == 0: 
+                    if len(args) == 0:
+                        args.append(ctask.converter(request, parameter, ctask))
+                    else:
+                        args[0] = ctask.converter(request, parameter, ctask)
+                # in args already? (this should not be possible because Django doesn't allow mixing of named and positional parameters in the urls.py regex match, but coding for it)
+                elif i < len(args):
+                    args[i] = ctask.converter(args[i], parameter, ctask)
+                # urlparam value? (<= and -1 because first arg (request) is not part of urlparams list)
+                elif i <= len(request.urlparams):
+                    kwargs[parameter.name] = ctask.converter(request.urlparams[i-1], parameter, ctask)
+                # default value?
+                elif parameter.default is not inspect.Parameter.empty:
+                    kwargs[parameter.name] = ctask.converter(parameter.default, parameter, ctask)
+                # fallback is None
                 else:
-                    args[0] = ctask.converter(request, parameter, ctask)
-            # in args already? (this should not be possible because Django doesn't allow mixing of named and positional parameters in the urls.py regex match, but coding for it)
-            elif i < len(args):
-                args[i] = ctask.converter(args[i], parameter, ctask)
-            # urlparam value? (<= and -1 because first arg (request) is not part of urlparams list)
-            elif i <= len(request.urlparams):
-                kwargs[parameter.name] = ctask.converter(request.urlparams[i-1], parameter, ctask)
-            # default value?
-            elif parameter.default is not inspect.Parameter.empty:
-                kwargs[parameter.name] = ctask.converter(parameter.default, parameter, ctask)
-            # fallback is None
-            else:
-                kwargs[parameter.name] = ctask.converter(None, parameter, ctask)
+                    kwargs[parameter.name] = ctask.converter(None, parameter, ctask)
+                    
+            except BaseRedirectException as e:   
+                log.info('Redirect exception raised during conversion of parameter %s (%s): %s', parameter.position, parameter.name, e)
+                raise
+            except Http404 as e:
+                log.info('Raising Http404 because exception raised during conversion of parameter %s (%s): %s', parameter.position, parameter.name, e, exc_info=e)
+                raise
+            except Exception as e:
+                log.info('Raising Http404 because exception raised during conversion of parameter %s (%s): %s', parameter.position, parameter.name, e, exc_info=e)
+                raise Http404('Invalid parameter specified in the url')
+                
+        # send the pre-signal
+        if DMP_OPTIONS.get('SIGNALS', False):
+            for receiver, ret_response in dmp_signal_pre_process_request.send(sender=sys.modules[__name__], request=request, view_args=args, view_kwargs=kwargs):
+                if isinstance(ret_response, (HttpResponse, StreamingHttpResponse)):
+                    return ret_response
+
         # call the view!
-        return self.function(*args, **kwargs)
+        response = self.function(*args, **kwargs)
+
+        # send the post-signal
+        if DMP_OPTIONS.get('SIGNALS', False):
+            for receiver, ret_response in dmp_signal_post_process_request.send(sender=sys.modules[__name__], request=request, response=response, view_args=args, view_kwargs=kwargs):
+                if ret_response is not None:
+                    response = ret_response # sets it to the last non-None in the signal receiver chain
+                    
+        # return the response
+        return response
 
 
     def message(self, request):

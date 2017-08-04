@@ -3,26 +3,34 @@ from django.dispatch import Signal
 
 #############################################################
 ###   Signals that we send from DMP
+###   
+###   See the standard documentation on Django regarding
+###   signals.  Also see the DMP documentation on these
+###   specific signals.
 
 #  Triggered just before DMP calls a view's process_request() method.
 #  If the method returns an HttpResponse object, processing stops and the object is returned to the browser.
 #
-#    request :: the request object, which has several attributes that might be of interest:
-#                 request.dmp_router_app      :: The app name, based on the current url.
-#                 request.dmp_router_page     :: The page name (the views/.py file or templates/.html file), based on the current url.
-#                 request.urlparams           :: Any extra url parameters, based on the current url.
-#                 request.dmp_router_module   :: The module where the view function is located.
-#                 request.dmp_router_function :: The specific view function within the module to call.
+#    request     :: The request object, which has several attributes that might be of interest:
+#                       request.dmp_router_app      :: The app name, based on the current url.
+#                       request.dmp_router_page     :: The page name (the views/.py file or templates/.html file), based on the current url.
+#                       request.urlparams           :: Any extra url parameters, based on the current url.
+#                       request.dmp_router_module   :: The module where the view function is located.
+#                       request.dmp_router_function :: The specific view function within the module to call.
+#    view_args   :: The list of positional arguments to be sent to the view function. 
+#    view_kwargs :: The dictionary of keyword arguments to be sent to the view function.
 #
-dmp_signal_pre_process_request = Signal(providing_args=['request'])
+dmp_signal_pre_process_request = Signal(providing_args=['request', 'view_args', 'view_kwargs'])
 
 #  Triggered just after a view's process_request() method returns.
 #  If the method returns an HttpResponse object, the normal response is replaced with that object.
 #
-#    request      :: the request object
-#    response     :: the return from the process_request method, normally an HttpResponse object.
+#    request      :: The request object
+#    response     :: The return from the process_request method, normally an HttpResponse object.
+#    view_args    :: The list of positional arguments that was to the view. 
+#    view_kwargs  :: The dictionary of keyword arguments that was sent to the view function.
 #
-dmp_signal_post_process_request = Signal(providing_args=['request', 'response'])
+dmp_signal_post_process_request = Signal(providing_args=['request', 'response', 'view_args', 'view_kwargs'])
 
 #  Triggered just before DMP renders a Mako template
 #  If the method returns a different Template object than the one passed into it, the returned on is used.

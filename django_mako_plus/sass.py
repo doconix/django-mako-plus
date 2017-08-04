@@ -35,13 +35,13 @@ def check_template_scss(styles_dir, template_name):
             scss_stat = os.stat(scss_file)
         except OSError:
             scss_stat = None
-        if scss_stat != None:  # only continue this block if we found a .scss file
+        if scss_stat is not None:  # only continue this block if we found a .scss file
             try:
                 fstat = os.stat(gen_css_file)
             except OSError:
                 fstat = None
             # if we 1) have no css_file or 2) have a newer scss_file, run the compiler
-            if fstat == None or scss_stat.st_mtime > fstat.st_mtime:
+            if fstat is None or scss_stat.st_mtime > fstat.st_mtime:
                 try:
                     if ext == 'css':
                         compile_scss_file(scss_file, gen_css_file)

@@ -121,7 +121,7 @@ class JavascriptRedirectException(RedirectException):
 
 
 ################################################################
-###   Other exceptions
+###   Other exceptions not exposed beyond DMP
 
 class SassCompileException(Exception):
     '''Raised when a .scss file won't compile'''

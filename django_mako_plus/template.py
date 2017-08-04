@@ -31,7 +31,7 @@ class MakoTemplateLoader:
         get_template_loader_for_path().
         '''
         # calculate the template directory and check that it exists
-        if template_subdir == None:  # None skips adding the template_subdir
+        if template_subdir is None:  # None skips adding the template_subdir
             template_dir = os.path.abspath(app_path)
         else:
             template_dir = os.path.abspath(os.path.join(app_path, template_subdir))
@@ -132,12 +132,12 @@ class MakoTemplateAdapter(object):
         # set up the context dictionary, which is the variables available throughout the template
         context_dict = {}
         # if request is None, add some default items because the context processors won't happen
-        if request == None:
+        if request is None:
             context_dict['settings'] = settings
             context_dict['STATIC_URL'] = settings.STATIC_URL
         # let the context_processors add variables to the context.
         if not isinstance(context, Context):
-            context = Context(context) if request == None else RequestContext(request, context)
+            context = Context(context) if request is None else RequestContext(request, context)
         with context.bind_template(self):
             for d in context:
                 context_dict.update(d)
@@ -145,9 +145,9 @@ class MakoTemplateAdapter(object):
         context_dict.pop('self', None)
 
         # send the pre-render signal
-        if DMP_OPTIONS.get('SIGNALS', False) and request != None:
+        if DMP_OPTIONS.get('SIGNALS', False) and request is not None:
             for receiver, ret_template_obj in dmp_signal_pre_render_template.send(sender=self, request=request, context=context, template=self.mako_template):
-                if ret_template_obj != None:
+                if ret_template_obj is not None:
                     if isinstance(ret_template_obj, MakoTemplateAdapter):
                         self.mako_template = ret_template_obj.mako_template   # if the signal function sends a MakoTemplateAdapter back, use the real mako template inside of it
                     else:
@@ -174,9 +174,9 @@ class MakoTemplateAdapter(object):
             content = render_obj.render_unicode(**context_dict)
             
         # send the post-render signal
-        if DMP_OPTIONS.get('SIGNALS', False) and request != None:
+        if DMP_OPTIONS.get('SIGNALS', False) and request is not None:
             for receiver, ret_content in dmp_signal_post_render_template.send(sender=self, request=request, context=context, template=self.mako_template, content=content):
-                if ret_content != None:
+                if ret_content is not None:
                     content = ret_content  # sets it to the last non-None return in the signal receiver chain
             
         # return
@@ -224,7 +224,7 @@ class MakoTemplateAdapter(object):
 
         except RedirectException: # redirect to another page
             e = sys.exc_info()[1]
-            if request == None:
+            if request is None:
                 log.info('a template redirected processing to %s', request.dmp_router_module, request.dmp_router_function, e.redirect_to)
             else:
                 log.info('view function %s.%s redirected processing to %s', request.dmp_router_module, request.dmp_router_function, e.redirect_to)

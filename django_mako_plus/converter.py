@@ -2,7 +2,7 @@ from django.apps import apps
 from django.db.models import Model, ObjectDoesNotExist
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
-from django.http import HttpRequest, Http404
+from django.http import HttpRequest
 
 from .exceptions import RedirectException
 from .util import DMP_OPTIONS, log
@@ -132,24 +132,20 @@ class BaseConverter(object):
                         urlparams:          The unconverted request.urlparams list of strings from the url,
                                             provided for cases when converting a value depends on another.
 
-        This method should return one of the following:
+        This method should do one of the following:
 
-            1. Converted value (desired type is in parameter.type) to be placed in converted_args.
+            1. Return the converted value (desired type is in parameter.type) to be placed in converted_args.
 
-            2. An HttpResponse object, which is immediately returned to the browser (without further processing).
-
-            3. Raise an exception to signal an error or validation problem, such as:
-                a. Django's Http404 exception (returns immediately to the browser)
-                b. DMP's RedirectException (sends a redirect to the browser)
-                c. DMP's InternalRedirectException (internally restarts the router with a new view function)
+            2. Raise an exception to signal an error or validation problem, such as:
+                    a. ValueError if unconvertable value (caught by DMP and and raises Http404)
+                    b. DMP's RedirectException
+                    c. DMP's InternalRedirectException
+                    d. Django's Http404 exception
+                    e. Any other exception (caught by DMP and and raises Http404)
                See the @view_parameter decorator for more information on handling conversion errors.
         '''
         # we don't convert anything without type hints
         if parameter.type is inspect.Parameter.empty:
-            return value
-
-        # if the value is already the right type, return it
-        if isinstance(value, parameter.type):
             return value
 
         # find the converter method for this type
@@ -159,8 +155,8 @@ class BaseConverter(object):
             if issubclass(parameter.type, ci.convert_type):
                 return ci.convert_func.__get__(self, self.__class__)(value, parameter, task)
 
-        # we should never get here because the default converter has a converter for <object>
-        # but it could occur if the DefaultConverter is swapped out entirely by a project
+        # we should never get here because DefaultConverter below has a converter for <object>
+        # (unless a project entirely swaps out the DefaultConverter for another subclass)
         raise ValueError('No parameter converter exists for type: {}. Either remove the type hint or subclass the DMP DefaultConverter class.'.format(parameter.type))
 
 
@@ -170,141 +166,140 @@ class DefaultConverter(BaseConverter):
     The default converter that comes with DMP.  URL parameter converters
     can be any callable.  This implementation is an extensible class with pluggable
     methods for conversion of different types.
-
-    Converters are any type of callable; see __call__ below for the primary method.
-    '''
-    # characters that mean None values in URLs
-    EMPTY_CHARACTERS = { '', '-', '0', None }
-
     
-    @BaseConverter.convert_method(object)
-    def convert_http_request(self, value, parameter, task):
-        '''
-        Fallback converter when nothing else matches.
-        '''
+    The processing function is in super: BaseConverter.__call__().
+    '''
+    def _check_default(self, value, parameter, task, default_chars):
+        '''Returns the default if the value is "empty"'''
+        # not using a set here because it fails when value is unhashable
+        if value in default_chars:
+            if parameter.default is inspect.Parameter.empty:
+                raise ValueError('Value was empty, but no default value is given in view function for parameter: {} ({})'.format(parameter.position, parameter.name))
+            return parameter.default
         return value
-
-
+        
+    
     @BaseConverter.convert_method(HttpRequest)
     def convert_http_request(self, value, parameter, task):
         '''
         Pass through for the request object (first parameter in every view call).
-        The request is run through the conversion process, even though it will almost
-        never need to be converted to something else. This is just to be consistent in
-        "converting" each parameter in a view call. It also allows projects to use
-        this hook to make modifications to the request object, although a middleware
-        class is better suited in most cases.
+        The request is run through the conversion process, even though it will should not
+        need conversion. This is just to be consistent in processing each parameter 
+        in a view call. Projects can override this method if they need to convert
+        it to something else (although custom middleware may be a better fit).
         '''
         return value
         
 
+    @BaseConverter.convert_method(object)
+    def convert_object(self, value, parameter, task):
+        '''
+        Fallback converter when nothing else matches:
+            '', None convert to parameter default
+            Anything else is returned as-is
+        '''
+        return self._check_default(value, parameter, task, ( '', None ))
+
+
     @BaseConverter.convert_method(str)
     def convert_str(self, value, parameter, task):
-        '''Pass through for strings'''
-        return value
-
-
+        '''
+        Converts to string:
+            '', None convert to parameter default
+            Anything else is returned as-is (url params are already strings)
+        '''
+        return self._check_default(value, parameter, task, ( '', None ))
+        
+    
     @BaseConverter.convert_method(int, float)
     def convert_number(self, value, parameter, task):
-        '''Converts the string to an int or float'''
-        if value is None:
-            value = 0
-        try:
-            return parameter.type(value)  # int() or float()
-        except Exception as e:
-            log.info('Raising Http404 due to parameter conversion error: %s', e)
-            raise Http404('Invalid parameter specified in the url')
+        '''
+        Converts to int or float:
+            '', '-', None convert to parameter default
+            Anything else uses int() or float() constructor
+        '''
+        value = self._check_default(value, parameter, task, ( '', '-', None ))
+        if value is None or isinstance(value, (int, float)):
+            return value
+        return parameter.type(value)  # int() or float()
 
 
     @BaseConverter.convert_method(decimal.Decimal)
     def convert_decimal(self, value, parameter, task):
-        '''Converts the string to a decimal.Decimal'''
-        try:
-            if value in self.EMPTY_CHARACTERS:
-                return None
-        except TypeError:
-            pass # not hashable
-        try:
-            return parameter.type(value)
-        except Exception as e:
-            log.info('Raising Http404 due to parameter conversion error: %s', e)
-            raise Http404('Invalid parameter specified in the url')
+        '''
+        Converts to decimal.Decimal:
+            '', '-', None convert to parameter default
+            Anything else uses Decimal constructor
+        '''
+        value = self._check_default(value, parameter, task, ( '', '-', None ))
+        if value is None or isinstance(value, decimal.Decimal):
+            return value
+        return decimal.Decimal(value)
 
 
     @BaseConverter.convert_method(bool)
-    def convert_boolean(self, value, parameter, task):
-        '''Converts the string to float'''
-        try:
-            return value is not False and value not in self.EMPTY_CHARACTERS
-        except Exception as e:
-            log.info('Raising Http404 due to parameter conversion error: %s', e)
-            raise Http404('Invalid parameter specified in the url')
+    def convert_boolean(self, value, parameter, task, default=False):
+        '''
+        Converts to boolean (only the first char of the value is used):
+            '', '-', None convert to parameter default
+            'f', 'F', '0', False always convert to False
+            Anything else converts to True.
+        '''
+        value = self._check_default(value, parameter, task, ( '', '-', None ))
+        if isinstance(value, bool):
+            return value
+        if isinstance(value, str) and len(value) > 0:
+            value = value[0]
+        return value not in ( 'f', 'F', '0', False, None )
 
 
     @BaseConverter.convert_method(datetime.datetime)
     def convert_datetime(self, value, parameter, task):
-        '''Converts the string to datetime.datetime'''
-        try:
-            if value in self.EMPTY_CHARACTERS:
-                return None
-        except TypeError:
-            pass # not hashable
-        try:
-            for fmt in settings.DATETIME_INPUT_FORMATS:
-                try:
-                    return datetime.datetime.strptime(value, fmt)
-                except (ValueError, TypeError):
-                    continue
-            raise ValueError("value '{}' does not match any formats in settings.DATETIME_INPUT_FORMATS".format(value))
-        except Exception as e:
-            log.info('Raising Http404 due to parameter conversion error: %s', e)
-            raise Http404('Invalid parameter specified in the url')
+        '''
+        Converts to datetime.datetime:
+            '', '-', None convert to parameter default
+            The first matching format in settings.DATETIME_INPUT_FORMATS converts to datetime
+        '''
+        value = self._check_default(value, parameter, task, ( '', '-', None ))
+        if value is None or isinstance(value, datetime.datetime):
+            return value
+        for fmt in settings.DATETIME_INPUT_FORMATS:
+            try:
+                return datetime.datetime.strptime(value, fmt)
+            except (ValueError, TypeError):
+                continue
+        raise ValueError("'{}' does not match a format in settings.DATETIME_INPUT_FORMATS".format(value))
 
 
     @BaseConverter.convert_method(datetime.date)
     def convert_date(self, value, parameter, task):
-        '''Converts the string to datetime.date'''
-        try:
-            if value in self.EMPTY_CHARACTERS:
-                return None
-        except TypeError:
-            pass # not hashable
-        try:
-            for fmt in settings.DATE_INPUT_FORMATS:
-                try:
-                    return datetime.datetime.strptime(value, fmt).date()
-                except (ValueError, TypeError):
-                    continue
-            raise ValueError("value '{}' does not match any formats in settings.DATE_INPUT_FORMATS".format(value))
-        except Exception as e:
-            log.info('Raising Http404 due to parameter conversion error: %s', e)
-            raise Http404('Invalid parameter specified in the url')
+        '''
+        Converts to datetime.date:
+            '', '-', None convert to parameter default
+            The first matching format in settings.DATE_INPUT_FORMATS converts to datetime
+        '''
+        value = self._check_default(value, parameter, task, ( '', '-', None ))
+        if value is None or isinstance(value, datetime.date):
+            return value
+        for fmt in settings.DATE_INPUT_FORMATS:
+            try:
+                return datetime.datetime.strptime(value, fmt).date()
+            except (ValueError, TypeError):
+                continue
+        raise ValueError("'{}' does not match a format in settings.DATE_INPUT_FORMATS".format(value))
 
 
     @BaseConverter.convert_method(Model)  # django models.Model
     def convert_id_to_model(self, value, parameter, task):
         '''
-        Converts a urlparam id to a model object.
-            - The primary key (id) is expected to be an int (standard django way of doing it).
-            - An empty string, dash "-", or 0 returns None.
-            - Anything else raises Http404, including a DoesNotExist on the .get() call.
+        Converts to a Model object.
+            '', '-', '0', None convert to parameter default
+            Anything else is assumed an object id and sent to `.get(id=value)`.
         '''
-        try:
-            if value in self.EMPTY_CHARACTERS:
-                return None
-        except TypeError:
-            pass # not hashable
-        try:
-            pk = int(value)
-        except Exception as e:
-            log.info('Raising Http404 due to parameter conversion error: %s', e)
-            raise Http404('Invalid parameter specified in the url')
-        try:
-            return parameter.type.objects.get(id=pk)
-        except ObjectDoesNotExist as e:
-            log.info('Raising Http404 due to parameter conversion error: %s', e)
-            raise Http404('Invalid parameter specified in the url')
-
+        value = self._check_default(value, parameter, task, ( '', '-', '0', None ))
+        if isinstance(value, (int, str)):  # only convert if we have the id
+            return parameter.type.objects.get(id=value)
+        return value
 
 
 ####################################################

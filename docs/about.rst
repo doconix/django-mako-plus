@@ -125,7 +125,7 @@ If you have read through the Django Tutorial, you've seen examples for templatin
 | | {{ value | | default:"nothing" }}                                      | Use a boolean:                                                        |
 |                                                                          | | ${ value or "nothing" }                                             |
 |                                                                          | or use a Python if statement:                                         |
-|                                                                          | | ${ value if value != None else "nothing" }                          |
+|                                                                          | | ${ value if value is not None else "nothing" }                      |
 +--------------------------------------------------------------------------+-----------------------------------------------------------------------+
 | | Run arbitrary Python (keep it simple, Tex!):                                                                                                   |
 +--------------------------------------------------------------------------+-----------------------------------------------------------------------+
