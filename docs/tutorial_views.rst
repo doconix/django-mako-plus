@@ -100,118 +100,6 @@ DMP provides a second function, ``dmp_render_to_string``. This is nearly the sam
         return request.dmp_render('index.html', context)
 
 
-
-Templates in Other Apps
---------------------------
-
-You're in a special use case?  Need to render templates from a different app?  There's two ways to do it.  Note the imports in the code below:  
-
-First Way:
-
-.. code:: python
-
-    from django.conf import settings
-    from django.http import HttpResponse
-    from django_mako_plus import view_function, render_template
-    from datetime import datetime
-
-    @view_function
-    def process_request(request):
-        context = {
-            'now': datetime.now(),
-        }
-        # replace 'homepage' with the name of any DMP-enabled app:
-        return HttpResponse(render_template(request, 'homepage', 'index.html', context))
-
-Second Way (this way uses the standard Django API):
-
-.. code:: python
-
-    from django.conf import settings
-    from django.shortcuts import render
-    from django_mako_plus import view_function
-    from datetime import datetime
-
-    @view_function
-    def process_request(request):
-        context = {
-            'now': datetime.now(),
-        }
-        # replace 'homepage' with the name of any DMP-enabled app:
-        return render(request, 'homepage/index.html', context)
-
-
-Mime Types and Status Codes
----------------------------
-
-The ``dmp_render()`` function determines the mime type from the template extension and returns a *200* status code. What if you need to return JSON, CSV, or a 404 not found? Just wrap the ``dmp_render_to_string`` function in a standard Django ``HttpResponse`` object. A few examples:
-
-.. code:: python
-
-    from django.http import HttpResponse
-
-    # return CSV
-    return HttpResponse(request.dmp_render_to_string('my_csv.html', {}), mimetype='text/csv')
-
-    # return a custom error page
-    return HttpResponse(request.dmp_render_to_string('custom_error_page.html', {}), status=404)
-
-
-Convenience Functions
--------------------------
-
-You might be wondering: Can I use a dynamically-found app? What if I need a template object? Can I render a file directly?
-
-Use the DMP convenience functions to be more dynamic, to interact directly with template objects, or to render a file of your choosing.
-
-*Render a file from any app's template directory:*
-
-.. code:: python
-
-    from django_mako_plus import render_template
-    mystr = render_template(request, 'homepage', 'index.html', context)
-
-*Render a file from a custom directory within an app:*
-
-.. code:: python
-
-    from django_mako_plus import render_template
-    mystr = render_template(request, 'homepage', 'custom.html', context, subdir="customsubdir")
-
-*Render a file at any location, even outside of your project:*
-
-.. code:: python
-
-    from django_mako_plus import render_template_for_path
-    mystr = render_template_for_path(request, '/var/some/dir/template.html', context)
-
-*Get a template object for a template in an app:*
-
-.. code:: python
-
-    from django_mako_plus import get_template
-    template = get_template('homepage', 'index.html')
-
-*Get a template object at any location, even outside your project:*
-
-.. code:: python
-
-    from django_mako_plus import get_template_for_path
-    template = get_template_for_path('/var/some/dir/template.html')
-
-*Get a lower-level Mako template object (without the Django template wrapper):*
-
-.. code:: python
-
-    from django_mako_plus import get_template_for_path
-    template = get_template_for_path('/var/some/dir/template.html')
-    mako_template = template.mako_template
-
-See the `Mako documentation <http://www.makotemplates.org/>`__ for more information on working directly with Mako template objects. Mako has many features that go well beyond the DMP interface.
-
-    The convenience functions are perfectly fine if they suit your needs, but the ``dmp_render`` function described at the beginning of the tutorial is likely the best choice for most users because it doesn't hard code the app name. The convenience functions are not Django-API compliant.
-
-
 Django API Calls
 --------------------------------
 
@@ -230,3 +118,14 @@ or to be more explicit with Django:
     return render(request, 'homepage/index.html', context, using='django_mako_plus')
 
 Note in the above code that you need to specify the template in the format ``app/template``.  This allows DMP find the right app to load the template from.
+
+
+Further Reading
+---------------------------
+
+The `advanced topic on templates <topics_templates.html>`_ expands with the following topics:
+
+* Templates in other apps
+* Templates in other directories, even outside the project
+* Controlling content types and HTTP codes
+* Convenience functions
