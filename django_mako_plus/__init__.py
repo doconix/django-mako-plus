@@ -79,3 +79,4 @@ from .static_files import link_js
 from .static_files import link_template_css
 from .static_files import link_template_js
 from .static_files import get_static
+from .static_files import get_template_static

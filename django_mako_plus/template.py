@@ -32,16 +32,16 @@ class MakoTemplateLoader:
         '''
         # calculate the template directory and check that it exists
         if template_subdir is None:  # None skips adding the template_subdir
-            template_dir = os.path.abspath(app_path)
+            self.template_dir = os.path.abspath(app_path)
         else:
-            template_dir = os.path.abspath(os.path.join(app_path, template_subdir))
+            self.template_dir = os.path.abspath(os.path.join(app_path, template_subdir))
         # I used to check for the existence of the template dir here, but it caused error
         # checking at engine load time (too soon).  I now wait until get_template() is called,
         # which fails with a TemplateDoesNotExist exception if the template_dir doesn't exist.
 
         # calculate the cache root and template search directories
-        self.cache_root = os.path.join(template_dir, DMP_OPTIONS.get('TEMPLATES_CACHE_DIR', '.cached_templates'))
-        self.template_search_dirs = [ template_dir ]
+        self.cache_root = os.path.join(self.template_dir, DMP_OPTIONS.get('TEMPLATES_CACHE_DIR', '.cached_templates'))
+        self.template_search_dirs = [ self.template_dir ]
         if DMP_OPTIONS.get('TEMPLATES_DIRS'):
             self.template_search_dirs.extend(DMP_OPTIONS.get('TEMPLATES_DIRS'))
         # Mako doesn't allow parent directory inheritance, such as <%inherit file="../../otherapp/templates/base.html"/>
@@ -70,18 +70,26 @@ class MakoTemplateLoader:
             raise TemplateSyntaxError('Template "%s" raised an error: %s' % (template, e))
 
 
-    def get_mako_template(self, template):
+    def get_mako_template(self, template, force=False):
         '''Retrieve the real *Mako* template object for the given template name without any wrapper,
            using the app_path and template_subdir settings in this object.
 
            This method is an alternative to get_template().  Use it when you need the actual Mako template object.
            This method raises a Mako exception if the template is not found or cannot compile.
+        
+           If force is True, an empty Mako template will be created when the file does not exist.
+           This option is used by the static_files part of DMP and normally be left False.
         '''
         if template is None:
             raise TemplateLookupException('Template "%s" not found in search path: %s.' % (template, self.template_search_dirs))
 
         # get the template
-        template_obj = self.tlookup.get_template(template)
+        try:
+            template_obj = self.tlookup.get_template(template)
+        except TemplateLookupException:
+            if not force:
+                raise
+            template_obj = Template('', filename=os.path.join(self.template_dir, template))
 
         # if this is the first time the template has been pulled from self.tlookup, add a few extra attributes
         if not hasattr(template_obj, 'template_path'):
@@ -141,8 +149,7 @@ class MakoTemplateAdapter(object):
         with context.bind_template(self):
             for d in context:
                 context_dict.update(d)
-        # some contexts have self in them, and it messes up render_unicode below because we get two selfs
-        context_dict.pop('self', None)
+        context_dict.pop('self', None)  # some contexts have self in them, and it messes up render_unicode below because we get two selfs
 
         # send the pre-render signal
         if DMP_OPTIONS.get('SIGNALS', False) and request is not None:

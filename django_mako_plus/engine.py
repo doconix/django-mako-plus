@@ -62,6 +62,9 @@ class MakoTemplates(BaseEngine):
         
         # parse the static file providers
         DMP_OPTIONS['RUNTIME_STATIC_PROVIDERS'] = []
+        if 'STATIC_PROVIDERS' not in DMP_OPTIONS:  # defaults for upgrading users
+            from . import static_files
+            DMP_OPTIONS['STATIC_PROVIDERS'] = [ v for k, v in inspect.getmembers(static_files, lambda o: inspect.isclass(o) and issubclass(o, static_files.BaseProvider) and o != static_files.BaseProvider) ]
         for provider_class in DMP_OPTIONS.get('STATIC_PROVIDERS', []):
             if not inspect.isclass(provider_class):
                 provider_class = import_string(provider_class)
