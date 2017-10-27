@@ -9,43 +9,29 @@ from .sass import check_template_scss
 from .exceptions import SassCompileException
 from .util import get_dmp_instance, log, DMP_OPTIONS
 
-import os, os.path, io, posixpath, warnings
+import os, os.path, io, posixpath
 from collections import deque
+import glob
 
 
 
-
-# key to attach TemplateInfo objects and static renderer to the Mako Template itself
-# I attach it to the template objects because they are already cached by mako, so
-# caching them again here would result in double-caching.  It's a bit of a
-# monkey-patch to set them as attributes in the Mako templates, but it's efficient
-# and encapsulated entirely within this file
-DMP_TEMPLATEINFO_KEY = '_django_mako_plus_templateinfo'
-
-# a cache to store TemplateInfo objects that didn't have an associated template
-# these are normally nonexistent files that were referenced (which we allow)
-NO_TSELF_CACHE = {}
-
-
-
-#######################################################################
-###   Shortcut methods - these are the primary way the static render
-###   should be used
-
-
-def link_css(tself, cgi_id=None, duplicates=True):
+def get_static(tself, group=None, cgi_id=None, duplicates=True):
     '''
-    Renders the <style> links for a given template.
+    Returns the HTML for the given static files group.
+    
+        Add this at the top (<head> section) of your template:
+        ${ django_mako_plus.static_group(self, 'styles') }
+    
+        Add this at the bottom of your template:
+        ${ django_mako_plus.static_group(self, 'scripts') }
+    
+        Or, to get all content in one call:
+        ${ django_mako_plus.static_group(self) }
 
-        ${ django_mako_plus.link_css(self) }
-
-    This call is normally placed in the <head> section of your base.htm
-    template.
-
-    Suppose you have two html files using template inheritance: index.html
-    and base.htm.  This method will render the links for all style files
-    with the names of either of these two templates.  Up to four files
-    are linked/sourced:
+    Suppose you have two html files connected via template inheritance: index.html
+    and base.htm.  This method will render the links for all static files
+    with the names of either of these two templates.  Assuming the default
+    providers are listed in settings.py, up to four files are linked/sourced:
 
         base.htm       Generates a <style> link for app/styles/base.css
             |          and a <style> source for app/styles/base.cssm
@@ -54,8 +40,7 @@ def link_css(tself, cgi_id=None, duplicates=True):
                        and a <style> source for app/styles/index.cssm
 
     This call must be made from within a rendering Mako template because
-    this is where you have  access to the "self" namespace.
-
+    this is where you have access to the "self" namespace.
     If you need to render these links outside of a template, see link_template_css()
     below.
 
@@ -70,114 +55,165 @@ def link_css(tself, cgi_id=None, duplicates=True):
     for calculating the id is the file modification time (minutes since 1970).
     '''
     html = []
+    request = tself.context.get('request')
     for ti in reversed(build_templateinfo_chain(tself, cgi_id)):
-        ti.append_css(tself.context.get('request'), tself.context, html, duplicates=duplicates)
+        ti.append_static(request, tself.context, html, group=group, duplicates=duplicates)
     return '\n'.join(html)
 
+    
 
-def link_js(tself, cgi_id=None, duplicates=True):
+##############################################################
+###   Default providers - one of these exists for each
+###   static file pattern: *.css, *.cssm, *.js, *.jsm, etc.
+
+class BaseProvider(object):
     '''
-    Renders the <script> links for a given template:
-
-        ${ django_mako_plus.link_js(self) }
-
-    This call is normally placed near the end of your base.htm
-    template.
-
-    Suppose you have two html files using template inheritance: index.html
-    and base.htm.  This method will render the links for all script files
-    with the names of either of these two templates.  Up to four files
-    are linked/sourced:
-
-        base.htm       Generates a <script> link for app/scripts/base.js
-            |          and a <script> source for app/scripts/base.jsm
-            |
-        index.html     Generates a <script> link for app/scripts/index.js
-                       and a <script> source for app/scripts/index.jsm
-
-    This call must be made from within a rendering Mako template because
-    this is where you have  access to the "self" namespace.
-
-    If you need to render these links outside of a template, see link_template_js()
-    below.
-
-    The optional cgi_id parameter is to overcome browser caches.  On some browsers,
-    changes to your CSS/JS files don't get downloaded because the browser waits a time
-    to check for a new version.  This wait time is set by your web server,
-    and it's normally a good thing to speed everything up.  However,
-    when you upload new CSS/JS files, you want all browsers to download the new
-    files even if their cached versions have't expired yet.
-    By adding an arbitrary id to the end of the .css and .js files, browsers will
-    see the files as *new* anytime that id changes.  The default method
-    for calculating the id is the file modification time (minutes since 1970).
+    A list of providers is attached to each template as it is process.
+    These are cached with the template, so .__init__() is only called once
+    per system runtime, while .append_static() is called for each
+    request.  Optimize the methods accordingly.
     '''
-    html = []
-    for ti in reversed(build_templateinfo_chain(tself, cgi_id)):
-        ti.append_js(tself.context.get('request'), tself.context, html, duplicates=duplicates)
-    return '\n'.join(html)
+    group = 'group name here'
+    def __init__(self, app_dir, template_name, cgi_id):
+        self.app_dir = app_dir
+        self.template_name = os.path.splitext(template_name)[0]  # remove its extension
+        self.cgi_id = cgi_id
+        self.init()
+        
+
+class CssProvider(BaseProvider):
+    '''Provides the link for *.css files'''
+    group = 'styles'
+    def init(self):
+        pattern = os.path.join(self.app_dir, os.path.join('styles', self.template_name + '.css'))
+        content_builder = []
+        for fullpath in glob.glob(pattern):
+            if self.cgi_id is None:
+                self.cgi_id = int(os.stat(fullpath).st_mtime)
+            href = posixpath.join(settings.STATIC_URL, os.path.relpath(fullpath, settings.BASE_DIR))  # ensure we have forward slashes (even on windows) because this is for urls
+            content_builder.append('<link rel="stylesheet" type="text/css" href="{}?{}" />'.format(href, self.cgi_id))
+        self.content = '\n'.join(content_builder)
+        
+    def append_static(self, request, context, html):
+        html.append(self.content)
 
 
-def link_template_css(request, app, template_name, context, cgi_id=None, force=True, duplicates=True):
+class MakoCssProvider(BaseProvider):
+    '''Provides the content for *.cssm files'''
+    group = 'styles'
+    def init(self):
+        self.cssm_dir = os.path.join(self.app_dir, 'styles')
+        try:
+            self.template = get_dmp_instance().get_template_loader_for_path(self.cssm_dir).get_template(self.template_name + '.cssm')
+        except TemplateDoesNotExist:
+            self.template = None
+        
+    def append_static(self, request, context, html):
+        if self.template is not None:
+            content = self.template.render(request=request, context=context)
+            if DMP_OPTIONS.get('RUNTIME_CSSMIN') is not None:
+                content = DMP_OPTIONS['RUNTIME_CSSMIN'](content)
+            html.append('<style type="text/css">{}</style>'.format(content))
+        
+
+class ScssProvider(BaseProvider):
+    '''Provides the link for *.scss files'''
+    group = 'styles'
+    def init(self):
+        pass
+    
+    def append_static(self, request, context, html):
+        html.append('sass provider')
+
+
+class JsProvider(BaseProvider):
+    '''Provides the link for *.js files'''
+    group = 'scripts'
+    def init(self):
+        pattern = os.path.join(self.app_dir, os.path.join('scripts', self.template_name + '.js'))
+        content_builder = []
+        for fullpath in glob.glob(pattern):
+            if self.cgi_id is None:
+                self.cgi_id = int(os.stat(fullpath).st_mtime)
+            href = posixpath.join(settings.STATIC_URL, os.path.relpath(fullpath, settings.BASE_DIR))  # ensure we have forward slashes (even on windows) because this is for urls
+            content_builder.append('<script src="{}?{}"></script>'.format(href, self.cgi_id))
+        self.content = '\n'.join(content_builder)
+        
+    def append_static(self, request, context, html):
+        html.append(self.content)
+
+
+class MakoJsProvider(BaseProvider):
+    '''Provides the content for *.jsm files'''
+    group = 'scripts'
+    def init(self):
+        self.cssm_dir = os.path.join(self.app_dir, 'scripts')
+        try:
+            self.template = get_dmp_instance().get_template_loader_for_path(self.cssm_dir).get_template(self.template_name + '.jsm')
+        except TemplateDoesNotExist:
+            self.template = None
+        
+    def append_static(self, request, context, html):
+        if self.template is not None:
+            content = self.template.render(request=request, context=context)
+            if DMP_OPTIONS.get('RUNTIME_JSMIN') is not None:
+                content = DMP_OPTIONS['RUNTIME_JSMIN'](content)
+            html.append('<script type="text/javascript">{}</script>'.format(content))
+
+
+###################################################
+###  TemplateInfo: attached to each template
+
+class TemplateInfo(object):
     '''
-    Renders the styles for the given template in the given app.  Normally,
-    link_css() is used to accomplish this in your base template.  This method
-    is available when/if you need to generate the links in normal python
-    code (rather than within a running template).
+    Data class that holds information about a template's directories.  A TemplateInfo object
+    is created by build_templateinfo_chain for each level in the Mako template inheritance chain.
+    This object is then attached to the template object, which Mako already caches.
+    That way we only do this work once per server run (in production mode).
 
-    The app can be an AppConfig object or the name of the app.
-    The template_name is the name of a file in the app/templates/ directory.
+    The app_dir is the search location for the styles/ and scripts/ folders, relative to the
+    project base directory.  For typical apps, this is simply the app name.
 
-    Unless force is False, the related .css/.cssm files are created for the template_name
-    even if a nonexistent filename is sent.  This can be useful when
-    creating html directly within Python code.
+    The template_name is the filename of the template.
+
+    The cgi_id parameter is described in the MakoTemplateRenderer class below.
     '''
-    html = []
-    for ti in reversed(build_templateinfo_chain_by_name(app, template_name, cgi_id, force)):
-        ti.append_css(request, context, html, duplicates=duplicates)
-    return '\n'.join(html)
+    def __init__(self, app_dir, template_name, cgi_id=None):
+        self.app_dir = app_dir
+        self.template_name = template_name
+        
+        # initialize the static providers
+        self.providers = []
+        for provider_class in DMP_OPTIONS['RUNTIME_STATIC_PROVIDERS']:
+            self.providers.append(provider_class(app_dir, template_name, cgi_id))
 
 
-def link_template_js(request, app, template_name, context, cgi_id=None, force=True, duplicates=True):
-    '''
-    Renders the scripts for the given template in the given app.  Normally,
-    link_js() is used to accomplish this in your base template.  This method
-    is available when/if you need to generate the links in normal python
-    code (rather than within a running template).
-
-    The app can be an AppConfig object or the name of the app.
-    The template_name is the name of a file in the app/templates/ directory.
-
-    Unless force is False, the related .js/.jsm files are created for the template_name
-    even if a nonexistent filename is sent.  This can be useful when
-    creating html directly within Python code.
-    '''
-    html = []
-    for ti in reversed(build_templateinfo_chain_by_name(app, template_name, cgi_id, force)):
-        ti.append_js(request, context, html, duplicates=duplicates)
-    return '\n'.join(html)
-
-
-
-###########################################################
-###   Deprecated as of Jan 2017
-
-def get_template_css(tself, request, context, cgi_id=None, duplicates=True):
-    warnings.warn('As of DMP 3.8, get_template_css(self, request, context) has been changed to template_css(self).  Please make the necessary adjustments in your base templates.', DeprecationWarning)
-    return link_css(tself, cgi_id, duplicates=duplicates)
-
-
-def get_template_js(tself, request, context, cgi_id=None, duplicates=True):
-    warnings.warn('As of DMP 3.8, get_template_js(self, request, context) has been changed to template_js(self).  Please make the necessary adjustments in your base templates.', DeprecationWarning)
-    return link_js(tself, cgi_id, duplicates=duplicates)
-
+    def append_static(self, request, context, html, group=None, duplicates=True):
+        if request is None:
+            provider_keys = set() 
+        else:
+            if not hasattr(request, '_dmp_static_provider_keys'):
+                setattr(request, '_dmp_static_provider_keys', set())
+            provider_keys = request._dmp_static_provider_keys
+        for provider in self.providers:
+            provider_key = ( self.app_dir, self.template_name, provider.__class__.__qualname__ )
+            if (duplicates or provider_key not in provider_keys) and \
+               (provider.group == group or group is None):
+                    provider.append_static(request, context, html)
+                    provider_keys.add(provider_key)
 
 
 
 ##############################################################################
-###   Builds a chain of TemplateInfo objects, one of each level
-###   of the inheritance chain of a template.
-###
+###   Builds a chain of TemplateInfo objects, one for each template
+###   in the inheritance chain of a given template.
 
+# key to attach TemplateInfo objects and static renderer to the Mako Template itself
+# I attach it to the template objects because they are already cached by mako, so
+# caching them again here would result in double-caching.  It's a bit of a
+# monkey-patch to set them as attributes in the Mako templates, but it's efficient
+# and encapsulated entirely within this file
+DMP_TEMPLATEINFO_KEY = '_django_mako_plus_templateinfo'
 
 def build_templateinfo_chain(tself, cgi_id=None):
     '''
@@ -220,6 +256,10 @@ def build_templateinfo_chain(tself, cgi_id=None):
     # return
     return chain
 
+
+# a cache to store TemplateInfo objects that didn't have an associated template
+# these are normally nonexistent files that were referenced (which we allow)
+NO_TSELF_CACHE = {}
 
 def build_templateinfo_chain_by_name(app, template_name, cgi_id, force=True):
     '''
@@ -275,120 +315,6 @@ def build_templateinfo_chain_by_name(app, template_name, cgi_id, force=True):
     return [ ti ]
 
 
-class TemplateInfo(object):
-    '''
-    Data class that holds information about a template's directories.  A TemplateInfo object
-    is created by build_templateinfo_chain for each level in the Mako template inheritance chain.
-    This object is then attached to the template object, which Mako already caches.
-    That way we only do this work once per server run (in production mode).
-
-    The app_dir is the search location for the styles/ and scripts/ folders, relative to the
-    project base directory.  For typical apps, this is simply the app name.
-
-    The template_name is the filename of the template.
-
-    The cgi_id parameter is described in the MakoTemplateRenderer class below.
-    '''
-    def __init__(self, app_dir, template_name, cgi_id=None):
-        # calculate directory and static url locations
-        self.template_name = os.path.splitext(template_name)[0]  # remove its extension
-        self.app_dir = app_dir
-        app_reldir = os.path.relpath(self.app_dir, settings.BASE_DIR)
-        self.app_url = posixpath.join(*app_reldir.split(os.path.sep))  # ensure we have forward slashes (even on windwos) because this is for urls
-
-        # set up the filenames
-        self.css_file = os.path.join(self.app_dir, 'styles', '%s.css' % self.template_name)
-        self.cssm_file = os.path.join(self.app_dir, 'styles', '%s.cssm' % self.template_name)
-        self.js_file = os.path.join(self.app_dir, 'scripts', '%s.js' % self.template_name)
-        self.jsm_file = os.path.join(self.app_dir, 'scripts', '%s.jsm' % self.template_name)
-
-        # the SASS templatename.scss (compile any updated templatename.scss files to templatename.css files)
-        if DMP_OPTIONS.get('RUNTIME_SCSS_ENABLED'):
-            check_template_scss(os.path.join(self.app_dir, 'styles'), self.template_name)
-
-        # I want short try blocks, so there are several - for example, the first OSError can only occur for one reason: if the os.stat() fails.
-        # I'm using os.stat here instead of os.path.exists because I need the st_mtime.  The os.stat checks that the file exists and gets the modified time in one command.
-
-        # the static templatename.css file
-        try:
-            fstat = os.stat(self.css_file)
-            self.css = '<link rel="stylesheet" type="text/css" href="%s?%s" />' % (posixpath.join(settings.STATIC_URL, self.app_url, 'styles', self.template_name + '.css'), cgi_id if cgi_id is not None else int(fstat.st_mtime))
-        except OSError:
-            self.css = None
-
-        # the mako-rendered templatename.cssm file
-        try:
-            fstat = os.stat(self.cssm_file)
-            self.cssm = self.template_name + '.cssm'
-        except OSError:
-            self.cssm = None
-
-        # the static templatename.js file
-        try:
-            fstat = os.stat(self.js_file)
-            self.js = '<script src="%s?%s"></script>' % (posixpath.join(settings.STATIC_URL, self.app_url, 'scripts', self.template_name + '.js'), cgi_id if cgi_id is not None else int(fstat.st_mtime))
-        except OSError:
-            self.js = None
-
-        # the mako-rendered templatename.jsm file
-        try:
-            fstat = os.stat(self.jsm_file)
-            self.jsm = self.template_name + '.jsm'
-        except OSError:
-            self.jsm = None
-            
-            
-    def _is_duplicate(self, request, filepath):
-        '''Returns true if the given filepath has already been appended in this request'''
-        if request is None or not hasattr(request, '_dmp_static_files'):
-            return False
-        return filepath in request._dmp_static_files
-            
-
-    def _set_duplicate(self, request, filepath):
-        '''Adds the filepath to the rendered static files, making future calls to _is_duplicate() return True'''
-        if request is None:
-            return
-        if not hasattr(request, '_dmp_static_files'):
-            request._dmp_static_files = set()
-        request._dmp_static_files.add(filepath)
-        
-
-    def append_css(self, request, context, html, duplicates=True):
-        '''Appends the CSS for this template's .css and .cssm files, if they exist, to the html list.'''
-        # do we have a css?
-        if self.css and (duplicates or not self._is_duplicate(request, self.css_file)):
-            html.append(self.css)  # the <link> was already created once in the constructor
-            self._set_duplicate(request, self.css_file)
-        # do we have a cssm?
-        if self.cssm and (duplicates or not self._is_duplicate(request, self.cssm_file)):
-            # engine.py already caches these loaders, so no need to cache them again here
-            lookup = get_dmp_instance().get_template_loader_for_path(os.path.join(self.app_dir, 'styles'))
-            css_text = lookup.get_template(self.cssm).render(request=request, context=context)
-            if DMP_OPTIONS.get('RUNTIME_CSSMIN'):
-                css_text = DMP_OPTIONS['RUNTIME_CSSMIN'](css_text)
-            html.append('<style type="text/css">%s</style>' % css_text)
-            self._set_duplicate(request, self.cssm_file)
-
-
-    def append_js(self, request, context, html, duplicates=True):
-        '''Appends the Javascript for this template's .js and .jsm files, if they exist to the html list.'''
-        # do we have a js?
-        if self.js and (duplicates or self._is_duplicate(request, self.js_file)):
-            html.append(self.js)  # the <script> was already created once in the constructor
-            self._set_duplicate(request, self.js_file)
-        # do we have a jsm?
-        if self.jsm and (duplicates or not self._is_duplicate(request, self.jsm_file)):
-            # engine.py already caches these loaders, so no need to cache them again here
-            lookup = get_dmp_instance().get_template_loader_for_path(os.path.join(self.app_dir, 'scripts'))
-            js_text = lookup.get_template(self.jsm).render(request=request, context=context)
-            if DMP_OPTIONS.get('RUNTIME_JSMIN'):
-                js_text = DMP_OPTIONS['RUNTIME_JSMIN'](js_text)
-            html.append('<script>%s</script>' % js_text)
-            self._set_duplicate(request, self.jsm_file)
-
-
-
 
 #######################################################################
 ###   Utility functions
@@ -408,5 +334,67 @@ def _create_empty_mako_context(template):
     context._set_with_template(template)
     func, lclcontext = mako.runtime._populate_self_namespace(context, template)
     return lclcontext
+
+
+
+
+#######################################################################
+###   Shortcut methods - these are deprecated as of Oct 2017
+
+
+def link_css(tself, cgi_id=None, duplicates=True):
+    '''
+    Deprecated as of Oct 2017.
+    Use `django_mako_plus.get_static(self, 'styles')` instead.
+    '''
+    return get_static(tself, group='styles', cgi_id=cgi_id, duplicates=duplicates)
+
+
+def link_js(tself, cgi_id=None, duplicates=True):
+    '''
+    Deprecated as of Oct 2017.
+    Use `django_mako_plus.get_static(self, 'scripts')` instead.
+    '''
+    return get_static(tself, group='scripts', cgi_id=cgi_id, duplicates=duplicates)
+
+
+def link_template_css(request, app, template_name, context, cgi_id=None, force=True, duplicates=True):
+    '''
+    Renders the styles for the given template in the given app.  Normally,
+    link_css() is used to accomplish this in your base template.  This method
+    is available when/if you need to generate the links in normal python
+    code (rather than within a running template).
+
+    The app can be an AppConfig object or the name of the app.
+    The template_name is the name of a file in the app/templates/ directory.
+
+    Unless force is False, the related .css/.cssm files are created for the template_name
+    even if a nonexistent filename is sent.  This can be useful when
+    creating html directly within Python code.
+    '''
+    html = []
+    # for ti in reversed(build_templateinfo_chain_by_name(app, template_name, cgi_id, force)):
+    #     ti.append_css(request, context, html, duplicates=duplicates)
+    return '\n'.join(html)
+
+
+def link_template_js(request, app, template_name, context, cgi_id=None, force=True, duplicates=True):
+    '''
+    Renders the scripts for the given template in the given app.  Normally,
+    link_js() is used to accomplish this in your base template.  This method
+    is available when/if you need to generate the links in normal python
+    code (rather than within a running template).
+
+    The app can be an AppConfig object or the name of the app.
+    The template_name is the name of a file in the app/templates/ directory.
+
+    Unless force is False, the related .js/.jsm files are created for the template_name
+    even if a nonexistent filename is sent.  This can be useful when
+    creating html directly within Python code.
+    '''
+    html = []
+    # for ti in reversed(build_templateinfo_chain_by_name(app, template_name, cgi_id, force)):
+    #     ti.append_js(request, context, html, duplicates=duplicates)
+    return '\n'.join(html)
 
 

@@ -2,7 +2,7 @@ from django.apps import apps, AppConfig
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 
-import os, os.path, subprocess, sys, time, base64, importlib
+import os, os.path, subprocess, sys, time, base64
 
 
 # this is populated with the dictionary of options in engine.py when

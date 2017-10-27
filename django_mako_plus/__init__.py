@@ -78,6 +78,4 @@ from .static_files import link_css
 from .static_files import link_js
 from .static_files import link_template_css
 from .static_files import link_template_js
-# these are deprecated as of Jan 2017 and can be removed at some point
-from .static_files import get_template_css
-from .static_files import get_template_js
+from .static_files import get_static

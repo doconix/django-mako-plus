@@ -15,8 +15,7 @@ from .util import get_dmp_instance, get_dmp_app_configs, log, DMP_OPTIONS, DMP_I
 from mako.template import Template
 
 from copy import deepcopy
-import os, os.path, sys, itertools, collections
-
+import os, os.path, sys, itertools, collections, inspect
 try:
     # python 3.4+
     from importlib.util import find_spec
@@ -60,11 +59,18 @@ class MakoTemplates(BaseEngine):
         for processor in itertools.chain(_builtin_context_processors, DMP_OPTIONS.get('CONTEXT_PROCESSORS', [])):
             context_processors.append(import_string(processor))
         self.template_context_processors = tuple(context_processors)
+        
+        # parse the static file providers
+        DMP_OPTIONS['RUNTIME_STATIC_PROVIDERS'] = []
+        for provider_class in DMP_OPTIONS.get('STATIC_PROVIDERS', []):
+            if not inspect.isclass(provider_class):
+                provider_class = import_string(provider_class)
+            DMP_OPTIONS['RUNTIME_STATIC_PROVIDERS'].append(provider_class)
 
         # now that our engine has loaded, initialize a few parts of it
         # should we minify JS AND CSS FILES?
-        DMP_OPTIONS['RUNTIME_JSMIN'] = False
-        DMP_OPTIONS['RUNTIME_CSSMIN'] = False
+        DMP_OPTIONS['RUNTIME_JSMIN'] = None
+        DMP_OPTIONS['RUNTIME_CSSMIN'] = None
         if DMP_OPTIONS.get('MINIFY_JS_CSS', False) and not settings.DEBUG:
             try:
                 from rjsmin import jsmin
