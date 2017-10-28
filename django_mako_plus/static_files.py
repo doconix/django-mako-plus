@@ -8,7 +8,6 @@ from mako.lookup import TemplateLookup as MakoTemplateLookup
 import mako.runtime
 
 from .sass import check_template_scss
-from .exceptions import SassCompileException
 from .util import get_dmp_instance, log, DMP_OPTIONS
 
 import os, os.path, io, posixpath
@@ -149,11 +148,18 @@ class BaseProvider(object):
     '''
     default = False
     group = 'group name here'
+    weight = 0  # higher weights sort first and thus process before others
     def __init__(self, app_dir, template_name, cgi_id):
         self.app_dir = app_dir
         self.template_name = os.path.splitext(template_name)[0]  # remove its extension
         self.cgi_id = cgi_id
         self.init()
+
+    def init(self):
+        pass
+        
+    def append_static(self, request, context, html):
+        pass
         
 
 class CssProvider(BaseProvider):
@@ -173,6 +179,14 @@ class CssProvider(BaseProvider):
         html.append(self.content)
 
 
+class CompileScssProvider(BaseProvider):
+    '''Compiles *.scss files to *.css files when needed.'''
+    weight = 10  # so sass compiles it before the CssProvider runs
+    def init(self):
+        # doing the check in init() so it only happens one time during production
+        check_template_scss(os.path.join(self.app_dir, 'styles'), self.template_name, 'css')
+        
+    
 class MakoCssProvider(BaseProvider):
     '''Provides the content for *.cssm files'''
     group = 'styles'
@@ -191,16 +205,14 @@ class MakoCssProvider(BaseProvider):
             html.append('<style type="text/css">{}</style>'.format(content))
         
 
-class ScssProvider(BaseProvider):
-    '''Provides the link for *.scss files'''
-    group = 'styles'
+class CompileMakoScssProvider(BaseProvider):
+    '''Compiles *.scssm files to *.cssm files when needed.'''
+    weight = 10  # so sass compiles it before the MakoCssProvider runs
     def init(self):
-        pass
+        # doing the check in init() so it only happens one time during production
+        check_template_scss(os.path.join(self.app_dir, 'styles'), self.template_name, 'cssm')
+        
     
-    def append_static(self, request, context, html):
-        html.append('sass provider')
-
-
 class JsProvider(BaseProvider):
     '''Provides the link for *.js files'''
     group = 'scripts'

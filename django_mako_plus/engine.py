@@ -15,6 +15,7 @@ from .util import get_dmp_instance, get_dmp_app_configs, log, DMP_OPTIONS, DMP_I
 from mako.template import Template
 
 from copy import deepcopy
+from operator import attrgetter
 import os, os.path, sys, itertools, collections, inspect
 try:
     # python 3.4+
@@ -69,6 +70,7 @@ class MakoTemplates(BaseEngine):
             if not inspect.isclass(provider_class):
                 provider_class = import_string(provider_class)
             DMP_OPTIONS['RUNTIME_STATIC_PROVIDERS'].append(provider_class)
+        DMP_OPTIONS['RUNTIME_STATIC_PROVIDERS'].sort(key=attrgetter('weight'), reverse=True)
 
         # now that our engine has loaded, initialize a few parts of it
         # should we minify JS AND CSS FILES?
@@ -87,16 +89,12 @@ class MakoTemplates(BaseEngine):
             DMP_OPTIONS['RUNTIME_CSSMIN'] = cssmin
 
         # should we compile SASS files?
-        DMP_OPTIONS['RUNTIME_SCSS_ENABLED'] = False
-        SCSS_BINARY = DMP_OPTIONS.get('SCSS_BINARY', None)
-        if isinstance(SCSS_BINARY, str):  # for backwards compatability
-            log.warning('Future warning: the settings.py variable SCSS_BINARY should be a list of arguments, not a string.')
-            DMP_OPTIONS['RUNTIME_SCSS_ARGUMENTS'] = SCSS_BINARY.split(' ')
-            DMP_OPTIONS['RUNTIME_SCSS_ENABLED'] = True
-        elif isinstance(SCSS_BINARY, (list, tuple)):
-            DMP_OPTIONS['RUNTIME_SCSS_ARGUMENTS'] = SCSS_BINARY
-            DMP_OPTIONS['RUNTIME_SCSS_ENABLED'] = True
-        elif not SCSS_BINARY:
+        scss_binary = DMP_OPTIONS.get('SCSS_BINARY', None)
+        if isinstance(scss_binary, str): 
+            DMP_OPTIONS['RUNTIME_SCSS_ARGUMENTS'] = scss_binary.split(' ')
+        elif isinstance(scss_binary, (list, tuple)):
+            DMP_OPTIONS['RUNTIME_SCSS_ARGUMENTS'] = scss_binary
+        elif not scss_binary:
             DMP_OPTIONS['RUNTIME_SCSS_ARGUMENTS'] = None
         else:
             raise ImproperlyConfigured('The SCSS_BINARY option in Django Mako Plus settings must be a list of arguments.  See the DMP documentation.')

@@ -1,3 +1,6 @@
+from django.conf import settings
+from django.core.exceptions import ImproperlyConfigured
+
 from mako.lexer import Lexer
 from mako import parsetree
 
@@ -20,7 +23,7 @@ MAKO_EXPRESSION_MARKERS = ( 'MakoExpression', 'ExpressionMako' )
 RE_MAKO_EXPRESSION = re.compile('{}_(.+?)_{}'.format(MAKO_EXPRESSION_MARKERS[0], MAKO_EXPRESSION_MARKERS[1]), flags=re.MULTILINE)
 
 
-def check_template_scss(styles_dir, template_name):
+def check_template_scss(styles_dir, template_name, target_ext):
     '''
     Checks to see if template.scss or template.scssm need compiling.
     The styles_dir should be the full path to the styles directory.
@@ -28,27 +31,28 @@ def check_template_scss(styles_dir, template_name):
 
     Raises a SassCompileException if compilation fails.
     '''
-    for ext in ( 'css', 'cssm' ):
-        scss_file = os.path.join(styles_dir, '{}.s{}'.format(template_name, ext))
-        gen_css_file = os.path.join(styles_dir, '{}.{}'.format(template_name, ext))
+    scss_file = os.path.join(styles_dir, '{}.s{}'.format(template_name, target_ext))
+    gen_css_file = os.path.join(styles_dir, '{}.{}'.format(template_name, target_ext))
+    try:
+        scss_stat = os.stat(scss_file)
+    except OSError:
+        scss_stat = None
+    if scss_stat is not None:  # only continue this block if we found a .scss file
         try:
-            scss_stat = os.stat(scss_file)
+            fstat = os.stat(gen_css_file)
         except OSError:
-            scss_stat = None
-        if scss_stat is not None:  # only continue this block if we found a .scss file
+            fstat = None
+        # if we 1) have no css_file or 2) have a newer scss_file, run the compiler
+        if fstat is None or scss_stat.st_mtime > fstat.st_mtime:
             try:
-                fstat = os.stat(gen_css_file)
-            except OSError:
-                fstat = None
-            # if we 1) have no css_file or 2) have a newer scss_file, run the compiler
-            if fstat is None or scss_stat.st_mtime > fstat.st_mtime:
-                try:
-                    if ext == 'css':
-                        compile_scss_file(scss_file, gen_css_file)
-                    else:
-                        compile_scssm_file(scss_file, gen_css_file)
-                except subprocess.CalledProcessError as cpe:
-                    raise SassCompileException(cpe.cmd, cpe.stderr)
+                if DMP_OPTIONS['RUNTIME_SCSS_ARGUMENTS'] is None:
+                    raise ImproperlyConfigured("Unable to run scss on {} because SCSS_BINARY is not defined in settings.py. Please see the DMP settings documentation for the correct format.".format(scss_file))
+                if target_ext == 'css':
+                    compile_scss_file(scss_file, gen_css_file)
+                else:
+                    compile_scssm_file(scss_file, gen_css_file)
+            except subprocess.CalledProcessError as cpe:
+                raise SassCompileException(cpe.cmd, cpe.stderr)
 
 
 def compile_scss_file(scss_file, css_file):
@@ -58,7 +62,7 @@ def compile_scss_file(scss_file, css_file):
     If the Sass execution fails, this function raises subprocess.CalledProcessError.
     '''
     # run sass on it
-    args = list(DMP_OPTIONS.get('RUNTIME_SCSS_ARGUMENTS'))
+    args = list(DMP_OPTIONS['RUNTIME_SCSS_ARGUMENTS'])
     args.append(scss_file)
     args.append(css_file)
     run_command(*args)
@@ -113,6 +117,9 @@ def compile_scssm_file(scssm_file, css_file):
             with open(scssm_file, 'w', encoding=encoding) as fout:
                 fout.write(contents)
             # update the modified timestamp on the css file so the scssm_file is older than it (we just rewrote the scssm)
-            os.utime(css_file)
+            try:
+                os.utime(css_file)
+            except FileNotFoundError:
+                pass
 
 
