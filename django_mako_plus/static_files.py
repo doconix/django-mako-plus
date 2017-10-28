@@ -14,6 +14,15 @@ import os, os.path, io, posixpath
 from collections import deque
 import glob, warnings
 
+try:
+    from rjsmin import jsmin
+except ImportError:
+    jsmin = None
+try:
+    from rcssmin import cssmin
+except ImportError:
+    cssmin = None
+
 
 # a lookup object to cache 
 forced_lookup = MakoTemplateLookup()
@@ -146,7 +155,7 @@ class BaseProvider(object):
     per system runtime, while .append_static() is called for each
     request.  Optimize the methods accordingly.
     '''
-    default = False
+    options = {}
     group = 'group name here'
     weight = 0  # higher weights sort first and thus process before others
     def __init__(self, app_dir, template_name, cgi_id):
@@ -179,40 +188,6 @@ class CssProvider(BaseProvider):
         html.append(self.content)
 
 
-class CompileScssProvider(BaseProvider):
-    '''Compiles *.scss files to *.css files when needed.'''
-    weight = 10  # so sass compiles it before the CssProvider runs
-    def init(self):
-        # doing the check in init() so it only happens one time during production
-        check_template_scss(os.path.join(self.app_dir, 'styles'), self.template_name, 'css')
-        
-    
-class MakoCssProvider(BaseProvider):
-    '''Provides the content for *.cssm files'''
-    group = 'styles'
-    def init(self):
-        self.cssm_dir = os.path.join(self.app_dir, 'styles')
-        try:
-            self.template = get_dmp_instance().get_template_loader_for_path(self.cssm_dir).get_template(self.template_name + '.cssm')
-        except TemplateDoesNotExist:
-            self.template = None
-        
-    def append_static(self, request, context, html):
-        if self.template is not None:
-            content = self.template.render(request=request, context=context)
-            if DMP_OPTIONS.get('RUNTIME_CSSMIN') is not None:
-                content = DMP_OPTIONS['RUNTIME_CSSMIN'](content)
-            html.append('<style type="text/css">{}</style>'.format(content))
-        
-
-class CompileMakoScssProvider(BaseProvider):
-    '''Compiles *.scssm files to *.cssm files when needed.'''
-    weight = 10  # so sass compiles it before the MakoCssProvider runs
-    def init(self):
-        # doing the check in init() so it only happens one time during production
-        check_template_scss(os.path.join(self.app_dir, 'styles'), self.template_name, 'cssm')
-        
-    
 class JsProvider(BaseProvider):
     '''Provides the link for *.js files'''
     group = 'scripts'
@@ -230,8 +205,35 @@ class JsProvider(BaseProvider):
         html.append(self.content)
 
 
+class MakoCssProvider(BaseProvider):
+    '''Provides the content for *.cssm files'''
+    options = {
+        'minify': True,
+    }
+    group = 'styles'
+    def init(self):
+        self.cssm_dir = os.path.join(self.app_dir, 'styles')
+        try:
+            self.template = get_dmp_instance().get_template_loader_for_path(self.cssm_dir).get_template(self.template_name + '.cssm')
+        except TemplateDoesNotExist:
+            self.template = None
+        
+    def append_static(self, request, context, html):
+        if self.template is not None:
+            content = self.template.render(request=request, context=context)
+            if self.options['minify']:
+                if cssmin is not None:
+                    content = cssmin(content)
+                else:
+                    raise ImproperlyConfigured("Unable to minify {}.cssm because rcssmin is not available. Please `pip install rcssmin`.".format(self.template_name))
+            html.append('<style type="text/css">{}</style>'.format(content))
+        
+
 class MakoJsProvider(BaseProvider):
     '''Provides the content for *.jsm files'''
+    options = {
+        'minify': True,
+    }
     group = 'scripts'
     def init(self):
         self.cssm_dir = os.path.join(self.app_dir, 'scripts')
@@ -243,10 +245,43 @@ class MakoJsProvider(BaseProvider):
     def append_static(self, request, context, html):
         if self.template is not None:
             content = self.template.render(request=request, context=context)
-            if DMP_OPTIONS.get('RUNTIME_JSMIN') is not None:
-                content = DMP_OPTIONS['RUNTIME_JSMIN'](content)
+            if self.options['minify']:
+                if jsmin is not None:
+                    content = jsmin(content)
+                else:
+                    raise ImproperlyConfigured("Unable to minify {}.jsm because rjsmin is not available. Please `pip install rjsmin`.".format(self.template_name))
             html.append('<script type="text/javascript">{}</script>'.format(content))
 
+
+class CompileProvider(BaseProvider):
+    '''
+    Compiles static files, such as *.scss or *.less, when an output file 
+    timestamp is older than the source file. In production mode, this check
+    is done only once (the first time a template is run) per server start.
+    '''
+    options = {  # these defaults use scss, but this could be for less, transcrypt, etc.
+        'source': 'styles/{template}.scss',
+        'output': 'styles/{template}.css',
+        # the command line should be specified as a list (see the subprocess module)
+        'command': [ '/usr/bin/env', 'scss', '--unix-newlines', '--load-path', settings.BASE_DIR, '{source}', '{output}' ],
+    }
+    weight = 10  # so it compiles before the normal providers
+    def init(self):
+        # doing the check in init() so it only happens one time during production
+        check_template_scss(os.path.join(self.app_dir, 'styles'), self.template_name, 'css', self.options['command'])
+        
+    
+class CompileMakoScssProvider(BaseProvider):
+    '''Compiles *.scssm files to *.cssm files when needed.'''
+    options = {
+        'command': None, # use default in sass.py
+    }
+    weight = 10  # so sass compiles it before the MakoCssProvider runs
+    def init(self):
+        # doing the check in init() so it only happens one time during production
+        check_template_scss(os.path.join(self.app_dir, 'styles'), self.template_name, 'cssm', self.options['command'])
+        
+    
 
 
 

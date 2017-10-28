@@ -5,7 +5,8 @@ from mako.lexer import Lexer
 from mako import parsetree
 
 from .exceptions import SassCompileException
-from .util import DMP_OPTIONS, run_command, lock_file, encode32, decode32
+from .command import run_command, lock_file
+from .util import DMP_OPTIONS, encode32, decode32
 
 import glob, sys, os, os.path, subprocess, itertools, re
 
@@ -18,12 +19,12 @@ Only ${ var } expressions are supported right now.  Other Mako
 constructs like <% %> may be supported later.
 '''
 
-
+DEFAULT_SCSS_COMMAND = [ '/usr/bin/env', 'scss', '--unix-newlines', '--load-path', settings.BASE_DIR ]
 MAKO_EXPRESSION_MARKERS = ( 'MakoExpression', 'ExpressionMako' )
 RE_MAKO_EXPRESSION = re.compile('{}_(.+?)_{}'.format(MAKO_EXPRESSION_MARKERS[0], MAKO_EXPRESSION_MARKERS[1]), flags=re.MULTILINE)
 
 
-def check_template_scss(styles_dir, template_name, target_ext):
+def check_template_scss(styles_dir, template_name, target_ext, cmd=None):
     '''
     Checks to see if template.scss or template.scssm need compiling.
     The styles_dir should be the full path to the styles directory.
@@ -45,30 +46,28 @@ def check_template_scss(styles_dir, template_name, target_ext):
         # if we 1) have no css_file or 2) have a newer scss_file, run the compiler
         if fstat is None or scss_stat.st_mtime > fstat.st_mtime:
             try:
-                if DMP_OPTIONS['RUNTIME_SCSS_ARGUMENTS'] is None:
-                    raise ImproperlyConfigured("Unable to run scss on {} because SCSS_BINARY is not defined in settings.py. Please see the DMP settings documentation for the correct format.".format(scss_file))
                 if target_ext == 'css':
-                    compile_scss_file(scss_file, gen_css_file)
+                    compile_scss_file(scss_file, gen_css_file, cmd)
                 else:
-                    compile_scssm_file(scss_file, gen_css_file)
+                    compile_scssm_file(scss_file, gen_css_file, cmd)
             except subprocess.CalledProcessError as cpe:
                 raise SassCompileException(cpe.cmd, cpe.stderr)
 
 
-def compile_scss_file(scss_file, css_file):
+def compile_scss_file(scss_file, css_file, cmd=None):
     '''
     Compiles a regular scss file
 
     If the Sass execution fails, this function raises subprocess.CalledProcessError.
     '''
     # run sass on it
-    args = list(DMP_OPTIONS['RUNTIME_SCSS_ARGUMENTS'])
+    args = list(cmd if cmd is not None else DEFAULT_SCSS_COMMAND) # copy so we can modify
     args.append(scss_file)
     args.append(css_file)
     run_command(*args)
 
 
-def compile_scssm_file(scssm_file, css_file):
+def compile_scssm_file(scssm_file, css_file, cmd=None):
     '''
     Compiles an scssm (sass with embedded Mako) file.
     This is a total hack to sneak mako codes through the Sass compiler.  The algorithm
@@ -100,7 +99,7 @@ def compile_scssm_file(scssm_file, css_file):
                     elif isinstance(node, parsetree.Text):
                         fout.write(node.content)
             # run sass on it
-            compile_scss_file(scssm_file, css_file)
+            compile_scss_file(scssm_file, css_file, cmd)
             # read the contents of the generated file
             with open(css_file, encoding=encoding) as fin:
                 csscontents = fin.read()

@@ -62,42 +62,17 @@ class MakoTemplates(BaseEngine):
         self.template_context_processors = tuple(context_processors)
         
         # parse the static file providers
-        DMP_OPTIONS['RUNTIME_STATIC_PROVIDERS'] = []
-        if 'STATIC_PROVIDERS' not in DMP_OPTIONS:  # defaults for upgrading users
+        if 'STATIC_FILE_PROVIDERS' not in DMP_OPTIONS:  # defaults for upgrading users
             from . import static_files
-            DMP_OPTIONS['STATIC_PROVIDERS'] = [ v for k, v in inspect.getmembers(static_files, lambda o: inspect.isclass(o) and issubclass(o, static_files.BaseProvider) and o != static_files.BaseProvider) ]
-        for provider_class in DMP_OPTIONS.get('STATIC_PROVIDERS', []):
-            if not inspect.isclass(provider_class):
-                provider_class = import_string(provider_class)
-            DMP_OPTIONS['RUNTIME_STATIC_PROVIDERS'].append(provider_class)
-        DMP_OPTIONS['RUNTIME_STATIC_PROVIDERS'].sort(key=attrgetter('weight'), reverse=True)
-
-        # now that our engine has loaded, initialize a few parts of it
-        # should we minify JS AND CSS FILES?
-        DMP_OPTIONS['RUNTIME_JSMIN'] = None
-        DMP_OPTIONS['RUNTIME_CSSMIN'] = None
-        if DMP_OPTIONS.get('MINIFY_JS_CSS', False) and not settings.DEBUG:
-            try:
-                from rjsmin import jsmin
-            except ImportError:
-                raise ImproperlyConfigured('MINIFY_JS_CSS = True in the Django Mako Plus settings, but the "rjsmin" package does not seem to be loaded.')
-            try:
-                from rcssmin import cssmin
-            except ImportError:
-                raise ImproperlyConfigured('MINIFY_JS_CSS = True in the Django Mako Plus settings, but the "rcssmin" package does not seem to be loaded.')
-            DMP_OPTIONS['RUNTIME_JSMIN'] = jsmin
-            DMP_OPTIONS['RUNTIME_CSSMIN'] = cssmin
-
-        # should we compile SASS files?
-        scss_binary = DMP_OPTIONS.get('SCSS_BINARY', None)
-        if isinstance(scss_binary, str): 
-            DMP_OPTIONS['RUNTIME_SCSS_ARGUMENTS'] = scss_binary.split(' ')
-        elif isinstance(scss_binary, (list, tuple)):
-            DMP_OPTIONS['RUNTIME_SCSS_ARGUMENTS'] = scss_binary
-        elif not scss_binary:
-            DMP_OPTIONS['RUNTIME_SCSS_ARGUMENTS'] = None
+            DMP_OPTIONS['RUNTIME_STATIC_PROVIDERS'] = [ v for k, v in inspect.getmembers(static_files, lambda o: inspect.isclass(o) and issubclass(o, static_files.BaseProvider) and o != static_files.BaseProvider) ]
         else:
-            raise ImproperlyConfigured('The SCSS_BINARY option in Django Mako Plus settings must be a list of arguments.  See the DMP documentation.')
+            DMP_OPTIONS['RUNTIME_STATIC_PROVIDERS'] = []
+            for provider_class, options in DMP_OPTIONS['STATIC_FILE_PROVIDERS'].items():
+                if not inspect.isclass(provider_class):
+                    provider_class = import_string(provider_class)
+                provider_class.options.update(options)
+                DMP_OPTIONS['RUNTIME_STATIC_PROVIDERS'].append(provider_class)
+        DMP_OPTIONS['RUNTIME_STATIC_PROVIDERS'].sort(key=attrgetter('weight'), reverse=True)
 
         # add a template renderer for each DMP-enabled app
         for app_config in get_dmp_app_configs():

@@ -96,9 +96,37 @@ TEMPLATES = [
             # determines whether DMP will send its custom signals during the process
             'SIGNALS': False,
 
-            # whether to minify using rjsmin, rcssmin during 1) collection of static files, and 2) on the fly as .jsm and .cssm files are rendered
-            # rjsmin and rcssmin are fast enough that doing it on the fly can be done without slowing requests down
-            'MINIFY_JS_CSS': True,
+            # static file providers - these collect static files for automatic links in templates 
+            # comment out any you don't want to use.
+            'STATIC_FILE_PROVIDERS': {
+            
+                # creates <link> when styles/template.css exists
+                'django_mako_plus.static_files.CssProvider': {},
+
+                # creates <script> when scripts/template.js exists
+                'django_mako_plus.static_files.JsProvider': {},
+
+                # renders CSS when styles/template.cssm exists
+                'django_mako_plus.static_files.MakoCssProvider': {
+                    'minify': True,
+                },
+
+                # renders JS when scripts/template.js exists
+                'django_mako_plus.static_files.MakoJsProvider': {
+                    'minify': True,
+                },
+
+                # runs a shell command
+                'django_mako_plus.static_files.CommandProvider': {
+                    'command': [ '/usr/bin/env', 'scss', '--unix-newlines', '--load-path', ns.BASE_DIR ],
+                },
+
+                # compiles styles/template.scssm to styles/template.cssm
+                'django_mako_plus.static_files.CompileMakoScssProvider': {
+                    'command': [ '/usr/bin/env', 'scss', '--unix-newlines', '--load-path', ns.BASE_DIR ],
+                },
+            },                
+
 
             # the name of the SASS binary to run if a .scss file is newer than the resulting .css file
             # happens when the corresponding template.html is accessed the first time after server startup
