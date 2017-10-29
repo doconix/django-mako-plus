@@ -14,8 +14,9 @@ import threading
 # lock to keep register_app() thread safe
 rlock = threading.RLock()
 
-# the DMP-enabled AppConfigs in the system
-DMP_ENABLED_APPS = set()
+# the DMP-enabled AppConfigs in the system (by name)
+DMP_ENABLED_APPS = {}
+
 
 
 ###############################################################
@@ -54,8 +55,7 @@ def register_app(app):
             return
 
         # first time for this app, so add to our dictionary
-        # defaultdict, so no need to set to anything
-        DMP_ENABLED_APPS.add(app.name)
+        DMP_ENABLED_APPS[app.name] = app
 
         # set up the template, script, and style renderers
         # these create and cache just by accessing them

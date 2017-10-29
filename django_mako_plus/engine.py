@@ -64,15 +64,15 @@ class MakoTemplates(BaseEngine):
         # parse the static file providers
         if 'STATIC_FILE_PROVIDERS' not in DMP_OPTIONS:  # defaults for upgrading users
             from . import static_files
-            DMP_OPTIONS['RUNTIME_STATIC_PROVIDERS'] = [ v for k, v in inspect.getmembers(static_files, lambda o: inspect.isclass(o) and issubclass(o, static_files.BaseProvider) and o != static_files.BaseProvider) ]
+            DMP_OPTIONS['RUNTIME_STATIC'] = [ v for k, v in inspect.getmembers(static_files, lambda p: inspect.isclass(p) and issubclass(p, static_files.BaseProvider) and p != static_files.BaseProvider and p.default_provider) ]
         else:
-            DMP_OPTIONS['RUNTIME_STATIC_PROVIDERS'] = []
+            DMP_OPTIONS['RUNTIME_STATIC'] = []
             for provider_class, options in DMP_OPTIONS['STATIC_FILE_PROVIDERS'].items():
                 if not inspect.isclass(provider_class):
                     provider_class = import_string(provider_class)
                 provider_class.options.update(options)
-                DMP_OPTIONS['RUNTIME_STATIC_PROVIDERS'].append(provider_class)
-        DMP_OPTIONS['RUNTIME_STATIC_PROVIDERS'].sort(key=attrgetter('weight'), reverse=True)
+                DMP_OPTIONS['RUNTIME_STATIC'].append(provider_class)
+        DMP_OPTIONS['RUNTIME_STATIC'].sort(key=attrgetter('weight'), reverse=True)
 
         # add a template renderer for each DMP-enabled app
         for app_config in get_dmp_app_configs():

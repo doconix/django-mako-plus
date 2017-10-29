@@ -18,7 +18,6 @@ The following sections explore the capabilities of DMP beyond the tutorials.  If
     topics_class_views
     topics_converters
     topics_urls_py
-    topics_scss
     topics_just_mako
     topics_signals
     topics_translation

@@ -7,10 +7,10 @@ from mako.template import Template as MakoTemplate
 from mako.lookup import TemplateLookup as MakoTemplateLookup
 import mako.runtime
 
-from .sass import check_template_scss
+from .command import run_command
 from .util import get_dmp_instance, log, DMP_OPTIONS
 
-import os, os.path, io, posixpath
+import os, os.path, io, posixpath, shutil
 from collections import deque
 import glob, warnings
 
@@ -22,6 +22,7 @@ try:
     from rcssmin import cssmin
 except ImportError:
     cssmin = None
+
 
 
 # a lookup object to cache 
@@ -70,7 +71,7 @@ def get_static(tself, group=None, cgi_id=None, duplicates=True):
     '''
     html = []
     request = tself.context.get('request')
-    for ti in reversed(build_templateinfo_chain(tself, cgi_id)):
+    for ti in reversed(_build_templateinfo_chain(tself, cgi_id)):
         ti.append_static(request, tself.context, html, group=group, duplicates=duplicates)
     return '\n'.join(html)
 
@@ -100,6 +101,49 @@ def get_template_static(request, app, template_name, context=None, group=None, c
     _, mako_context = mako.runtime._populate_self_namespace(runtime_context, template)
     return get_static(mako_context['self'], group=group, cgi_id=cgi_id, duplicates=duplicates)
 
+
+
+##############################################################################
+###   Builds a chain of TemplateInfo objects, one for each template
+###   in the inheritance chain of a given template.
+
+# key to attach TemplateInfo objects and static renderer to the Mako Template itself
+# I attach it to the template objects because they are already cached by mako, so
+# caching them again here would result in double-caching.  It's a bit of a
+# monkey-patch to set them as attributes in the Mako templates, but it's efficient
+# and encapsulated entirely within this file
+DMP_TEMPLATEINFO_KEY = '_django_mako_plus_templateinfo'
+
+def _build_templateinfo_chain(tself, cgi_id=None):
+    '''
+    Retrieves a chain of TemplateInfo objects.  The chain is formed by following
+    template inheritance through inherit tags: <%inherit file="base_homepage.htm" />
+
+    For efficiency, the templates are ordered with the specialization template first.
+    The returned list should usually be reversed() by the calling code to put the
+    superclass CSS/JS first (allowing the specialization to override supertemplate styles
+    and scripts).
+    '''
+    # step through the template inheritance
+    chain = []
+    while tself is not None:
+        # first check the cache, creating if necessary
+        ti = getattr(tself.template, DMP_TEMPLATEINFO_KEY, None)
+        if ti is None:
+            template_dir, template_name = os.path.split(tself.template.filename)
+            app_dir = os.path.dirname(template_dir)
+            ti = TemplateInfo(app_dir, template_name, cgi_id)
+            # cache in template if in production mode
+            if not settings.DEBUG:
+                setattr(tself.template, DMP_TEMPLATEINFO_KEY, ti)
+        # append the TemplateInfo
+        chain.append(ti)
+        # loop with the next inherited template
+        tself = tself.inherits
+
+    # return
+    return chain
+
     
     
 ###################################################
@@ -108,7 +152,7 @@ def get_template_static(request, app, template_name, context=None, group=None, c
 class TemplateInfo(object):
     '''
     Data class that holds information about a template's directories.  A TemplateInfo object
-    is created by build_templateinfo_chain for each level in the Mako template inheritance chain.
+    is created by _build_templateinfo_chain for each level in the Mako template inheritance chain.
     This object is then attached to the template object, which Mako already caches.
     That way we only do this work once per server run (in production mode).
 
@@ -125,7 +169,7 @@ class TemplateInfo(object):
         
         # initialize the static providers
         self.providers = []
-        for provider_class in DMP_OPTIONS['RUNTIME_STATIC_PROVIDERS']:
+        for provider_class in DMP_OPTIONS['RUNTIME_STATIC']:
             self.providers.append(provider_class(app_dir, template_name, cgi_id))
 
 
@@ -156,8 +200,9 @@ class BaseProvider(object):
     request.  Optimize the methods accordingly.
     '''
     options = {}
-    group = 'group name here'
-    weight = 0  # higher weights sort first and thus process before others
+    group = None
+    weight = 0               # higher weights sort first and thus process before others
+    default_provider = True  # whether to use when settings.py does not specify providers
     def __init__(self, app_dir, template_name, cgi_id):
         self.app_dir = app_dir
         self.template_name = os.path.splitext(template_name)[0]  # remove its extension
@@ -175,14 +220,11 @@ class CssProvider(BaseProvider):
     '''Provides the link for *.css files'''
     group = 'styles'
     def init(self):
-        pattern = os.path.join(self.app_dir, os.path.join('styles', self.template_name + '.css'))
-        content_builder = []
-        for fullpath in glob.glob(pattern):
-            if self.cgi_id is None:
-                self.cgi_id = int(os.stat(fullpath).st_mtime)
-            href = posixpath.join(settings.STATIC_URL, os.path.relpath(fullpath, settings.BASE_DIR))  # ensure we have forward slashes (even on windows) because this is for urls
-            content_builder.append('<link rel="stylesheet" type="text/css" href="{}?{}" />'.format(href, self.cgi_id))
-        self.content = '\n'.join(content_builder)
+        fullpath = os.path.join(self.app_dir, os.path.join('styles', self.template_name + '.css'))
+        if self.cgi_id is None:
+            self.cgi_id = int(os.stat(fullpath).st_mtime)
+        href = posixpath.join(settings.STATIC_URL, os.path.relpath(fullpath, settings.BASE_DIR))  # ensure we have forward slashes (even on windows) because this is for urls
+        self.content = '<link rel="stylesheet" type="text/css" href="{}?{}" />'.format(href, self.cgi_id)
         
     def append_static(self, request, context, html):
         html.append(self.content)
@@ -192,19 +234,17 @@ class JsProvider(BaseProvider):
     '''Provides the link for *.js files'''
     group = 'scripts'
     def init(self):
-        pattern = os.path.join(self.app_dir, os.path.join('scripts', self.template_name + '.js'))
-        content_builder = []
-        for fullpath in glob.glob(pattern):
-            if self.cgi_id is None:
-                self.cgi_id = int(os.stat(fullpath).st_mtime)
-            href = posixpath.join(settings.STATIC_URL, os.path.relpath(fullpath, settings.BASE_DIR))  # ensure we have forward slashes (even on windows) because this is for urls
-            content_builder.append('<script src="{}?{}"></script>'.format(href, self.cgi_id))
-        self.content = '\n'.join(content_builder)
+        fullpath = os.path.join(self.app_dir, os.path.join('scripts', self.template_name + '.js'))
+        if self.cgi_id is None:
+            self.cgi_id = int(os.stat(fullpath).st_mtime)
+        href = posixpath.join(settings.STATIC_URL, os.path.relpath(fullpath, settings.BASE_DIR))  # ensure we have forward slashes (even on windows) because this is for urls
+        self.content = '<script src="{}?{}"></script>'.format(href, self.cgi_id)
         
     def append_static(self, request, context, html):
         html.append(self.content)
 
 
+###  DEPRECATED as of DMP 4.3.1
 class MakoCssProvider(BaseProvider):
     '''Provides the content for *.cssm files'''
     options = {
@@ -229,6 +269,7 @@ class MakoCssProvider(BaseProvider):
             html.append('<style type="text/css">{}</style>'.format(content))
         
 
+###  DEPRECATED as of DMP 4.3.1
 class MakoJsProvider(BaseProvider):
     '''Provides the content for *.jsm files'''
     options = {
@@ -258,82 +299,37 @@ class CompileProvider(BaseProvider):
     Compiles static files, such as *.scss or *.less, when an output file 
     timestamp is older than the source file. In production mode, this check
     is done only once (the first time a template is run) per server start.
+    
+    Special format keywords for use in the options:
+        {appdir} - The app directory for the template being rendered (full path).
+        {template} - The name of the template being rendered, without its extension.
     '''
-    options = {  # these defaults use scss, but this could be for less, transcrypt, etc.
-        'source': 'styles/{template}.scss',
-        'output': 'styles/{template}.css',
-        # the command line should be specified as a list (see the subprocess module)
-        'command': [ '/usr/bin/env', 'scss', '--unix-newlines', '--load-path', settings.BASE_DIR, '{source}', '{output}' ],
+    # the command line should be specified as a list (see the subprocess module)
+    # SCSS example
+    group = 'styles'
+    options = {  
+        'source': '{appdir}/styles/{template}.scss',
+        'compiled': '{appdir}/styles/{template}.css',
+        'command': [ shutil.which('scss'), '--unix-newlines', '{appdir}/styles/{template}.scss', '{appdir}/styles/{template}.css' ],
     }
-    weight = 10  # so it compiles before the normal providers
+    weight = 10                 # so it compiles before the normal providers
+    default_provider = False    # use this provider only if specified in settings
     def init(self):
         # doing the check in init() so it only happens one time during production
-        check_template_scss(os.path.join(self.app_dir, 'styles'), self.template_name, 'css', self.options['command'])
-        
-    
-class CompileMakoScssProvider(BaseProvider):
-    '''Compiles *.scssm files to *.cssm files when needed.'''
-    options = {
-        'command': None, # use default in sass.py
-    }
-    weight = 10  # so sass compiles it before the MakoCssProvider runs
-    def init(self):
-        # doing the check in init() so it only happens one time during production
-        check_template_scss(os.path.join(self.app_dir, 'styles'), self.template_name, 'cssm', self.options['command'])
-        
-    
+        fargs = {
+            'appdir': self.app_dir, 
+            'template': self.template_name,
+        }
+        source_path = self.options['source'].format(**fargs)
+        compiled_path = self.options['compiled'].format(**fargs)
+        if os.path.exists(source_path):
+            try:
+                needs_compile = os.path.getmtime(compiled_path) < os.path.getmtime(source_path)
+            except OSError:  # usually means compiled_path doesn't exist
+                needs_compile = True  
+            if needs_compile:
+                run_command(*[ a.format(**fargs) for a in self.options['command'] ])
 
-
-
-##############################################################################
-###   Builds a chain of TemplateInfo objects, one for each template
-###   in the inheritance chain of a given template.
-
-# key to attach TemplateInfo objects and static renderer to the Mako Template itself
-# I attach it to the template objects because they are already cached by mako, so
-# caching them again here would result in double-caching.  It's a bit of a
-# monkey-patch to set them as attributes in the Mako templates, but it's efficient
-# and encapsulated entirely within this file
-DMP_TEMPLATEINFO_KEY = '_django_mako_plus_templateinfo'
-
-def build_templateinfo_chain(tself, cgi_id=None):
-    '''
-    Retrieves a chain of TemplateInfo objects.  The chain is formed by following
-    template inheritance through inherit tags: <%inherit file="base_homepage.htm" />
-
-    For efficiency, the templates are ordered with the specialization template first.
-    The returned list should usually be reversed() by the calling code to put the
-    superclass CSS/JS first (allowing the specialization to override supertemplate styles
-    and scripts).
-
-    This function is not normally used directly.  Use the link_css() and link_js()
-    functions instead.
-
-    # Example placed in a template, using the self namespace
-        %for ti in build_templateinfo_chain(self):
-            ...
-        %endfor
-
-    '''
-    # step through the template inheritance
-    chain = []
-    while tself is not None:
-        # first check the cache, creating if necessary
-        ti = getattr(tself.template, DMP_TEMPLATEINFO_KEY, None)
-        if ti is None:
-            template_dir, template_name = os.path.split(tself.template.filename)
-            app_dir = os.path.dirname(template_dir)
-            ti = TemplateInfo(app_dir, template_name, cgi_id)
-            # cache in template if in production mode
-            if not settings.DEBUG:
-                setattr(tself.template, DMP_TEMPLATEINFO_KEY, ti)
-        # append the TemplateInfo
-        chain.append(ti)
-        # loop with the next inherited template
-        tself = tself.inherits
-
-    # return
-    return chain
 
 
 #######################################################################

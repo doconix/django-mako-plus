@@ -7,6 +7,15 @@ from optparse import make_option
 import os, os.path, shutil, fnmatch
 from importlib import import_module
 
+try:
+    from rjsmin import jsmin
+except ImportError:
+    jsmin = None
+try:
+    from rcssmin import cssmin
+except ImportError:
+    cssmin = None
+
 
 
 TYPE_DIRECTORY = 0       # file is a directory
@@ -58,24 +67,6 @@ INITIAL_RULES = (
 
 
 
-
-# import minification if requested
-JSMIN = False
-CSSMIN = False
-if DMP_OPTIONS.get('MINIFY_JS_CSS', False):
-    try:
-        from rjsmin import jsmin
-        JSMIN = True
-    except ImportError:
-        raise CommandError('The Django Mako Plus option "MINIFY_JS_CSS" is True in settings.py, but the "rjsmin" module does not seem to be installed. Do you need to "pip install" it?')
-    try:
-        from rcssmin import cssmin
-        CSSMIN = True
-    except ImportError:
-        raise CommandError('The Django Mako Plus option "MINIFY_JS_CSS" is True in settings.py, but the "rcssmin" module does not seem to be installed. Do you need to "pip install" it?')
-
-
-
 class Command(BaseCommand):
     args = ''
     help = 'Collects static files, such as media, scripts, and styles, to a common directory root. This is done to prepare for deployment.'
@@ -103,6 +94,12 @@ class Command(BaseCommand):
             dest='quiet',
             default=False,
             help='Set verbosity to level 0, which silences all messages (see --verbosity).'
+        )
+        parser.add_argument(
+            '--no-minify',
+            action='store_true',
+            dest='no_minify',
+            help='Do not minify *.css with rcssmin and *.js with rjsmin.',
         )
         parser.add_argument(
             '--include-dir',
@@ -235,8 +232,8 @@ class Command(BaseCommand):
                     os.mkdir(dest_path)
                 self.copy_dir(source_path, dest_path, level+1)
 
-            # if a regular Javscript file, minify it
-            elif ext == '.js' and DMP_OPTIONS.get('MINIFY_JS_CSS', False) and JSMIN:
+            # if a regular Javscript file, run through the static file processors (scripts group)
+            elif ext == '.js' and not self.options['no_minify'] and jsmin:
                 self.message('Including and minifying file with score {}: {}'.format(score, source_path), msglevel, level+1)
                 with open(source_path, encoding=encoding) as fin:
                     with open(dest_path, 'w', encoding=encoding) as fout:
@@ -244,8 +241,8 @@ class Command(BaseCommand):
                         fout.write(minified)
 
 
-            # same with css files
-            elif ext == '.css' and DMP_OPTIONS.get('MINIFY_JS_CSS', False) and CSSMIN:
+            # if a CSS file, run through the static file processors (styles group)
+            elif ext == '.css' and not self.options['no_minify'] and cssmin:
                 self.message('Including and minifying file with score {}: {}'.format(score, source_path), msglevel, level+1)
                 with open(source_path, encoding=encoding) as fin:
                     with open(dest_path, 'w', encoding=encoding) as fout:

@@ -99,48 +99,29 @@ TEMPLATES = [
             # static file providers - these collect static files for automatic links in templates 
             # comment out any you don't want to use.
             'STATIC_FILE_PROVIDERS': {
-            
                 # creates <link> when styles/template.css exists
                 'django_mako_plus.static_files.CssProvider': {},
-
                 # creates <script> when scripts/template.js exists
                 'django_mako_plus.static_files.JsProvider': {},
-
-                # renders CSS when styles/template.cssm exists
+                # renders CSS when styles/template.cssm exists (deprecated as of DMP 4.3.1)
                 'django_mako_plus.static_files.MakoCssProvider': {
                     'minify': True,
                 },
-
-                # renders JS when scripts/template.js exists
+                # renders JS when scripts/template.jsm exists (deprecated as of DMP 4.3.1)
                 'django_mako_plus.static_files.MakoJsProvider': {
                     'minify': True,
                 },
-
-                # runs a shell command
-                'django_mako_plus.static_files.CommandProvider': {
-                    'command': [ '/usr/bin/env', 'scss', '--unix-newlines', '--load-path', ns.BASE_DIR ],
-                },
-
-                # compiles styles/template.scssm to styles/template.cssm
-                'django_mako_plus.static_files.CompileMakoScssProvider': {
-                    'command': [ '/usr/bin/env', 'scss', '--unix-newlines', '--load-path', ns.BASE_DIR ],
-                },
+                # # autocompiles Sass, Less, Transcrypt, etc. files when they change
+                # # specify the `command` as a list (see Python's subprocess module)
+                # # Special format keywords for use in the options:
+                # #     {appdir} - The app directory for the template being rendered (full path).
+                # #     {template} - The name of the template being rendered, without its extension.
+                # 'django_mako_plus.static_files.CompileProvider': {
+                #     'source': '{appdir}/styles/{template}.scss',
+                #     'compiled': '{appdir}/styles/{template}.css',
+                #     'command': [ shutil.which('scss'), '--unix-newlines', '{appdir}/styles/{template}.scss', '{appdir}/styles/{template}.css' ],
+                # },
             },                
-
-
-            # the name of the SASS binary to run if a .scss file is newer than the resulting .css file
-            # happens when the corresponding template.html is accessed the first time after server startup
-            # if DEBUG=False, this only happens once per file after server startup, not for every request
-            # specify the binary in a list below -- even if just one item (see subprocess.Popen)
-
-            # Python 3.4+:
-            #'SCSS_BINARY': [ shutil.which('scss'), '--unix-newlines' ],
-
-            # Python 3.0 to 3.2:
-            #'SCSS_BINARY': [ '/path/to/scss', '--unix-newlines' ],
-
-            # Disabled (no sass integration)
-            'SCSS_BINARY': None,
 
             # see the DMP online tutorial for information about this setting
             # it can normally be empty

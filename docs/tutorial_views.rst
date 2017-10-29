@@ -82,7 +82,7 @@ In the example above, we used the ``dmp_render`` function to render our template
 
 At the beginning of each request, DMP's middleware determines the current app (i.e. the first item in the url) and adds two render functions to the request object.  These are available throughout your request, with no imports needed.  As long as you are rendering a template in the request's current app, DMP knows where to find the template file.
 
-DMP provides a second function, ``dmp_render_to_string``. This is nearly the same as ``dmp_render``, but ``dmp_render_to_string`` returns a string rather than an ``HttpResponse`` object. Scroll to `Mime Types and Status Codes`_ to see an example of the ``dmp_render_to_string`` function.
+DMP provides a second function, ``dmp_render_to_string``. This is nearly the same as ``dmp_render``, but ``dmp_render_to_string`` returns a string rather than an ``HttpResponse`` object.
 
 **You really don't need to worry about any of this.**  Templates are rendered in the current app 99% of the time, so just use this code unless you are in a special use case:
 

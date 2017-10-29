@@ -97,7 +97,7 @@ Second Way (this way uses the standard Django API):
 
 
 Content Types and Status Codes
----------------------------
+--------------------------------
 
 The ``dmp_render()`` function determines the mime type from the template extension and returns a *200* status code. What if you need to return JSON, CSV, or a 404 not found?  The function takes these parameters too. A few examples:
 

@@ -119,17 +119,3 @@ class JavascriptRedirectException(RedirectException):
         return HttpResponseJavascriptRedirect(self.redirect_to, *self.args, **self.kwargs)
 
 
-
-################################################################
-###   Other exceptions not exposed beyond DMP
-
-class SassCompileException(Exception):
-    '''Raised when a .scss file won't compile'''
-    def __init__(self, cmd, message):
-        self.cmd = cmd
-        self.message = message
-
-    def __str__(self):
-        return self.message
-
-

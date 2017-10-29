@@ -25,7 +25,7 @@ Features
 - `Calls any view function </tutorial_views.html>`_ by convention instead of listing every. single. page. in urls.py.
 - `Converts parameters </tutorial_urlparams.html>`_ in the URL and loads model objects by convention.
 - Automatically `links .js and .css </tutorial_css_js.html>`_ in your HTML documents by convention.
-- Includes `per-user logic </tutorial_css_js.html#static-and-dynamic-javascript>`_ in .js and .css files.
+- Automatically sets `context variables </tutorial_css_js.html#static-and-dynamic-javascript>`_ in the Javascript namespace.
 - Provides `Django-style signals </topics_signals.html>`_.
 - Extends Django's redirecting with `exception-based redirecting </topics_redirecting.html>`_.
 - Supports `language translations </topics_translation.html>`_, `class-based views </topics_class_views.html>`_, and collection of `static files </topics_static_files.html>`_.

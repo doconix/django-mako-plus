@@ -26,8 +26,6 @@ In the above function, ``hrs`` and ``mins`` are set to the following integers:
 +--------------------------------------------------+-----------------------------------------------------------------------+
 | ``/homepage/index/111``                          | ``hrs=111``; ``mins=30`` (default)                                    |
 +--------------------------------------------------+-----------------------------------------------------------------------+
-        
-
 
 Supported Types
 ^^^^^^^^^^^^^^^^^^^^^
@@ -56,8 +54,6 @@ Out of the box, DMP converts the following types:
 | ``object``                | The fallback, no conversion                                 | ``''``                                            |
 +---------------------------+-------------------------------------------------------------+---------------------------------------------------+
 
-
-
 Notes about bool:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -83,7 +79,6 @@ In the example above, ``forward`` has a type hint *and* a default value, making 
 
 While these conversion characters may seem a little arbitrary, these characters allow you to create "pretty" urls, with a dash or zero denoting False.
 
-
 Notes about Django Models:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -104,8 +99,6 @@ In the above code, one of two outcomes will occur:
 * If it doesn't exist, DMP raises Http404.
 
 A third outcome could also have occurred if the URL had been slightly different.  In the URL ``http://localhost:8000/storefront/receipt/-/``, the purchase object would be ``None``, but the view function still would be called normally.  When converting Model parameters, the empty string, the dash, and a zero all cause the object to be None.  This allows your application to create URLs with objects explictily set to None.
-
-
 
 Non-Wrapping Decorators
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -153,7 +146,6 @@ When your inner function is decorated with ``@wraps``, DMP is able to "unwrap" t
 
     If your decorator comes from third-party code that you can't control, one solution is to create a new decorator (following the pattern above) that calls the third-party function as its "work". Then decorate functions with your own decorator rather than the third-party decorator.
 
-
 Raw Parameter Values
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -186,8 +178,6 @@ Because of these difficulties, the urlparams list is programmed to never return 
 
 For this reason, the default converters for booleans and Models objects equate the empty string *and* dash '-' as the token for False and None, respectively.  The single dash is especially useful because it provides a character in the URL (so your web server doesn't compact that position) and explicitly states the value.  Your custom converters can override this behavior, but be sure to check for the empty string in ``request.urlparams`` instead of ``None``.
 
-
-
 Extending the Default Converter
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -198,7 +188,6 @@ Conversion methods are linked to types with the ``@DefaultConverter.convert_meth
     The converter uses ``isinstance`` to find the right converter, so it matches both exact types and inherited types.  This is how the automatic model converter is done: the single converter method for ``models.Model`` is called for all custom-defined models in your project because the superclass is listed as the type.
 
 Let's add two custom conversion methods: one for a Django model and one for the built-in type ``timedelta``.  Note that we are putting the ``CustomConverter`` class in the app-level ``__init__.py`` file, but it can actually be in any file of your project that imports at Django startup.
-
 
 Example 1: ``django.contrib.auth.models.User``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -289,7 +278,6 @@ In the above code, ``User`` is imported when the source file is loaded in to Pyt
 
 Using strings for types may or may not be necessary, depending on how your project imports are written.  This format is only allowed for model classes and not for other types like ``"str"``.
 
-
 Return or Raise
 +++++++++++++++++++++++++++++++
 
@@ -301,8 +289,6 @@ Certain exceptions are automatically handled by DMP and Django.  Raising these e
 
 * DMP handles `several redirect exceptions <topics_redirecting.html>`_.
 * Django handles exceptions like `Http404 <https://docs.djangoproject.com/en/dev/topics/http/views/#the-http404-exception>`_.
-
-
 
 Example 2: ``timedelta``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -353,7 +339,6 @@ Then change ``/homepage/views/index.py`` to the following:
 
 When you load http://localhost:8000/homepage/index/6:30/ in your browser, DMP will use ``convert_timedelta()`` to parse the hours and minutes from the first url parameter.
 
-
 @view_function(custom='arguments')
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -402,8 +387,6 @@ The following is a repeat of the "Extending" example above, modified to raise a 
         return request.dmp_render('index.html', context)
 
 In summary, adding keyword arguments to ``@view_function(...)`` allows you set values *per view function*, which enables common converter functions to contain per-function logic.
-
-
 
 Replacing the Default Converter
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -470,6 +453,3 @@ In this case, the converter is called twice: once for ``delta`` and once for ``f
 |                                                   | | ``convert(True, ...)`` is called for the ``forward`` parameter              |
 |                                                   |    (using the default in the function signature).                             |
 +---------------------------------------------------+-------------------------------------------------------------------------------+
-
-
-

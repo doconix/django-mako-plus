@@ -10,7 +10,7 @@
         <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 
         ## render the styles with the same name as this template and its supertemplates
-        ${ django_mako_plus.link_css(self) }
+        ${ django_mako_plus.get_static(self, 'styles') }
 
     </head>
     <body>
@@ -24,7 +24,7 @@
         </%block>
 
         ## render the scripts with the same name as this template and its supertemplates
-        ${ django_mako_plus.link_js(self) }
+        ${ django_mako_plus.get_static(self, 'scripts') }
 
     </body>
 </html>
