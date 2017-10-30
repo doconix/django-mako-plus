@@ -73,10 +73,21 @@ from .util import get_dmp_app_configs
 # when it processes the project's urls.py file.
 
 
-# the static files shortcuts
+# static files shortcuts
+from .static_files import get_static
+from .static_files import get_template_static
+# static file providers
+from .static_files import BaseProvider
+from .static_files import LinkProvider
+from .static_files import CssLinkProvider
+from .static_files import JsLinkProvider
+from .static_files import CompileProvider
+from .static_files import CompileScssProvider
+from .static_files import CompileLessProvider
+# static files deprecated things
+from .static_files import MakoCssProvider
+from .static_files import MakoJsProvider
 from .static_files import link_css
 from .static_files import link_js
 from .static_files import link_template_css
 from .static_files import link_template_js
-from .static_files import get_static
-from .static_files import get_template_static

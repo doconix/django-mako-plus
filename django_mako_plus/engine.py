@@ -10,11 +10,11 @@ from .exceptions import InternalRedirectException, RedirectException
 from .signals import dmp_signal_pre_render_template, dmp_signal_post_render_template, dmp_signal_redirect_exception
 from .template import MakoTemplateLoader, MakoTemplateAdapter
 from .registry import register_app, is_dmp_app as registry_is_dmp_app
+from .static_files import init_providers
 from .util import get_dmp_instance, get_dmp_app_configs, log, DMP_OPTIONS, DMP_INSTANCE_KEY
 
 from mako.template import Template
 
-from copy import deepcopy
 from operator import attrgetter
 import os, os.path, sys, itertools, collections, inspect
 try:
@@ -61,19 +61,9 @@ class MakoTemplates(BaseEngine):
             context_processors.append(import_string(processor))
         self.template_context_processors = tuple(context_processors)
         
-        # parse the static file providers
-        if 'STATIC_FILE_PROVIDERS' not in DMP_OPTIONS:  # defaults for upgrading users
-            from . import static_files
-            DMP_OPTIONS['RUNTIME_STATIC'] = [ v for k, v in inspect.getmembers(static_files, lambda p: inspect.isclass(p) and issubclass(p, static_files.BaseProvider) and p != static_files.BaseProvider and p.default_provider) ]
-        else:
-            DMP_OPTIONS['RUNTIME_STATIC'] = []
-            for provider_class, options in DMP_OPTIONS['STATIC_FILE_PROVIDERS'].items():
-                if not inspect.isclass(provider_class):
-                    provider_class = import_string(provider_class)
-                provider_class.options.update(options)
-                DMP_OPTIONS['RUNTIME_STATIC'].append(provider_class)
-        DMP_OPTIONS['RUNTIME_STATIC'].sort(key=attrgetter('weight'), reverse=True)
-
+        # set up the static file providers
+        init_providers()
+        
         # add a template renderer for each DMP-enabled app
         for app_config in get_dmp_app_configs():
             register_app(app_config)

@@ -2,9 +2,6 @@ from django.apps import apps
 from django.core.exceptions import ImproperlyConfigured
 
 import base64
-import os
-import os.path
-import time
 
 
 # this is populated with the dictionary of options in engine.py when
@@ -90,3 +87,13 @@ def decode32(st):
     return byte_st.decode('utf8')         # we now have a Unicode string of the original text
 
 
+def merge_dicts(*dicts):
+    '''
+    Merges an arbitrary number of dicts, starting 
+    with the first argument and updating through the
+    last argument (last dict wins on conflicting keys).
+    '''
+    merged = {}
+    for d in dicts:
+        merged.update(d)
+    return merged

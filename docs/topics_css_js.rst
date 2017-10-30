@@ -64,10 +64,10 @@ Generally, the best way to handle this is to refactor your code so the duplicate
 
 With the above call, DMP will include only one reference to each filename within a given request.
 
-Providers
---------------------
+Under the Hood: Providers
+-------------------------------
 
-When you call ``get_static()`` within a template, DMP iterates through a list of providers (``django_mako_plus.static_files.BaseProvider`` subclasses).  You can customize the behavior of these providers in your ``settings.py`` file:
+The static files system is built to be extended for custom file types.  When you call ``get_static()`` within a template, DMP iterates through a list of providers (``django_mako_plus.static_files.BaseProvider`` subclasses).  You can customize the behavior of these providers in your ``settings.py`` file.  Here's a very basic version:
 
 ::
 
@@ -78,46 +78,114 @@ When you call ``get_static()`` within a template, DMP iterates through a list of
             'APP_DIRS': True,
             'OPTIONS': {
                 ...
-                'STATIC_FILE_PROVIDERS': {
-                    # creates <link> when styles/template.css exists
-                    'django_mako_plus.static_files.CssProvider': {},
+                'STATIC_FILE_PROVIDERS': [
+                    # generates links for app/styles/template.css
+                    { 'provider': 'django_mako_plus.CssLinkProvider' },
                     
-                    # creates <script> when scripts/template.js exists
-                    'django_mako_plus.static_files.JsProvider': {},
+                    # generates links for app/scripts/template.js
+                    { 'provider': 'django_mako_plus.JsLinkProvider' },
                     
-                    # *.scss compiling
-                    # specify the `command` as a list (see Python's subprocess module)
-                    # Special format keywords for use in the options:
-                    #     {appdir} - The app directory for the template being rendered (full path).
-                    #     {template} - The name of the template being rendered, without its extension.
-                    'django_mako_plus.static_files.CompileProvider': {
-                        'source': '{appdir}/styles/{template}.scss',
-                        'compiled': '{appdir}/styles/{template}.css',
-                        'command': [ shutil.which('scss'), '--unix-newlines', '{appdir}/styles/{template}.scss', '{appdir}/styles/{template}.css' ],
-                    },
-
-                    # *.less compiling
-                    'django_mako_plus.static_files.CompileProvider': {
-                        'source': '{appdir}/styles/{template}.less',
-                        'compiled': '{appdir}/styles/{template}.css',
-                        'command': [ shutil.which('lessc'), '--source-map', '{appdir}/styles/{template}.less', '{appdir}/styles/{template}.css' ],
-                    },
-
-                    # *.py (Transcript) compiling
-                    'django_mako_plus.static_files.CompileProvider': {
-                        'source': '{appdir}/scripts/{template}.py',
-                        'compiled': '{appdir}/scripts/__javascript__/{template}.js',
-                        'command': [ '/usr/bin/env, 'python3' '-m transcrypt '-m -b', '{appdir}/scripts/{template}.py', '{appdir}/scripts/__javascript__/{template}.js' ],
-                    },
-                },                
+                    # compiles app/styles/template.scss to app/styles/template/css
+                    { 'provider': 'django_mako_plus.CompileScssProvider' },
+                    
+                    # compiles app/styles/template.less to app/styles/template/css
+                    { 'provider': 'django_mako_plus.CompileLessProvider' },
+                ],
             }
         }
     ]
     
-The first two providers, ``CssProvider`` and ``JsProvider``, generate the automatic links in your template.  Again, these are triggered by the call to ``django_mako_plus.get_static(self, 'group')``, where group is either "styles" or "scripts". 
+Each type of provider takes additional settings that allow you to customize locations, automatic compilation, etc.  The following more-detailed version enumerates all the options (set to their defaults).  
 
-The third provider compiles ``*.scss`` files. The options are specified with two special keywords sent to string .format(): ``{appdir}`` and ``{template}``.  The ``{appdir}`` keyword is the app folder for the current template (given as a full, absolute path).  The ``{template}`` keyword is the name of current template (without its extension).  Using these special keywords, three options are constructed so DMP knows the source file path, the compiled file path, and the executable command.  When the source file is newer than the compiled file, DMP runs the command.
+::
 
-The fourth provider compiles ``*.less`` files. 
+    TEMPLATES = [
+        {
+            'NAME': 'django_mako_plus',
+            'BACKEND': 'django_mako_plus.MakoTemplates',
+            'APP_DIRS': True,
+            'OPTIONS': {
+                ...
+                'STATIC_FILE_PROVIDERS': [
+                    # generates links for app/styles/template.css
+                    { 
+                        'provider': 'django_mako_plus.CssLinkProvider' 
+                        'group': 'styles',
+                        'weight': 0,
+                        'filename': '{appdir}/styles/{template}.css',
+                    },
+                    
+                    # generates links for app/scripts/template.js
+                    { 
+                        'provider': 'django_mako_plus.JsLinkProvider' 
+                        'group': 'scripts',
+                        'weight': 0,
+                        'filename': '{appdir}/scripts/{template}.js',
+                    },
+                    
+                    # compiles app/styles/template.scss to app/styles/template/css
+                    { 
+                        'provider': 'django_mako_plus.CompileScssProvider' 
+                        'group': 'styles',
+                        'weight': 10,  
+                        'source': '{appdir}/styles/{template}.scss',
+                        'compiled': '{appdir}/styles/{template}.css',
+                        'command': [ shutil.which('scss'), '--unix-newlines', '{appdir}/styles/{template}.scss', '{appdir}/styles/{template}.css' ],
+                    },
+                    
+                    # compiles app/styles/template.less to app/styles/template/css
+                    { 
+                        'provider': 'django_mako_plus.CompileLessProvider' 
+                        'group': 'styles',
+                        'weight': 10,  
+                        'source': '{appdir}/styles/{template}.less',
+                        'compiled': '{appdir}/styles/{template}.css',
+                        'command': [ shutil.which('lessc'), '--source-map', '{appdir}/styles/{template}.less', '{appdir}/styles/{template}.css' ],
+                    },
+                ],
+            }
+        }
+    ]
+    
+Custom Providers
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The fifth provider compiles Transcrypt ``*.py`` files to Javascript.  
+Creating new provider classes is easy.  The following is an example of a custom provider class.  Once you create the class, simply reference it in your settings.py file.
+
+.. code:: python
+
+    from django_mako_plus import BaseProvider
+    from django_mako_plus.utils import merge_dicts
+
+    class YourCustomProvider(BaseProvider):
+        default_options = merge_dicts(BaseProvider.default_options, {  
+            'any': 'additional',
+            'options': 'should',
+            'be': 'specified',
+            'here': '.',
+        })
+        
+        def init(self):
+            # This is called from the constructor.
+            # It runs once per template (at production).
+            # Place any setup code here, or omit the
+            # method if you don't need it.
+            # 
+            # Variables set by DMP:
+            #    self.app_dir = '/absolute/path/to/app/'
+            #    self.template_name = 'current template name without extension'
+            #    self.options = { 'dictionary': 'of all options' }
+            #    self.cgi_id = 'a unique number - see the docs'
+            
+        def append_static(self, request, context, html):
+            # This is called during template rendering
+            # It runs once per template - each time get_static()
+            # is called.
+            #
+            # This method sbould append HTML tags to the `html`
+            # parameter (which is a list of str).
+            # 
+            html.append('<div>Some content</div>')
+            html.append('<div>More here</div>')
+            
+            
