@@ -223,42 +223,28 @@ standard Django project already has the ``TEMPLATES =`` line.
                 # determines whether DMP will send its custom signals during the process
                 'SIGNALS': False,
 
-                # whether to minify using rjsmin, rcssmin during 1) collection of static files, and 2) on the fly as .jsm and .cssm files are rendered
-                # rjsmin and rcssmin are fast enough that doing it on the fly can be done without slowing requests down
-                'MINIFY_JS_CSS': True,
-
-                # the name of the SASS binary to run if a .scss file is newer than the resulting .css file
-                # happens when the corresponding template.html is accessed the first time after server startup
-                # if DEBUG=False, this only happens once per file after server startup, not for every request
-                # specify the binary in a list below -- even if just one item (see subprocess.Popen)
-
-                # Python 3.4+:
-                #'SCSS_BINARY': [ shutil.which('scss'), '--unix-newlines' ],
-
-                # Python 3.0 to 3.2:
-                #'SCSS_BINARY': [ '/path/to/scss', '--unix-newlines' ],
-
-                # Disabled (no sass integration)
-                'SCSS_BINARY': None,
-
+                # # static file providers - these autoinclude *.css and *.js files
+                # 'CONTENT_PROVIDERS': [
+                #     # generates links for app/styles/template.css
+                #     { 'provider': 'django_mako_plus.CssLinkProvider' },
+                #
+                #     # generates links for app/scripts/template.js
+                #     { 'provider': 'django_mako_plus.JsLinkProvider' },
+                #
+                #     # adds tagged context variables to the JS namespace
+                #     { 'provider': 'django_mako_plus.JsContextProvider' },
+                #
+                #     # compiles app/styles/template.scss to app/styles/template/css
+                #     { 'provider': 'django_mako_plus.CompileScssProvider' },
+                #
+                #     # compiles app/styles/template.less to app/styles/template/css
+                #     { 'provider': 'django_mako_plus.CompileLessProvider' },
+                # ],
+           
                 # see the DMP online tutorial for information about this setting
                 # it can normally be empty
                 'TEMPLATES_DIRS': [
                     # '/var/somewhere/templates/',
-                ],
-            },
-        },
-        {
-            'NAME': 'django',
-            'BACKEND': 'django.template.backends.django.DjangoTemplates',
-            'DIRS': [],
-            'APP_DIRS': True,
-            'OPTIONS': {
-                'context_processors': [
-                    'django.template.context_processors.debug',
-                    'django.template.context_processors.request',
-                    'django.contrib.auth.context_processors.auth',
-                    'django.contrib.messages.context_processors.messages',
                 ],
             },
         },

@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.core.serializers.json import DjangoJSONEncoder
 
 from ..util import merge_dicts
 from .base import BaseProvider
@@ -21,7 +22,7 @@ class JsContextProvider(BaseProvider):
         if provider_run.inheritance_index == 0:
             js_context = { k: provider_run.context[k] for k in provider_run.context.kwargs if isinstance(k, jscontext) }
             if len(js_context) > 0:
-                return '<script>window.context = {};</script>'.format(json.dumps(js_context))
+                return '<script>window.context = {};</script>'.format(json.dumps(js_context, cls=DjangoJSONEncoder))
         return None
         
         
