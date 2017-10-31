@@ -16,6 +16,9 @@ DEFAULT_CONTENT_PROVIDERS = [
     { 'provider': 'django_mako_plus.CssLinkProvider' },
     { 'provider': 'django_mako_plus.JsLinkProvider'  },
     { 'provider': 'django_mako_plus.JsContextProvider'  },
+    # deprecated as of Oct 2017
+    { 'provider': 'django_mako_plus.MakoCssProvider'  },
+    { 'provider': 'django_mako_plus.MakoJsProvider'  },
 ]
 
 
@@ -32,7 +35,7 @@ class ProviderFactory(object):
         try:
             self.provider_class = provider_def['provider']
         except KeyError:
-            raise ImproperlyConfigured('The Django Mako Plus template OPTIONS were not set up correctly in settings.py; a STATIC_FILE_PROVIDERS item is missing `provider`.')
+            raise ImproperlyConfigured('The Django Mako Plus template OPTIONS were not set up correctly in settings.py; a CONTENT_PROVIDERS item is missing `provider`.')
         if isinstance(self.provider_class, str):
             self.provider_class = import_string(self.provider_class)
         if not issubclass(self.provider_class, BaseProvider):

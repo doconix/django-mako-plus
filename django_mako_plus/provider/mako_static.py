@@ -22,6 +22,7 @@ except ImportError:
 class MakoCssProvider(BaseProvider):
     '''Provides the content for *.cssm files'''
     default_options = merge_dicts(BaseProvider.default_options, {  
+        'group': 'styles',
         'minify': True,
     })
     def init(self):
@@ -47,6 +48,7 @@ class MakoCssProvider(BaseProvider):
 class MakoJsProvider(BaseProvider):
     '''Provides the content for *.jsm files'''
     default_options = merge_dicts(BaseProvider.default_options, {  
+        'group': 'scripts',
         'minify': True,
     })
     def init(self):
@@ -56,7 +58,7 @@ class MakoJsProvider(BaseProvider):
         except TemplateDoesNotExist:
             self.template = None
         
-    def get_content(self, request, context):
+    def get_content(self, provider_run):
         if self.template is not None:
             content = self.template.render(request=provider_run.request, context=provider_run.context)
             if self.options['minify']:

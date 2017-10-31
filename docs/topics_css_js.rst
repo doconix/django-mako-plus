@@ -4,7 +4,7 @@ Rendering CSS and JS
 In the `tutorial <tutorial_css_js.html>`_, you learned how to automatically include CSS and JS based on your page name .  
 If your page is named ``mypage.html``, DMP will automatically include ``mypage.css`` and ``mypage.js`` in the page content.  Skip back to the `tutorial <tutorial_css_js.html>`_ if you need a refresher.
 
-Preprocessors like Scss and Less
+Preprocessors (Scss and Less)
 -----------------------------------
 
 If you are using preprocessors for your CSS or JS, DMP can automatically compile files.  While this could alternatively be done with an editor plugin or with a 'watcher' process, letting DMP compile for you keeps the responsibility within your project settings (rather than per-programmer-dependent setups).
@@ -64,8 +64,7 @@ The static files system is built to be extended for custom file types.  When you
             'BACKEND': 'django_mako_plus.MakoTemplates',
             'APP_DIRS': True,
             'OPTIONS': {
-                ...
-                'STATIC_FILE_PROVIDERS': [
+                'CONTENT_PROVIDERS': [
                     # generates links for app/styles/template.css
                     { 'provider': 'django_mako_plus.CssLinkProvider' },
                     
@@ -95,8 +94,7 @@ Each type of provider takes additional settings that allow you to customize loca
             'BACKEND': 'django_mako_plus.MakoTemplates',
             'APP_DIRS': True,
             'OPTIONS': {
-                ...
-                'STATIC_FILE_PROVIDERS': [
+                'CONTENT_PROVIDERS': [
                     # generates links for app/styles/template.css
                     { 
                         'provider': 'django_mako_plus.CssLinkProvider' 
@@ -126,7 +124,7 @@ Each type of provider takes additional settings that allow you to customize loca
                         'group': 'styles',
                         'weight': 10,  
                         'source': '{appdir}/styles/{template}.scss',
-                        'compiled': '{appdir}/styles/{template}.css',
+                        'output': '{appdir}/styles/{template}.css',
                         'command': [ shutil.which('scss'), '--unix-newlines', '{appdir}/styles/{template}.scss', '{appdir}/styles/{template}.css' ],
                     },
                     
@@ -136,13 +134,42 @@ Each type of provider takes additional settings that allow you to customize loca
                         'group': 'styles',
                         'weight': 10,  
                         'source': '{appdir}/styles/{template}.less',
-                        'compiled': '{appdir}/styles/{template}.css',
+                        'output': '{appdir}/styles/{template}.css',
                         'command': [ shutil.which('lessc'), '--source-map', '{appdir}/styles/{template}.less', '{appdir}/styles/{template}.css' ],
                     },
                 ],
             }
         }
     ]
+    
+For example, the following compiles `Transcrypt files <https://www.transcrypt.org/>`_.  The first provider transpiles the source, and the second one creates the ``<script>`` link to the output file.
+
+::
+
+    TEMPLATES = [
+        {
+            'NAME': 'django_mako_plus',
+            'BACKEND': 'django_mako_plus.MakoTemplates',
+            'APP_DIRS': True,
+            'OPTIONS': {
+                'CONTENT_PROVIDERS': [
+                    {
+                        'provider': 'django_mako_plus.CompileProvider',
+                        'group': 'scripts',
+                        'source': '{appdir}/scripts/{template}.py',
+                        'output': '{appdir}/scripts/__javascript__/{template}.js',
+                        'command': [ 'transcrypt', '--map', '--build', '--nomin', '{appdir}/scripts/{template}.py' ],
+                    },
+                    { 
+                        'provider': 'django_mako_plus.JsLinkProvider',
+                        'group': 'scripts',
+                        'filename': '{appdir}/scripts/__javascript__/{template}.js',
+                    },
+                ],
+            }
+        }
+    ]
+    
     
 Custom Providers
 ^^^^^^^^^^^^^^^^^^^^^^^^^^

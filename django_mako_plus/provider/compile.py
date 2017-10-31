@@ -23,7 +23,7 @@ class CompileProvider(BaseProvider):
         'group': 'styles',
         'weight': 10,  
         'source': '{appdir}/somedir/{template}.source',
-        'compiled': '{appdir}/somedir/{template}.output',
+        'output': '{appdir}/somedir/{template}.output',
         'command': [ 'echo', '{appdir}/somedir/{template}.source', '{appdir}/somedir/{template}.output' ],
     })
     def init(self):
@@ -33,7 +33,7 @@ class CompileProvider(BaseProvider):
             'template': self.template_name,
         }
         source_path = self.options['source'].format(**fargs)
-        compiled_path = self.options['compiled'].format(**fargs)
+        compiled_path = self.options['output'].format(**fargs)
         if os.path.exists(source_path):
             try:
                 needs_compile = os.path.getmtime(compiled_path) < os.path.getmtime(source_path)
@@ -47,7 +47,7 @@ class CompileScssProvider(CompileProvider):
     '''Specialized CompileProvider that contains settings for *.scss files.'''
     default_options = merge_dicts(CompileProvider.default_options, {  
         'source': '{appdir}/styles/{template}.scss',
-        'compiled': '{appdir}/styles/{template}.css',
+        'output': '{appdir}/styles/{template}.css',
         'command': [ shutil.which('scss'), '--unix-newlines', '{appdir}/styles/{template}.scss', '{appdir}/styles/{template}.css' ],
     })
 
@@ -56,7 +56,7 @@ class CompileLessProvider(CompileProvider):
     '''Specialized CompileProvider that contains settings for *.less files.'''
     default_options = merge_dicts(CompileProvider.default_options, {  
         'source': '{appdir}/styles/{template}.less',
-        'compiled': '{appdir}/styles/{template}.css',
+        'output': '{appdir}/styles/{template}.css',
         'command': [ shutil.which('lessc'), '--source-map', '{appdir}/styles/{template}.less', '{appdir}/styles/{template}.css' ],
     })
 
