@@ -54,7 +54,7 @@ In other words, this behavior already happens; just use the calls above.  Even i
 Under the Hood: Providers
 -------------------------------
 
-The static files system is built to be extended for custom file types.  When you call ``providers()`` within a template, DMP iterates through a list of providers (``django_mako_plus.BaseProvider`` subclasses).  You can customize the behavior of these providers in your ``settings.py`` file.  Here's a very basic version:
+The framework is built to be extended for custom file types.  When you call ``providers()`` within a template, DMP iterates through a list of providers (``django_mako_plus.BaseProvider`` subclasses).  You can customize the behavior of these providers in your ``settings.py`` file.  Here's a very basic version:
 
 ::
 
@@ -116,6 +116,7 @@ Each type of provider takes additional settings that allow you to customize loca
                         'provider': 'django_mako_plus.JsContextProvider' 
                         'group': 'scripts',
                         'weight': 5,
+                        'encoder': 'django.core.serializers.json.DjangoJSONEncoder',
                     },
                     
                     # compiles app/styles/template.scss to app/styles/template/css

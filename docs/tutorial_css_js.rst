@@ -100,6 +100,8 @@ Reload your browser, and then right-click and "View Page Source".  Scroll to the
     
 By tagging the key as ``jscontext('now')``, DMP sets the key and value in ``window.context``.  Since this code appears **just before index.js**, it can be used throughout our JS file.  Note that variables sent via ``jscontext`` must be serializable by Django's ``django.core.serializers.json.DjangoJSONEncoder``.  That includes all the typical types, plus datetime, date, time, timedelta, Decimal, and UUID.
 
+    If you need a custom encoding class (instead of DjangoJSONEncoder), specify the class path in settings.  See ``encoder`` setting in `the advanced topic on CSS and JS <topics_css_js.html#under-the-hood-providers>`_.
+
 Let's use the variable in ``index.js``:
 
 .. code:: javascript
