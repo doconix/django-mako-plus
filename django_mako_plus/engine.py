@@ -10,7 +10,7 @@ from .exceptions import InternalRedirectException, RedirectException
 from .signals import dmp_signal_pre_render_template, dmp_signal_post_render_template, dmp_signal_redirect_exception
 from .template import MakoTemplateLoader, MakoTemplateAdapter
 from .registry import register_app, is_dmp_app as registry_is_dmp_app
-from .static_files import init_providers
+from .provider import init_providers
 from .util import get_dmp_instance, get_dmp_app_configs, log, DMP_OPTIONS, DMP_INSTANCE_KEY
 
 from mako.template import Template

@@ -1,7 +1,7 @@
 from django.conf import settings
 
 from ..util import merge_dicts
-from .provider_base import BaseProvider
+from .base import BaseProvider
 
 import os
 import os.path
@@ -15,7 +15,6 @@ class LinkProvider(BaseProvider):
         'group': 'styles',
         'filename': '{appdir}/somedir/{template}.static.file',
     })
-    weight = 10                 # so it compiles before the normal providers
     def init(self):
         self.content = None
         fargs = {
@@ -24,6 +23,10 @@ class LinkProvider(BaseProvider):
         }
         fullpath = self.options['filename'].format(**fargs)
         if os.path.exists(fullpath):
+            # the cgi_id is a unique number either given by the project or by reading the last modified time of the file
+            # it is important to add to links (see make_link in the subclasses) because it makes the url unique, which
+            # forces browsers to re-download the file despite a previous version being in their cache.  Without this id,
+            # some browsers (Chrome, I'm looking at you) use the cached version even after updates to the file.
             if self.cgi_id is None:
                 self.cgi_id = int(os.stat(fullpath).st_mtime)
             # make it relative to the project root, and ensure we have forward slashes (even on windows) because this is for urls
@@ -33,9 +36,8 @@ class LinkProvider(BaseProvider):
     def make_link(href):
         raise NotImplementedError('Subclass should have implemented this.')
 
-    def append_static(self, request, context, html):
-        if self.content is not None:
-            html.append(self.content)
+    def get_content(self, provider_run):
+        return self.content
 
 
 class CssLinkProvider(LinkProvider):

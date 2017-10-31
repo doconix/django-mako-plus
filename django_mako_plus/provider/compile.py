@@ -1,6 +1,6 @@
 from ..command import run_command
 from ..util import get_dmp_instance, merge_dicts
-from .provider_base import BaseProvider
+from .base import BaseProvider
 
 import os
 import os.path

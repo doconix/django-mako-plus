@@ -9,8 +9,8 @@ import os, os.path
 
 class Tester(TestCase):
 
-    def test_static_files(self):
-        resp = self.client.get('/tests/static_files/')
+    def test_providers(self):
+        resp = self.client.get('/tests/providers/')
         self.assertEqual(resp.status_code, 200)
         # base
         self.assertTrue(b'tests/scripts/base.js' in resp.content)
@@ -20,10 +20,10 @@ class Tester(TestCase):
         self.assertFalse(b'+base.css+' in resp.content)
         self.assertTrue(b'+base.cssm+' in resp.content)
         # static files
-        self.assertTrue(b'tests/scripts/static_files.js' in resp.content)
-        self.assertFalse(b'+static_files.js+' in resp.content)
-        self.assertTrue(b'+static_files.jsm+' in resp.content)
-        self.assertTrue(b'tests/styles/static_files.css' in resp.content)
-        self.assertFalse(b'+static_files.css+' in resp.content)
-        self.assertTrue(b'+static_files.cssm+' in resp.content)
+        self.assertTrue(b'tests/scripts/providers.js' in resp.content)
+        self.assertFalse(b'+providers.js+' in resp.content)
+        self.assertTrue(b'+providers.jsm+' in resp.content)
+        self.assertTrue(b'tests/styles/providers.css' in resp.content)
+        self.assertFalse(b'+providers.css+' in resp.content)
+        self.assertTrue(b'+providers.cssm+' in resp.content)
 

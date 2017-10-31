@@ -76,7 +76,7 @@ The real HTML is kept in the ``base.htm`` file. It looks like this:
         <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 
         ## render the styles with the same name as this template and its supertemplates
-        ${ django_mako_plus.get_static(self, 'styles') }
+        ${ django_mako_plus.providers(self, 'styles') }
 
       </head>
       <body>
@@ -90,7 +90,7 @@ The real HTML is kept in the ``base.htm`` file. It looks like this:
         </%block>
 
         ## render the scripts with the same name as this template and its supertemplates
-        ${ django_mako_plus.get_static(self, 'scripts') }
+        ${ django_mako_plus.providers(self, 'scripts') }
 
       </body>
     </html>
@@ -99,7 +99,7 @@ Pay special attention to the ``<%block name="content">`` section, which is overr
 
 The purpose of the inheritance from ``base.htm`` is to get a consistent look, menu, etc. across all pages of your site. When you create additional pages, simply override the ``content`` block, similar to the way ``index.html`` does it.
 
-    Don't erase anything in the base.htm file. In particular, ``get_static()``,
+    Don't erase anything in the base.htm file. In particular, ``providers()``,
     is important. As much as you probably want to clean up the mess, try 
     your best to leave these two calls alone. 
     

@@ -2,7 +2,7 @@ from django.core.exceptions import ImproperlyConfigured
 from django.template import TemplateDoesNotExist
 
 from ..util import get_dmp_instance, merge_dicts
-from .provider_base import BaseProvider
+from .base import BaseProvider
 
 import os
 import os.path
@@ -31,15 +31,16 @@ class MakoCssProvider(BaseProvider):
         except TemplateDoesNotExist:
             self.template = None
         
-    def append_static(self, request, context, html):
+    def get_content(self, provider_run):
         if self.template is not None:
-            content = self.template.render(request=request, context=context)
+            content = self.template.render(request=provider_run.request, context=provider_run.context)
             if self.options['minify']:
                 if cssmin is not None:
                     content = cssmin(content)
                 else:
                     raise ImproperlyConfigured("Unable to minify {}.cssm because rcssmin is not available. Please `pip install rcssmin`.".format(self.template_name))
-            html.append('<style type="text/css">{}</style>'.format(content))
+            return '<style type="text/css">{}</style>'.format(content)
+        return None
         
 
 ###  DEPRECATED as of DMP 4.3.1
@@ -55,14 +56,15 @@ class MakoJsProvider(BaseProvider):
         except TemplateDoesNotExist:
             self.template = None
         
-    def append_static(self, request, context, html):
+    def get_content(self, request, context):
         if self.template is not None:
-            content = self.template.render(request=request, context=context)
+            content = self.template.render(request=provider_run.request, context=provider_run.context)
             if self.options['minify']:
                 if jsmin is not None:
                     content = jsmin(content)
                 else:
                     raise ImproperlyConfigured("Unable to minify {}.jsm because rjsmin is not available. Please `pip install rjsmin`.".format(self.template_name))
-            html.append('<script type="text/javascript">{}</script>'.format(content))
+            return '<script type="text/javascript">{}</script>'.format(content)
+        return None
 
 

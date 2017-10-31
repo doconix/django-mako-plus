@@ -14,7 +14,7 @@ Suppose your template ``index.html`` contains the typical code:
 .. code:: html
 
     <head>
-        ${ django_mako_plus.get_static(self, 'styles') }
+        ${ django_mako_plus.providers(self, 'styles') }
     </head>
 
 When enabled, DMP looks for ``app_folder/styles/index.scss``.  If it exists, DMP checks the timestamp of the compiled version, ``app_folder/styles/index.css``, to see if if recompilation is needed.  If needed, it runs ``scss`` before generating ``<link type="text/css" />`` for the file. 
@@ -31,18 +31,18 @@ To include CSS and JS by name, use the following within any template on your sit
 ::
 
     ## instead of using the normal:
-    ## ${ django_mako_plus.get_static(self, 'styles') }
+    ## ${ django_mako_plus.providers(self, 'styles') }
     ##
     ## specify the app and page name:
-    ${ django_mako_plus.get_template_static(request, 'homepage', 'otherpage.html', context, 'styles')
+    ${ django_mako_plus.template_providers(request, 'homepage', 'otherpage.html', context, 'styles')
 
     ...
 
     ## instead of using the normal:
-    ## ${ django_mako_plus.get_static(self, 'scripts') }
+    ## ${ django_mako_plus.providers(self, 'scripts') }
     ##
     ## specify the app and page name:
-    ${ django_mako_plus.get_template_static(request, 'homepage', 'otherpage.html', context, 'scripts')
+    ${ django_mako_plus.template_providers(request, 'homepage', 'otherpage.html', context, 'scripts')
 
 Rendering Nonexistent Pages
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -51,23 +51,10 @@ This special case is for times when you need the CSS and JS autorendered, but do
 
 In other words, this behavior already happens; just use the calls above.  Even if ``otherpage.html`` doesn't exist, you'll get ``otherpage.css`` and ``otherpage.js`` in the current page content.
 
-Skipping Duplicates
--------------------------------
-
-In rare cases, static file links ``<link ...>`` can show on a page more than once.  For example, this can happen when you ``<%include />`` a subtemplate within a ``for`` loop.  If that subtemplate contains a ``get_static()`` call, you'll get the same CSS links on each run of the loop.
-
-Generally, the best way to handle this is to refactor your code so the duplicate calls don't occur.  However, if this isn't the right solution in a given situation, you can ask DMP to automatically skip duplicate includes by adding the ``duplicates`` parameter:
-
-::
-
-    ${ django_mako_plus.get_template_static(self, 'styles', duplicates=False) }
-
-With the above call, DMP will include only one reference to each filename within a given request.
-
 Under the Hood: Providers
 -------------------------------
 
-The static files system is built to be extended for custom file types.  When you call ``get_static()`` within a template, DMP iterates through a list of providers (``django_mako_plus.static_files.BaseProvider`` subclasses).  You can customize the behavior of these providers in your ``settings.py`` file.  Here's a very basic version:
+The static files system is built to be extended for custom file types.  When you call ``providers()`` within a template, DMP iterates through a list of providers (``django_mako_plus.BaseProvider`` subclasses).  You can customize the behavior of these providers in your ``settings.py`` file.  Here's a very basic version:
 
 ::
 
@@ -84,6 +71,9 @@ The static files system is built to be extended for custom file types.  When you
                     
                     # generates links for app/scripts/template.js
                     { 'provider': 'django_mako_plus.JsLinkProvider' },
+                    
+                    # adds marked context variables to the JS namespace
+                    { 'provider': 'django_mako_plus.JsContextProvider' },
                     
                     # compiles app/styles/template.scss to app/styles/template/css
                     { 'provider': 'django_mako_plus.CompileScssProvider' },
@@ -123,6 +113,13 @@ Each type of provider takes additional settings that allow you to customize loca
                         'filename': '{appdir}/scripts/{template}.js',
                     },
                     
+                    # adds marked context variables to the JS namespace
+                    { 
+                        'provider': 'django_mako_plus.JsContextProvider' 
+                        'group': 'scripts',
+                        'weight': 5,
+                    },
+                    
                     # compiles app/styles/template.scss to app/styles/template/css
                     { 
                         'provider': 'django_mako_plus.CompileScssProvider' 
@@ -157,7 +154,7 @@ Creating new provider classes is easy.  The following is an example of a custom 
     from django_mako_plus import BaseProvider
     from django_mako_plus.utils import merge_dicts
 
-    class YourCustomProvider(BaseProvider):
+    class YourCustomproviders(BaseProvider):
         default_options = merge_dicts(BaseProvider.default_options, {  
             'any': 'additional',
             'options': 'should',
@@ -177,15 +174,14 @@ Creating new provider classes is easy.  The following is an example of a custom 
             #    self.options = { 'dictionary': 'of all options' }
             #    self.cgi_id = 'a unique number - see the docs'
             
-        def append_static(self, request, context, html):
+        def get_content(self, request, context):
             # This is called during template rendering
-            # It runs once per template - each time get_static()
+            # It runs once per template - each time providers()
             # is called.
             #
-            # This method sbould append HTML tags to the `html`
-            # parameter (which is a list of str).
+            # This method sbould return the content to be added
+            # to the rendered output.
             # 
-            html.append('<div>Some content</div>')
-            html.append('<div>More here</div>')
+            return '<div>Some content or css or js or whatever</div>'
             
             

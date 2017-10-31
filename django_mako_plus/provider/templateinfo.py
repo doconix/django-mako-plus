@@ -23,50 +23,17 @@ class TemplateInfo(object):
     is created by _build_templateinfo_chain for each level in the Mako template inheritance chain.
     This object is then attached to the template object, which Mako already caches.
     That way we only do this work once per server run (in production mode).
-
-    The app_dir is the search location for the styles/ and scripts/ folders, relative to the
-    project base directory.  For typical apps, this is simply the app name.
-
-    The template_name is the filename of the template.
-
-    The cgi_id parameter is described in the MakoTemplateRenderer class below.
     '''
-    def __init__(self, app_dir, template_name, cgi_id=None):
-        self.app_dir = app_dir
-        self.template_name = template_name
-        
-        # initialize the static providers
-        self.providers = []
-        for provider_class in DMP_OPTIONS['RUNTIME_STATIC']:
-            self.providers.append(provider_class(app_dir, template_name, cgi_id))
+    def __init__(self, app_dir, template_name, cgi_id):
+        self.app_dir = app_dir              # absolute path
+        self.template_name = template_name  # without the extension
+        self.providers = [ pf.create(app_dir, template_name, cgi_id) for pf in DMP_OPTIONS['RUNTIME_PROVIDERS'] ]
 
 
-    def append_static(self, request, context, html, group=None, duplicates=True):
-        if request is None:
-            provider_keys = set() 
-        else:
-            if not hasattr(request, '_dmp_static_provider_keys'):
-                setattr(request, '_dmp_static_provider_keys', set())
-            provider_keys = request._dmp_static_provider_keys
-        for provider in self.providers:
-            provider_key = ( self.app_dir, self.template_name, provider.__class__.__qualname__ )
-            if (duplicates or provider_key not in provider_keys) and \
-               (group is None or provider.group == group):
-                    provider.append_static(request, context, html)
-                    provider_keys.add(provider_key)
-
-
-
-
-def build_templateinfo_chain(tself, cgi_id=None):
+def build_templateinfo_chain(tself, cgi_id):
     '''
     Retrieves a chain of TemplateInfo objects.  The chain is formed by following
-    template inheritance through inherit tags: <%inherit file="base_homepage.htm" />
-
-    For efficiency, the templates are ordered with the specialization template first.
-    The returned list should usually be reversed() by the calling code to put the
-    superclass CSS/JS first (allowing the specialization to override supertemplate styles
-    and scripts).
+    template inheritance through inherit tags: <%inherit file="parent.htm" />.
     '''
     # step through the template inheritance
     chain = []
@@ -86,6 +53,7 @@ def build_templateinfo_chain(tself, cgi_id=None):
         tself = tself.inherits
 
     # return
+    chain.reverse() # we need furthest ancestor first, current template last
     return chain
 
     

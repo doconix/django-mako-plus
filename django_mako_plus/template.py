@@ -78,7 +78,7 @@ class MakoTemplateLoader:
            This method raises a Mako exception if the template is not found or cannot compile.
         
            If force is True, an empty Mako template will be created when the file does not exist.
-           This option is used by the static_files part of DMP and normally be left False.
+           This option is used by the providers part of DMP and normally be left False.
         '''
         if template is None:
             raise TemplateLookupException('Template "%s" not found in search path: %s.' % (template, self.template_search_dirs))

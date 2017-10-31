@@ -1,1 +1,1 @@
-console.log('This is +static_files.js+');
+console.log('This is +providers.js+');

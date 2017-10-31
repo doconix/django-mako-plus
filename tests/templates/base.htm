@@ -6,7 +6,7 @@
         <title>Testing_App</title>
 
         ## render the css with the same name as this page and its supertemplates
-        ${ django_mako_plus.get_static(self, 'styles') }
+        ${ django_mako_plus.providers(self, 'styles') }
 
     </head>
     <body>
@@ -14,7 +14,7 @@
         </%block>
 
         ## render the JS with the same name as this page and its supertemplates
-        ${ django_mako_plus.get_static(self, 'scripts') }
+        ${ django_mako_plus.providers(self, 'scripts') }
 
     </body>
 </html>

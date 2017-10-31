@@ -28,7 +28,7 @@ Features
 - Automatically sets `context variables </tutorial_css_js.html#static-and-dynamic-javascript>`_ in the Javascript namespace.
 - Provides `Django-style signals </topics_signals.html>`_.
 - Extends Django's redirecting with `exception-based redirecting </topics_redirecting.html>`_.
-- Supports `language translations </topics_translation.html>`_, `class-based views </topics_class_views.html>`_, and collection of `static files </topics_static_files.html>`_.
+- Supports `language translations </topics_translation.html>`_, `class-based views </topics_class_views.html>`_, and collection of `static files </topics_providers.html>`_.
 - Includes a comprehensive `test suite <https://github.com/doconix/django-mako-plus/tree/master/tests>`_.
 
 DMP doesn't replace Django; the standard router and template engine can be used alongside it.
