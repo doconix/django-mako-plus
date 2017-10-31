@@ -76,26 +76,20 @@ class ProviderRun(object):
         self.context = context
         self.group = group
         self.chain = chain
-        # attach to the request so we have a log of rendered providers for this request
-        if self.request is not None:
-            if not hasattr(self.request, '_dmp_rendered_providers'):
-                setattr(self.request, '_dmp_rendered_providers', set())
-            self.rendered_providers = getattr(self.request, '_dmp_rendered_providers')
-        else:
-            self.rendered_providers = set() 
         
     def get_content(self):
-        '''Loops each TemplateProviders list, returning the combined content.'''
+        '''Loops each TemplateInfo providers list, returning the combined content.'''
         self.inheritance_index = 0
         self.html = []
         for ti in self.chain:
             for provider_i, provider in enumerate(ti.providers):
                 if self.group is None or provider.group == self.group:
-                   content = provider.get_content(self)
-                   if content:
-                       self.html.append(content)
+                    content = provider.get_content(self)
+                    if content:
+                        self.html.append(content)
             self.inheritance_index += 1
         return '\n'.join(self.html)
+
 
 
 def template_providers(request, app, template_name, context=None, group=None, cgi_id=None, force=True):
