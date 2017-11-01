@@ -16,5 +16,8 @@ if __name__ == "__main__":
     else:
         args = sys.argv[1:]
     failures = test_runner.run_tests(args)
+    print()
+    print('Note: some of the tests produce exceptions and stack traces in the output, but these are the expected exceptions resulting from tests.  Focus on whether the tests ran without failures (not on the expected exceptions).')
+    print()
     sys.exit(bool(failures))
 

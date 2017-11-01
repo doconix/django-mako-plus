@@ -5,7 +5,7 @@ STOP_RENDERING = runtime.STOP_RENDERING
 __M_dict_builtin = dict
 __M_locals_builtin = locals
 _magic_number = 10
-_modified_time = 1492952745.431536
+_modified_time = 1509551115.112275
 _enable_loop = True
 _template_filename = '/Users/conan/Documents/data/programming/django-mako-plus/tests/scripts/static_files.jsm'
 _template_uri = 'static_files.jsm'
@@ -21,7 +21,7 @@ def render_body(context,**pageargs):
     try:
         __M_locals = __M_dict_builtin(pageargs=pageargs)
         __M_writer = context.writer()
-        __M_writer("console.log('This is +static_files.jsm+');\n")
+        __M_writer("console.log('This is +providers.jsm+');\n")
         return ''
     finally:
         context.caller_stack._pop_frame()
@@ -29,6 +29,6 @@ def render_body(context,**pageargs):
 
 """
 __M_BEGIN_METADATA
-{"filename": "/Users/conan/Documents/data/programming/django-mako-plus/tests/scripts/static_files.jsm", "source_encoding": "utf-8", "uri": "static_files.jsm", "line_map": {"24": 1, "19": 0, "30": 24}}
+{"source_encoding": "utf-8", "line_map": {"24": 1, "19": 0, "30": 24}, "filename": "/Users/conan/Documents/data/programming/django-mako-plus/tests/scripts/static_files.jsm", "uri": "static_files.jsm"}
 __M_END_METADATA
 """
