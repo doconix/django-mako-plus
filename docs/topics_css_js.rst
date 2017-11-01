@@ -51,6 +51,98 @@ This special case is for times when you need the CSS and JS autorendered, but do
 
 In other words, this behavior already happens; just use the calls above.  Even if ``otherpage.html`` doesn't exist, you'll get ``otherpage.css`` and ``otherpage.js`` in the current page content.
 
+Connecting Python and Javascript
+-----------------------------------------------
+
+In the `tutorial <tutorial_css_js.html>`_, you learned to send context variables to included *.js files using ``jscontext``:
+
+.. code:: python
+
+    from django.conf import settings
+    from django_mako_plus import view_function, jscontext
+    from datetime import datetime
+
+    @view_function
+    def process_request(request):
+        context = {
+            jscontext('now'): datetime.now(),
+        }
+        return request.dmp_render('index.html', context)
+
+DMP responds with a script tag that contains the value in its ``data-context`` attribute:
+
+::
+
+    <script type="text/javascript" src="/static/homepage/scripts/index.js?1509480811" data-context="{&#34;now&#34;: &#34;2017-10-31T20:13:33.084&#34;}"></script>
+    
+Reading the Attribute
+^^^^^^^^^^^^^^^^^^^^^^^^
+    
+The task of getting the data from the script attribute to your Javascript namespace is fraught with danger.   While there are possible ways to do this, the suggested Master Sword is the following:
+
+::
+
+    (function(context) {
+        // your code here, such as
+        console.log(context);
+    })(JSON.parse(document.currentScript.getAttribute('data-context')));
+
+The drawback to this method is it only works with modern browsers.  The above code creates a closure for the ``context`` variable, which allows each of your scripts to use the same variable name without stepping on one another.  Clean namespaces.  Yummy.
+
+If your users have older browsers, including any version of IE, this method can still work with `a polyfill <https://www.google.com/search?q=polyfill+currentscript>`_.
+
+If you are using a load event callback, such as a JQuery ready function, be sure to embed the callback within the closure.  The ``document.currentScript`` attribute only exists during the initial run of the script, so it's gone by the time the callback executes.  Here's an example:
+
+::
+
+    (function(context) {
+        $(function() {
+            // your code here, such as
+            console.log(context);
+        });
+    })(JSON.parse(document.currentScript.getAttribute('data-context')));
+    
+Selecting on src=
+~~~~~~~~~~~~~~~~~~~~~
+
+The ``querySelector`` function is available on semi-modern browsers (including IE 9+):
+
+::
+
+    (function(context) {
+        // your code here, such as
+        console.log(context);
+    })(JSON.parse(document.querySelector('script[src*="/homepage/scripts/index.js"]').getAttribute('data-context')));
+
+The primary drawback of this approach is the hard-coded name selection can be fragile, such as when you change the template name and forget to match the code.
+
+Last Executed Script
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If your scripts are all sequential, you can simply grab the last script tag added to the document:
+
+::
+
+    (function() {
+        var scripts = document.getElementsByTagName('script');
+        var context = JSON.parse(scripts[scripts.length - 1].getAttribute('data-context'));
+        // your code here, such as
+        console.log(context);
+    })();
+
+The primary drawback of this approach is it doesn't work with asyncronous or deferred scripts.  It's a script only a mother could love, but it is fairly reliable.
+
+Other Approaches
+^^^^^^^^^^^^^^^^^^^^
+
+You've probably noticed that I haven't included the most direct approach: ``document.getElementById``, but I've skipped this approach because the ``<script>`` tag doesn't have an id.  If DMP set an id on the element, the Javascript would need to somehow get that id.  it just pushes the data transfer one level out, but we end up with the same problem.  The whole point of DMP is convention, with as little hard coding and configuration as possible.  For now, this method is ix-nayed.
+
+Another method is encoding the data in the script src query string.  However, reading this from Javascript means we need a reference to the script tag, so once again we just pushed the problem one level out.
+
+Finally, many examples online use the last item in ``document.scripts`` -- the last script inserted into the DOM.  This approach doesn't work well in this case because additional ``<script>`` elements are usually added to the DOM before the script is downloaded and running. These additional scripts are found instead of the one you are after.
+
+
+
 Under the Hood: Providers
 -------------------------------
 
@@ -71,9 +163,6 @@ The framework is built to be extended for custom file types.  When you call ``pr
                     # generates links for app/scripts/template.js
                     { 'provider': 'django_mako_plus.JsLinkProvider' },
                     
-                    # adds marked context variables to the JS namespace
-                    { 'provider': 'django_mako_plus.JsContextProvider' },
-                    
                     # compiles app/styles/template.scss to app/styles/template/css
                     { 'provider': 'django_mako_plus.CompileScssProvider' },
                     
@@ -84,7 +173,13 @@ The framework is built to be extended for custom file types.  When you call ``pr
         }
     ]
     
-Each type of provider takes additional settings that allow you to customize locations, automatic compilation, etc.  The following more-detailed version enumerates all the options (set to their defaults).  
+Each type of provider takes additional settings that allow you to customize locations, automatic compilation, etc.  When reading most options, DMP runs the option through str.format() with the following formatting kwargs:
+
+* ``appname`` - the name of the template's app
+* ``appdir`` - the absolute path to the app directory
+* ``template`` - the name of the template being rendered
+
+The following more-detailed version enumerates all the options (set to their defaults).
 
 ::
 
@@ -109,14 +204,9 @@ Each type of provider takes additional settings that allow you to customize loca
                         'group': 'scripts',
                         'weight': 0,
                         'filename': '{appdir}/scripts/{template}.js',
-                    },
-                    
-                    # adds marked context variables to the JS namespace
-                    { 
-                        'provider': 'django_mako_plus.JsContextProvider' 
-                        'group': 'scripts',
-                        'weight': 5,
                         'encoder': 'django.core.serializers.json.DjangoJSONEncoder',
+                        'async': True,
+                        'defer': False,
                     },
                     
                     # compiles app/styles/template.scss to app/styles/template/css
@@ -200,7 +290,7 @@ Creating new provider classes is easy.  The following is an example of a custom 
             #    self.app_dir = '/absolute/path/to/app/'
             #    self.template_name = 'current template name without extension'
             #    self.options = { 'dictionary': 'of all options' }
-            #    self.cgi_id = 'a unique number - see the docs'
+            #    self.version_id = 'a unique number - see the docs'
             
         def get_content(self, request, context):
             # This is called during template rendering

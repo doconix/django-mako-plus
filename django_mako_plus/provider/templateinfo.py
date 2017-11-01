@@ -24,13 +24,13 @@ class TemplateInfo(object):
     This object is then attached to the template object, which Mako already caches.
     That way we only do this work once per server run (in production mode).
     '''
-    def __init__(self, app_dir, template_name, cgi_id):
+    def __init__(self, app_dir, template_name, version_id):
         self.app_dir = app_dir              # absolute path
         self.template_name = template_name  # without the extension
-        self.providers = [ pf.create(app_dir, template_name, cgi_id) for pf in DMP_OPTIONS['RUNTIME_PROVIDERS'] ]
+        self.providers = [ pf.create(app_dir, template_name, version_id) for pf in DMP_OPTIONS['RUNTIME_PROVIDERS'] ]
 
 
-def build_templateinfo_chain(tself, cgi_id):
+def build_templateinfo_chain(tself, version_id):
     '''
     Retrieves a chain of TemplateInfo objects.  The chain is formed by following
     template inheritance through inherit tags: <%inherit file="parent.htm" />.
@@ -43,7 +43,7 @@ def build_templateinfo_chain(tself, cgi_id):
         if ti is None:
             template_dir, template_name = os.path.split(tself.template.filename)
             app_dir = os.path.dirname(template_dir)
-            ti = TemplateInfo(app_dir, template_name, cgi_id)
+            ti = TemplateInfo(app_dir, template_name, version_id)
             # cache in template if in production mode
             if not settings.DEBUG:
                 setattr(tself.template, DMP_TEMPLATEINFO_KEY, ti)

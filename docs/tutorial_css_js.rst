@@ -91,29 +91,32 @@ Lets compare the server time with the browser time allows us to calculate the ti
         }
         return request.dmp_render('index.html', context)
 
-Reload your browser, and then right-click and "View Page Source".  Scroll to the bottom of the rendered source to see something like the following:
+Reload your browser, and then right-click and "View Page Source".  The ``<script>`` tag now looks like this:
 
 ::
 
-    <script>window.context = {"now": "2019-10-31T04:23:40.598"};</script>
-    <script type="text/javascript" src="/static/homepage/scripts/index.js?1509423115"></script>
+    <script type="text/javascript" src="/static/homepage/scripts/index.js?1509480811" data-context="{&#34;now&#34;: &#34;2017-10-31T20:13:33.084&#34;}"></script>
     
-By tagging the key as ``jscontext('now')``, DMP sets the key and value in ``window.context``.  Since this code appears **just before index.js**, it can be used throughout our JS file.  Note that variables sent via ``jscontext`` must be serializable by Django's ``django.core.serializers.json.DjangoJSONEncoder``.  That includes all the typical types, plus datetime, date, time, timedelta, Decimal, and UUID.
-
-    If you need a custom encoding class (instead of DjangoJSONEncoder), specify the class path in settings.  See ``encoder`` setting in `the advanced topic on CSS and JS <topics_css_js.html#under-the-hood-providers>`_.
+When you tag a context key with ``jscontext('now')``, DMP adds it as a data attribute to the HTML script tag.  Note that variables sent via ``jscontext`` must be serializable by Django's ``django.core.serializers.json.DjangoJSONEncoder`` (although you can set a custom encoder if needed).  The default encoder includes all the typical types, plus datetime, date, time, timedelta, Decimal, and UUID.
 
 Let's use the variable in ``index.js``:
 
 .. code:: javascript
 
-    $(function() {
-        var serverTime = new Date(context.now);   // server time (from window.context)
-        var browserTime = new Date();             // browser time
-        var hours = Math.round(Math.abs(serverTime - browserTime) / 36e5);
-        $('.browser-time').text('The current browser is ' + hours + ' hours off of the server time zone.');
-    });
+    (function(context) {
+        $(function() {
+            console.log(context);
+            var serverTime = new Date(context.now);   // server time (from window.context)
+            var browserTime = new Date();             // browser time
+            var hours = Math.round(Math.abs(serverTime - browserTime) / 36e5);
+            $('.browser-time').text('The current browser is ' + hours + ' hours off of the server time zone.');
+        });
+    })(JSON.parse(document.currentScript.getAttribute('data-context')));
+    
+Reload your browser, and you should see the calculation of hours.  
 
-Reload your browser, and you should see the calculation of hours.
+    The context is sent to the script via a ``<script>`` tag attribute, and the surrounding closure keeps the variable local to this script.  Read more about this in `the topic on CSS and JS <topics_css_js.html>`_.
+
 
 Behind the CSS and JS Curtain
 -----------------------------
@@ -134,3 +137,4 @@ The two calls to ``providers()`` include the ``<link>`` and ``<script>`` tags fo
 
 This all works because the ``index.html`` template extends from the ``base.htm`` template. If you fail to inherit from ``base.htm`` or ``base_ajax.htm``, DMP won't be able to include the support files.
 
+Read more about providers in `Rendering CSS and JS <topics_css_js.html>`_.

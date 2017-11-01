@@ -1,5 +1,6 @@
 from django.core.exceptions import ImproperlyConfigured
 from django.utils.module_loading import import_string
+from django.utils.encoding import force_text
 
 from ..util import DMP_OPTIONS, merge_dicts
 
@@ -15,7 +16,6 @@ import os.path
 DEFAULT_CONTENT_PROVIDERS = [
     { 'provider': 'django_mako_plus.CssLinkProvider' },
     { 'provider': 'django_mako_plus.JsLinkProvider'  },
-    { 'provider': 'django_mako_plus.JsContextProvider'  },
     # deprecated as of Oct 2017
     { 'provider': 'django_mako_plus.MakoCssProvider'  },
     { 'provider': 'django_mako_plus.MakoJsProvider'  },
@@ -42,8 +42,8 @@ class ProviderFactory(object):
             raise ImproperlyConfigured('The Django Mako Plus template OPTIONS were not set up correctly in settings.py; The `provider` value must be a subclass of django_mako_plus.BaseProvider.')
         self.options = merge_dicts(self.provider_class.default_options, provider_def)
         
-    def create(self, app_dir, template_name, cgi_id):
-        return self.provider_class(app_dir, template_name, self.options, cgi_id)
+    def create(self, app_dir, template_name, version_id):
+        return self.provider_class(app_dir, template_name, self.options, version_id)
         
         
 
@@ -61,20 +61,24 @@ class BaseProvider(object):
         'group': 'styles',
         'weight': 0,  # higher weights run first
     }
-    def __init__(self, app_dir, template_name, options, cgi_id):
+    def __init__(self, app_dir, template_name, options, version_id):
+        self.app_name = os.path.split(app_dir)[1]                  # django app name
         self.app_dir = app_dir                                     # absolute path
         self.template_name = os.path.splitext(template_name)[0]    # without the extension
         self.options = merge_dicts(self.default_options, options)  # combined options dictionary
-        self.cgi_id = cgi_id                                       # unique number for overriding the cache (see LinkProvider)
+        self.version_id = version_id                               # unique number for overriding the cache (see LinkProvider)
         self.init()
+        
         
     @property
     def group(self):
         return self.options['group']
 
+
     def init(self):
         '''Called at the end of the constructor.'''
         pass
+        
         
     def get_content(self, provider_run):
         '''
@@ -84,4 +88,11 @@ class BaseProvider(object):
         return None
         
         
+    def format_string(self, st):
+        '''Helper function that runs st.format with some standard named options.'''
+        return force_text(st).format(
+            appname=self.app_name,
+            appdir=self.app_dir,
+            template=self.template_name,
+        )
         

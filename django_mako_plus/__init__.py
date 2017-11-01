@@ -78,8 +78,7 @@ from .provider import providers
 from .provider import template_providers
 # html content providers
 from .provider import BaseProvider
-from .provider import LinkProvider, CssLinkProvider, JsLinkProvider
-from .provider import JsContextProvider, jscontext
+from .provider import LinkProvider, CssLinkProvider, JsLinkProvider, jscontext
 from .provider import CompileProvider, CompileScssProvider, CompileLessProvider
 # html content providers (deprecated)
 from .provider import MakoCssProvider, MakoJsProvider

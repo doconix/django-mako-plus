@@ -28,19 +28,15 @@ class CompileProvider(BaseProvider):
     })
     def init(self):
         # doing the check in init() so it only happens one time during production
-        fargs = {
-            'appdir': self.app_dir, 
-            'template': self.template_name,
-        }
-        source_path = self.options['source'].format(**fargs)
-        compiled_path = self.options['output'].format(**fargs)
+        source_path = self.format_string(self.options['source'])
+        compiled_path = self.format_string(self.options['output'])
         if os.path.exists(source_path):
             try:
                 needs_compile = os.path.getmtime(compiled_path) < os.path.getmtime(source_path)
             except OSError:  # usually means compiled_path doesn't exist
                 needs_compile = True  
             if needs_compile:
-                run_command(*[ a.format(**fargs) for a in self.options['command'] ])
+                run_command(*[ self.format_string(a) for a in self.options['command'] ])
 
 
 class CompileScssProvider(CompileProvider):

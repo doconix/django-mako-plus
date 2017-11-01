@@ -17,15 +17,14 @@ import warnings
 
 from .base import init_providers, BaseProvider
 from .compile import CompileProvider, CompileScssProvider, CompileLessProvider
-from .jscontext import JsContextProvider, jscontext
-from .links import LinkProvider, CssLinkProvider, JsLinkProvider
+from .links import LinkProvider, CssLinkProvider, JsLinkProvider, jscontext
 from .mako_static import MakoCssProvider, MakoJsProvider
 
 
 #########################################################
 ###  Primary functions
 
-def providers(tself, group=None, cgi_id=None):
+def providers(tself, group=None, version_id=None):
     '''
     Returns the HTML for the given provider group.
     
@@ -54,7 +53,7 @@ def providers(tself, group=None, cgi_id=None):
     If you need to render these links outside of a template, see link_template_css()
     below.
 
-    The optional cgi_id parameter is to overcome browser caches.  On some browsers,
+    The optional version_id parameter is to overcome browser caches.  On some browsers,
     changes to your CSS/JS files don't get downloaded because the browser waits a time
     to check for a new version.  This wait time is set by your web server,
     and it's normally a good thing to speed everything up.  However,
@@ -65,7 +64,7 @@ def providers(tself, group=None, cgi_id=None):
     for calculating the id is the file modification time (minutes since 1970).
     '''
     request = tself.context.get('request')
-    provider_run = ProviderRun(request, tself.context, group, build_templateinfo_chain(tself, cgi_id))
+    provider_run = ProviderRun(request, tself.context, group, build_templateinfo_chain(tself, version_id))
     return provider_run.get_content()
 
 
@@ -92,7 +91,7 @@ class ProviderRun(object):
 
 
 
-def template_providers(request, app, template_name, context=None, group=None, cgi_id=None, force=True):
+def template_providers(request, app, template_name, context=None, group=None, version_id=None, force=True):
     '''
     Returns the HTML for the given provider group, using an app and template name.
     This method should not normally be used (use providers() instead).  The use of 
@@ -122,7 +121,7 @@ def template_providers(request, app, template_name, context=None, group=None, cg
     runtime_context = mako.runtime.Context(io.BytesIO(), **context_dict)
     runtime_context._set_with_template(template)
     _, mako_context = mako.runtime._populate_self_namespace(runtime_context, template)
-    return providers(mako_context['self'], group=group, cgi_id=cgi_id)
+    return providers(mako_context['self'], group=group, version_id=version_id)
 
 
 
@@ -130,39 +129,39 @@ def template_providers(request, app, template_name, context=None, group=None, cg
 #######################################################################
 ###   Deprecated methods - these are deprecated as of Oct 2017
 
-def link_css(tself, cgi_id=None):
+def link_css(tself, version_id=None):
     '''
     Deprecated as of Oct 2017.
     Use `django_mako_plus.providers(self, 'styles')` instead.
     '''
     warnings.warn("link_css() is deprecated as of Oct 2017.  Use `django_mako_plus.providers(self, 'styles')` instead.", DeprecationWarning)
-    return providers(tself, group='styles', cgi_id=cgi_id)
+    return providers(tself, group='styles', version_id=version_id)
 
 
-def link_js(tself, cgi_id=None):
+def link_js(tself, version_id=None):
     '''
     Deprecated as of Oct 2017.
     Use `django_mako_plus.providers(self, 'scripts')` instead.
     '''
     warnings.warn("link_js() is deprecated as of Oct 2017.  Use `django_mako_plus.providers(self, 'scripts')` instead.", DeprecationWarning)
-    return providers(tself, group='scripts', cgi_id=cgi_id)
+    return providers(tself, group='scripts', version_id=version_id)
 
 
-def link_template_css(request, app, template_name, context, cgi_id=None, force=True):
+def link_template_css(request, app, template_name, context, version_id=None, force=True):
     '''
     Deprecated as of Oct 2017.
     Use `django_mako_plus.template_providers(..., group='styles')` instead.
     '''
     warnings.warn("link_template_css() is deprecated as of Oct 2017.  Use `django_mako_plus.template_providers(..., group='styles')` instead.", DeprecationWarning)
-    return template_providers(request, app, template_name, context, group='styles', cgi_id=cgi_id, force=force)
+    return template_providers(request, app, template_name, context, group='styles', version_id=version_id, force=force)
 
 
-def link_template_js(request, app, template_name, context, cgi_id=None, force=True):
+def link_template_js(request, app, template_name, context, version_id=None, force=True):
     '''
     Deprecated as of Oct 2017.
     Use `django_mako_plus.template_providers(..., group='scripts')` instead.
     '''
     warnings.warn("link_template_js() is deprecated as of Oct 2017.  Use `django_mako_plus.template_providers(..., group='scripts')` instead.", DeprecationWarning)
-    return template_providers(request, app, template_name, context, group='scripts', cgi_id=cgi_id, force=force)
+    return template_providers(request, app, template_name, context, group='scripts', version_id=version_id, force=force)
 
 

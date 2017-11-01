@@ -231,9 +231,6 @@ standard Django project already has the ``TEMPLATES =`` line.
                 #     # generates links for app/scripts/template.js
                 #     { 'provider': 'django_mako_plus.JsLinkProvider' },
                 #
-                #     # adds tagged context variables to the JS namespace
-                #     { 'provider': 'django_mako_plus.JsContextProvider' },
-                #
                 #     # compiles app/styles/template.scss to app/styles/template/css
                 #     { 'provider': 'django_mako_plus.CompileScssProvider' },
                 #

@@ -8,7 +8,6 @@ The following sections explore the capabilities of DMP beyond the tutorials.  If
     :maxdepth: 1
 
     topics_variables
-    topics_providers
     topics_css_js
     topics_static_files
     topics_templates
