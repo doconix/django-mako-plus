@@ -1,10 +1,7 @@
 from django.test import TestCase
 
 from django_mako_plus.router import ViewFunctionRouter
-from django_mako_plus.util import log
 
-import logging
-import os, os.path
 
 
 class Tester(TestCase):

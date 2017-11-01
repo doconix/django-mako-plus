@@ -1,12 +1,9 @@
-from django.conf import settings
-from django.core.management.base import BaseCommand, CommandError
 from django.core.management.commands.makemessages import Command as MakeMessagesCommand
 
 from django_mako_plus.util import get_dmp_instance, get_dmp_app_configs
 
-from optparse import make_option
-from importlib import import_module
-import os, os.path, shutil, fnmatch, glob
+import os
+import os.path
 
 
 class Command(MakeMessagesCommand):

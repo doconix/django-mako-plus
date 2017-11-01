@@ -1,7 +1,6 @@
 from django.conf import settings
-from django.conf.urls import url
 from django.core.exceptions import ImproperlyConfigured, ViewDoesNotExist
-from django.http import HttpRequest, HttpResponse, StreamingHttpResponse, HttpResponseServerError, Http404
+from django.http import Http404, HttpResponse, HttpResponseServerError, StreamingHttpResponse
 from django.http import Http404, HttpResponseNotAllowed
 from django.template import TemplateDoesNotExist
 from django.views.generic import View
@@ -10,10 +9,11 @@ from .converter import ConversionTask
 from .decorators import view_function, NotDecoratedError
 from .exceptions import BaseRedirectException, InternalRedirectException, RedirectException
 from .signals import dmp_signal_pre_process_request, dmp_signal_post_process_request, dmp_signal_internal_redirect_exception, dmp_signal_redirect_exception
-from .util import get_dmp_instance, get_dmp_app_configs, log, DMP_OPTIONS
+from .util import DMP_OPTIONS, get_dmp_instance, log
 
-import sys, logging, inspect, threading
-from collections import namedtuple
+import inspect
+import sys
+import threading
 from importlib import import_module
 from importlib.util import find_spec
 

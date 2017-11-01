@@ -1,14 +1,13 @@
 from django.apps import apps
-from django.http import HttpResponse
 from django.template import TemplateDoesNotExist
 from django.test import TestCase
 
-from django_mako_plus.util import log
 from django_mako_plus.util import get_dmp_instance
 from django_mako_plus.template import MakoTemplateAdapter
 from django_mako_plus.template import MakoTemplateLoader
 
-import logging, os, os.path
+import os
+import os.path
 
 
 class Tester(TestCase):

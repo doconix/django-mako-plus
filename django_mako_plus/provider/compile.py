@@ -1,5 +1,5 @@
 from ..command import run_command
-from ..util import get_dmp_instance, merge_dicts
+from ..util import merge_dicts
 from .base import BaseProvider
 
 import os

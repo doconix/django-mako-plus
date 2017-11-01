@@ -31,7 +31,7 @@ To include CSS and JS by name, use the following within any template on your sit
 ::
 
     ## instead of using the normal:
-    ## ${ django_mako_plus.links(self, 'styles') }
+    ## ${ django_mako_plus.links(self) }
     ##
     ## specify the app and page name:
     ${ django_mako_plus.template_links(request, 'homepage', 'otherpage.html', context)
@@ -62,11 +62,15 @@ In the `tutorial <tutorial_css_js.html>`_, you learned to send context variables
         }
         return request.dmp_render('index.html', context)
 
-DMP responds with a script tag that contains the value in its ``data-context`` attribute:
+DMP responds with a small script tag that adds the following to the ``<head>`` section.  
 
 ::
 
     <script type="text/javascript" src="/static/homepage/scripts/index.js?1509480811" data-context="{&#34;now&#34;: &#34;2017-10-31T20:13:33.084&#34;}"></script>
+    
+If you are paying close attention, you may have noticed that DMP actually sends a script snippet that, when run by the browser, creates the above tag with code.  Sending a script to add a script might seem as real as James Moriarty leaving the holodeck, but stick with me.  DMP does this because some frameworks (JQuery!) strip the ``<script>`` tags from ajax responses and trigger them manually.  Since the scripts run after the content is inserted into the DOM, the ``document.currentScript`` variable is null and unable to give the ``jscontext`` variables to your JS.  By running a script which inserts a script tag, the real script runs inline with the ``appendChild`` call, and ``document.currentScript`` gets magically set by the browser.  
+
+tl;dr: Inserting the script tag with code skips past any ajax framework behavior, allowing your JS to get the ``jscontext`` variables from the script tags.
     
 Reading the Attribute
 ^^^^^^^^^^^^^^^^^^^^^^^^

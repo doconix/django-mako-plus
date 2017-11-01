@@ -1,6 +1,4 @@
-from django.apps import apps
 from django.core.exceptions import ImproperlyConfigured
-from django.views.generic import View
 from urllib.parse import unquote
 
 # try to import MiddlewareMixIn (Django 1.10+)
@@ -11,8 +9,8 @@ except ImportError:
     MiddlewareMixin = object
 
 from .registry import is_dmp_app
-from .router import get_router, route_request, ClassBasedRouter
-from .util import URLParamList, get_dmp_instance, DMP_OPTIONS, log
+from .router import ClassBasedRouter, get_router
+from .util import DMP_OPTIONS, URLParamList, log
 from .template import render_to_response_shortcut, render_to_string_shortcut
 
 import logging

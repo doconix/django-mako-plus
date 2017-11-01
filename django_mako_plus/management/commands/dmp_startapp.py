@@ -1,9 +1,7 @@
-from django.conf import settings
 from django.core import management
-from django.core.management.base import BaseCommand, CommandError
+from django.core.management.base import BaseCommand
 import django_mako_plus
 import os, os.path
-from importlib import import_module
 
 
 class Command(BaseCommand):

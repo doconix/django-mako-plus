@@ -1,13 +1,10 @@
-from django.apps import apps
-from django.http import HttpResponse
 from django.test import TestCase
-from django.template import TemplateDoesNotExist, TemplateSyntaxError
 
 from django_mako_plus import DefaultConverter, set_default_converter, get_default_converter
 from django_mako_plus.util import log
 from tests.models import IceCream, MyInt
-import logging
-import os, os.path, datetime, decimal
+import datetime
+import decimal
 
 
 class Tester(TestCase):

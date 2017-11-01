@@ -1,5 +1,4 @@
 from django.apps import apps
-from django.http import HttpResponse
 from django.test import TestCase
 from django.template import TemplateDoesNotExist, TemplateSyntaxError
 
@@ -10,9 +9,7 @@ from django_mako_plus import get_template_loader_for_path
 from django_mako_plus import get_template_for_path
 from django_mako_plus import render_template_for_path
 from django_mako_plus.template import MakoTemplateLoader, MakoTemplateAdapter
-from django_mako_plus.util import log
 
-import logging
 import os, os.path
 
 

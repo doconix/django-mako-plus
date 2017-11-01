@@ -1,28 +1,25 @@
 from django.apps import apps, AppConfig
-from django.conf import settings
-from django.conf.urls import url
 from django.core.exceptions import ImproperlyConfigured
-from django.template import TemplateDoesNotExist, engines, TemplateSyntaxError
+from django.template import TemplateDoesNotExist
 from django.template.backends.base import BaseEngine
 from django.utils.module_loading import import_string
 
-from .exceptions import InternalRedirectException, RedirectException
-from .signals import dmp_signal_pre_render_template, dmp_signal_post_render_template, dmp_signal_redirect_exception
 from .template import MakoTemplateLoader, MakoTemplateAdapter
 from .registry import register_app, is_dmp_app as registry_is_dmp_app
 from .provider import init_providers
-from .util import get_dmp_instance, get_dmp_app_configs, log, DMP_OPTIONS, DMP_INSTANCE_KEY
+from .util import DMP_INSTANCE_KEY, DMP_OPTIONS, get_dmp_app_configs
 
 from mako.template import Template
 
-from operator import attrgetter
-import os, os.path, sys, itertools, collections, inspect
+import itertools
+import os
+import os.path
 try:
     # python 3.4+
-    from importlib.util import find_spec
+    pass
 except ImportError:
     # python <= 3.4
-    from importlib import find_loader as find_spec
+    pass
 
 
 # Following Django's lead, hard coding the CSRF processor

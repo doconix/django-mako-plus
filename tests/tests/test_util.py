@@ -1,8 +1,6 @@
 from django.test import TestCase
 from django_mako_plus.util import encode32, decode32
-from django_mako_plus.util import log
 import random, string
-import logging
 
 
 class Tester(TestCase):

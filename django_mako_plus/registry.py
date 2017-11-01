@@ -2,7 +2,6 @@
 ###   A registry of callable view functions
 ###   in the DMP system
 
-from django.conf import settings
 from django.apps import apps, AppConfig
 
 from .template import render_to_string_shortcut_deprecated, render_to_response_shortcut_deprecated

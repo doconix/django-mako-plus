@@ -1,12 +1,12 @@
 from django.conf import settings
-from django.http import HttpResponse, StreamingHttpResponse, Http404, HttpResponseRedirect, HttpResponsePermanentRedirect
+from django.http import HttpResponse
 from django.template import TemplateDoesNotExist, TemplateSyntaxError, Context, RequestContext
 
 from mako.exceptions import TopLevelLookupException, TemplateLookupException, CompileException, SyntaxException, html_error_template
 from mako.lookup import TemplateLookup
 from mako.template import Template
 
-from .exceptions import InternalRedirectException, RedirectException
+from .exceptions import RedirectException
 from .signals import dmp_signal_pre_render_template, dmp_signal_post_render_template, dmp_signal_redirect_exception
 from .util import get_dmp_instance, log, DMP_OPTIONS
 

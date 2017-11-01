@@ -1,13 +1,7 @@
-from django.apps import apps
-from django.http import HttpResponse
-from django.template import TemplateDoesNotExist
 from django.test import TestCase
 
-from django_mako_plus.util import log
-from django_mako_plus.filters import django_syntax
 from django_mako_plus import render_template
 
-import logging, os, os.path
 
 
 

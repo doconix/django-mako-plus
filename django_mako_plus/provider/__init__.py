@@ -24,7 +24,7 @@ from .mako_static import MakoCssProvider, MakoJsProvider
 #########################################################
 ###  Primary functions
 
-def links(tself, group=None, version_id=None):
+def links(tself, version_id=None, group=None):
     '''
     Returns the HTML for the given provider group.
     
@@ -91,7 +91,7 @@ class ProviderRun(object):
 
 
 
-def template_links(request, app, template_name, context=None, group=None, version_id=None, force=True):
+def template_links(request, app, template_name, context=None, version_id=None, group=None, force=True):
     '''
     Returns the HTML for the given provider group, using an app and template name.
     This method should not normally be used (use links() instead).  The use of 
@@ -121,7 +121,7 @@ def template_links(request, app, template_name, context=None, group=None, versio
     runtime_context = mako.runtime.Context(io.BytesIO(), **context_dict)
     runtime_context._set_with_template(template)
     _, mako_context = mako.runtime._populate_self_namespace(runtime_context, template)
-    return links(mako_context['self'], group=group, version_id=version_id)
+    return links(mako_context['self'], version_id=version_id, group=group)
 
 
 
@@ -135,7 +135,7 @@ def link_css(tself, version_id=None):
     Use `django_mako_plus.links(self, 'styles')` instead.
     '''
     warnings.warn("link_css() is deprecated as of Oct 2017.  Use `django_mako_plus.links(self, 'styles')` instead.", DeprecationWarning)
-    return links(tself, group='styles', version_id=version_id)
+    return links(tself, version_id=version_id, group='styles')
 
 
 def link_js(tself, version_id=None):
@@ -144,7 +144,7 @@ def link_js(tself, version_id=None):
     Use `django_mako_plus.links(self, 'scripts')` instead.
     '''
     warnings.warn("link_js() is deprecated as of Oct 2017.  Use `django_mako_plus.links(self, 'scripts')` instead.", DeprecationWarning)
-    return links(tself, group='scripts', version_id=version_id)
+    return links(tself, version_id=version_id, group='scripts')
 
 
 def link_template_css(request, app, template_name, context, version_id=None, force=True):
@@ -153,7 +153,7 @@ def link_template_css(request, app, template_name, context, version_id=None, for
     Use `django_mako_plus.template_links(..., group='styles')` instead.
     '''
     warnings.warn("link_template_css() is deprecated as of Oct 2017.  Use `django_mako_plus.template_links(..., group='styles')` instead.", DeprecationWarning)
-    return template_links(request, app, template_name, context, group='styles', version_id=version_id, force=force)
+    return template_links(request, app, template_name, context, version_id=version_id, group='styles', force=force)
 
 
 def link_template_js(request, app, template_name, context, version_id=None, force=True):
@@ -162,6 +162,6 @@ def link_template_js(request, app, template_name, context, version_id=None, forc
     Use `django_mako_plus.template_links(..., group='scripts')` instead.
     '''
     warnings.warn("link_template_js() is deprecated as of Oct 2017.  Use `django_mako_plus.template_links(..., group='scripts')` instead.", DeprecationWarning)
-    return template_links(request, app, template_name, context, group='scripts', version_id=version_id, force=force)
+    return template_links(request, app, template_name, context, version_id=version_id, group='scripts', force=force)
 
 

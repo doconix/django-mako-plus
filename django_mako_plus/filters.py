@@ -1,9 +1,7 @@
-from django.conf import settings
-from django.template import Context, RequestContext, engines
+from django.template import RequestContext, engines
 
 from .util import log
 
-import logging
 
 
 

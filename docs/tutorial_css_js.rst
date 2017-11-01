@@ -50,7 +50,7 @@ Note that ``base.css`` is included first because it's at the top of the hierarch
 
     You might be wondering about the big number after the html source ``<link>``. That's the file modification time, in minutes since 1970. This is included because browsers don't automatically download new CSS files (I'm looking at you here Chrome!). They use their cached versions until a specified date, often far in the future (this duration is set by your web server). By adding a number to the end of the file, browsers think the CSS files are "new" because the "filename" changes whenever you change the file. Trixy browserses...
 
-Previous versions of DMP enabled ``*.cssm`` and ``*.jsm`` files, but this functionality is now deprecated.  Instead, DMP now does JS context variables, described in the next section.
+    Previous versions of DMP enabled ``*.cssm`` and ``*.jsm`` files, but this functionality is now deprecated.  Instead, DMP now does JS context variables, described in the next section.
 
 
 Javascript
@@ -74,7 +74,7 @@ Refresh your browser page, and you should see the browser time updating each sec
 Javascript in Context
 --------------------------------
 
-What if we need to get a value from our Python view code, such as the server time, into the ``index.js`` file?  DMP handles this for you.
+What if we need to get a value from our Python view code, such as the server time, into the ``index.js`` file?  DMP handles this too.
 
 Lets compare the server time with the browser time allows us to calculate the time zone difference between the two. To send a variable to the JS environment, tag it with ``jscontext()``.  Change your ``index.py`` file to the following:
 
@@ -91,7 +91,7 @@ Lets compare the server time with the browser time allows us to calculate the ti
         }
         return request.dmp_render('index.html', context)
 
-Reload your browser, and then right-click and "View Page Source".  The ``<script>`` tag now looks like this:
+Reload your browser, and then right-click and "Inspect" to see your DOM.  The ``<script>`` tag now looks like this:
 
 ::
 
@@ -115,7 +115,7 @@ Let's use the variable in ``index.js``:
     
 Reload your browser, and you should see the calculation of hours.  
 
-    The context is sent to the script via a data attribute on the ``<script>`` element.  The closure keeps the variable local to this script.  Read more about this in `the topic on CSS and JS <topics_css_js.html>`_.
+    The context is sent to the script via a data attribute on the ``<script>`` element.  The closure surrounding everything keeps the variable local to this script.  Read more about this in `the topic on CSS and JS <topics_css_js.html>`_.
 
 
 Behind the CSS and JS Curtain
@@ -126,7 +126,7 @@ After reading about automatic CSS and JS inclusion, you might want to know how i
 ::
 
     ## render the static file links for this template
-    ${ django_mako_plus.links(self, 'styles') }
+    ${ django_mako_plus.links(self) }
 
 The calls to ``links()`` include the ``<link>`` and ``<script>`` tags for the template name and all of its supertemplates. These links are placed at the end of your ``<head>`` section.  (Just a few years ago, common practice was to place script tags at the end of the body, but modern browsers with asyncronous and deferred scripts have put them back in the body.)
 

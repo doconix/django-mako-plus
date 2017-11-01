@@ -11,7 +11,6 @@ class BaseRedirectException(Exception):
     '''
     Superclass of DMP redirect exceptions
     '''
-    pass
 
 
 class InternalRedirectException(BaseRedirectException):

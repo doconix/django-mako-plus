@@ -65,14 +65,14 @@ class JsLinkProvider(LinkProvider):
     # unavailable. With this approach, the <script> below can run inline or
     # in a callback, but the script loaded by the new tag always runs inline.
     # This way currentScript is available in all cases.
-    script = ' '.join([ s.strip() for s in '''
+    script = ''.join([ s.strip() for s in '''
         <script>
             var n=document.createElement("script");
             n.setAttribute("data-context", "{data}");
             n.setAttribute("async", {async});
             n.setAttribute("defer", {defer});
             n.src="{href}?{version}";
-            document.body.appendChild(n);
+            document.head.appendChild(n);
         </script>
     '''.splitlines() ])
     
@@ -89,7 +89,7 @@ class JsLinkProvider(LinkProvider):
             defer='true' if self.options['defer'] else 'false',
             href=self.href, 
             version=self.version_id,
-            data=json.dumps(js_context, cls=self.encoder).replace('"', '\\"'),
+            data=json.dumps(js_context, cls=self.encoder, separators=(',', ':')).replace('"', '\\"') if len(js_context) > 0 else '{}',
         )
 
 
@@ -100,28 +100,7 @@ class jscontext(str):
     JS context items are sent to the template like normal,
     but they are also added to the runtime JS namespace.
     
-    In myview.py:
-        from django_mako_plus import js_context, view_function
-        
-        @view_function
-        def myview(request):
-            context = {
-                jscontext('age'): 50,
-                jscontext('name'): 'Homer Simpson',
-                'another': 'sent only to template',
-            }
-            return request.dmp_render('myview.html', context)
-    
-    In myview.html:
-        ${ django_mako_plus.links('scripts')
-    Output in template:
-        window.context = {
-            "age": 50,
-            "name": "Homer Simpson"
-        };
-    
-    In myview.js:
-        console.log(context.age);
+    See the tutorial for more information on this function.
     '''
     # no code needed, just using the class for identity
     pass

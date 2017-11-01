@@ -77,7 +77,6 @@ class BaseProvider(object):
 
     def init(self):
         '''Called at the end of the constructor.'''
-        pass
         
         
     def get_content(self, provider_run):
