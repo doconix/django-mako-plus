@@ -9,7 +9,7 @@ import os, os.path
 
 class Tester(TestCase):
 
-    def test_providers(self):
+    def test_links(self):
         resp = self.client.get('/tests/providers/')
         self.assertEqual(resp.status_code, 200)
         # base

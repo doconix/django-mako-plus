@@ -14,7 +14,7 @@ Suppose your template ``index.html`` contains the typical code:
 .. code:: html
 
     <head>
-        ${ django_mako_plus.providers(self, 'styles') }
+        ${ django_mako_plus.links(self) }
     </head>
 
 When enabled, DMP looks for ``app_folder/styles/index.scss``.  If it exists, DMP checks the timestamp of the compiled version, ``app_folder/styles/index.css``, to see if if recompilation is needed.  If needed, it runs ``scss`` before generating ``<link type="text/css" />`` for the file. 
@@ -31,18 +31,11 @@ To include CSS and JS by name, use the following within any template on your sit
 ::
 
     ## instead of using the normal:
-    ## ${ django_mako_plus.providers(self, 'styles') }
+    ## ${ django_mako_plus.links(self, 'styles') }
     ##
     ## specify the app and page name:
-    ${ django_mako_plus.template_providers(request, 'homepage', 'otherpage.html', context, 'styles')
+    ${ django_mako_plus.template_links(request, 'homepage', 'otherpage.html', context)
 
-    ...
-
-    ## instead of using the normal:
-    ## ${ django_mako_plus.providers(self, 'scripts') }
-    ##
-    ## specify the app and page name:
-    ${ django_mako_plus.template_providers(request, 'homepage', 'otherpage.html', context, 'scripts')
 
 Rendering Nonexistent Pages
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -91,7 +84,7 @@ The drawback to this method is it only works with modern browsers.  The above co
 
 If your users have older browsers, including any version of IE, this method can still work with `a polyfill <https://www.google.com/search?q=polyfill+currentscript>`_.
 
-If you are using a load event callback, such as a JQuery ready function, be sure to embed the callback within the closure.  The ``document.currentScript`` attribute only exists during the initial run of the script, so it's gone by the time the callback executes.  Here's an example:
+If you are using an onload callback function, such as a JQuery ready function, be sure to embed the callback within the closure.  The ``document.currentScript`` attribute only exists during the initial run of the script, so it's gone by the time the callback executes.  Here's an example:
 
 ::
 
@@ -116,21 +109,6 @@ The ``querySelector`` function is available on semi-modern browsers (including I
 
 The primary drawback of this approach is the hard-coded name selection can be fragile, such as when you change the template name and forget to match the code.
 
-Last Executed Script
-~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-If your scripts are all sequential, you can simply grab the last script tag added to the document:
-
-::
-
-    (function() {
-        var scripts = document.getElementsByTagName('script');
-        var context = JSON.parse(scripts[scripts.length - 1].getAttribute('data-context'));
-        // your code here, such as
-        console.log(context);
-    })();
-
-The primary drawback of this approach is it doesn't work with asyncronous or deferred scripts.  It's a script only a mother could love, but it is fairly reliable.
 
 Other Approaches
 ^^^^^^^^^^^^^^^^^^^^
@@ -139,14 +117,32 @@ You've probably noticed that I haven't included the most direct approach: ``docu
 
 Another method is encoding the data in the script src query string.  However, reading this from Javascript means we need a reference to the script tag, so once again we just pushed the problem one level out.
 
-Finally, many examples online use the last item in ``document.scripts`` -- the last script inserted into the DOM.  This approach doesn't work well in this case because additional ``<script>`` elements are usually added to the DOM before the script is downloaded and running. These additional scripts are found instead of the one you are after.
+Finally, many examples online use the last item in ``document.scripts`` or the last script in the DOM.  This approach probably isn't the ticket because additional ``<script>`` elements are usually added to the DOM before the current one is running. This method worked well with browsers circa 2010, but not as well with today's browsers.
 
 
+Groups
+-----------------
+
+Each provider class specifies a "group" it is part of. In the default providers, the two groups are ``scripts`` and ``styles``.  When you render the static file links in your template, providers from all groups are included:
+
+::
+
+    ${ django_mako_plus.links(self) }
+
+However, if you need to split the link rendering into two or more places on a page, or if you only need style links for some reason, you can specify a group in the render:
+
+::
+
+    ${ django_mako_plus.links(self, group='styles') }
+
+In the above call, only providers in the ``styles`` group are printed.
+
+Groups are specified in the options for each provider, so you can change them to any string you need in the ``CONTENT_PROVIDERS`` section.
 
 Under the Hood: Providers
 -------------------------------
 
-The framework is built to be extended for custom file types.  When you call ``providers()`` within a template, DMP iterates through a list of providers (``django_mako_plus.BaseProvider`` subclasses).  You can customize the behavior of these providers in your ``settings.py`` file.  Here's a very basic version:
+The framework is built to be extended for custom file types.  When you call ``links()`` within a template, DMP iterates through a list of providers (``django_mako_plus.BaseProvider`` subclasses).  You can customize the behavior of these providers in your ``settings.py`` file.  Here's a very basic version:
 
 ::
 
@@ -272,7 +268,7 @@ Creating new provider classes is easy.  The following is an example of a custom 
     from django_mako_plus import BaseProvider
     from django_mako_plus.utils import merge_dicts
 
-    class YourCustomproviders(BaseProvider):
+    class YourCustomProvider(BaseProvider):
         default_options = merge_dicts(BaseProvider.default_options, {  
             'any': 'additional',
             'options': 'should',
@@ -294,7 +290,7 @@ Creating new provider classes is easy.  The following is an example of a custom 
             
         def get_content(self, request, context):
             # This is called during template rendering
-            # It runs once per template - each time providers()
+            # It runs once per template - each time links()
             # is called.
             #
             # This method sbould return the content to be added

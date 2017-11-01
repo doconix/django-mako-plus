@@ -63,17 +63,6 @@ TEMPLATES = [
             # determines whether DMP will send its custom signals during the process
             'SIGNALS': False,
 
-            # whether to minify using rjsmin, rcssmin during 1) collection of static files, and 2) on the fly as .jsm and .cssm files are rendered
-            # rjsmin and rcssmin are fast enough that doing it on the fly can be done without slowing requests down
-            'MINIFY_JS_CSS': True,
-
-            # the name of the SASS binary to run if a .scss file is newer than the resulting .css file
-            # happens when the corresponding template.html is accessed the first time after server startup
-            # if DEBUG=False, this only happens once per file after server startup, not for every request
-            # specify the binary in a list below -- even if just one item (see subprocess.Popen)
-            'SCSS_BINARY': [ shutil.which('scss'), '--unix-newlines' ],
-            #'SCSS_BINARY': None,
-
             # see the DMP online tutorial for information about this setting
             # it can normally be empty
             'TEMPLATES_DIRS': [

@@ -7,10 +7,10 @@
         <title>{{ app_name }}</title>
 
         ## add any site-wide scripts or CSS here; for example, jquery:
-        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 
-        ## render the styles with the same name as this template and its supertemplates
-        ${ django_mako_plus.providers(self, 'styles') }
+        ## render the static file links with the same name as this template
+        ${ django_mako_plus.links(self) }
 
     </head>
     <body>
@@ -22,9 +22,6 @@
         <%block name="content">
             Site content goes here in sub-templates.
         </%block>
-
-        ## render the scripts with the same name as this template and its supertemplates
-        ${ django_mako_plus.providers(self, 'scripts') }
 
     </body>
 </html>

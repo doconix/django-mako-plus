@@ -113,7 +113,7 @@ class jscontext(str):
             return request.dmp_render('myview.html', context)
     
     In myview.html:
-        ${ django_mako_plus.providers('scripts')
+        ${ django_mako_plus.links('scripts')
     Output in template:
         window.context = {
             "age": 50,

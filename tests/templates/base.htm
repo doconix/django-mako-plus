@@ -5,16 +5,12 @@
 
         <title>Testing_App</title>
 
-        ## render the css with the same name as this page and its supertemplates
-        ${ django_mako_plus.providers(self, 'styles') }
+        ## render the static file links with the same name as this template
+        ${ django_mako_plus.links(self) }
 
     </head>
     <body>
         <%block name="content">
         </%block>
-
-        ## render the JS with the same name as this page and its supertemplates
-        ${ django_mako_plus.providers(self, 'scripts') }
-
     </body>
 </html>
