@@ -2,7 +2,7 @@ from django.conf import settings
 from django.utils.module_loading import import_string
 
 from ..uid import wuid
-from ..util import merge_dicts, strip_whitespace
+from ..util import merge_dicts
 from .base import BaseProvider
 
 import os
@@ -39,51 +39,28 @@ class CssLinkProvider(LinkProvider):
     '''Generates a CSS <link>'''
     default_options = merge_dicts(LinkProvider.default_options, { 
         'filename': '{appdir}/styles/{template}.css',
+        'skip_duplicates': True,
     })
     def get_content(self, provider_run):
         if self.href is None:
             return None
-        return '<link rel="stylesheet" type="text/css" data-links="{linksid}" href="{href}?{version}" />'.format(
-            linksid=provider_run.uid,
+        return '<link id="{uid}" data-context="{contextid}" rel="stylesheet" type="text/css" href="{href}?{version}" />'.format(
+            uid=wuid(),           
+            contextid=provider_run.uid,
             href=self.href, 
             version=self.version_id,
+            skip_duplicates='true' if self.options['skip_duplicates'] else 'false',
         )
 
 
 class JsLinkProvider(LinkProvider):
-    '''Generates a JS <script>'''
+    '''Generates a JS <script>.'''
     default_options = merge_dicts(LinkProvider.default_options, {  
         'group': 'scripts',
         'filename': '{appdir}/scripts/{template}.js',
         'encoder': 'django.core.serializers.json.DjangoJSONEncoder',
         'async': False,
-        'context_name': 'dmpScriptContext',
     })
-    # Read "Bootstrap Script" section in docs/topics_css_js.rst for an explanation of these scripts
-    context_source = strip_whitespace('''
-        <script id="{contextid}">
-            if (window["{contextname}"]===undefined){{
-                window["{contextname}"]={{}};
-            }}
-            window.{contextname}["{contextid}"]={contextdata};
-        </script>
-    ''')
-    script_source = strip_whitespace('''
-        <script>
-            (function(){{
-                var n=document.createElement("script");
-                n.id="{uid}";
-                n.async={async};
-                n.setAttribute("data-context", "{contextid}");
-                n.src="{href}?{version}";
-                if (document.currentScript) {{
-                    document.currentScript.parentNode.insertBefore(n, document.currentScript.nextSibling);
-                }}else{{
-                    document.head.appendChild(n);
-                }}
-            }})();
-        </script>
-    ''')
     
     def init(self):
         super().init()
@@ -92,24 +69,22 @@ class JsLinkProvider(LinkProvider):
     def get_content(self, provider_run):
         if self.href is None:
             return None
-        script = self.script_source.format(
+        bootstrap = '<script>DMP_CONTEXT.addScript("{uid}", "{contextid}", "{href}?{version}", {async});</script>'.format(
             uid=wuid(),           
-            contextname=self.options['context_name'],
             contextid=provider_run.uid,  
-            async='true' if self.options['async'] else 'false',
             href=self.href, 
             version=self.version_id,
+            async='true' if self.options['async'] else 'false',
         )
         # send the context with the first item
         if provider_run.chain_index == 0:
             context_data = { k: provider_run.context[k] for k in provider_run.context.kwargs if isinstance(k, jscontext) }
-            context_script = self.context_source.format(
-                contextname=self.options['context_name'],
+            return '<script>DMP_CONTEXT.setContext("{contextid}", {data});</script>{bootstrap}'.format(
                 contextid=provider_run.uid,  
-                contextdata=json.dumps(context_data, cls=self.encoder, separators=(',', ':')) if context_data else '{}',
+                data=json.dumps(context_data, cls=self.encoder, separators=(',', ':')) if context_data else '{}',
+                bootstrap=bootstrap,
             )
-            return context_script + '\n' + script
-        return script
+        return bootstrap
 
 
 class jscontext(str):

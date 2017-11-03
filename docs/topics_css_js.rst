@@ -46,6 +46,34 @@ This special case is for times when you need the CSS and JS autorendered, but do
 
 In other words, this behavior already happens; just use the calls above.  Even if ``otherpage.html`` doesn't exist, you'll get ``otherpage.css`` and ``otherpage.js`` in the current page content.
 
+common.js
+----------------------------------
+
+Your ``base.htm`` file contains the following script link:
+
+::
+
+    <script src="/django_mako_plus/common.min.js"></script>
+    
+This file contains a few functions that DMP uses to run scripts and send context variables to your javascript.  It is important that this link be loaded **before** any DMP calls are done in your templates.
+
+When running in production mode, your web server (IIS, Nginx, etc.) should serve this file rather than Django.  Or you may want to include the file in a packager like webpack.  In any case, the file just needs to be included on every page of your site, so do it in an efficient way for your setup.
+
+The following is an example setting for Nginx:
+
+::
+
+    location /django_mako_plus/common.min.js { 
+        alias /to/django_mako_plus/scripts/common.min.js; 
+    }
+
+If you don't know the location of DMP on your server, try this command:
+
+::
+
+    python3 -c 'import django_mako_plus; print(django_mako_plus.__file__)'
+
+
 (context) => { javascript }
 -----------------------------------------------
 
@@ -70,14 +98,14 @@ DMP responds with a bootstrap script that creates the following:
 
     <script src="/static/homepage/scripts/index.js?1509480811" data-context="u1234567890abcdef"></script>
     
-The bootstrap script places the context data in ``window.dmpScriptContext`` under the generated, unique context id.  Your script pulls it from this namespace with the following:
+The bootstrap script places the context data in ``window.DMP_CONTEXT`` under the generated, unique context id.  Your script pulls it from this namespace with the following:
 
 ::
 
     (function(context) {
         // your code here, such as
         console.log(context);
-    })(dmpScriptContext[document.currentScript.getAttribute('data-context')]);
+    })(DMP_CONTEXT[document.currentScript.getAttribute('data-context')]);
 
 The above code creates a closure for the ``context`` variable, which allows each of your scripts to use the same variable name without stepping on one another.  Yummy.
 
@@ -92,7 +120,7 @@ If you are using an onload callback function, such as a JQuery ready function, b
             // your code here, such as
             console.log(context);
         });
-    })(dmpScriptContext[document.currentScript.getAttribute('data-context')]);
+    })(DMP_CONTEXT[document.currentScript.getAttribute('data-context')]);
     
 Selecting on src=
 ^^^^^^^^^^^^^^^^^^^^^
@@ -104,7 +132,7 @@ The ``querySelector`` function is available on semi-modern browsers (including I
     (function(context) {
         // your code here, such as
         console.log(context);
-    })(dmpScriptContext[document.querySelector('script[src*="/homepage/scripts/index.js"]').getAttribute('data-context')]);
+    })(DMP_CONTEXT[document.querySelector('script[src*="/homepage/scripts/index.js"]').getAttribute('data-context')]);
 
 The primary drawback of this approach is the hard-coded name selection can be fragile, such as when you change the template name and forget to match the code.
 
@@ -201,6 +229,7 @@ The following more-detailed version enumerates all the options (set to their def
                         'group': 'styles',
                         'weight': 0,
                         'filename': '{appdir}/styles/{template}.css',
+                        'skip_duplicates': True,
                     },
                     
                     # generates links for app/scripts/template.js

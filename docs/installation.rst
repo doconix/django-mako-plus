@@ -223,21 +223,6 @@ standard Django project already has the ``TEMPLATES =`` line.
                 # determines whether DMP will send its custom signals during the process
                 'SIGNALS': False,
 
-                # # static file providers - these autoinclude *.css and *.js files
-                # 'CONTENT_PROVIDERS': [
-                #     # generates links for app/styles/template.css
-                #     { 'provider': 'django_mako_plus.CssLinkProvider' },
-                #
-                #     # generates links for app/scripts/template.js
-                #     { 'provider': 'django_mako_plus.JsLinkProvider' },
-                #
-                #     # compiles app/styles/template.scss to app/styles/template/css
-                #     { 'provider': 'django_mako_plus.CompileScssProvider' },
-                #
-                #     # compiles app/styles/template.less to app/styles/template/css
-                #     { 'provider': 'django_mako_plus.CompileLessProvider' },
-                # ],
-           
                 # see the DMP online tutorial for information about this setting
                 # it can normally be empty
                 'TEMPLATES_DIRS': [

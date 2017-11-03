@@ -80,10 +80,4 @@ def merge_dicts(*dicts):
     return merged
     
  
-def strip_whitespace(st):
-    '''Strip newline characters and starting/ending whitespace on each line.'''
-    # if settings.DEBUG:
-    #     return st
-    return ''.join([ s.strip() for s in st.splitlines() ])
-
 

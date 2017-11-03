@@ -1,4 +1,6 @@
+from django.apps import apps
 from django.conf.urls import url
+from django.views.static import serve
 try:
     from django.urls.resolvers import RegexURLPattern     # Django 1.10+
     from django.urls.exceptions import Resolver404
@@ -7,7 +9,6 @@ except ImportError:
     from django.core.urlresolvers import Resolver404
 from .router import route_request
 from .registry import is_dmp_app
-
 
 
 #########################################################
@@ -51,10 +52,14 @@ class DMPRegexPattern(RegexURLPattern):
 #########################################################
 ###   The default DMP url patterns
 
-# FYI, even though the valid python identifier is [_A-Za-z][_a-zA-Z0-9]*, I'm simplifying it to [_a-zA-Z0-9]+ because it works for our purposes
 
+
+# FYI, even though the valid python identifier is [_A-Za-z][_a-zA-Z0-9]*, I'm simplifying it to [_a-zA-Z0-9]+ because it works for our purposes
 urlpatterns = [
     # these are in order of specificity, with the most specific ones at the top
+    
+    # the DMP javascript file - the docs tell users to serve this file with their web server instead
+    url(r'django_mako_plus/common.min.js', serve, {'path': 'scripts/common.js', 'document_root': apps.get_app_config('django_mako_plus').path }),
 
     # /app/page.function/urlparams
     DMPRegexPattern(r'^(?P<dmp_router_app>[_a-zA-Z0-9\-]+)/(?P<dmp_router_page>[_a-zA-Z0-9\-]+)\.(?P<dmp_router_function>[_a-zA-Z0-9\.\-]+)/?(?P<urlparams>.*?)/?$', route_request, name='DMP /app/page.function'),
@@ -73,7 +78,8 @@ urlpatterns = [
     url(r'^(?P<dmp_router_page>[_a-zA-Z0-9\-]+)/?(?P<urlparams>.*?)/?$', route_request, name='DMP /page'),
 
     # / with nothing else
-    # FYI: /urlparams can't happen because it would be captured as /page in the previous pattern
     url(r'^$', route_request, name='DMP /'),
+
+    # FYI: /urlparams alone doesn't work because it would be captured as /page in the previous pattern
 ]
 

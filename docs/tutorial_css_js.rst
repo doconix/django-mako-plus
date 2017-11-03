@@ -111,7 +111,7 @@ Let's use the variable in ``index.js``:
             var hours = Math.round(Math.abs(serverTime - browserTime) / 36e5);
             $('.browser-time').text('The current browser is ' + hours + ' hours off of the server time zone.');
         });
-    })(dmpScriptContext[document.currentScript.getAttribute('data-context')]);
+    })(DMP_CONTEXT[document.currentScript.getAttribute('data-context')]);
     
 Reload your browser, and you should see the calculation of hours.  
 
@@ -126,6 +126,7 @@ After reading about automatic CSS and JS inclusion, you might want to know how i
 ::
 
     ## render the static file links for this template
+    <script src="/django_mako_plus/common.min.js"></script>
     ${ django_mako_plus.links(self) }
 
 The calls to ``links()`` include the ``<link>`` and ``<script>`` tags for the template name and all of its supertemplates. These links are placed at the end of your ``<head>`` section.  (Just a few years ago, common practice was to place script tags at the end of the body, but modern browsers with asyncronous and deferred scripts have put them back in the body.)

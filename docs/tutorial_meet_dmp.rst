@@ -76,6 +76,7 @@ The real HTML is kept in the ``base.htm`` file. It looks like this:
         <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 
         ## render the static file links with the same name as this template
+        <script src="/django_mako_plus/common.min.js"></script>
         ${ django_mako_plus.links(self) }
 
       </head>
@@ -96,13 +97,10 @@ Pay special attention to the ``<%block name="content">`` section, which is overr
 
 The purpose of the inheritance from ``base.htm`` is to get a consistent look, menu, etc. across all pages of your site. When you create additional pages, simply override the ``content`` block, similar to the way ``index.html`` does it.
 
-    Don't erase anything in the base.htm file. In particular, ``django_mako_plus.links()``,
-    is important. As much as you probably want to clean up the mess, try 
-    your best to leave these two calls alone. 
-    
-    These are not the lines of code you are looking for. Move along.
+    Don't erase anything in the base.htm file. In particular, ``django_mako_plus.links()`` and the ``common.js`` script are important.
+    As much as you probably want to clean up the mess, try your best to leave these alone. 
 
-**AttributeError: 'Undefined' object has no attribute 'get\_static':**
+**'Undefined' object has no attribute 'get\_static':**
 
 If you get this error, you might need to update a setting in ``settings.py``. Ensure that DMP is imported in the ``DEFAULT_TEMPLATE_IMPORTS`` list:
 
@@ -117,6 +115,14 @@ Then clear out the compiled templates caches:
 ::
 
     python manage.py dmp_cleanup
+    
+**DMP_CONTEXT is not defined**
+
+If you get this error, the ``/django_mako_plus/common.min.js`` script is not being loaded.  Check the following:
+
+* Is the ``<script>`` tag for this file in your ``base.htm``?  If there, did it get moved below the ``links()`` call?  This script must be loaded on every page of your site (i.e. in the base template), and it must be loaded before DMP calls are made.
+* Is the url pattern for this file working?  Check your ``urls.py`` file for ``include('django_mako_plus.urls')``.  The DMP ``urls.py`` file contains a direct pattern for this file that allows Django to find it.
+
 
 Goodbye, urls.py
 -----------------------
