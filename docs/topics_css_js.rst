@@ -4,6 +4,8 @@ Rendering CSS and JS
 In the `tutorial <tutorial_css_js.html>`_, you learned how to automatically include CSS and JS based on your page name .  
 If your page is named ``mypage.html``, DMP will automatically include ``mypage.css`` and ``mypage.js`` in the page content.  Skip back to the `tutorial <tutorial_css_js.html>`_ if you need a refresher.
 
+We'll now continue with the advanced version.
+
 Preprocessors (Scss and Less)
 -----------------------------------
 
@@ -44,10 +46,10 @@ This special case is for times when you need the CSS and JS autorendered, but do
 
 In other words, this behavior already happens; just use the calls above.  Even if ``otherpage.html`` doesn't exist, you'll get ``otherpage.css`` and ``otherpage.js`` in the current page content.
 
-Connecting Python and Javascript
+(context) => { javascript }
 -----------------------------------------------
 
-In the `tutorial <tutorial_css_js.html>`_, you learned to send context variables to included *.js files using ``jscontext``:
+In the `tutorial <tutorial_css_js.html>`_, you learned to send context variables to *.js files using ``jscontext``:
 
 .. code:: python
 
@@ -62,15 +64,11 @@ In the `tutorial <tutorial_css_js.html>`_, you learned to send context variables
         }
         return request.dmp_render('index.html', context)
 
-DMP responds with a small script tag that adds the following to the ``<head>`` section.  
+DMP responds with a bootstrap script that adds the following:  
 
 ::
 
     <script type="text/javascript" src="/static/homepage/scripts/index.js?1509480811" data-context="{&#34;now&#34;: &#34;2017-10-31T20:13:33.084&#34;}"></script>
-    
-If you are paying close attention, you may have noticed that DMP actually sends a script snippet that, when run by the browser, creates the above tag with code.  Sending a script to add a script might seem as real as James Moriarty leaving the holodeck, but stick with me.  DMP does this because some frameworks (JQuery!) strip the ``<script>`` tags from ajax responses and trigger them manually.  Since the scripts run after the content is inserted into the DOM, the ``document.currentScript`` variable is null and unable to give the ``jscontext`` variables to your JS.  By running a script which inserts a script tag, the real script runs inline with the ``appendChild`` call, and ``document.currentScript`` gets magically set by the browser.  
-
-tl;dr: Inserting the script tag with code skips past any ajax framework behavior, allowing your JS to get the ``jscontext`` variables from the script tags.
     
 Reading the Attribute
 ^^^^^^^^^^^^^^^^^^^^^^^^
@@ -100,7 +98,7 @@ If you are using an onload callback function, such as a JQuery ready function, b
     })(JSON.parse(document.currentScript.getAttribute('data-context')));
     
 Selecting on src=
-~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^
 
 The ``querySelector`` function is available on semi-modern browsers (including IE 9+):
 
@@ -117,11 +115,20 @@ The primary drawback of this approach is the hard-coded name selection can be fr
 Other Approaches
 ^^^^^^^^^^^^^^^^^^^^
 
-You've probably noticed that I haven't included the most direct approach: ``document.getElementById``, but I've skipped this approach because the ``<script>`` tag doesn't have an id.  If DMP set an id on the element, the Javascript would need to somehow get that id.  it just pushes the data transfer one level out, but we end up with the same problem.  The whole point of DMP is convention, with as little hard coding and configuration as possible.  For now, this method is ix-nayed.
+You've probably noticed that I haven't included the most direct approach: ``document.getElementById``, but I've skipped this approach because Javascript would need to somehow get the id of the ``script`` element.  That still requires something like ``document.currentScript`` -- it just pushes the data transfer one level out, but we end up with the same problem.  
 
-Another method is encoding the data in the script src query string.  However, reading this from Javascript means we need a reference to the script tag, so once again we just pushed the problem one level out.
+Another method is encoding the data in the script ``src`` query string.  However, reading this from Javascript means we need a reference to the script tag, so once again we just pushed the problem one level out.
 
-Finally, many examples online use the last item in ``document.scripts`` or the last script in the DOM.  This approach probably isn't the ticket because additional ``<script>`` elements are usually added to the DOM before the current one is running. This method worked well with browsers circa 2010, but not as well with today's browsers.
+Finally, many examples online use the last item in ``document.scripts`` or the last script in the DOM.  This approach isn't the ticket because additional ``<script>`` elements are usually added to the DOM before the current script starts executing. This method worked well with browsers circa 2005, but not as well with today's browsers.
+
+Bootstrap Script
+^^^^^^^^^^^^^^^^^^^^^^
+
+If you are paying close attention, you may have noticed that DMP actually sends a bootstrap script that creates the real script tag dynamically. Sending a script to add a script might seem like James Moriarty trying to get off the holodeck, but stick with me.  
+
+The ``document.currentScript`` variable is available during the execution of a script only during its immediate execution.  That means it is **not** available during ajax returns or callbacks. Front-end libraries like JQuery strip ``<script>`` tags because ``.innerHtml`` treats them like text instead of code. These libraries insert the content normally and **afterwards** execute the script code. This makes ``currentScript === null`` by the time your script actually runs. Boo.
+
+Why does it matter?  Because ``currentScript`` is how we get context variables from the script tag to the Javascript namespace. With DMP's approach, the script is able to load inline, via ajax, via callback, or any other way.  The only drawback to this approach is scripts added this way run **after** the scripts written directly in the HTML (even when ``async=false``).  Once hard coded scripts are finished, browsers run through the DMP-linked scripts in the order they were added to the DOM.  
 
 
 Groups
@@ -205,8 +212,7 @@ The following more-detailed version enumerates all the options (set to their def
                         'weight': 0,
                         'filename': '{appdir}/scripts/{template}.js',
                         'encoder': 'django.core.serializers.json.DjangoJSONEncoder',
-                        'async': True,
-                        'defer': False,
+                        'async': False,
                     },
                     
                     # compiles app/styles/template.scss to app/styles/template/css
@@ -233,7 +239,9 @@ The following more-detailed version enumerates all the options (set to their def
         }
     ]
     
-For example, the following compiles `Transcrypt files <https://www.transcrypt.org/>`_.  The first provider transpiles the source, and the second one creates the ``<script>`` link to the output file.
+The ``weight`` setting determines which providers run first (higher weights go first).    
+    
+As an example, consider the `Transcrypt files <https://www.transcrypt.org/>`_ project, which transpiles Python code into Javascript. It lets you write browser scripts in our favorite language (note the source looks for ``.py`` files. The provider settings tells DMP to compile your Transcrypt files when needed. The first provider transpiles the source, and the second one creates the ``<script>`` link to the output file.
 
 ::
 
@@ -265,7 +273,7 @@ For example, the following compiles `Transcrypt files <https://www.transcrypt.or
 Custom Providers
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Creating new provider classes is easy.  The following is an example of a custom provider class.  Once you create the class, simply reference it in your settings.py file.
+Suppose you need custom preprocessing of static files or custom template content.  Your future may include creating a new provider class. Fortunately, these are pretty simple classes. Once you create the class, simply reference it in your settings.py file.
 
 .. code:: python
 
@@ -282,11 +290,11 @@ Creating new provider classes is easy.  The following is an example of a custom 
         
         def init(self):
             # This is called from the constructor.
-            # It runs once per template (at production).
-            # Place any setup code here, or omit the
-            # method if you don't need it.
+            # It runs once (the first time the template 
+            # is rendered). Place any setup code here, 
+            # or omit the method if you don't need it.
             # 
-            # Variables set by DMP:
+            # Fields set by DMP that might be useful:
             #    self.app_dir = '/absolute/path/to/app/'
             #    self.template_name = 'current template name without extension'
             #    self.options = { 'dictionary': 'of all options' }

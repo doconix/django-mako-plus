@@ -1,8 +1,6 @@
 from django.test import TestCase
 
 
-
-
 class Tester(TestCase):
 
     def test_links(self):

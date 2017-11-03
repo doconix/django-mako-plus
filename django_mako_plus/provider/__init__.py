@@ -4,6 +4,7 @@ from django.template import Context
 import mako.runtime
 
 from ..util import get_dmp_instance
+from ..uid import wuid
 from .templateinfo import build_templateinfo_chain
 
 import io
@@ -19,7 +20,6 @@ from .base import init_providers, BaseProvider
 from .compile import CompileProvider, CompileScssProvider, CompileLessProvider
 from .links import LinkProvider, CssLinkProvider, JsLinkProvider, jscontext
 from .mako_static import MakoCssProvider, MakoJsProvider
-
 
 #########################################################
 ###  Primary functions
@@ -71,6 +71,7 @@ def links(tself, version_id=None, group=None):
 class ProviderRun(object):
     '''Information for a run through a chain of template info objects and providers on each one.'''
     def __init__(self, request, context, group, chain):
+        self.uid = wuid()       # a unique Id for this run
         self.request = request
         self.context = context
         self.group = group

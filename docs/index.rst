@@ -68,6 +68,7 @@ Contents
     :maxdepth: 2
 
     about
+    upgrade_notes
     installation
     tutorial
     topics

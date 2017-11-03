@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.utils.module_loading import import_string
-from mako.filters import html_escape
 
+from ..uid import wuid
 from ..util import merge_dicts
 from .base import BaseProvider
 
@@ -43,7 +43,8 @@ class CssLinkProvider(LinkProvider):
     def get_content(self, provider_run):
         if self.href is None:
             return None
-        return '<link rel="stylesheet" type="text/css" href="{href}?{version}" />'.format(
+        return '<link rel="stylesheet" type="text/css" data-links="{linksid}" href="{href}?{version}" />'.format(
+            linksid=provider_run.uid,
             href=self.href, 
             version=self.version_id,
         )
@@ -55,24 +56,37 @@ class JsLinkProvider(LinkProvider):
         'group': 'scripts',
         'filename': '{appdir}/scripts/{template}.js',
         'encoder': 'django.core.serializers.json.DjangoJSONEncoder',
-        'async': True,
-        'defer': False,
+        'async': False,
     })
-    # A little explanation is in order for this dynamic script inclusion.
+    #     A little explanation is in order for this dynamic script inclusion.
     # document.currentScript is available during the execution of a script
-    # but *not* during callbacks. Some libraries (JQuery!) strip <script> tags
-    # and execute them after insertion into the DOM, which makes currentScript
-    # unavailable. With this approach, the <script> below can run inline or
-    # in a callback, but the script loaded by the new tag always runs inline.
-    # This way currentScript is available in all cases.
+    # but *not* during callbacks. Front-end libraries like JQuery strip 
+    # <script> tags on ajax because .innerHtml won't accept them, so the libraries
+    # execute them after insertion into the DOM, which makes currentScript
+    # unavailable.  We need currentScript because that's how context variables
+    # get from <script data-context="..."> into the script.  
+    #     With this approach, the <script> runs inline, via ajax, via callback, 
+    # or any other way.  When the code is added to the DOM, the currentScript
+    # variable is available in all cases.  We try to append directly after this 
+    # bootstrap script, but fallback to append to <head> when in ajax or a callback.
+    #     The only drawback to this approach is scripts added this way run
+    # after all scripts in the original HTML, even when async=false. They do stay
+    # in order, though, as long as async=False.
     script = ''.join([ s.strip() for s in '''
         <script>
-            var n=document.createElement("script");
-            n.setAttribute("data-context", "{data}");
-            n.setAttribute("async", {async});
-            n.setAttribute("defer", {defer});
-            n.src="{href}?{version}";
-            document.head.appendChild(n);
+            (function(){{
+                var n=document.createElement("script");
+                n.id="{uid}";
+                n.async={async};
+                n.setAttribute("data-inheritance", "{inheritanceid}");
+                n.src="{href}?{version}";
+                n.setAttribute("data-context", "{data}");
+                if (document.currentScript) {{
+                    document.currentScript.parentNode.insertBefore(n, document.currentScript.nextSibling);
+                }}else{{
+                    document.head.appendChild(n);
+                }}
+            }})();
         </script>
     '''.splitlines() ])
     
@@ -85,11 +99,12 @@ class JsLinkProvider(LinkProvider):
             return None
         js_context = { k: provider_run.context[k] for k in provider_run.context.kwargs if isinstance(k, jscontext) }
         return self.script.format(
+            uid=wuid(),                     # id="" is a unique id just to this tag
+            inheritanceid=provider_run.uid, # data-inheritance="" is a shared id to all links in a template inheritance chain
             async='true' if self.options['async'] else 'false',
-            defer='true' if self.options['defer'] else 'false',
             href=self.href, 
             version=self.version_id,
-            data=json.dumps(js_context, cls=self.encoder, separators=(',', ':')).replace('"', '\\"') if len(js_context) > 0 else '{}',
+            data=json.dumps(js_context, cls=self.encoder, separators=(',', ':')).replace('\\', '\\\\').replace('"', '\\"') if len(js_context) > 0 else '{}',
         )
 
 
@@ -103,5 +118,4 @@ class jscontext(str):
     See the tutorial for more information on this function.
     '''
     # no code needed, just using the class for identity
-    pass
     
