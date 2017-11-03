@@ -12,16 +12,11 @@ DMP boasts the following advantages:
 
 2. It enables **calling views and html pages by convention** rather than specific entries in urls.py. Any .html file on your site can be called without new entries in urls.py for every. single. new. page. Doesn't Python favor convention over configuration?
 
-3. DMP introduces the idea of URL parameters. These allow you to embed parameters in urls, Django style--meaning you can use pretty URLs like http://myserver.com/abc/def/123/ **without explicit entries in urls.py** and without the need for traditional (i.e. ulgy) ?first=abc&second=def&third=123 syntax.
+3. DMP introduces the idea of URL parameters with automatic type conversion. These allow you to embed parameters in urls, Django style--meaning you can use pretty URLs like http://myserver.com/abc/def/123/ **without explicit entries in urls.py** and without the need for traditional (i.e. ulgy) ?first=abc&second=def&third=123 syntax.
 
-4. It separates view functions into different files rather than all-in-one style. Anyone who has programmed Django long knows that the single views.py file in each app often gets looooonnng. Splitting logic into separate files keeps things more orderly.
+4. It includes CSS and JS files with the same name as the current template automatically. This means that ``mypage.css`` and ``mypage.js`` get linked in ``mypage.html`` automatically. Plus, DMP allows sending context values from your Python view code right into your Javascript namespace, without any significant hacks.
 
-5. It includes CSS and JS files automatically, and it allows Python code within these files. These static files get included in your web pages without any explicit declaration of ``<link>`` or ``<script>`` elements. This means that ``mypage.css`` and ``mypage.js`` get linked in ``mypage.html`` automatically. Python code within these support files means your CSS can change based on user or database entries.
-
-6. Optionally, it integrates with Sass by automatically running ``scss`` on updated .scss files.
-
-
-    **Author's Note:** Django comes with its own template system, but it's fairly weak (by design). Mako, on the other hand, is a fantastic template system that allows full Python code within HTML pages. The primary reason Django doesn't allow full Python in its templates is the designers want to encourage you and I to keep template logic simple. I fully agree with this philosophy. I just don't agree with the "forced" part of this philosophy. The Python way is rather to give freedom to the developer but train in the correct way of doing things. Even though I fully like Python in my templates, I still keep them fairly simple. Views are where your logic goes.
+5. DMP can compile your preprocessor files, such as ``.scss``, ``.less``, or even ``Transcrypt .py``.
 
 
 Frequently Asked Questions
@@ -35,6 +30,15 @@ This app was developed at MyEducator.com, primarily by `Dr. Conan C. Albrecht <m
 
 I've been told by some that DMP has a lot in common with Rails. When I developed DMP, I had never used RoR, but good ideas are good ideas wherever they are found, right? :)
 
+What's wrong with Django's built-in template language?
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Django comes with its own template system, but it's fairly weak (by design). Mako, on the other hand, is a fantastic template system that allows full Python code within HTML pages. 
+
+The primary reason Django doesn't allow full Python in its templates is the designers want to encourage you and I to keep template logic simple. I fully agree with this philosophy. I just don't agree with the "forced" part of this philosophy. The Python way is rather to give freedom to the developer but train in the correct way of doing things. Even though I fully like Python in my templates, I still keep them fairly simple. Views are where your logic goes.
+
+
+
 Why Mako instead Django or Jinja2?
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -43,6 +47,7 @@ Python has several mature, excellent templating languages. Both Django and Jinja
 Mako itself is very stable, both in terms of "lack of bugs" and in "completed feature set". Today, the Mako API almost never changes because it does exactly what it needs to do and does it well. This make it an excellent candidate for server use.
 
 The short answer is I liked Mako's approach the best. It felt the most Pythonic to me. Jinja2 may feel more like Django's built-in template system, but Mako won out because it looked more like Python--and the point of DMP is to include Python in templates.
+
 
 Can I use DMP with regular Django apps?
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -149,8 +154,8 @@ If you have read through the Django Tutorial, you've seen examples for templatin
 | Place in template:                                                       | Simply name the .css/.js file the same name as your .html template.   |
 | |  <link rel="stylesheet" type="text/css" href="...">                    | DMP will include the link automatically.                              |
 +--------------------------------------------------------------------------+-----------------------------------------------------------------------+
-| **Perform per-request logic in CSS or JS files:**                                                                                                |
+| **Perform per-request logic in JS files:**                                                                                                       |
 +--------------------------------------------------------------------------+-----------------------------------------------------------------------+
-| Create an entry in urls.py, create a view,                               | Simply name the .css file as name.cssm for each name.html template.   |
-| and render a template for the CSS or JS.                                 | DMP will render the template and include it automatically.            |
+| Difficult, young padwan...very difficult.                                | Wrap context keys with ``jscontext()``, and DMP will                  |
+|                                                                          | make the variable available in your JS file.                          |
 +--------------------------------------------------------------------------+-----------------------------------------------------------------------+
