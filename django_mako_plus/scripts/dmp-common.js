@@ -1,9 +1,14 @@
 (function() {    
     if (window.DMP_CONTEXT === undefined) {
         window["DMP_CONTEXT"] = {
+            /* Check for the dmp version so we don't have mismatches */
+            __version__: '4.3.2',
             
             /* Adds data to the DMP context under the given key */
-            setContext: function(contextid, data) {
+            setContext: function(version, contextid, data) {
+                if (DMP_CONTEXT.__version__ != version) {
+                    console.warn('DMP framework version is ' + version + ' dmp-common.js is ' + DMP_CONTEXT.__version__ + '. Unexpected behavior may occur.');
+                }
                 DMP_CONTEXT[contextid] = data;
             },//addContext
 

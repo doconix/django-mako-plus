@@ -53,7 +53,7 @@ Your ``base.htm`` file contains the following script link:
 
 ::
 
-    <script src="/django_mako_plus/common.min.js"></script>
+    <script src="/django_mako_plus/dmp-common.min.js"></script>
     
 This file contains a few functions that DMP uses to run scripts and send context variables to your javascript.  It is important that this link be loaded **before** any DMP calls are done in your templates.
 
@@ -63,8 +63,8 @@ The following is an example setting for Nginx:
 
 ::
 
-    location /django_mako_plus/common.min.js { 
-        alias /to/django_mako_plus/scripts/common.min.js; 
+    location /django_mako_plus/dmp-common.min.js { 
+        alias /to/django_mako_plus/scripts/dmp-common.min.js; 
     }
 
 If you don't know the location of DMP on your server, try this command:

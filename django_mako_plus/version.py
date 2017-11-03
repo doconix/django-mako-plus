@@ -4,12 +4,3 @@
 
 __version__ = '4.3.2'
 
-
-# Reminder on uploading to pypi and removing the build folders:
-'''
-
-python3 setup.py sdist
-twine upload dist/*
-rm -rf dist/ django_mako_plus.egg-info/
-
-'''

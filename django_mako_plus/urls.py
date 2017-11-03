@@ -59,7 +59,7 @@ urlpatterns = [
     # these are in order of specificity, with the most specific ones at the top
     
     # the DMP javascript file - the docs tell users to serve this file with their web server instead
-    url(r'django_mako_plus/common.min.js', serve, {'path': 'scripts/common.js', 'document_root': apps.get_app_config('django_mako_plus').path }),
+    url(r'django_mako_plus/dmp-common.min.js', serve, {'path': 'scripts/dmp-common.min.js', 'document_root': apps.get_app_config('django_mako_plus').path }),
 
     # /app/page.function/urlparams
     DMPRegexPattern(r'^(?P<dmp_router_app>[_a-zA-Z0-9\-]+)/(?P<dmp_router_page>[_a-zA-Z0-9\-]+)\.(?P<dmp_router_function>[_a-zA-Z0-9\.\-]+)/?(?P<urlparams>.*?)/?$', route_request, name='DMP /app/page.function'),

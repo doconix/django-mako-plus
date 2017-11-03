@@ -4,17 +4,24 @@ import os, os.path
 import sys
 import subprocess
 import time
+from collections import namedtuple
 
 
 ################################################################
 ###   Run a shell commands
+
+ReturnInfo = namedtuple('CommandReturn', ( 'code', 'stdout', 'stderr' ))
+
 
 def run_command(*args, raise_exception=True):
     '''
     Runs a command, piping all output to the DMP log.
     The args should be separate arguments so paths and subcommands can have spaces in them:
 
-        run_command('ls', '-l', '/Users/me/My Documents')
+        ret = run_command('ls', '-l', '/Users/me/My Documents')
+        print(ret.code)
+        print(ret.stdout)
+        print(ret.stderr)
 
     On Windows, the PATH is not followed.  This can be overcome with:
 
@@ -24,21 +31,19 @@ def run_command(*args, raise_exception=True):
     log.info('%s', ' '.join(args))
     p = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE)
     stdout, stderr = p.communicate()
+    returninfo = ReturnInfo(p.returncode, stdout.decode('utf8'), stderr.decode('utf8'))
     if stdout:
-        log.info('%s', stdout.decode('utf8'))
-    if raise_exception and p.returncode != 0:
-        raise CommandError(p.returncode, ' '.join(args), stdout.decode('utf8'), stderr.decode('utf8'))
-    return p.returncode
-
+        log.info('%s', returninfo.stdout)
+    if raise_exception and returninfo.code != 0:
+        raise CommandError(' '.join(args), returninfo)
+    return returninfo
 
 
 class CommandError(Exception):
-    def __init__(self, returncode, command, output, error):
-        self.returncode = returncode
+    def __init__(self, command, returninfo):
         self.command = command
-        self.output = output
-        self.error = error
+        self.returninfo = returninfo
         super().__init__()
         
     def __str__(self):
-        return '[{}] {}\n{}\nCommand was: {}'.format(self.returncode, self.output, self.error, self.command)
+        return '[{}] {}\n{}\nCommand was: {}'.format(self.returninfo.code, self.returninfo.stdout, self.returninfo.stderr, self.command)

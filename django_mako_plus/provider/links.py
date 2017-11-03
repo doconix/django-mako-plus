@@ -3,6 +3,7 @@ from django.utils.module_loading import import_string
 
 from ..uid import wuid
 from ..util import merge_dicts
+from ..version import __version__
 from .base import BaseProvider
 
 import os
@@ -67,24 +68,24 @@ class JsLinkProvider(LinkProvider):
         self.encoder = import_string(self.options['encoder'])
 
     def get_content(self, provider_run):
-        if self.href is None:
-            return None
-        bootstrap = '<script>DMP_CONTEXT.addScript("{uid}", "{contextid}", "{href}?{version}", {async});</script>'.format(
-            uid=wuid(),           
-            contextid=provider_run.uid,  
-            href=self.href, 
-            version=self.version_id,
-            async='true' if self.options['async'] else 'false',
-        )
+        html = []
         # send the context with the first item
         if provider_run.chain_index == 0:
             context_data = { k: provider_run.context[k] for k in provider_run.context.kwargs if isinstance(k, jscontext) }
-            return '<script>DMP_CONTEXT.setContext("{contextid}", {data});</script>{bootstrap}'.format(
+            html.append('<script>DMP_CONTEXT.setContext("{version}", "{contextid}", {data});</script>'.format(
+                version=__version__,
                 contextid=provider_run.uid,  
                 data=json.dumps(context_data, cls=self.encoder, separators=(',', ':')) if context_data else '{}',
-                bootstrap=bootstrap,
-            )
-        return bootstrap
+            ))
+        if self.href is not None:
+            html.append('<script>DMP_CONTEXT.addScript("{uid}", "{contextid}", "{href}?{version}", {async});</script>'.format(
+                uid=wuid(),           
+                contextid=provider_run.uid,  
+                href=self.href, 
+                version=self.version_id,
+                async='true' if self.options['async'] else 'false',
+            ))
+        return ('\n' if settings.DEBUG else '').join(html)
 
 
 class jscontext(str):
