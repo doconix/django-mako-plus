@@ -5,7 +5,7 @@ Converting URL Parameters
     :depth: 2
 
 
-In the `Tutorial <tutorial_urlparams.html>`_, you learned that any extra parameters in the URL are sent to your view function as parameters.  For example the following view function signature expects two additional parameters in the url: ``hrs`` and ``mins``.  DMP converts these to ``int`` automatically.
+In the `initial tutorial <tutorial_urlparams.html>`_, you learned that any extra parameters in the URL are sent to your view function as parameters.  For example the following view function signature expects two additional parameters in the url: ``hrs`` and ``mins``.  DMP converts these to ``int`` automatically.
 
 .. code:: python
 

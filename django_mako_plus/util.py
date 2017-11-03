@@ -1,4 +1,5 @@
 from django.apps import apps
+from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 
 import base64
@@ -64,28 +65,8 @@ class URLParamList(list):
         return super().__getitem__(idx)
 
 
-
-######################################################
-###   Encoding routines.
-###   Using Base32 because its alphabet conforms to
-###   CSS selectors.
-
-def encode32(st):
-    '''Encodes the given string to base64.'''
-    if not isinstance(st, bytes):
-        st = st.encode('utf8')              # we now have a byte string rather than the original unicode text
-    b32_byte_st = base64.b32encode(st)   # we now have a base32-encoded byte string representing the text
-    return b32_byte_st.decode('ascii').replace('=', '9')    # we're now back to Unicode (using ascii decoding since base32 is all ascii characters)
-
-
-def decode32(st):
-    '''Decodes the given base64-encoded string.'''
-    st = st.replace('9', '=')
-    if not isinstance(st, bytes):
-        st = st.encode('ascii')     # we now have a byte string of the base64-encoded text instead of the Unicode base32s-encoded st
-    byte_st = base64.b32decode(st)   # we now have a byte string of the original text
-    return byte_st.decode('utf8')         # we now have a Unicode string of the original text
-
+##########################################
+###   Utilities
 
 def merge_dicts(*dicts):
     '''
@@ -98,4 +79,11 @@ def merge_dicts(*dicts):
         merged.update(d)
     return merged
     
-  
+ 
+def strip_whitespace(st):
+    '''Strip newline characters and starting/ending whitespace on each line.'''
+    # if settings.DEBUG:
+    #     return st
+    return ''.join([ s.strip() for s in st.splitlines() ])
+
+

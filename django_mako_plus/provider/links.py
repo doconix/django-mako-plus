@@ -2,7 +2,7 @@ from django.conf import settings
 from django.utils.module_loading import import_string
 
 from ..uid import wuid
-from ..util import merge_dicts
+from ..util import merge_dicts, strip_whitespace
 from .base import BaseProvider
 
 import os
@@ -57,30 +57,25 @@ class JsLinkProvider(LinkProvider):
         'filename': '{appdir}/scripts/{template}.js',
         'encoder': 'django.core.serializers.json.DjangoJSONEncoder',
         'async': False,
+        'context_name': 'dmpScriptContext',
     })
-    #     A little explanation is in order for this dynamic script inclusion.
-    # document.currentScript is available during the execution of a script
-    # but *not* during callbacks. Front-end libraries like JQuery strip 
-    # <script> tags on ajax because .innerHtml won't accept them, so the libraries
-    # execute them after insertion into the DOM, which makes currentScript
-    # unavailable.  We need currentScript because that's how context variables
-    # get from <script data-context="..."> into the script.  
-    #     With this approach, the <script> runs inline, via ajax, via callback, 
-    # or any other way.  When the code is added to the DOM, the currentScript
-    # variable is available in all cases.  We try to append directly after this 
-    # bootstrap script, but fallback to append to <head> when in ajax or a callback.
-    #     The only drawback to this approach is scripts added this way run
-    # after all scripts in the original HTML, even when async=false. They do stay
-    # in order, though, as long as async=False.
-    script = ''.join([ s.strip() for s in '''
+    # Read "Bootstrap Script" section in docs/topics_css_js.rst for an explanation of these scripts
+    context_source = strip_whitespace('''
+        <script id="{contextid}">
+            if (window["{contextname}"]===undefined){{
+                window["{contextname}"]={{}};
+            }}
+            window.{contextname}["{contextid}"]={contextdata};
+        </script>
+    ''')
+    script_source = strip_whitespace('''
         <script>
             (function(){{
                 var n=document.createElement("script");
                 n.id="{uid}";
                 n.async={async};
-                n.setAttribute("data-inheritance", "{inheritanceid}");
+                n.setAttribute("data-context", "{contextid}");
                 n.src="{href}?{version}";
-                n.setAttribute("data-context", "{data}");
                 if (document.currentScript) {{
                     document.currentScript.parentNode.insertBefore(n, document.currentScript.nextSibling);
                 }}else{{
@@ -88,7 +83,7 @@ class JsLinkProvider(LinkProvider):
                 }}
             }})();
         </script>
-    '''.splitlines() ])
+    ''')
     
     def init(self):
         super().init()
@@ -97,16 +92,24 @@ class JsLinkProvider(LinkProvider):
     def get_content(self, provider_run):
         if self.href is None:
             return None
-        js_context = { k: provider_run.context[k] for k in provider_run.context.kwargs if isinstance(k, jscontext) }
-        return self.script.format(
-            uid=wuid(),                     # id="" is a unique id just to this tag
-            inheritanceid=provider_run.uid, # data-inheritance="" is a shared id to all links in a template inheritance chain
+        script = self.script_source.format(
+            uid=wuid(),           
+            contextname=self.options['context_name'],
+            contextid=provider_run.uid,  
             async='true' if self.options['async'] else 'false',
             href=self.href, 
             version=self.version_id,
-            data=json.dumps(js_context, cls=self.encoder, separators=(',', ':')).replace('\\', '\\\\').replace('"', '\\"') if len(js_context) > 0 else '{}',
         )
-
+        # send the context with the first item
+        if provider_run.chain_index == 0:
+            context_data = { k: provider_run.context[k] for k in provider_run.context.kwargs if isinstance(k, jscontext) }
+            context_script = self.context_source.format(
+                contextname=self.options['context_name'],
+                contextid=provider_run.uid,  
+                contextdata=json.dumps(context_data, cls=self.encoder, separators=(',', ':')) if context_data else '{}',
+            )
+            return context_script + '\n' + script
+        return script
 
 
 class jscontext(str):

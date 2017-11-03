@@ -64,29 +64,26 @@ In the `tutorial <tutorial_css_js.html>`_, you learned to send context variables
         }
         return request.dmp_render('index.html', context)
 
-DMP responds with a bootstrap script that adds the following:  
+DMP responds with a bootstrap script that creates the following:  
 
 ::
 
-    <script type="text/javascript" src="/static/homepage/scripts/index.js?1509480811" data-context="{&#34;now&#34;: &#34;2017-10-31T20:13:33.084&#34;}"></script>
+    <script src="/static/homepage/scripts/index.js?1509480811" data-context="u1234567890abcdef"></script>
     
-Reading the Attribute
-^^^^^^^^^^^^^^^^^^^^^^^^
-    
-The task of getting the data from the script attribute to your Javascript namespace is fraught with danger.   While there are possible ways to do this, the suggested Master Sword is the following:
+The bootstrap script places the context data in ``window.dmpScriptContext`` under the generated, unique context id.  Your script pulls it from this namespace with the following:
 
 ::
 
     (function(context) {
         // your code here, such as
         console.log(context);
-    })(JSON.parse(document.currentScript.getAttribute('data-context')));
+    })(dmpScriptContext[document.currentScript.getAttribute('data-context')]);
 
-The drawback to this method is it only works with modern browsers.  The above code creates a closure for the ``context`` variable, which allows each of your scripts to use the same variable name without stepping on one another.  Clean namespaces.  Yummy.
+The above code creates a closure for the ``context`` variable, which allows each of your scripts to use the same variable name without stepping on one another.  Yummy.
 
-If your users have older browsers, including any version of IE, this method can still work with `a polyfill <https://www.google.com/search?q=polyfill+currentscript>`_.
+While several approaches exist to get the ``data-context`` attribute into your script, we recommend the above code.  The drawback is this approach only works with modern browsers (Chrome 29+, Firefox 4+, Safari 8+, Edge 1+, Opera 16+). If your site visitors use browsers older than these, including any version of IE, this method can still work with `a polyfill <https://github.com/JamesMGreene/document.currentScript>`_.
 
-If you are using an onload callback function, such as a JQuery ready function, be sure to embed the callback within the closure.  The ``document.currentScript`` attribute only exists during the initial run of the script, so it's gone by the time the callback executes.  Here's an example:
+If you are using an onload callback function, such as a JQuery ready function, be sure to embed the callback within the closure.  The ``document.currentScript`` attribute only exists during the initial run of the script, so it's gone by the time the callback executes.  Here's an example of the right way to do it:
 
 ::
 
@@ -95,7 +92,7 @@ If you are using an onload callback function, such as a JQuery ready function, b
             // your code here, such as
             console.log(context);
         });
-    })(JSON.parse(document.currentScript.getAttribute('data-context')));
+    })(dmpScriptContext[document.currentScript.getAttribute('data-context')]);
     
 Selecting on src=
 ^^^^^^^^^^^^^^^^^^^^^
@@ -107,7 +104,7 @@ The ``querySelector`` function is available on semi-modern browsers (including I
     (function(context) {
         // your code here, such as
         console.log(context);
-    })(JSON.parse(document.querySelector('script[src*="/homepage/scripts/index.js"]').getAttribute('data-context')));
+    })(dmpScriptContext[document.querySelector('script[src*="/homepage/scripts/index.js"]').getAttribute('data-context')]);
 
 The primary drawback of this approach is the hard-coded name selection can be fragile, such as when you change the template name and forget to match the code.
 
@@ -130,6 +127,7 @@ The ``document.currentScript`` variable is available during the execution of a s
 
 Why does it matter?  Because ``currentScript`` is how we get context variables from the script tag to the Javascript namespace. With DMP's approach, the script is able to load inline, via ajax, via callback, or any other way.  The only drawback to this approach is scripts added this way run **after** the scripts written directly in the HTML (even when ``async=false``).  Once hard coded scripts are finished, browsers run through the DMP-linked scripts in the order they were added to the DOM.  
 
+Since several scripts (one for each super-template in the template's inheritance) need the same context data, DMP stores the data in the common namespace ``window.dmp_context``.
 
 Groups
 -----------------

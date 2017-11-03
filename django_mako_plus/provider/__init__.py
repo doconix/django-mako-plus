@@ -72,14 +72,15 @@ class ProviderRun(object):
     '''Information for a run through a chain of template info objects and providers on each one.'''
     def __init__(self, request, context, group, chain):
         self.uid = wuid()       # a unique Id for this run
-        self.request = request
-        self.context = context
-        self.group = group
-        self.chain = chain
+        self.request = request  # request from the render call
+        self.context = context  # context from the render call
+        self.group = group      # the provider group being rendered (usually None)
+        self.chain = chain      # list of TemplateInfos matching the template inheritance
+        self.chain_index = 0    # current index of the inheritance chain as the run goes
         
     def get_content(self):
         '''Loops each TemplateInfo providers list, returning the combined content.'''
-        self.inheritance_index = 0
+        self.chain_index = 0
         self.html = []
         for ti in self.chain:
             for provider_i, provider in enumerate(ti.providers):
@@ -87,7 +88,7 @@ class ProviderRun(object):
                     content = provider.get_content(self)
                     if content:
                         self.html.append(content)
-            self.inheritance_index += 1
+            self.chain_index += 1
         return '\n'.join(self.html)
 
 
