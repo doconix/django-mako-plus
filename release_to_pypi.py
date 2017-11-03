@@ -29,6 +29,6 @@ with open(DMP_COMMON + '.min.js', 'w') as f:
 # run the setup and upload
 ret = run_command('python3', 'setup.py', 'sdist')
 print(ret.stdout)
-#ret = run_command([ 'twine', 'upload', 'dist/*' ])
+ret = run_command([ 'twine', 'upload', 'dist/*' ])
 print(ret.stdout)
 run_command('rm', '-rf', 'dist/', 'django_mako_plus.egg-info/')
