@@ -1,16 +1,24 @@
 (function() {    
     if (window.DMP_CONTEXT === undefined) {
-        window["DMP_CONTEXT"] = {
+        window.DMP_CONTEXT = {
             /* Check for the dmp version so we don't have mismatches */
             __version__: '4.3.2',
             
             /* Adds data to the DMP context under the given key */
-            setContext: function(version, contextid, data) {
+            set: function(version, contextid, data) {
                 if (DMP_CONTEXT.__version__ != version) {
                     console.warn('DMP framework version is ' + version + ' dmp-common.js is ' + DMP_CONTEXT.__version__ + '. Unexpected behavior may occur.');
                 }
                 DMP_CONTEXT[contextid] = data;
-            },//addContext
+            },
+            
+            /* Retrieves context data for the current running script script */
+            get: function() {
+                if (document.currentScript === undefined) {
+                    throw Error('document.currentScript is undefined. DMP_CONTEXT.getContext() can only be done during initial script processing (not in callbacks or event handling).');
+                }
+                return DMP_CONTEXT[document.currentScript.getAttribute('data-context')];
+            },
 
             /* Adds a <script> element dynamically, which ensures the fetched script has document.currentScript (see docs) */
             addScript: function(uid, contextid, src, async) {
@@ -25,7 +33,7 @@
                 }else{
                     document.head.appendChild(n);
                 }
-            },//addScript
+            },
 
         };//DMP_CONTEXT
     }//if

@@ -111,7 +111,7 @@ Let's use the variable in ``index.js``:
             var hours = Math.round(Math.abs(serverTime - browserTime) / 36e5);
             $('.browser-time').text('The current browser is ' + hours + ' hours off of the server time zone.');
         });
-    })(DMP_CONTEXT[document.currentScript.getAttribute('data-context')]);
+    })(DMP_CONTEXT.get());
     
 Reload your browser, and you should see the calculation of hours.  
 

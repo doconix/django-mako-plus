@@ -72,7 +72,7 @@ class JsLinkProvider(LinkProvider):
         # send the context with the first item
         if provider_run.chain_index == 0:
             context_data = { k: provider_run.context[k] for k in provider_run.context.kwargs if isinstance(k, jscontext) }
-            html.append('<script>DMP_CONTEXT.setContext("{version}", "{contextid}", {data});</script>'.format(
+            html.append('<script>DMP_CONTEXT.set("{version}", "{contextid}", {data});</script>'.format(
                 version=__version__,
                 contextid=provider_run.uid,  
                 data=json.dumps(context_data, cls=self.encoder, separators=(',', ':')) if context_data else '{}',

@@ -105,7 +105,7 @@ The bootstrap script places the context data in ``window.DMP_CONTEXT`` under the
     (function(context) {
         // your code here, such as
         console.log(context);
-    })(DMP_CONTEXT[document.currentScript.getAttribute('data-context')]);
+    })(DMP_CONTEXT.get());
 
 The above code creates a closure for the ``context`` variable, which allows each of your scripts to use the same variable name without stepping on one another.  Yummy.
 
@@ -120,7 +120,7 @@ If you are using an onload callback function, such as a JQuery ready function, b
             // your code here, such as
             console.log(context);
         });
-    })(DMP_CONTEXT[document.currentScript.getAttribute('data-context')]);
+    })(DMP_CONTEXT.get());
     
 Selecting on src=
 ^^^^^^^^^^^^^^^^^^^^^

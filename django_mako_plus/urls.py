@@ -9,7 +9,7 @@ except ImportError:
     from django.core.urlresolvers import Resolver404
 from .router import route_request
 from .registry import is_dmp_app
-
+import os, os.path
 
 #########################################################
 ###   A custom url pattern that checks for DMP apps.
@@ -58,8 +58,8 @@ class DMPRegexPattern(RegexURLPattern):
 urlpatterns = [
     # these are in order of specificity, with the most specific ones at the top
     
-    # the DMP javascript file - the docs tell users to serve this file with their web server instead
-    url(r'django_mako_plus/dmp-common.min.js', serve, {'path': 'scripts/dmp-common.min.js', 'document_root': apps.get_app_config('django_mako_plus').path }),
+    # the DMP web files - the docs tell users to serve this directory with their web server instead
+    url(r'^django_mako_plus/(?P<path>[^/]+)', serve, { 'document_root': os.path.join(apps.get_app_config('django_mako_plus').path, 'webroot') }),
 
     # /app/page.function/urlparams
     DMPRegexPattern(r'^(?P<dmp_router_app>[_a-zA-Z0-9\-]+)/(?P<dmp_router_page>[_a-zA-Z0-9\-]+)\.(?P<dmp_router_function>[_a-zA-Z0-9\.\-]+)/?(?P<urlparams>.*?)/?$', route_request, name='DMP /app/page.function'),

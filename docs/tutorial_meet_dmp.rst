@@ -10,6 +10,19 @@ I'll assume you've just installed Django-Mako-Plus according to the `installatio
 
 You should see a congratulations page. If you don't, go back to the installation section and walk through the steps again. Your console might have valuable error messages to help troubleshoot things.
 
+For the Impatient
+-----------------------
+
+If you are an experienced web developer and just want to get going, check out the example files in your new app: 
+
+* ``homepage/template/base.htm``
+* ``homepage/template/index.htm``
+* ``homepage/styles/index.css``
+* ``homepage/scripts/index.js``
+
+These files contain example code that follows the primary patterns of DMP.
+
+
 Your New App
 ----------------------
 
@@ -54,6 +67,7 @@ Let's start with the two primary html template files: ``base.htm`` and ``index.h
         <div class="content">
           <h3>Congratulations -- you've successfully created a new django-mako-plus app!</h3>
           <h4>Next Up: Go through the django-mako-plus tutorial and add Javascript, CSS, and urlparams to this page.</h4>
+          <h4 class="utc-time">Current time in UTC: ${ utc_time }</h4>
         </div>
     </%block>
 
