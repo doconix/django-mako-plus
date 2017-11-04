@@ -78,9 +78,11 @@ class JsLinkProvider(LinkProvider):
                 data=json.dumps(context_data, cls=self.encoder, separators=(',', ':')) if context_data else '{}',
             ))
         if self.href is not None:
-            html.append('<script>DMP_CONTEXT.addScript("{uid}", "{contextid}", "{href}?{version}", {async});</script>'.format(
+            html.append('<script>DMP_CONTEXT.addScript("{uid}", "{contextid}", "{app}/{template}", "{href}?{version}", {async});</script>'.format(
                 uid=wuid(),           
                 contextid=provider_run.uid,  
+                app=self.app_name.replace('"', '\\"'),
+                template=self.template_name.replace('"', '\\"'),
                 href=self.href, 
                 version=self.version_id,
                 async='true' if self.options['async'] else 'false',

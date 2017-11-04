@@ -107,11 +107,11 @@ The bootstrap script places the context data in ``window.DMP_CONTEXT`` under the
         console.log(context);
     })(DMP_CONTEXT.get());
 
-The above code creates a closure for the ``context`` variable, which allows each of your scripts to use the same variable name without stepping on one another.  Yummy.
+The above code creates a closure for the ``context`` variable, which allows each of your scripts to use the same variable name without stepping on one another.  
 
-While several approaches exist to get the ``data-context`` attribute into your script, we recommend the above code.  The drawback is this approach only works with modern browsers (Chrome 29+, Firefox 4+, Safari 8+, Edge 1+, Opera 16+). If your site visitors use browsers older than these, including any version of IE, this method can still work with `a polyfill <https://github.com/JamesMGreene/document.currentScript>`_.
+The context magic uses ``document.currentScript``, which exists in the initial run of any script. The drawback is the default approach only works with modern browsers (Chrome 29+, Firefox 4+, Safari 8+, Edge 1+, Opera 16+). If your site visitors use browsers older than these, including any version of IE, you need to include a polyfill, such as `a polyfill <https://github.com/JamesMGreene/document.currentScript>`_.
 
-If you are using an onload callback function, such as a JQuery ready function, be sure to embed the callback within the closure.  The ``document.currentScript`` attribute only exists during the initial run of the script, so it's gone by the time the callback executes.  Here's an example of the right way to do it:
+If you are using an onload callback function, such as a JQuery ready function, be sure to embed the callback within the closure.  The ``document.currentScript`` variable only exists during the initial run of the script, so it's gone by the time the callback executes.  Here's an example of the right way to do it:
 
 ::
 
@@ -122,29 +122,31 @@ If you are using an onload callback function, such as a JQuery ready function, b
         });
     })(DMP_CONTEXT.get());
     
-Selecting on src=
-^^^^^^^^^^^^^^^^^^^^^
+Selecting on Template
+^^^^^^^^^^^^^^^^^^^^^^^^
 
-The ``querySelector`` function is available on semi-modern browsers (including IE 9+):
+If your script must execute within a callback or if ``document.currentScript`` isn't a native or polyfill option, you can still get the context vairables using the app and template names. The following code retrieves the context for ``homepage`` app, ``index.html`` template:
+::
+
+    (function(context) {
+        // your code here, such as
+        console.log(context);
+    })(DMP_CONTEXT.get('homepage/index'));
+
+The primary drawback of this approach is the hard-coded name selection can be fragile, such as when you change the template name and forget to match the code.
+
+Script Element
+^^^^^^^^^^^^^^^^^^^^
+
+If neither of the above methods work in your situation, you can select the ``<script>`` element manually. There are a number of fallback methods you can use to get a reference to the element. For example, the following selects on the ``src`` attribute:
 
 ::
 
     (function(context) {
         // your code here, such as
         console.log(context);
-    })(DMP_CONTEXT[document.querySelector('script[src*="/homepage/scripts/index.js"]').getAttribute('data-context')]);
+    })(DMP_CONTEXT.get(document.querySelector('script[src*="/static/homepage/scripts/index.js"]'));
 
-The primary drawback of this approach is the hard-coded name selection can be fragile, such as when you change the template name and forget to match the code.
-
-
-Other Approaches
-^^^^^^^^^^^^^^^^^^^^
-
-You've probably noticed that I haven't included the most direct approach: ``document.getElementById``, but I've skipped this approach because Javascript would need to somehow get the id of the ``script`` element.  That still requires something like ``document.currentScript`` -- it just pushes the data transfer one level out, but we end up with the same problem.  
-
-Another method is encoding the data in the script ``src`` query string.  However, reading this from Javascript means we need a reference to the script tag, so once again we just pushed the problem one level out.
-
-Finally, many examples online use the last item in ``document.scripts`` or the last script in the DOM.  This approach isn't the ticket because additional ``<script>`` elements are usually added to the DOM before the current script starts executing. This method worked well with browsers circa 2005, but not as well with today's browsers.
 
 Bootstrap Script
 ^^^^^^^^^^^^^^^^^^^^^^

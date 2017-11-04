@@ -1,7 +1,9 @@
 (function() {    
     if (window.DMP_CONTEXT === undefined) {
+        
         window.DMP_CONTEXT = {
-            /* Check for the dmp version so we don't have mismatches */
+            
+            /* A check for the dmp version so we don't have mismatches */
             __version__: '4.3.2',
             
             /* Adds data to the DMP context under the given key */
@@ -12,19 +14,41 @@
                 DMP_CONTEXT[contextid] = data;
             },
             
-            /* Retrieves context data for the current running script script */
-            get: function() {
-                if (document.currentScript === undefined) {
-                    throw Error('document.currentScript is undefined. DMP_CONTEXT.getContext() can only be done during initial script processing (not in callbacks or event handling).');
+            /* 
+                Retrieves context data.  Usage:
+            
+                    DMP_CONTEXT.get()                                           // for the currently-executing script
+                    DMP_CONTEXT.get('myapp/mytemplate')                         // for the app/template
+                    DMP_CONTEXT.get(document.querySelector('some selector'))    // for the specified <script> tag
+            */
+            get: function(option) {
+                // default to currentScript if undefined
+                if (option === undefined) {  
+                    if (document.currentScript === undefined) {
+                        throw Error('document.currentScript is undefined. DMP_CONTEXT.get() can only be done during initial script processing (not in callbacks or event handling).');
+                    }
+                    return DMP_CONTEXT[document.currentScript.getAttribute('data-context')];
+                }  
+                
+                // <script> tag
+                if (option.nodeType === 1 && option.nodeName.toLowerCase() == 'script') {
+                    return DMP_CONTEXT[option.getAttribute('data-context')];
+                }//if
+                
+                // "app/template"
+                var elem = document.querySelector('script[data-template="' + option + '"]');
+                if (!elem) {
+                    throw Error('DMP_CONTEXT.get() could not find a <script> with data-template="' + option + '".');
                 }
-                return DMP_CONTEXT[document.currentScript.getAttribute('data-context')];
+                return DMP_CONTEXT[elem.getAttribute('data-context')];
             },
-
+            
             /* Adds a <script> element dynamically, which ensures the fetched script has document.currentScript (see docs) */
-            addScript: function(uid, contextid, src, async) {
+            addScript: function(uid, contextid, template, src, async) {
                 var n = document.createElement("script");
                 n.id = uid;
                 n.async = async;
+                n.setAttribute('data-template', template);
                 n.setAttribute("data-context", contextid);
                 n.src = src;
                 // try to add immediately after this script's tag, with fallback to <head>
@@ -36,5 +60,6 @@
             },
 
         };//DMP_CONTEXT
+        
     }//if
 })()
