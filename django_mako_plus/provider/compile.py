@@ -29,13 +29,12 @@ class CompileProvider(BaseProvider):
     def init(self):
         # doing the check in init() so it only happens one time during production
         source_path = self.format_string(self.options['source'])
-        compiled_path = self.format_string(self.options['output'])
         if os.path.exists(source_path):
-            try:
-                needs_compile = os.path.getmtime(compiled_path) < os.path.getmtime(source_path)
-            except OSError:  # usually means compiled_path doesn't exist
-                needs_compile = True  
-            if needs_compile:
+            source_stat = os.stat(source_path)
+            compiled_path = self.format_string(self.options['output'])
+            compiled_exists = os.path.exists(compiled_path)
+            compiled_stat = os.stat(compiled_path) if compiled_exists else None
+            if not compiled_exists or source_stat.st_mtime > compiled_stat.st_mtime:
                 run_command(*[ self.format_string(a) for a in self.options['command'] ])
 
 

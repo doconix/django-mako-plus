@@ -43,7 +43,7 @@ class CommandError(Exception):
     def __init__(self, command, returninfo):
         self.command = command
         self.returninfo = returninfo
-        super().__init__()
+        super().__init__('CommandError')
         
     def __str__(self):
-        return '[{}] {}\n{}\nCommand was: {}'.format(self.returninfo.code, self.returninfo.stdout, self.returninfo.stderr, self.command)
+        return '[return value: {}] {}; {}'.format(self.returninfo.code, self.returninfo.stdout[:1000], self.returninfo.stderr[:1000])

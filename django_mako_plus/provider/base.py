@@ -87,9 +87,12 @@ class BaseProvider(object):
         return None
         
         
-    def format_string(self, st):
-        '''Helper function that runs st.format with some standard named options.'''
-        return force_text(st).format(
+    def format_string(self, val):
+        '''
+        Helper function that runs st.format with some standard named options.
+        val.format() is called with {appname}, {appdir}, {template}.
+        '''
+        return force_text(val).format(
             appname=self.app_name,
             appdir=self.app_dir,
             template=self.template_name,
