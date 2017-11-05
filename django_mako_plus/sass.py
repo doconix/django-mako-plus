@@ -2,7 +2,8 @@ from mako.lexer import Lexer
 from mako import parsetree
 
 from .exceptions import SassCompileException
-from .util import DMP_OPTIONS, run_command, lock_file, encode32, decode32
+from .util import DMP_OPTIONS
+from .command import run_command
 
 import glob, sys, os, os.path, subprocess, itertools, re
 from warnings import warn
@@ -126,4 +127,7 @@ def compile_scssm_file(scssm_file, css_file):
             # update the modified timestamp on the css file so the scssm_file is older than it (we just rewrote the scssm)
             os.utime(css_file)
 
+
+#############################
+### Utilities
 
