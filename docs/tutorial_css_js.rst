@@ -129,6 +129,10 @@ Reload your browser, and you should see the calculation of hours.
 
     The context is sent to the script via a data attribute on the ``<script>`` element.  The closure surrounding everything keeps the variable local to this script.  Read more about this in `the topic on CSS and JS <topics_css_js.html>`_.
 
+Bundlers like Webpack, Browserify, etc.
+------------------------------------------
+
+If you are using JS bundles, DMP files can go right in the bundles.  See bundling in `Rendering CSS and JS <topics_css_js.html>`_ for more information..
 
 Behind the CSS and JS Curtain
 -----------------------------
