@@ -1,14 +1,18 @@
-import os, os.path, sys
+import os, os.path, sys, re 
 from setuptools import setup
 
 MODULE_NAME = 'django_mako_plus'
 
 
 # I can't import the version file the normal way because it loads
-# __init__.py, which then imports the DMP engine.  Thanks to sorin
-# on StackOverflow for this idea.
-exec(open('django_mako_plus/version.py').read())
-VERSION = __version__
+# __init__.py, which then imports the DMP engine.  
+with open('django_mako_plus/version.py') as f:
+    match = re.search("__version__\s=\s'(\d+\.\d+\.\d+)'", f.read())
+    if not match:
+        print('Cannot determine the DMP version. Aborting setup.py.')
+        sys.exit(1)
+    VERSION = match.group(1)
+
 
 CLASSIFIERS = [
     'Development Status :: 5 - Production/Stable',
@@ -27,8 +31,10 @@ install_requires = [
     'mako >= 1.0.0',
 ]
 
-# remove the __pycache__ directories since the ones in project_template seems to stick around
-os.system('find . -name "__pycache__" -type d -exec rm -r "{}" \; > /dev/null')
+
+if len(sys.argv) >= 2 and sys.argv[1] == 'sdist':
+    # remove the __pycache__ directories since the ones in project_template seems to stick around
+    os.system('find . -name "__pycache__" -type d -exec rm -r "{}" \; > /dev/null')
 
 # Compile the list of packages available
 packages = []
@@ -78,7 +84,7 @@ setup(
   long_description=long_description,
   version=VERSION,
   author='Conan Albrecht',
-  author_email='ca@byu.edu',
+  author_email='doconix@gmail.com',
   url="http://django-mako-plus.readthedocs.io/",
   download_url="https://github.com/doconix/django-mako-plus/archive/master.zip",
 #  package_dir={ MODULE_NAME: MODULE_NAME },

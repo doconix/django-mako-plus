@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <head>
 
-        <title>{{ app_name }}</title>
+        <title>homepage</title>
 
         ## add any site-wide scripts or CSS here; for example, jquery:
         <script src="http://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
@@ -17,12 +17,14 @@
     <body>
 
         <header>
-            <h1>Welcome to the {{ app_name }} app!<h1>
+            <h1>Welcome to the homepage app!<h1>
         </header>
-
-        <%block name="content">
-            Site content goes here in sub-templates.
-        </%block>
+        
+        <main>
+            <%block name="content">
+                Site content goes here in sub-templates.
+            </%block>
+        </main>
 
     </body>
 </html>

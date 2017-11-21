@@ -6,7 +6,7 @@
         
         window.DMP_CONTEXT = {
             
-            __version__: '4.3.2',   // DMP version to check for mismatches
+            __version__: '4.3.3',   // DMP version to check for mismatches
             contexts: {},           // contextid -> context1
             contextsByName: {},     // app/template -> [ context1, context2, ... ]
             
@@ -16,16 +16,18 @@
                     console.warn('DMP framework version is ' + version + ' dmp-common.js is ' + DMP_CONTEXT.__version__ + '. Unexpected behavior may occur.');
                 }
                 DMP_CONTEXT.contexts[contextid] = data;
-            },
-
-            /* Adds a <script> element dynamically, which ensures the fetched script has document.currentScript (see docs) */
-            addScript: function(uid, contextid, template, src, async) {
-                // add to the context store
+            },    
+            
+            /* Links a template to its context id */
+            linkContextByName(contextid, template) {
                 if (DMP_CONTEXT.contextsByName[template] === undefined) {
                     DMP_CONTEXT.contextsByName[template] = [];
                 }
                 DMP_CONTEXT.contextsByName[template].push(contextid);
-                
+            },
+
+            /* Adds a <script> element dynamically, which ensures the fetched script has document.currentScript (see docs) */
+            addScript: function(uid, contextid, template, src, async) {
                 // <script> element
                 var n = document.createElement("script");
                 n.id = uid;

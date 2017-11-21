@@ -11,7 +11,7 @@ Convention over configuration.  Just like a slice of home-baked apple pie.
 A Bit of Style
 ---------------------------------------------------
 
-To style our index.html file, create ``homepage/styles/index.css`` and copy the following into it:
+To style our index.html file, open ``homepage/styles/index.css`` and copy the following into it:
 
 .. code:: python
 
@@ -22,7 +22,7 @@ To style our index.html file, create ``homepage/styles/index.css`` and copy the 
 
 When you refresh your page, the server time should be styled with large, red text. If you view the html source in your browser, you'll see a new ``<link...>`` near the top of your file. It's as easy as naming the files the same and placing the .css file in the styles/ directory.
 
-The framework knows how to follow template inheritance. For example, since ``index.html`` extends from ``base.htm``, we can actually put our CSS in **either**: ``index.css`` or ``base.css``.  Place your CSS styles in the appropriate file, depending on where the HTML elements are located. For example, let's style our header a little. Since the ``<header>`` element is in ``base.htm``, create ``homepage/styles/base.css`` and place the following in it:
+The framework knows how to follow template inheritance. For example, since ``index.html`` extends from ``base.htm``, we can actually put our CSS in **either**: ``index.css`` or ``base.css``.  Place your CSS styles in the appropriate file, depending on where the HTML elements are located. For example, let's style our header a little. Since the ``<header>`` element is in ``base.htm``, open ``homepage/styles/base.css`` and check for the following:
 
 .. code:: css
 
@@ -32,14 +32,24 @@ The framework knows how to follow template inheritance. For example, since ``ind
     }
 
     header {
-        padding: 36px 0;
-        text-align: center;
-        font-size: 2.5em;
-        color: #F4F4F4;
-        background-color: #0088CC;
+        background-color: #147871;
+        padding: 15px 20px;
+        border-top: 4px solid #606060;
+        border-bottom: 4px solid #606060;
     }
 
-Reload your browser, and you should have a nice white on blue header. If you view source in the browser, you'll see the CSS files were included as follows:
+    header h1 {
+        color: #FFFFFF;
+        margin: 0;
+        padding: 0;
+    }
+
+    main {
+        margin: 0;
+        padding: 15px;
+    }
+    
+Since base.htm will be the parent page of nearly every HTML page on your site, these common styles will apply to all pages. If you view source in the browser, you'll see the CSS files were included as follows:
 
 .. code:: html
 
@@ -50,7 +60,7 @@ Note that ``base.css`` is included first because it's at the top of the hierarch
 
     You might be wondering about the big number after the html source ``<link>``. That's the file modification time, in minutes since 1970. This is included because browsers don't automatically download new CSS files (I'm looking at you here Chrome!). They use their cached versions until a specified date, often far in the future (this duration is set by your web server). By adding a number to the end of the file, browsers think the CSS files are "new" because the "filename" changes whenever you change the file. Trixy browserses...
 
-    Previous versions of DMP enabled ``*.cssm`` and ``*.jsm`` files, but this functionality is now deprecated.  Instead, DMP now does JS context variables, described in the next section.
+    Note that previous versions of DMP enabled ``*.cssm`` and ``*.jsm`` files, but this functionality is now deprecated.  Instead, DMP now does JS context variables, described in the next section.
 
 
 Javascript
@@ -106,7 +116,7 @@ Let's use the variable in ``index.js``:
     (function(context) {
         $(function() {
             console.log(context);
-            var serverTime = new Date(context.now);   // server time (from window.context)
+            var serverTime = new Date(context.now);   // server time (from DMP_CONTEXT)
             var browserTime = new Date();             // browser time
             var hours = Math.round(Math.abs(serverTime - browserTime) / 36e5);
             $('.browser-time').text('The current browser is ' + hours + ' hours off of the server time zone.');
@@ -114,6 +124,8 @@ Let's use the variable in ``index.js``:
     })(DMP_CONTEXT.get());
     
 Reload your browser, and you should see the calculation of hours.  
+
+    I realize the double closures (DMP_CONTEXT, jQuery) could be refactored, but I'm trying to be consistent with the previous examples.
 
     The context is sent to the script via a data attribute on the ``<script>`` element.  The closure surrounding everything keeps the variable local to this script.  Read more about this in `the topic on CSS and JS <topics_css_js.html>`_.
 

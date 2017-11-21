@@ -16,6 +16,7 @@ import os.path
 DEFAULT_CONTENT_PROVIDERS = [
     { 'provider': 'django_mako_plus.CssLinkProvider' },
     { 'provider': 'django_mako_plus.JsLinkProvider'  },
+    { 'provider': 'django_mako_plus.JsContextProvider' },
     # deprecated as of Oct 2017
     { 'provider': 'django_mako_plus.MakoCssProvider'  },
     { 'provider': 'django_mako_plus.MakoJsProvider'  },

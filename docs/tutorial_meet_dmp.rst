@@ -33,7 +33,10 @@ Let's explore the directory structure of your new app:
     homepage/
         media/
         scripts/
+            index.js
         styles/
+            base.css
+            index.css
         templates/
             base_ajax.htm
             base.htm
@@ -78,34 +81,36 @@ The real HTML is kept in the ``base.htm`` file. It looks like this:
 .. code:: html
 
     ## this is the skeleton of all pages on in this app - it defines the basic html tags
-
     <!DOCTYPE html>
     <html>
-      <meta charset="UTF-8">
-      <head>
+        <meta charset="UTF-8">
+        <head>
 
-        <title>homepage</title>
+            <title>homepage</title>
 
-        ## add any site-wide scripts or CSS here; for example, jquery:
-        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+            ## add any site-wide scripts or CSS here; for example, jquery:
+            <script src="http://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 
-        ## render the static file links with the same name as this template
-        <script src="/django_mako_plus/dmp-common.min.js"></script>
-        ${ django_mako_plus.links(self) }
+            ## render the static file links with the same name as this template
+            <script src="/django_mako_plus/dmp-common.min.js"></script>
+            ${ django_mako_plus.links(self) }
 
-      </head>
-      <body>
+        </head>
+        <body>
 
-        <header>
-            Welcome to the homepage app!
-        </header>
+            <header>
+                <h1>Welcome to the homepage app!<h1>
+            </header>
+        
+            <main>
+                <%block name="content">
+                    Site content goes here in sub-templates.
+                </%block>
+            </main>
 
-        <%block name="content">
-            Site content goes here in sub-templates.
-        </%block>
-
-      </body>
+        </body>
     </html>
+
 
 Pay special attention to the ``<%block name="content">`` section, which is overridden in ``index.html``. The page given to the browser will look exactly like ``base.htm``, but the ``content`` block will come from ``index.html`` rather than the one defined in the supertemplate.
 

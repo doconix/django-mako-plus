@@ -32,6 +32,6 @@ print()
 if input('Ready to upload to PyPi. Continue? ')[:1].lower() == 'y':
     ret = run_command('python3', 'setup.py', 'sdist')
     print(ret.stdout)
-    ret = run_command([ 'twine', 'upload', 'dist/*' ])
+    ret = run_command('twine', 'upload', 'dist/*')
     print(ret.stdout)
     run_command('rm', '-rf', 'dist/', 'django_mako_plus.egg-info/')

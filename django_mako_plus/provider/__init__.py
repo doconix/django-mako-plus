@@ -18,7 +18,7 @@ import warnings
 
 from .base import init_providers, BaseProvider
 from .compile import CompileProvider, CompileScssProvider, CompileLessProvider
-from .links import LinkProvider, CssLinkProvider, JsLinkProvider, jscontext
+from .links import LinkProvider, CssLinkProvider, JsLinkProvider, JsContextProvider, jscontext
 from .mako_static import MakoCssProvider, MakoJsProvider
 
 #########################################################

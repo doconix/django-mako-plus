@@ -33,6 +33,7 @@ class LinkProvider(BaseProvider):
             self.href = posixpath.join(settings.STATIC_URL, os.path.relpath(fullpath, settings.BASE_DIR))  
 
     def get_content(self, provider_run):
+        '''Subclasses should override this method'''
         return '<div class="DMP_LinkProvider">{}</div>'.format(self.href)
 
 
@@ -59,8 +60,27 @@ class JsLinkProvider(LinkProvider):
     default_options = merge_dicts(LinkProvider.default_options, {  
         'group': 'scripts',
         'filename': '{appdir}/scripts/{template}.js',
-        'encoder': 'django.core.serializers.json.DjangoJSONEncoder',
         'async': False,
+    })
+    def get_content(self, provider_run):
+        if self.href is None:
+            return None
+        return '<script>DMP_CONTEXT.addScript("{uid}", "{contextid}", "{app}/{template}", "{href}?{version}", {async});</script>'.format(
+            uid=wuid(),           
+            contextid=provider_run.uid,  
+            app=self.app_name.replace('"', '\\"'),
+            template=self.template_name.replace('"', '\\"'),
+            href=self.href, 
+            version=self.version_id,
+            async='true' if self.options['async'] else 'false',
+        )
+
+
+class JsContextProvider(BaseProvider):
+    '''Adds all js_context() variables to DMP_CONTEXT'''
+    default_options = merge_dicts(LinkProvider.default_options, {  
+        'group': 'scripts',
+        'encoder': 'django.core.serializers.json.DjangoJSONEncoder',
     })
     
     def init(self):
@@ -68,26 +88,24 @@ class JsLinkProvider(LinkProvider):
         self.encoder = import_string(self.options['encoder'])
 
     def get_content(self, provider_run):
+        # send the context with the main template (would be redundant to do for ancestors)
         html = []
-        # send the context with the first item
+        html.append('<script>')
         if provider_run.chain_index == 0:
             context_data = { k: provider_run.context[k] for k in provider_run.context.kwargs if isinstance(k, jscontext) }
-            html.append('<script>DMP_CONTEXT.set("{version}", "{contextid}", {data});</script>'.format(
+            html.append('DMP_CONTEXT.set("{version}", "{contextid}", {data});'.format(
                 version=__version__,
                 contextid=provider_run.uid,  
                 data=json.dumps(context_data, cls=self.encoder, separators=(',', ':')) if context_data else '{}',
             ))
-        if self.href is not None:
-            html.append('<script>DMP_CONTEXT.addScript("{uid}", "{contextid}", "{app}/{template}", "{href}?{version}", {async});</script>'.format(
-                uid=wuid(),           
-                contextid=provider_run.uid,  
-                app=self.app_name.replace('"', '\\"'),
-                template=self.template_name.replace('"', '\\"'),
-                href=self.href, 
-                version=self.version_id,
-                async='true' if self.options['async'] else 'false',
-            ))
+        html.append('DMP_CONTEXT.linkContextByName("{contextid}", "{app}/{template}");'.format(
+            contextid=provider_run.uid,  
+            app=self.app_name.replace('"', '\\"'),
+            template=self.template_name.replace('"', '\\"'),
+        ))
+        html.append('</script>')
         return ('\n' if settings.DEBUG else '').join(html)
+
 
 
 class jscontext(str):
