@@ -13,7 +13,7 @@
             /* Adds data to the DMP context under the given key */
             set: function(version, contextid, data) {
                 if (DMP_CONTEXT.__version__ != version) {
-                    console.warn('DMP framework version is ' + version + ' dmp-common.js is ' + DMP_CONTEXT.__version__ + '. Unexpected behavior may occur.');
+                    console.warn('DMP framework version is ' + version + ', while dmp-common.js is ' + DMP_CONTEXT.__version__ + '. Unexpected behavior may occur.');
                 }
                 DMP_CONTEXT.contexts[contextid] = data;
             },    

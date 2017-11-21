@@ -101,11 +101,11 @@ TEMPLATES = [
             #     # generates links for app/styles/template.css
             #     { 'provider': 'django_mako_plus.CssLinkProvider' },
             #
-            #     # adds JS context
-            #     { 'provider': 'django_mako_plus.JsContextProvider' },
-            #
             #     # generates links for app/scripts/template.js
             #     { 'provider': 'django_mako_plus.JsLinkProvider' },
+            #
+            #     # adds JS context
+            #     { 'provider': 'django_mako_plus.JsContextProvider' },
             #
             #     # compiles app/styles/template.scss to app/styles/template/css
             #     { 'provider': 'django_mako_plus.CompileScssProvider' },

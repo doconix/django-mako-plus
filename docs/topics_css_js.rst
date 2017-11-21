@@ -159,6 +159,31 @@ Why does it matter?  Because ``currentScript`` is how we get context variables f
 
 Since several scripts (one for each super-template in the template's inheritance) need the same context data, DMP stores the data in the common namespace ``window.dmp_context``.
 
+Javascript Bundles
+---------------------
+
+Getting fancy with something like Webpack, Browserify, or another bundler?  DMP scripts can go into your bundles, just like everything else.
+
+Normally, DMP automatically includes ``<script>`` tags for your templates.  This behavior happens because ``{ 'provider': 'django_mako_plus.JsLinkProvider' }`` is in your settings file.  Remove this to stop the automatic script tag creation.
+
+To create app-level bundles of all .js files in each app, follow these steps:
+
+1. Remove ``django_mako_plus.JsLinkProvider`` from your settings file. If all providers are commented out, uncomment the other providers but continue to omit this one.  DMP will no longer add ``<script>`` tags for templates.
+2. Ensure ``django_mako_plus.JsContextProvider`` is still active in settings. This will continue to add context variables to the ``DMP_CONTEXT`` javascript object.
+3. Configure your bundler tool to bundle and minify ``*.js`` files in each app.  Create a link to these bundle files in your html templates (a per-app super template would be a great location).
+4. Since the javascript files for all templates in a given app are bundled together, add ``if`` statements to each script to run only when their template is current. You could test the url in ``window.location``, a ``js_context()`` context variable, or template name in ``DMP_CONTEXT``.
+
+Suppose your template is named, ``mytemplate.html``. The paired JS file, ``mytemplate.js``, might contain the following:
+
+::
+
+    (function(context) {
+        // if context is not undefined, mytemplate was rendered
+        if (context) {
+            // behavior here!
+        }
+    })(DMP_CONTEXT.get('homepage/mytemplate'));
+    
 Groups
 -----------------
 
@@ -197,6 +222,9 @@ The framework is built to be extended for custom file types.  When you call ``li
                     
                     # generates links for app/scripts/template.js
                     { 'provider': 'django_mako_plus.JsLinkProvider' },
+                    
+                    # adds JS context
+                    { 'provider': 'django_mako_plus.JsContextProvider' },
                     
                     # compiles app/styles/template.scss to app/styles/template/css
                     { 'provider': 'django_mako_plus.CompileScssProvider' },
@@ -240,8 +268,15 @@ The following more-detailed version enumerates all the options (set to their def
                         'group': 'scripts',
                         'weight': 0,
                         'filename': '{appdir}/scripts/{template}.js',
-                        'encoder': 'django.core.serializers.json.DjangoJSONEncoder',
                         'async': False,
+                    },
+                    
+                    # adds JS context
+                    { 
+                        'provider': 'django_mako_plus.JsContextProvider' 
+                        'group': 'scripts',
+                        'weight': 0,
+                        'encoder': 'django.core.serializers.json.DjangoJSONEncoder',
                     },
                     
                     # compiles app/styles/template.scss to app/styles/template/css
