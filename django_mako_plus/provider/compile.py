@@ -35,7 +35,6 @@ class CompileProvider(BaseProvider):
             compiled_exists = os.path.exists(compiled_path)
             compiled_stat = os.stat(compiled_path) if compiled_exists else None
             if not compiled_exists or source_stat.st_mtime > compiled_stat.st_mtime:
-                print('>>>>>>>>>>>>> hey')
                 run_command(*[ self.format_string(a) for a in self.options['command'] ])
 
 
