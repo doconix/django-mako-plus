@@ -60,10 +60,10 @@ data_files.extend([
     ('', [ 'license.txt' ]),
 ])
 
-# add the app_template/ and package_template/ directory
+# add the extra directories
 # empty directories within app_template/ will cause problems with distutils, so be sure each directory has at least one file
 package_data_files = []
-for template_dir in ( 'app_template', 'project_template' ):
+for template_dir in ( 'app_template', 'project_template', 'webroot' ):
     for root, dirs, files in os.walk(os.path.join(MODULE_NAME, template_dir)):
       dirs[:] = [ d for d in dirs if not d.startswith('.') and not d in ( '__pycache__', ) ] # skip hidden and __pycache__ directories
       for fname in files:
