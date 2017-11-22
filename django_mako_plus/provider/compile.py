@@ -35,6 +35,7 @@ class CompileProvider(BaseProvider):
             compiled_exists = os.path.exists(compiled_path)
             compiled_stat = os.stat(compiled_path) if compiled_exists else None
             if not compiled_exists or source_stat.st_mtime > compiled_stat.st_mtime:
+                print('>>>>>>>>>>>>> hey')
                 run_command(*[ self.format_string(a) for a in self.options['command'] ])
 
 
@@ -43,7 +44,7 @@ class CompileScssProvider(CompileProvider):
     default_options = merge_dicts(CompileProvider.default_options, {  
         'source': '{appdir}/styles/{template}.scss',
         'output': '{appdir}/styles/{template}.css',
-        'command': [ shutil.which('scss'), '--unix-newlines', '{appdir}/styles/{template}.scss', '{appdir}/styles/{template}.css' ],
+        'command': [ shutil.which('scss'), '--load-path=.', '--unix-newlines', '{appdir}/styles/{template}.scss', '{appdir}/styles/{template}.css' ],
     })
 
 
