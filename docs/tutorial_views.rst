@@ -100,24 +100,12 @@ DMP provides a second function, ``dmp_render_to_string``. This is nearly the sam
         return request.dmp_render('index.html', context)
 
 
-Django API Calls
+But That's Not Django!
 --------------------------------
 
-As a template engine, DMP conforms to the Django standard.  If you need/want to use the standard Django template functions, use the following:
+In the above code, you may have noticed that we didn't use the "normal" Django shortcuts like ``render`` and ``render_to_response``.  DMP provides the shortcuts like ``dmp_render`` because its renderers are tied to apps (which is different than Django).  
 
-.. code:: python
-
-    from django.shortcuts import render
-    return render(request, 'homepage/index.html', context)
-
-or to be more explicit with Django:
-
-.. code:: python
-
-    from django.shortcuts import render
-    return render(request, 'homepage/index.html', context, using='django_mako_plus')
-
-Note in the above code that you need to specify the template in the format ``app/template``.  This allows DMP find the right app to load the template from.
+But that doesn't mean you can't use the standard Django shortcuts, ``TemplateResponse``, and ``SimpleTemplateResponse`` with DMP.  There's a full page devoted to the topic, so `take a side trip to the topic on "Django Template Functions" <topics_django.html>`_ if you want to stick to the normal Django API.
 
 
 Further Reading

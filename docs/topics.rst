@@ -7,10 +7,11 @@ The following sections explore the capabilities of DMP beyond the tutorials.  If
 .. toctree::
     :maxdepth: 1
 
+    topics_django
+    topics_templates
     topics_variables
     topics_css_js
     topics_static_files
-    topics_templates
     topics_csrf
     topics_other_syntax
     topics_redirecting
