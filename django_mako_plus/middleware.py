@@ -86,7 +86,7 @@ class RequestInitMiddleware(MiddlewareMixin):
                 "Please check settings.py to see it the middleware might be listed twice."
             )
         request._dmp_router_middleware_flag = True
-
+        
         # print debug messages to help with urls.py regex issues
         if log.isEnabledFor(logging.DEBUG):
             kwarg_params = [ param for param in DMP_PARAM_CHECK if param in view_kwargs ]
@@ -95,8 +95,6 @@ class RequestInitMiddleware(MiddlewareMixin):
 
         # add the variables to the request
         request.dmp_router_app = view_kwargs.pop('dmp_router_app', None) or DMP_OPTIONS.get('DEFAULT_APP')
-        if request.dmp_router_app is None:  # shouldn't happen because DMP's url patterns shouldn't have matched
-            raise Http404('DMP router mismatch: a valid app is not specified in the url, and DEFAULT_APP is not specified in settings.')
         if is_dmp_app(request.dmp_router_app):
             request.dmp_render = render_to_response_shortcut(request.dmp_router_app, request)
             request.dmp_render_to_string = render_to_string_shortcut(request.dmp_router_app, request)
@@ -109,12 +107,13 @@ class RequestInitMiddleware(MiddlewareMixin):
             request.dmp_router_function = 'process_request'
 
         # period and dash cannot be in python names, but we allow dash in app, dash in page, and dash/period in function
-        request.dmp_router_app = request.dmp_router_app.replace('-', '_')
-        request.dmp_router_page = request.dmp_router_page.replace('-', '_')
-        request.dmp_router_function = request.dmp_router_function.replace('.', '_').replace('-', '_')
+        request.dmp_router_app = request.dmp_router_app.replace('-', '_') if request.dmp_router_app is not None else None
+        request.dmp_router_page = request.dmp_router_page.replace('-', '_') if request.dmp_router_page is not None else None
+        request.dmp_router_function = request.dmp_router_function.replace('.', '_').replace('-', '_') if request.dmp_router_function is not None else None
 
         # add the full module path to the request
-        request.dmp_router_module = '.'.join([ request.dmp_router_app, 'views', request.dmp_router_page ])
+        if request.dmp_router_app is not None and request.dmp_router_page is not None:
+            request.dmp_router_module = '.'.join([ request.dmp_router_app, 'views', request.dmp_router_page ])
 
         # add the url parameters to the request
         # note that I'm not using unquote_plus because the + switches to a space *after* the question mark (in the regular parameters)
@@ -125,7 +124,8 @@ class RequestInitMiddleware(MiddlewareMixin):
 
         # get the function object - the return of get_router_function might be a function, a class-based view, or a template
         # get_router_function does some magic to make all of these act like a regular view function
-        request._dmp_router_callable = get_router(request.dmp_router_module, request.dmp_router_function, request.dmp_router_app, fallback_template)
+        if request.dmp_router_app is not None and request.dmp_router_page is not None:
+            request._dmp_router_callable = get_router(request.dmp_router_module, request.dmp_router_function, request.dmp_router_app, fallback_template)
 
         # adjust the variable values if a class
         if isinstance(request._dmp_router_callable, ClassBasedRouter):

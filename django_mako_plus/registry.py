@@ -27,6 +27,8 @@ def is_dmp_app(app):
     Returns True if the given app is a DMP-enabled app.  The app parameter can
     be either the name of the app or an AppConfig object.
     '''
+    if app is None:
+        return False
     if isinstance(app, AppConfig):
         app = app.name
     return app in DMP_ENABLED_APPS
