@@ -1,8 +1,5 @@
-Custom URL Pattern
+URL Patterns
 ===========================
-
-.. contents::
-    :depth: 2
 
 Suppose your project requires a different URL pattern than the normal ``/app/page/param1/param2/...``. For example, you might need the user id in between the app and page: ``/app/userid/page/param1/param1...``. This is supported in two different ways.
 
@@ -65,3 +62,25 @@ The second method is done by directly modifying the variables created in the mid
 Once ``RequestInitMiddleware.process_view`` creates the variables, your custom middleware can modify them in any way. As view middleware, your function will run *after* the DMP middleware by *before* routing takes place in ``route_request``.
 
 This method of modifying the URL pattern allows total freedom since you can use python code directly. However, it would probably be done in an exceptional rather than typical case.
+
+
+Default App and Page
+---------------------------
+
+As alluded to above, when the url doesn't contain the app and/or page, such as ``http://www.yourserver.com/``, DMP uses the default app and page specified in your  settings.py variables: ``DEFAULT_PAGE`` and ``DEFAULT_APP``.  
+
+In the following table, the default app is set to ``homepage`` and your default page is set to ``index.html``:
+
++----------------------------------------------------------+-------------------+------------------------+-------------------------------------------+
+| URL                                                      | App               | Page                   | Notes                                     |
++----------------------------------------------------------+-------------------+------------------------+-------------------------------------------+
+| ``http://www.yourserver.com/``                           | ``homepage``      | ``index.html``         |                                           |
++----------------------------------------------------------+-------------------+------------------------+-------------------------------------------+
+| ``http://www.yourserver.com/account/``                   | ``account``       | ``index.html``         |                                           |
++----------------------------------------------------------+-------------------+------------------------+-------------------------------------------+
+| ``http://www.yourserver.com/login/``                     | ``login``         | ``index.html``         | If ``login`` **is** one of your apps      |
++----------------------------------------------------------+-------------------+------------------------+-------------------------------------------+
+| ``http://www.yourserver.com/login/``                     | ``homepage``      | ``login.html``         | If ``login`` **is not** one of your apps  |
++----------------------------------------------------------+-------------------+------------------------+-------------------------------------------+
+| ``http://www.yourserver.com/account/password/``          | ``account``       | ``password.html``      |                                           |
++----------------------------------------------------------+-------------------+------------------------+-------------------------------------------+

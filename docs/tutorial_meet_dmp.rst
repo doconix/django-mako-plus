@@ -174,11 +174,4 @@ For example, the url ``/homepage/index/`` routes as follows:
 
 The above illustrates the easiest way to show pages: simply place .html files in your templates/ directory. This is useful for pages that don't have any "work" to do. Examples might be the "About Us" and "Terms of Service" pages. There's usually no functionality or permissions issues with these pages, so no view function is required.
 
-    What about the case where a page isn't specified, such as
-    ``/homepage/``? If the url doesn't contain two parts, the router
-    goes to the default page as specified in your settings.py
-    ``DEFAULT_PAGE`` setting. This allows you to have a "default page",
-    similar to the way web servers default to the index.html page. If
-    the path is entirely empty (i.e. http://www.yourserver.com/ with
-    *no* path parts), the router uses both defaults specified in your
-    settings.py file: ``DEFAULT_PAGE`` and ``DEFAULT_APP``.
+You might be wondering about default URLs, such as ``http://www.yourserver.com/``.  When the url doesn't contain the app and the page, DMP uses the default app and page specified in your settings. Read more on this at `Default App and Page <topics_urls_py.html>`_.

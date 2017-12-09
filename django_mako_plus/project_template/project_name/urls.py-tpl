@@ -22,6 +22,6 @@ urlpatterns = [
 
     # urls for any third-party apps go here
 
-    # the DMP router - this should be the last line in the list
+    # the DMP router - if DEFAULT_HOMEPAGE is set, this should be the last pattern (the wildcards match everything)
     url('', include('django_mako_plus.urls')),
 ]

@@ -73,8 +73,9 @@ TEMPLATES = [
             'TEMPLATES_CACHE_DIR': '.cached_templates',
 
             # the default app and page to render in Mako when the url is too short
-            'DEFAULT_PAGE': 'index',
+            # if None (no default app), DMP will not capture short URLs
             'DEFAULT_APP': 'homepage',
+            'DEFAULT_PAGE': 'index',
 
             # the default encoding of template files
             'DEFAULT_TEMPLATE_ENCODING': 'utf-8',

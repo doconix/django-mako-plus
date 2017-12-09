@@ -1,4 +1,5 @@
 from django.core.exceptions import ImproperlyConfigured
+from django.http import Http404
 from urllib.parse import unquote
 
 # try to import MiddlewareMixIn (Django 1.10+)
@@ -93,7 +94,9 @@ class RequestInitMiddleware(MiddlewareMixin):
             log.debug('variables set by urls.py: %s; variables set by defaults: %s', kwarg_params, missing_params)
 
         # add the variables to the request
-        request.dmp_router_app = view_kwargs.pop('dmp_router_app', None) or DMP_OPTIONS.get('DEFAULT_APP', 'homepage')
+        request.dmp_router_app = view_kwargs.pop('dmp_router_app', None) or DMP_OPTIONS.get('DEFAULT_APP')
+        if request.dmp_router_app is None:  # shouldn't happen because DMP's url patterns shouldn't have matched
+            raise Http404('DMP router mismatch: a valid app is not specified in the url, and DEFAULT_APP is not specified in settings.')
         if is_dmp_app(request.dmp_router_app):
             request.dmp_render = render_to_response_shortcut(request.dmp_router_app, request)
             request.dmp_render_to_string = render_to_string_shortcut(request.dmp_router_app, request)

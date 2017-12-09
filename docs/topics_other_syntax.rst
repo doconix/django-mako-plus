@@ -110,3 +110,29 @@ Local Variables
 Embedded template code has access to any variable passed to your temple (i.e. any variable in the context). Although not an encouraged practice, variables are sometimes created right in your template, and faithful to the Mako way, are not accessible in embedded blocks.
 
 You can pass locally-created variables as kwargs in the filter call. This is done with ``titles=titles`` in the Django code block example above.
+
+Including DMP in Django Templates
+-------------------------------------------
+
+Suppose a third party contains a "normal" Django template -- one that uses the standard Django syntax instead of Mako syntax. In customizing these templates, you may want to include DMP templates.  Django has an ``include`` template tag, but that's for Django templates.  That's where DMP's ``dmp_include`` tag comes in.
+
+Inside a standard Django template, use the following:
+
+::
+
+    {% load django_mako_plus %}
+    {% dmp_include "app" "template name" %}
+
+For example, suppose your Django template, ``my_standard_template.html`` needs to include the Mako-syntax ``navigation_snippet.htm`` in app ``homepage``.  Put the follwoing inside ``my_standard_template.html``:
+
+::
+    <!-- this file is my_standard_template.html -->
+    {% load django_mako_plus %}
+    {% dmp_include "homepage" "navigation_snippet.htm" %}
+
+You can also specify a ``def`` or ``block`` within the navigation snippet:
+
+::
+    <!-- this file is my_standard_template.html -->
+    {% load django_mako_plus %}
+    {% dmp_include "homepage" "navigation_snippet.htm" "someblock" %}

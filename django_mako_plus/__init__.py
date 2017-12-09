@@ -40,9 +40,9 @@ from .exceptions import JavascriptRedirectException
 from .exceptions import InternalRedirectException
 
 
-# filters
+# filters and tags
 from .filters import django_syntax, jinja2_syntax, alternate_syntax
-
+from .templatetags.django_mako_plus import dmp_include
 
 # the http responses
 from .http import HttpResponseJavascriptRedirect

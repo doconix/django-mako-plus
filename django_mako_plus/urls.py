@@ -9,6 +9,7 @@ except ImportError:
     from django.core.urlresolvers import Resolver404
 from .router import route_request
 from .registry import is_dmp_app
+from .util import DMP_OPTIONS
 import os, os.path
 
 #########################################################
@@ -52,15 +53,12 @@ class DMPRegexPattern(RegexURLPattern):
 #########################################################
 ###   The default DMP url patterns
 
-
-
 # FYI, even though the valid python identifier is [_A-Za-z][_a-zA-Z0-9]*, I'm simplifying it to [_a-zA-Z0-9]+ because it works for our purposes
+
+# app-specific patterns
 urlpatterns = [
     # these are in order of specificity, with the most specific ones at the top
     
-    # the DMP web files - the docs tell users to serve this directory with their web server instead
-    url(r'^django_mako_plus/(?P<path>[^/]+)', serve, { 'document_root': os.path.join(apps.get_app_config('django_mako_plus').path, 'webroot') }),
-
     # /app/page.function/urlparams
     DMPRegexPattern(r'^(?P<dmp_router_app>[_a-zA-Z0-9\-]+)/(?P<dmp_router_page>[_a-zA-Z0-9\-]+)\.(?P<dmp_router_function>[_a-zA-Z0-9\.\-]+)/?(?P<urlparams>.*?)/?$', route_request, name='DMP /app/page.function'),
 
@@ -71,15 +69,23 @@ urlpatterns = [
     # FYI: /app/urlparams can't happen because the first urlparam would be captured as /app/page in the previous pattern
     DMPRegexPattern(r'^(?P<dmp_router_app>[_a-zA-Z0-9\-]+?)/?$', route_request, name='DMP /app'),
 
-    # /page.function/urlparams
-    url(r'^(?P<dmp_router_page>[_a-zA-Z0-9\-]+)\.(?P<dmp_router_function>[_a-zA-Z0-9\.\-]*)/?(?P<urlparams>.*?)/?$', route_request, name='DMP /page.function'),
-
-    # /page/urlparams
-    url(r'^(?P<dmp_router_page>[_a-zA-Z0-9\-]+)/?(?P<urlparams>.*?)/?$', route_request, name='DMP /page'),
-
-    # / with nothing else
-    url(r'^$', route_request, name='DMP /'),
-
-    # FYI: /urlparams alone doesn't work because it would be captured as /page in the previous pattern
+    # the DMP web files - the docs tell users to serve this directly with Nginx/IIS/etc. instead of with Django and this pattern
+    url(r'^django_mako_plus/(?P<path>[^/]+)', serve, { 'document_root': os.path.join(apps.get_app_config('django_mako_plus').path, 'webroot') }),
 ]
+
+
+# default homepage app patterns
+if DMP_OPTIONS.get('DEFAULT_APP') is not None: 
+    urlpatterns.extend([
+        # /page.function/urlparams
+        url(r'^(?P<dmp_router_page>[_a-zA-Z0-9\-]+)\.(?P<dmp_router_function>[_a-zA-Z0-9\.\-]*)/?(?P<urlparams>.*?)/?$', route_request, name='DMP /page.function'),
+
+        # /page/urlparams
+        url(r'^(?P<dmp_router_page>[_a-zA-Z0-9\-]+)/?(?P<urlparams>.*?)/?$', route_request, name='DMP /page'),
+
+        # / with nothing else
+        url(r'^$', route_request, name='DMP /'),
+
+        # FYI: /urlparams alone doesn't work because it would be captured as /page in the previous pattern
+    ])
 
