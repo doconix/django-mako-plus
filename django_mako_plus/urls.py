@@ -70,7 +70,7 @@ urlpatterns = [
     DMPRegexPattern(r'^(?P<dmp_router_app>[_a-zA-Z0-9\-]+?)/?$', route_request, name='DMP /app'),
 
     # the DMP web files - the docs tell users to serve this directly with Nginx/IIS/etc. instead of with Django and this pattern
-    url(r'^django_mako_plus/(?P<path>[^/]+)', serve, { 'document_root': os.path.join(apps.get_app_config('django_mako_plus').path, 'webroot') }),
+    url(r'^django_mako_plus/(?P<path>[^/]+)', serve, { 'document_root': os.path.join(apps.get_app_config('django_mako_plus').path, 'webroot') }, name='DMP webroot (for devel)'),
 ]
 
 
