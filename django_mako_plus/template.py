@@ -53,17 +53,19 @@ class MakoTemplateLoader:
         self.tlookup = TemplateLookup(directories=self.template_search_dirs, imports=DMP_OPTIONS['DEFAULT_TEMPLATE_IMPORTS'], module_directory=self.cache_root, collection_size=2000, filesystem_checks=settings.DEBUG, input_encoding=DMP_OPTIONS.get('DEFAULT_TEMPLATE_ENCODING', 'utf-8'))
 
 
-    def get_template(self, template):
+    def get_template(self, template, def_name=None):
         '''Retrieve a *Django* API template object for the given template name, using the app_path and template_subdir
            settings in this object.  This method still uses the corresponding Mako template and engine, but it
            gives a Django API wrapper around it so you can use it the same as any Django template.
+        
+           If def_name is provided, template rendering will be limited to the named def/block (see Mako docs).
 
            This method corresponds to the Django templating system API.
-           This method raises a Django exception if the template is not found or cannot compile.
+           A Django exception is raised if the template is not found or cannot compile.
         '''
         try:
             # wrap the mako template in an adapter that gives the Django template API
-            return MakoTemplateAdapter(self.get_mako_template(template))
+            return MakoTemplateAdapter(self.get_mako_template(template), def_name)
         except (TopLevelLookupException, TemplateLookupException) as e: # Mako exception raised
             raise TemplateDoesNotExist('Template "%s" not found in search path: %s.' % (template, self.template_search_dirs))
         except (CompileException, SyntaxException) as e: # Mako exception raised
@@ -105,8 +107,15 @@ class MakoTemplateLoader:
 
 class MakoTemplateAdapter(object):
     '''A thin wrapper for a Mako template object that provides the Django API methods.'''
-    def __init__(self, mako_template):
+    def __init__(self, mako_template, def_name=None):
+        '''
+        Creates an adapter that corresponds to the Django API.
+        
+        If def_name is provided, template rendering will be limited to the named def/block (see Mako docs).
+        This can also be provided in the call to render().
+        '''
         self.mako_template = mako_template
+        self.def_name = def_name
 
 
     @property
@@ -127,7 +136,7 @@ class MakoTemplateAdapter(object):
             @def_name Limits output to a specific top-level Mako <%block> or <%def> section within the template.
                       If the section is a <%def>, any parameters must be in the context dictionary.  For example,
                       def_name="foo" will call <%block name="foo"></%block> or <%def name="foo()"></def> within
-                      the template.  This is an extension to the Django API, so it is optional.
+                      the template. 
 
         Returns the rendered template as a unicode string.
 
@@ -164,6 +173,8 @@ class MakoTemplateAdapter(object):
         # this only finds within the exact template (won't go up the inheritance tree)
         # I wish I could make it do so, but can't figure this out
         render_obj = self.mako_template
+        if def_name is None:
+            def_name = self.def_name
         if def_name:  # do we need to limit to just a def?
             render_obj = self.mako_template.get_def(def_name)
 

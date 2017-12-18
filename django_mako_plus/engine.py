@@ -23,8 +23,14 @@ except ImportError:
 
 
 # Following Django's lead, hard coding the CSRF processor
-_builtin_context_processors = ('django_mako_plus.context_processors.csrf',)
+_builtin_context_processors = (
+    'django_mako_plus.context_processors.csrf',
+)
 
+# regex to split the template name in get_template()
+# "myapp/mytemplate.html#myblock" gives groups:
+# ('myapp', '/mytemplate.html', 'mytemplate.html', '#myblockname', 'myblockname')
+RE_TEMPLATE_NAME = re.compile('([^/?#]*)?(/([^#]*))?(#(.*))?')
 
 
 #########################################################
@@ -85,21 +91,21 @@ class MakoTemplates(BaseEngine):
 
     def get_template(self, template_name):
         '''
-        Retrieves a template object.
+        Retrieves a template object from the pattern "app_name/template.html".
         This is one of the required methods of Django template engines.
 
         Because DMP templates are always app-specific (Django only searches
         a global set of directories), the template_name MUST be in the format:
-        "app_name/template.html".  DMP splits the template_name string on the
-        slash to get the app name and template name.
-
-        Only forward slashes are supported.  Use / even on Windows to specify
-        the "app_name/template.html".
+        "app_name/template.html" (even on Windows).  DMP splits the template_name 
+        string on the slash to get the app name and template name.
+        
+        Template rendering can be limited to a specific def/block within the template
+        by specifying `#def_name`, e.g. `myapp/mytemplate.html#myblockname`.
         '''
-        parts = template_name.split('/', 1)
-        if len(parts) < 2:
+        match = RE_TEMPLATE_NAME.match(template_name)
+        if match is None or match.group(1) is None or match.group(3) is None:
             raise TemplateDoesNotExist('Invalid template_name format for a DMP template.  This method requires that the template name be in app_name/template.html format (separated by slash).')
-        return self.get_template_loader(parts[0]).get_template('/'.join(parts[1:]))
+        return self.get_template_loader(match.group(1)).get_template(match.group(3), def_name=match.group(5))
 
 
     def get_template_loader(self, app, subdir='templates', create=False):
