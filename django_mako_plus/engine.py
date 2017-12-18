@@ -14,6 +14,7 @@ from mako.template import Template
 import itertools
 import os
 import os.path
+import re
 try:
     # python 3.4+
     pass
