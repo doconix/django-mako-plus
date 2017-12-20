@@ -80,5 +80,5 @@ Compatability
 
 DMP requires Python 3.4+ and Django 1.9+.
 
-It will continue with Django 2.0 when released.
+The first Django 2.0+ release was in December 2017.
 

@@ -27,7 +27,7 @@ CLASSIFIERS = [
     'Topic :: Software Development',
 ]
 install_requires = [
-    'django >= 1.9.0, < 2.0',
+    'django >= 1.9.0',
     'mako >= 1.0.0',
 ]
 
