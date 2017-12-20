@@ -1,6 +1,6 @@
 from django.conf import settings
 
-from ..util import DMP_OPTIONS
+from ..util import DMP_OPTIONS, split_app
 
 import os
 import os.path
@@ -24,10 +24,11 @@ class TemplateInfo(object):
     This object is then attached to the template object, which Mako already caches.
     That way we only do this work once per server run (in production mode).
     '''
-    def __init__(self, app_dir, template_name, version_id):
-        self.app_dir = app_dir              # absolute path
-        self.template_name = template_name  # without the extension
-        self.providers = [ pf.create(app_dir, template_name, version_id) for pf in DMP_OPTIONS['RUNTIME_PROVIDERS'] ]
+    def __init__(self, template_path, version_id):
+        # split to the app and the relative template path
+        app_config, template_path = split_app(template_path)
+        # create the providers
+        self.providers = [ pf.create(app_config, template_path, version_id) for pf in DMP_OPTIONS['RUNTIME_PROVIDERS'] ]
 
 
 def build_templateinfo_chain(tself, version_id):
@@ -41,9 +42,7 @@ def build_templateinfo_chain(tself, version_id):
         # first check the cache, creating if necessary
         ti = getattr(tself.template, DMP_TEMPLATEINFO_KEY, None)
         if ti is None:
-            template_dir, template_name = os.path.split(tself.template.filename)
-            app_dir = os.path.dirname(template_dir)
-            ti = TemplateInfo(app_dir, template_name, version_id)
+            ti = TemplateInfo(tself.template.filename, version_id)
             # cache in template if in production mode
             if not settings.DEBUG:
                 setattr(tself.template, DMP_TEMPLATEINFO_KEY, ti)
@@ -56,5 +55,6 @@ def build_templateinfo_chain(tself, version_id):
     chain.reverse() # we need furthest ancestor first, current template last
     return chain
 
+    
     
     

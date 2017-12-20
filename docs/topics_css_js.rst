@@ -359,7 +359,9 @@ Suppose you need custom preprocessing of static files or custom template content
             # or omit the method if you don't need it.
             # 
             # Fields set by DMP that might be useful:
-            #    self.app_dir = '/absolute/path/to/app/'
+            #    self.app_config = Django AppConfig object
+            #    self.app_config.path = '/absolute/path/to/app/'
+            #    self.template_path = 'path to template filename, relative to the app path'
             #    self.template_name = 'current template name without extension'
             #    self.options = { 'dictionary': 'of all options' }
             #    self.version_id = 'a unique number - see the docs'

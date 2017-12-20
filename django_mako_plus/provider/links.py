@@ -68,7 +68,7 @@ class JsLinkProvider(LinkProvider):
         return '<script>DMP_CONTEXT.addScript("{uid}", "{contextid}", "{app}/{template}", "{href}?{version}", {async});</script>'.format(
             uid=wuid(),           
             contextid=provider_run.uid,  
-            app=self.app_name.replace('"', '\\"'),
+            app=self.app_config.name.replace('"', '\\"'),
             template=self.template_name.replace('"', '\\"'),
             href=self.href, 
             version=self.version_id,
@@ -100,7 +100,7 @@ class JsContextProvider(BaseProvider):
             ))
         html.append('DMP_CONTEXT.linkContextByName("{contextid}", "{app}/{template}");'.format(
             contextid=provider_run.uid,  
-            app=self.app_name.replace('"', '\\"'),
+            app=self.app_config.name.replace('"', '\\"'),
             template=self.template_name.replace('"', '\\"'),
         ))
         html.append('</script>')

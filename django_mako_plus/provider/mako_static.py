@@ -26,7 +26,7 @@ class MakoCssProvider(BaseProvider):
         'minify': True,
     })
     def init(self):
-        self.cssm_dir = os.path.join(self.app_dir, 'styles')
+        self.cssm_dir = os.path.join(self.app_config.path, 'styles')
         try:
             self.template = get_dmp_instance().get_template_loader_for_path(self.cssm_dir).get_template(self.template_name + '.cssm')
         except TemplateDoesNotExist:
@@ -52,7 +52,7 @@ class MakoJsProvider(BaseProvider):
         'minify': True,
     })
     def init(self):
-        self.cssm_dir = os.path.join(self.app_dir, 'scripts')
+        self.cssm_dir = os.path.join(self.app_config.path, 'scripts')
         try:
             self.template = get_dmp_instance().get_template_loader_for_path(self.cssm_dir).get_template(self.template_name + '.jsm')
         except TemplateDoesNotExist:

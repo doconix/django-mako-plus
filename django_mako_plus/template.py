@@ -14,15 +14,17 @@ import os, os.path, sys, mimetypes, logging, warnings
 
 
 
-##############################################################
-###   Looks up Mako templates
+class DMPTemplateLookup(TemplateLookup):
+    '''Small extension to Mako's template lookup to provide a link back to the MakoTemplateLoader'''
+    def __init__(self, template_loader, *args, **kwargs):
+        super(DMPTemplateLookup, self).__init__(*args, **kwargs)
+        self.template_loader = template_loader
+    
 
-class MakoTemplateLoader:
-    '''Renders Mako templates.'''
+class MakoTemplateLoader(object):
+    '''Finds Mako templates for a Django app.'''
     def __init__(self, app_path, template_subdir='templates'):
         '''
-        Creates a renderer to the given template_subdir in app_path.
-
         The loader looks in the app_path/templates directory unless
         the template_subdir parameter overrides this default.
 
@@ -50,7 +52,7 @@ class MakoTemplateLoader:
         self.template_search_dirs.append(settings.BASE_DIR)
 
         # create the actual Mako TemplateLookup, which does the actual work
-        self.tlookup = TemplateLookup(directories=self.template_search_dirs, imports=DMP_OPTIONS['DEFAULT_TEMPLATE_IMPORTS'], module_directory=self.cache_root, collection_size=2000, filesystem_checks=settings.DEBUG, input_encoding=DMP_OPTIONS.get('DEFAULT_TEMPLATE_ENCODING', 'utf-8'))
+        self.tlookup = DMPTemplateLookup(self, directories=self.template_search_dirs, imports=DMP_OPTIONS['DEFAULT_TEMPLATE_IMPORTS'], module_directory=self.cache_root, collection_size=2000, filesystem_checks=settings.DEBUG, input_encoding=DMP_OPTIONS.get('DEFAULT_TEMPLATE_ENCODING', 'utf-8'))
 
 
     def get_template(self, template, def_name=None):
@@ -92,12 +94,6 @@ class MakoTemplateLoader:
             if not force:
                 raise
             template_obj = Template('', filename=os.path.join(self.template_dir, template))
-
-        # if this is the first time the template has been pulled from self.tlookup, add a few extra attributes
-        if not hasattr(template_obj, 'template_path'):
-            template_obj.template_path = template
-        if not hasattr(template_obj, 'template_full_path'):
-            template_obj.template_full_path = template_obj.filename
 
         # get the template
         return template_obj

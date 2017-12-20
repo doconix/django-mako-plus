@@ -2,7 +2,7 @@ from django.apps import apps
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 
-import base64
+import base64, os, os.path
 
 
 # this is populated with the dictionary of options in engine.py when
@@ -17,7 +17,7 @@ import logging
 log = logging.getLogger('django_mako_plus')
 
 ################################################################
-###   Utility functions
+###   DMP instance and apps
 
 def get_dmp_instance():
     '''
@@ -80,4 +80,29 @@ def merge_dicts(*dicts):
     return merged
     
  
+
+def split_app(path):
+    '''
+    Splits a path on the app, returning (app config, relative path within app).
+    
+    This function uses os.path.samefile to split even if a path is specified differently.
+    The drawback is significantly reduced speed because of a double loop, so use with care.
+    '''
+    configs = list(get_dmp_app_configs())  # cache the generator results so we can go through it several times
+    def get_config(app_dir):
+        if os.path.exists(app_dir):
+            for config in configs:
+                if os.path.samefile(config.path, app_dir):
+                    return config
+        return None
+    parts = os.path.normpath(path).split(os.path.sep)
+    for i in range(len(parts), 0, -1):
+        app_config = get_config(os.path.sep.join(parts[:i]))
+        if app_config is not None:
+            return app_config, os.path.sep.join(parts[i:])
+    return None, path
+        
+        
+    
+
 

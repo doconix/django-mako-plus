@@ -43,8 +43,8 @@ class ProviderFactory(object):
             raise ImproperlyConfigured('The Django Mako Plus template OPTIONS were not set up correctly in settings.py; The `provider` value must be a subclass of django_mako_plus.BaseProvider.')
         self.options = merge_dicts(self.provider_class.default_options, provider_def)
         
-    def create(self, app_dir, template_name, version_id):
-        return self.provider_class(app_dir, template_name, self.options, version_id)
+    def create(self, app_config, template_path, version_id):
+        return self.provider_class(app_config, template_path, self.options, version_id)
         
         
 
@@ -62,12 +62,15 @@ class BaseProvider(object):
         'group': 'styles',
         'weight': 0,  # higher weights run first
     }
-    def __init__(self, app_dir, template_name, options, version_id):
-        self.app_name = os.path.split(app_dir)[1]                  # django app name
-        self.app_dir = app_dir                                     # absolute path
-        self.template_name = os.path.splitext(template_name)[0]    # without the extension
-        self.options = merge_dicts(self.default_options, options)  # combined options dictionary
-        self.version_id = version_id                               # unique number for overriding the cache (see LinkProvider)
+    def __init__(self, app_config, template_path, options, version_id):
+        self.app_config = app_config
+        self.template_path = template_path
+        # this next variable assumes the template is in the "normal" location: app/templates/
+        parts = os.path.splitext(self.template_path)[0].split(os.path.sep)
+        self.template_name = os.path.sep.join(parts[1:]) if len(parts) > 1 else self.template_path
+        print('>>>', self.template_name)
+        self.options = merge_dicts(self.default_options, options)     # combined options dictionary
+        self.version_id = version_id                                  # unique number for overriding the cache (see LinkProvider)
         self.init()
         
         
@@ -94,8 +97,8 @@ class BaseProvider(object):
         val.format() is called with {appname}, {appdir}, {template}.
         '''
         return force_text(val).format(
-            appname=self.app_name,
-            appdir=self.app_dir,
+            appname=self.app_config.name,
+            appdir=self.app_config.path,
             template=self.template_name,
         )
         
