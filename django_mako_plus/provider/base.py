@@ -68,7 +68,6 @@ class BaseProvider(object):
         # this next variable assumes the template is in the "normal" location: app/templates/
         parts = os.path.splitext(self.template_path)[0].split(os.path.sep)
         self.template_name = os.path.sep.join(parts[1:]) if len(parts) > 1 else self.template_path
-        print('>>>', self.template_name)
         self.options = merge_dicts(self.default_options, options)     # combined options dictionary
         self.version_id = version_id                                  # unique number for overriding the cache (see LinkProvider)
         self.init()
