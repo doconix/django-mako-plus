@@ -47,5 +47,3 @@ if DMP_OPTIONS.get('DEFAULT_APP') is not None:
         re_path(r'^$', route_request, name='DMP /'),
     ])
 
-for pat in urlpatterns:
-    print('>>>>', pat)
