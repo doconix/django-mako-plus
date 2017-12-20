@@ -6,7 +6,7 @@
         
         window.DMP_CONTEXT = {
             
-            __version__: '4.4.7',   // DMP version to check for mismatches
+            __version__: '4.4.8',   // DMP version to check for mismatches
             contexts: {},           // contextid -> context1
             contextsByName: {},     // app/template -> [ context1, context2, ... ]
             
