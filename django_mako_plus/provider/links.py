@@ -70,7 +70,7 @@ class JsLinkProvider(LinkProvider):
             contextid=provider_run.uid,  
             app=self.app_config.name.replace('"', '\\"'),
             template=self.template_name.replace('"', '\\"'),
-            href=self.href, 
+            href=self.href.replace('\\', '/'), 
             version=self.version_id,
             async='true' if self.options['async'] else 'false',
         )
