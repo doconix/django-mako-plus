@@ -159,7 +159,7 @@ In the installation procedures above, you set your urls.py file to look somethin
 
         # urls for any third-party apps go here
 
-        # the DMP router - this should be the last line in the list
+        # adds all DMP-enabled apps
         url('', include('django_mako_plus.urls')),
     ]
 

@@ -253,7 +253,7 @@ Clean out all the cached template files. This should be done **anytime you make 
 Enable the Django-Mako-Plus Router
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Add the Django-Mako-Plus router **as the last pattern** in your ``urls.py`` file (the default admin is also included here for completeness):
+Add the Django-Mako-Plus router in your ``urls.py`` file (the default admin is also included here for completeness). 
 
 .. code:: python
 
@@ -262,7 +262,7 @@ Add the Django-Mako-Plus router **as the last pattern** in your ``urls.py`` file
     urlpatterns = [
         # urls for any third-party apps go here
 
-        # the DMP router - this should be the last line in the list
+        # adds all DMP-enabled apps
         url('', include('django_mako_plus.urls')),
     ]
 

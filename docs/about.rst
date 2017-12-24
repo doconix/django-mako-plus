@@ -52,9 +52,9 @@ The short answer is I liked Mako's approach the best. It felt the most Pythonic 
 Can I use DMP with regular Django apps?
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Yes. DMP plugs in as a regular templating engine per the standard Django API.
+Yes. DMP plugs in as a regular templating engine per the standard Django API.  You can use both DMP and regular Django simultaneously in the same project.
 
-The hook for most apps is the ``urls.py`` file. Just be sure that DMP's line in this file comes *last*. DMP's line is a wildcard, so it matches most urls. As long as the other app urls are listed first, Django will give them preference.
+When you include DMP's ``urls.py`` module in your project, patterns for each DMP-enabled app in your project are linked to our convention-based router.  Other apps won't match these patterns, so other apps route the normal Django way. This means third-party apps work just fine with DMP.
 
 Note also that other apps likely use Django's built-in templating system rather than DMP's Mako templating system. The two templating systems work fine side by side, so other apps should render fine the normal Django way and your custom apps will render fine with Mako.
 

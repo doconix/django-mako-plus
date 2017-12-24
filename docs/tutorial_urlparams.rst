@@ -8,6 +8,20 @@ Django is all about pretty URLs. In keeping with that philosophy, we present **U
 
 In traditional web links, we specify parameters using key=value pairs, as in ``/homepage/index?product=144&model=A58UX``. That's ugly, and it's certainly not the Django way.
 
+What About Django Path Converters?
+--------------------------------------
+
+One of the big changes in Django 2.0 (late 2017) is simplified URLs, including automatic parameter conversion. You might be wondering how the two relate to one another.
+
+DMP first included automatic parameter conversion in early 2017, and it wasn't influenced by Django's design; the two developed separately.  DMP's parameter conversion is different in the following ways:
+
+* DMP discovers parameters and type hints from your view function signatures; Django uses your patterns in ``urls.py``.
+* Type hints and parameter defaults in DMP are specified the `standard Python way <https://docs.python.org/3/library/typing.html>`_.  Django uses a custom URL syntax.
+* DMP has more built-in converters: DateTime, Decimal, all Django models, etc.
+* Converters in DMP match using ``isinstance``; converters in Django match by regex match.
+
+The conversion method in DMP matches well with its goal of convention-over-configuration.  Django's method matches well with its "enumerate all urls" design.  You can use both in the same project; DMP apps do it the DMP way, other apps do it the Django way.
+
 At a Glance
 ---------------------
 
