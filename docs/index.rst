@@ -43,9 +43,9 @@ Quick Start
     pip3 install django-mako-plus
 
     # create a new project with a 'homepage' app
-    python3 -m django startproject --template=http://cdn.rawgit.com/doconix/django-mako-plus/master/project_template.zip mysite
+    dmp new project mysite
     cd mysite
-    python3 manage.py startapp --template=http://cdn.rawgit.com/doconix/django-mako-plus/master/app_template.zip --extension=py,htm,html homepage
+    dmp new app homepage
 
     # open mysite/settings.py and append 'homepage' to the INSTALLED_APPS list
     INSTALLED_APPS = [

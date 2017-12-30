@@ -29,6 +29,8 @@ CLASSIFIERS = [
 install_requires = [
     'django >= 1.9.0',
     'mako >= 1.0.0',
+    'click >= 6.7',
+    'crayons >= 0.1.2',
 ]
 
 
@@ -95,5 +97,6 @@ setup(
 #  data_files=data_files,
   install_requires=install_requires,
   classifiers=CLASSIFIERS,
+  entry_points={'console_scripts': ['dmp=django_mako_plus.cli:main']},
   license='Apache 2.0',
 )
