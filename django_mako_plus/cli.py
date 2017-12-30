@@ -37,7 +37,7 @@ def project(name):
 @click.argument('name')
 def app(name):
     """Create a new django-mako-plus app."""
-    click.echo('Creating new app ' + crayons.magenta(name, bold=True))
+    click.echo('Creating new app     ' + crayons.magenta(name, bold=True))
 
     template_path = pkg_resources.resource_filename('django_mako_plus', 'app_template')
 
@@ -47,7 +47,7 @@ def app(name):
         shell=True
     )
 
-    click.echo(crayons.green('successfully created ' + crayons.magenta(name, bold=True)))
+    click.echo(crayons.green('Successfully created ' + crayons.magenta(name, bold=True)))
 
 
 if __name__ == '__main__':
