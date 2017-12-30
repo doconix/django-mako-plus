@@ -62,7 +62,7 @@ Don't forget to migrate to synchronize your database and create a superuser:
 Create a DMP-Style App
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Change to your project directory in the terminal/console, then create a new Django-Mako-Plus.
+Change to your project directory in the terminal/console, then create a new Django-Mako-Plus app.
 
 As with creating a DMP project, there are two ways to create a DMP app. One can use the shortcut provided with the DMP command-line-interface,
 or use django's ``manage.py startapp`` command with a ``--template`` option.
