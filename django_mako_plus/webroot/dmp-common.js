@@ -19,7 +19,7 @@
             },    
             
             /* Links a template to its context id */
-            linkContextByName(contextid, template) {
+            linkContextByName: function(contextid, template) {
                 if (DMP_CONTEXT.contextsByName[template] === undefined) {
                     DMP_CONTEXT.contextsByName[template] = [];
                 }
