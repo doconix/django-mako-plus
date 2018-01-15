@@ -24,11 +24,12 @@ DMP_PARAM_CHECK = ( 'dmp_router_app', 'dmp_router_page', 'dmp_router_function', 
 
 def default_render(*args, **kwargs):
     '''This function is set as the initial render function (below) until process_view sets the app-specific one (also below)'''
-    raise ImproperlyConfigured(
-        "DMP's app-specific render functions were not placed on the request object. "
-        "This app is 1) not a DMP-enabled app or 2) rendering was done before the middleware's process_view() method was called. "
-        "Fix the middleware issue, or if this instance needs to render without dependence on middleware, use DMP's render_template() convenience method instead. "
-    )
+    raise ImproperlyConfigured('''
+DMP's app-specific render functions were not placed on the request object. Likely reasons:
+    1) This app is not registered as a Django app (ensure the app is listed in `INSTALLED_APPS` in settings file).
+    2) This app is not a DMP-enabled app (check for `DJANGO_MAKO_PLUS = True` in appdir/__init__.py).
+    3) A template was rendered before the middleware's process_view() method was called (move after middleware call or use DMP's render_template() function which can be used anytime).
+    '''.strip())
 
 
 class RequestInitMiddleware(MiddlewareMixin):
@@ -86,7 +87,7 @@ class RequestInitMiddleware(MiddlewareMixin):
                 "Please check settings.py to see it the middleware might be listed twice."
             )
         request._dmp_router_middleware_flag = True
-        
+
         # print debug messages to help with urls.py regex issues
         if log.isEnabledFor(logging.DEBUG):
             kwarg_params = [ param for param in DMP_PARAM_CHECK if param in view_kwargs ]
@@ -131,7 +132,7 @@ class RequestInitMiddleware(MiddlewareMixin):
         if isinstance(request._dmp_router_callable, ClassBasedRouter):
             request.dmp_router_class = request.dmp_router_function
             request.dmp_router_function = request.method.lower()
-            
+
         # debugging
         # for attr in (
         #     'dmp_router_app',
