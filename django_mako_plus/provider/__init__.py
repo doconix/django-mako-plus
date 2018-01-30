@@ -1,11 +1,12 @@
 from django.apps import apps
+from django.conf import settings
 from django.template import Context
 
 import mako.runtime
 
 from ..util import get_dmp_instance
+from ..util import DMP_OPTIONS, split_app
 from ..uid import wuid
-from .templateinfo import build_templateinfo_chain
 
 import io
 import warnings
@@ -21,19 +22,28 @@ from .compile import CompileProvider, CompileScssProvider, CompileLessProvider
 from .links import LinkProvider, CssLinkProvider, JsLinkProvider, JsContextProvider, jscontext
 from .mako_static import MakoCssProvider, MakoJsProvider
 
+
+# key to attach Provider objects to Mako Template objects during producting mode.
+# I attach it to template objects because templates are already cached by mako, so
+# caching them here would result in double-caching.  It's a bit of a
+# monkey-patch to set them as attributes in the Mako templates, but it's efficient
+# and encapsulated entirely within this file
+PROVIDERS_KEY = '_django_mako_plus_providers_'
+
+
 #########################################################
 ###  Primary functions
 
 def links(tself, version_id=None, group=None):
     '''
     Returns the HTML for the given provider group.
-    
+
         Add this at the top (<head> section) of your template:
         ${ django_mako_plus.static_group(self, 'styles') }
-    
+
         Add this at the bottom of your template:
         ${ django_mako_plus.static_group(self, 'scripts') }
-    
+
         Or, to get all content in one call:
         ${ django_mako_plus.static_group(self) }
 
@@ -64,26 +74,41 @@ def links(tself, version_id=None, group=None):
     for calculating the id is the file modification time (minutes since 1970).
     '''
     request = tself.context.get('request')
-    provider_run = ProviderRun(request, tself.context, group, build_templateinfo_chain(tself, version_id))
+    provider_run = ProviderRun(tself, version_id, group)
     return provider_run.get_content()
 
 
 class ProviderRun(object):
     '''Information for a run through a chain of template info objects and providers on each one.'''
-    def __init__(self, request, context, group, chain):
-        self.uid = wuid()       # a unique Id for this run
-        self.request = request  # request from the render call
-        self.context = context  # context from the render call
-        self.group = group      # the provider group being rendered (usually None)
-        self.chain = chain      # list of TemplateInfos matching the template inheritance
-        self.chain_index = 0    # current index of the inheritance chain as the run goes
-        
+    def __init__(self, tself, version_id=None, group=None):
+        self.uid = wuid()                           # a unique id for this run
+        self.request = tself.context.get('request') # request from the render()
+        self.context = tself.context                # context from the render()
+        self.group = group                          # the provider group being rendered (usually None)
+        self.chain_index = 0                        # current index of the inheritance chain as the run goes
+
+        # discover the ancestor templates for this template `self`
+        self.chain = []
+        while tself is not None:
+            # check if already attached to template, create if necessary
+            providers = getattr(tself.template, PROVIDERS_KEY, None)
+            if providers is None:
+                app_config, template_path = split_app(tself.template.filename)
+                providers = [ pf.create(app_config, template_path, version_id) for pf in DMP_OPTIONS['RUNTIME_PROVIDERS'] ]
+                if not settings.DEBUG: # attach to template for speed in production mode
+                    setattr(tself.template, PROVIDERS_KEY, providers)
+            self.chain.append(providers)
+            # loop with the next inherited template
+            tself = tself.inherits
+        self.chain.reverse() # we need furthest ancestor first, current template last so current template (such as CSS) can override ancestors
+
+
     def get_content(self):
         '''Loops each TemplateInfo providers list, returning the combined content.'''
         self.chain_index = 0
         self.html = []
-        for ti in self.chain:
-            for provider_i, provider in enumerate(ti.providers):
+        for providers in self.chain:
+            for provider_i, provider in enumerate(providers):
                 if self.group is None or provider.group == self.group:
                     content = provider.get_content(self)
                     if content:
@@ -96,10 +121,10 @@ class ProviderRun(object):
 def template_links(request, app, template_name, context=None, version_id=None, group=None, force=True):
     '''
     Returns the HTML for the given provider group, using an app and template name.
-    This method should not normally be used (use links() instead).  The use of 
+    This method should not normally be used (use links() instead).  The use of
     this method is when provider need to be called from regular python code instead
     of from within a rendering template environment.
-    
+
     See links() for documentation on the variables.
     '''
     if isinstance(app, str):
@@ -109,7 +134,7 @@ def template_links(request, app, template_name, context=None, version_id=None, g
 
     # get the template object normally
     template = get_dmp_instance().get_template_loader(app, create=True).get_mako_template(template_name, force=force)
-        
+
     # create a mako context so it seems like we are inside a render
     # I'm hacking into private Mako methods here, but I can't see another
     # way to do this.  Hopefully this can be rectified at some point.
