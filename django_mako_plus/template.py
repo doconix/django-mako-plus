@@ -19,7 +19,7 @@ class DMPTemplateLookup(TemplateLookup):
     def __init__(self, template_loader, *args, **kwargs):
         super(DMPTemplateLookup, self).__init__(*args, **kwargs)
         self.template_loader = template_loader
-    
+
 
 class MakoTemplateLoader(object):
     '''Finds Mako templates for a Django app.'''
@@ -59,7 +59,7 @@ class MakoTemplateLoader(object):
         '''Retrieve a *Django* API template object for the given template name, using the app_path and template_subdir
            settings in this object.  This method still uses the corresponding Mako template and engine, but it
            gives a Django API wrapper around it so you can use it the same as any Django template.
-        
+
            If def_name is provided, template rendering will be limited to the named def/block (see Mako docs).
 
            This method corresponds to the Django templating system API.
@@ -80,7 +80,7 @@ class MakoTemplateLoader(object):
 
            This method is an alternative to get_template().  Use it when you need the actual Mako template object.
            This method raises a Mako exception if the template is not found or cannot compile.
-        
+
            If force is True, an empty Mako template will be created when the file does not exist.
            This option is used by the providers part of DMP and normally be left False.
         '''
@@ -106,7 +106,7 @@ class MakoTemplateAdapter(object):
     def __init__(self, mako_template, def_name=None):
         '''
         Creates an adapter that corresponds to the Django API.
-        
+
         If def_name is provided, template rendering will be limited to the named def/block (see Mako docs).
         This can also be provided in the call to render().
         '''
@@ -132,7 +132,7 @@ class MakoTemplateAdapter(object):
             @def_name Limits output to a specific top-level Mako <%block> or <%def> section within the template.
                       If the section is a <%def>, any parameters must be in the context dictionary.  For example,
                       def_name="foo" will call <%block name="foo"></%block> or <%def name="foo()"></def> within
-                      the template. 
+                      the template.
 
         Returns the rendered template as a unicode string.
 
@@ -186,13 +186,13 @@ class MakoTemplateAdapter(object):
                 content = html_error_template().render_unicode()       # to the browser
         else:  # this is outside the above "try" loop because in non-DEBUG mode, we want to let the exception throw out of here (without having to re-raise it)
             content = render_obj.render_unicode(**context_dict)
-            
+
         # send the post-render signal
         if DMP_OPTIONS.get('SIGNALS', False) and request is not None:
             for receiver, ret_content in dmp_signal_post_render_template.send(sender=self, request=request, context=context, template=self.mako_template, content=content):
                 if ret_content is not None:
                     content = ret_content  # sets it to the last non-None return in the signal receiver chain
-            
+
         # return
         return content
 
@@ -254,7 +254,7 @@ class MakoTemplateAdapter(object):
 ###
 ###  The middleware places these on the request object during process_view():
 ###
-###     request.render(...) 
+###     request.render(...)
 ###     request.render_to_string(...)
 ###
 

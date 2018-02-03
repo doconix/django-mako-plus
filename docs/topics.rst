@@ -8,6 +8,7 @@ The following sections explore the capabilities of DMP beyond the tutorials.  If
     :maxdepth: 1
 
     topics_django
+    topics_convenience
     topics_templates
     topics_variables
     topics_css_js

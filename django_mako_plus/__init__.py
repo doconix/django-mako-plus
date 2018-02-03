@@ -75,7 +75,7 @@ from .util import get_dmp_app_configs
 
 # html content shortcuts
 from .provider import links
-from .provider import template_links
+from .provider import template_links, template_obj_links
 # html content providers
 from .provider import BaseProvider
 from .provider import LinkProvider, CssLinkProvider, JsLinkProvider, JsContextProvider, jscontext
