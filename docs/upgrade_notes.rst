@@ -7,9 +7,31 @@ This document contains upgrade notes for those already using DMP.  We started th
 
 Most changes can be summarized in the DMP settings.py options.  We recommend comparing your settings.py file against the current template (see file project_template/project_name/settings.py-tpl on GitHub).  This will likely signal all the changes you may need to make.
 
-1. The biggest change is the variables DMP attaches to the request have been moved to an object, available as `request.dmp`.  This causes less namespace pollution of the request and allows easier changes going forward.  The following are the old => new:
+1. The biggest change is the variables DMP attaches to the request have been moved to an object, available as `request.dmp`.  This causes less namespace pollution of the request and allows easier changes going forward.  The following are the old to new adjustments you may need.  We recommend moving from `urlparams` to automatic view parameter conversion, although this is likely a significant change (there are no plans to remove `urlparams`, so this isn't required).
 
-    -
++--------------------------------+--------------------------------+
+| Old                            | New (DMP 4.4)                  |
++================================+================================+
+| `request.dmp_router_app`       | `request.dmp.app`              |
++--------------------------------+--------------------------------+
+| `request.dmp_router_page`      | `request.dmp.page`             |
++--------------------------------+--------------------------------+
+| `request.dmp_router_function`  | `request.dmp.function`         |
++--------------------------------+--------------------------------+
+| `request.dmp_router_module`    | `request.dmp.module`           |
++--------------------------------+--------------------------------+
+| `request.dmp_router_class`     | `request.dmp.class_obj`        |
++--------------------------------+--------------------------------+
+| `request._dmp_router_callable` | `request.dmp.function_obj`     |
++--------------------------------+--------------------------------+
+| `request.urlparams`            | `request.dmp.urlparams`        |
++--------------------------------+--------------------------------+
+| `request.dmp_render`           | `request.dmp.render`           |
++--------------------------------+--------------------------------+
+| `request.dmp_render_to_string` | `request.dmp.render_to_string` |
++--------------------------------+--------------------------------+
+
+    *Important:* As noted in the table above, search your codebase for ``request.dmp_render`` and replace with ``request.dmp.render``.
 
 2. Static files (CSS/JS): MakoCssProvider, MakoJsProvider, link_css, link_js, link_template_css, link_template_js are removed.  Instad, use ${ django_mako_plus.links() } once in the <head> section of your base page.
 
@@ -18,6 +40,18 @@ Most changes can be summarized in the DMP settings.py options.  We recommend com
 4. SCSS Compiling: The entire sass.py file is removed, including functions check_template_scss, compile_scss_file, compile_scssm_file.  Instead, use the Sass compile provider.  See providers for more information.
 
 5. The parameter keys in urls.py has changed.  You only need to adjust your urls.py if you have custom patterns.  For those doing it the normal way (including DMP's urls.py), no change is necessary.
+
++------------------------+-------------------+
+| Old                    | New (DMP 4.4)     |
++========================+===================+
+| `dmp_router_app`       | `dmp_app`         |
++------------------------+-------------------+
+| `dmp_router_page`      | `dmp_page`        |
++------------------------+-------------------+
+| `dmp_router_function`  | `dmp_function`    |
++------------------------+-------------------+
+| `urlparams`            | `dmp_urlparams`   |
++------------------------+-------------------+
 
 6. Rendering: render_to_string_shortcut_deprecated and render_to_response_shortcut_deprecated are removed, but this shouldn't affect anyone because they are internal function.
 

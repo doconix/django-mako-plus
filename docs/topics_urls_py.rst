@@ -42,7 +42,7 @@ The following is one of the URL patterns, modified to include the ``userid`` par
     from django_mako_plus import route_request
     urlpatterns = [
         ...
-        url(r'^(?P<dmp_router_app>[_a-zA-Z0-9\.\-]+)/(?P<userid>\d+)/(?P<dmp_router_page>[_a-zA-Z0-9\.\-]+)/?(?P<urlparams>.*?)/?$', route_request, name='DMP - /app/page'),
+        url(r'^(?P<dmp_app>[_a-zA-Z0-9\.\-]+)/(?P<userid>\d+)/(?P<dmp_page>[_a-zA-Z0-9\.\-]+)/?(?P<urlparams>.*?)/?$', route_request, name='DMP - /app/page'),
         ...
     ]
 
@@ -63,23 +63,23 @@ You can also "hard code" the app or page name in a given pattern. Suppose you wa
     from django_mako_plus import route_request
     urlpatterns = [
         ...
-        url(r'^(?P<user_id>\d+)$', route_request, { 'dmp_router_app': 'user', 'dmp_router_page': 'account' }, name='User Account'),
+        url(r'^(?P<user_id>\d+)$', route_request, { 'dmp_app': 'user', 'dmp_page': 'account' }, name='User Account'),
         ...
     ]
 
 Use the following named parameters in your patterns to tell DMP which
 app, page, and function to call:
 
--  ``(?P<dmp_router_app>[_a-zA-Z0-9\-]+)`` is the app name. If omitted, it is set to ``DEFAULT_APP`` in settings.
--  ``(?P<dmp_router_page>[_a-zA-Z0-9\-]+)`` is the view module name. If omitted, it is set to ``DEFAULT_APP`` in settings.
--  ``(?P<dmp_router_function>[_a-zA-Z0-9\.\-]+)`` is the function name.  If omitted, it is set to ``process_request``.
+-  ``(?P<dmp_app>[_a-zA-Z0-9\-]+)`` is the app name. If omitted, it is set to ``DEFAULT_APP`` in settings.
+-  ``(?P<dmp_page>[_a-zA-Z0-9\-]+)`` is the view module name. If omitted, it is set to ``DEFAULT_APP`` in settings.
+-  ``(?P<dmp_function>[_a-zA-Z0-9\.\-]+)`` is the function name.  If omitted, it is set to ``process_request``.
 -  ``(?P<urlparams>.*)`` is the url parameters, and it should normally  span multiple slashes. The default patterns set this value to  anything after the page name. This value is split on the slash ``/``   to form the ``request.dmp.urlparams`` list. If omitted, it is set to the empty list ``[]``.
 
 The following URL pattern can be used to embed an object ID parameter (named 'id' in this case) into DMP's conventional URL pattern (between the app name and the page name):
 
 ::
 
-    url(r'^(?P<dmp_router_app>[_a-zA-Z0-9\-]+)/(?P<id>\d+)/(?P<dmp_router_page>[_a-zA-Z0-9\-]+)\.?(?P<dmp_router_function>[_a-zA-Z0-9\-]+)?/?(?P<urlparams>.*)$', route_request, name='/app/id/page(.function)(/urlparams)'),
+    url(r'^(?P<dmp_app>[_a-zA-Z0-9\-]+)/(?P<id>\d+)/(?P<dmp_page>[_a-zA-Z0-9\-]+)\.?(?P<dmp_function>[_a-zA-Z0-9\-]+)?/?(?P<urlparams>.*)$', route_request, name='/app/id/page(.function)(/urlparams)'),
 
 Custom URL Patterns: Take 2
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

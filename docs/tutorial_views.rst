@@ -25,7 +25,7 @@ Let me pause for a minute and talk about log messages. If you enabled the logger
 
 ::
 
-    DEBUG::DMP variables set by urls.py: ['dmp_router_app', 'dmp_router_page', 'urlparams']; variables set by defaults: ['dmp_router_function'].
+    DEBUG::DMP variables set by urls.py: ['dmp_app', 'dmp_page', 'urlparams']; variables set by defaults: ['dmp_function'].
     INFO::DMP processing: app=homepage, page=index, module=homepage.views.index, func=process_request, urlparams=['']
     INFO::DMP calling view function homepage.views.index.process_request
     DEBUG::DMP rendering template /Users/conan/Documents/data/teaching/2017/IS 411-413/fomoproject/homepage/templates/index.html

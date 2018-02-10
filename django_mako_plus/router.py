@@ -39,8 +39,8 @@ def route_request(request, *args, **kwargs):
     while True:
         # an outer try that catches the redirect exceptions
         try:
-            # ensure we have a _dmp_router_callable variable on request
-            if getattr(request, 'dmp_router', None) is None:
+            # ensure the middleware ran
+            if getattr(request, 'dmp', None) is None:
                 raise ImproperlyConfigured("Variable request.dmp.function_obj does not exist (check MIDDLEWARE for `django_mako_plus.RequestInitMiddleware`).")
 
             # output the variables so the programmer can debug where this is routing
