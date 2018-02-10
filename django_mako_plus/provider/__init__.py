@@ -20,7 +20,6 @@ import warnings
 from .base import init_providers, BaseProvider
 from .compile import CompileProvider, CompileScssProvider, CompileLessProvider
 from .links import LinkProvider, CssLinkProvider, JsLinkProvider, JsContextProvider, jscontext
-from .mako_static import MakoCssProvider, MakoJsProvider
 
 
 # key to attach Provider objects to Mako Template objects during producting mode.
@@ -161,44 +160,5 @@ def template_obj_links(request, template_obj, context=None, version_id=None, gro
     return links(mako_context['self'], version_id=version_id, group=group)
 
 
-
-
-#######################################################################
-###   Deprecated methods - these are deprecated as of Oct 2017
-
-def link_css(tself, version_id=None):
-    '''
-    Deprecated as of Oct 2017.
-    Use `django_mako_plus.links(self, 'styles')` instead.
-    '''
-    warnings.warn("link_css() is deprecated as of Oct 2017.  Use `django_mako_plus.links(self, 'styles')` instead.", DeprecationWarning)
-    return links(tself, version_id=version_id, group='styles')
-
-
-def link_js(tself, version_id=None):
-    '''
-    Deprecated as of Oct 2017.
-    Use `django_mako_plus.links(self, 'scripts')` instead.
-    '''
-    warnings.warn("link_js() is deprecated as of Oct 2017.  Use `django_mako_plus.links(self, 'scripts')` instead.", DeprecationWarning)
-    return links(tself, version_id=version_id, group='scripts')
-
-
-def link_template_css(request, app, template_name, context, version_id=None, force=True):
-    '''
-    Deprecated as of Oct 2017.
-    Use `django_mako_plus.template_links(..., group='styles')` instead.
-    '''
-    warnings.warn("link_template_css() is deprecated as of Oct 2017.  Use `django_mako_plus.template_links(..., group='styles')` instead.", DeprecationWarning)
-    return template_links(request, app, template_name, context, version_id=version_id, group='styles', force=force)
-
-
-def link_template_js(request, app, template_name, context, version_id=None, force=True):
-    '''
-    Deprecated as of Oct 2017.
-    Use `django_mako_plus.template_links(..., group='scripts')` instead.
-    '''
-    warnings.warn("link_template_js() is deprecated as of Oct 2017.  Use `django_mako_plus.template_links(..., group='scripts')` instead.", DeprecationWarning)
-    return template_links(request, app, template_name, context, version_id=version_id, group='scripts', force=force)
 
 

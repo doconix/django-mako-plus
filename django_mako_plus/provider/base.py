@@ -17,9 +17,6 @@ DEFAULT_CONTENT_PROVIDERS = [
     { 'provider': 'django_mako_plus.CssLinkProvider' },
     { 'provider': 'django_mako_plus.JsLinkProvider'  },
     { 'provider': 'django_mako_plus.JsContextProvider' },
-    # deprecated as of Oct 2017
-    { 'provider': 'django_mako_plus.MakoCssProvider'  },
-    { 'provider': 'django_mako_plus.MakoJsProvider'  },
 ]
 
 
@@ -42,11 +39,11 @@ class ProviderFactory(object):
         if not issubclass(self.provider_class, BaseProvider):
             raise ImproperlyConfigured('The Django Mako Plus template OPTIONS were not set up correctly in settings.py; The `provider` value must be a subclass of django_mako_plus.BaseProvider.')
         self.options = merge_dicts(self.provider_class.default_options, provider_def)
-        
+
     def create(self, app_config, template_path, version_id):
         return self.provider_class(app_config, template_path, self.options, version_id)
-        
-        
+
+
 
 ##############################################################
 ###   Static File Providers
@@ -71,8 +68,8 @@ class BaseProvider(object):
         self.options = merge_dicts(self.default_options, options)     # combined options dictionary
         self.version_id = version_id                                  # unique number for overriding the cache (see LinkProvider)
         self.init()
-        
-        
+
+
     @property
     def group(self):
         return self.options['group']
@@ -80,16 +77,16 @@ class BaseProvider(object):
 
     def init(self):
         '''Called at the end of the constructor.'''
-        
-        
+
+
     def get_content(self, provider_run):
         '''
-        Called each time the template renders.  Should return a string 
+        Called each time the template renders.  Should return a string
         to be included in the HTML output, or None if no content.
         '''
         return None
-        
-        
+
+
     def format_string(self, val):
         '''
         Helper function that runs st.format with some standard named options.
@@ -100,4 +97,3 @@ class BaseProvider(object):
             appdir=self.app_config.path,
             template=self.template_name,
         )
-        

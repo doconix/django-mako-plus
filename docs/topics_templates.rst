@@ -106,13 +106,13 @@ The ``dmp_render()`` function determines the mime type from the template extensi
     from django.http import HttpResponse
 
     # return CSV
-    return request.dmp_render('my_csv.html', {}, content_type='text/csv')
+    return request.render('my_csv.html', {}, content_type='text/csv')
 
     # return a custom error page
-    return request.dmp_render('custom_error_page.html', {}, status=404)
+    return request.render('custom_error_page.html', {}, status=404)
 
     # specify a different template charset (or set globally in settings.py)
-    return request.dmp_render('im_old.html', {}, content_type='cp1252')
+    return request.render('im_old.html', {}, content_type='cp1252')
 
 Changing the Template Location (globally)
 --------------------------------------------
@@ -126,7 +126,7 @@ If the templates you need to access are within your project directory, no extra 
 
 .. code:: python
 
-    return request.dmp_render('/homepage/mytemplates/sub1/page.html', context)
+    return request.render('/homepage/mytemplates/sub1/page.html', context)
 
 Note the starting slash on the path. That tells DMP to start searching at your project root.
 
@@ -147,7 +147,7 @@ Suppose, after making the above change, you need to render the '/var/templates/p
 
 .. code:: python
 
-    return request.dmp_render('page1.html', context)
+    return request.render('page1.html', context)
 
 DMP will first search the current app's ``templates`` directory (i.e. the normal way), then it will search the ``TEMPLATES_DIRS`` list, which in this case contains ``/var/templates/``. Your ``page1.html`` template will be found and rendered.
 

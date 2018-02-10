@@ -36,8 +36,8 @@ The following code shows examples of different redirection methods:
 
     # restart the routing process with a new view without returning to the browser.
     # the browser keeps the same url and doesn't know a redirect has happened.
-    # the request.dmp_router_module and request.dmp_router_function variables are updated
-    # to reflect the new values, but all other variables, such as request.urlparams,
+    # the request.dmp.module and request.dmp.function variables are updated
+    # to reflect the new values, but all other variables, such as request.dmp.urlparams,
     # request.GET, and request.POST remain the same as before.
     # the next line is as if the browser went to /homepage/upgrade/
     raise InternalRedirectException('homepage.views.upgrade', 'process_request')

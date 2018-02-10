@@ -239,9 +239,9 @@ class MakoTemplateAdapter(object):
         except RedirectException: # redirect to another page
             e = sys.exc_info()[1]
             if request is None:
-                log.info('a template redirected processing to %s', request.dmp_router_module, request.dmp_router_function, e.redirect_to)
+                log.info('a template redirected processing to %s', request.dmp.module, request.dmp.function, e.redirect_to)
             else:
-                log.info('view function %s.%s redirected processing to %s', request.dmp_router_module, request.dmp_router_function, e.redirect_to)
+                log.info('view function %s.%s redirected processing to %s', request.dmp.module, request.dmp.function, e.redirect_to)
             # send the signal
             if DMP_OPTIONS.get('SIGNALS', False):
                 dmp_signal_redirect_exception.send(sender=sys.modules[__name__], request=request, exc=e)
@@ -284,19 +284,19 @@ def render_to_string_shortcut(app_name, request):
             @view_function
             def process_request(request):
                 # render an HTML template in appname/templates/sometemplate.html to a string
-                html = request.dmp_render_to_string('sometemplate.html', { 'var1': 'value' })
+                html = request.render_to_string('sometemplate.html', { 'var1': 'value' })
                 # (do something with the html)
 
             @view_function
             def another_func(request):
                 # render some dynamic JS in appname/scripts/sometemplate.js (which has embedded Mako code)
-                html = request.dmp_render_to_string('sometemplate.js', { 'var1': 'value' }, subdir="scripts")
+                html = request.render_to_string('sometemplate.js', { 'var1': 'value' }, subdir="scripts")
                 # (do something with the html)
 
             @view_function
             def yet_another(request):
                 # render a single <block name="toolbar"> instead of the entire template in appname/templates/sometemplate.html to a string
-                html = request.dmp_render_to_string('sometemplate.html', { 'var1': 'value' }, def_name='toolbar')
+                html = request.render_to_string('sometemplate.html', { 'var1': 'value' }, def_name='toolbar')
                 # (do something with the html)
 
         The method triggers two signals:
@@ -342,17 +342,17 @@ def render_to_response_shortcut(app_name, request):
             @view_function
             def process_request(request):
                 # return an HTML template in appname/templates/sometemplate.html
-                return request.dmp_render('sometemplate.html', { 'var1': 'value' })
+                return request.render('sometemplate.html', { 'var1': 'value' })
 
             @view_function
             def another_func(request):
                 # return some dynamic JS in appname/scripts/sometemplate.js (which has embedded Mako code)
-                return request.dmp_render('sometemplate.js', { 'var1': 'value' }, subdir="scripts")
+                return request.render('sometemplate.js', { 'var1': 'value' }, subdir="scripts")
 
             @view_function
             def yet_another(request):
                 # return a single <block name="toolbar"> instead of the entire template in appname/templates/sometemplate.html
-                return request.dmp_render('sometemplate.html', { 'var1': 'value' }, def_name='toolbar')
+                return request.render('sometemplate.html', { 'var1': 'value' }, def_name='toolbar')
 
         The method triggers two signals:
             1. dmp_signal_pre_render_template: you can (optionally) return a new Mako Template object from a receiver to replace
@@ -368,128 +368,4 @@ def render_to_response_shortcut(app_name, request):
     return wrapper
 
 
-
-############################################################################
-###
-###  DEPRECATED VERSIONS
-###  (these attach to the app-level module, but phasing them out)
-###
-###  Monkey-patch functions to enable render() and render_to_string()
-###  within the app scope of *each* DMP-enabled app.
-###
-
-def render_to_string_shortcut_deprecated(app_name):
-    # I'm doing this inner function for late lookups (get_template_loader), just in case new template loader objects are added after creation.
-    def wrapper(request, template, context=None, def_name=None, subdir='templates'):
-        '''
-        A shortcut to render a template.  This is one of the primary functions in the DMP framework.
-        This method is added to the app space of each DMP-enabled app at load time.
-
-            @request      The request context from Django.  If this is None, any TEMPLATE_CONTEXT_PROCESSORS defined in your settings
-                          file will be ignored but the template will otherwise render fine.
-            @template     The template file path to render.  This is relative to the app_path/controller_TEMPLATES_DIR/ directory.
-                          For example, to render app_path/templates/page1, set template="page1.html", assuming you have
-                          set up the variables as described in the documentation above.
-            @context      A dictionary of name=value variables to send to the template page.  This can be a real dictionary
-                          or a Django Context object.
-            @def_name     Limits output to a specific top-level Mako <%block> or <%def> section within the template.
-                          For example, def_name="foo" will call <%block name="foo"></%block> or <%def name="foo()"></def> within the template.
-            @subdir       The sub-folder within the app where the template resides.  Templates are normally placed
-                          in project/appname/templates/, which is the default value.
-
-        Returns the rendered template as a unicode string.
-
-        Examples of use from within appname/views/someview.py:
-
-            from django_mako_plus import view_function
-
-            @view_function
-            def process_request(request):
-                # render an HTML template in appname/templates/sometemplate.html to a string
-                html = render_to_string(request, 'sometemplate.html', { 'var1': 'value' })
-                # (do something with the html)
-
-            @view_function
-            def another_func(request):
-                # render some dynamic JS in appname/scripts/sometemplate.js (which has embedded Mako code)
-                html = render_to_string(request, 'sometemplate.js', { 'var1': 'value' }, subdir="scripts")
-                # (do something with the html)
-
-            @view_function
-            def yet_another(request):
-                # render a single <block name="toolbar"> instead of the entire template in appname/templates/sometemplate.html to a string
-                html = render_to_string(request, 'sometemplate.html', { 'var1': 'value' }, def_name='toolbar')
-                # (do something with the html)
-
-        The method triggers two signals:
-            1. dmp_signal_pre_render_template: you can (optionally) return a new Mako Template object from a receiver to replace
-               the normal template object that is used for the render operation.
-            2. dmp_signal_post_render_template: you can (optionally) return a string to replace the string from the normal
-               template object render.
-        '''
-        template_loader = get_dmp_instance().get_template_loader(app_name, subdir)
-        template_adapter = template_loader.get_template(template)
-        warnings.warn('As of DMP 4.2, `dmp_render` has changed to `request.dmp_render`. Please see the documentation for more information.', DeprecationWarning)
-        return getattr(template_adapter, 'render')(context=context, request=request, def_name=def_name)
-
-    # outer function return
-    return wrapper
-
-
-def render_to_response_shortcut_deprecated(app_name):
-    # I'm doing this inner function for late lookups (get_template_loader), just in case new template loader objects are added after creation.
-    def wrapper(request, template, context=None, def_name=None, subdir='templates', content_type=None, status=None, charset=None):
-        '''
-        A shortcut to render a template.  This is one of the primary functions in the DMP framework.
-        This method is added to the app space of each DMP-enabled app at load time.
-
-            @request      The request context from Django.  If this is None, any TEMPLATE_CONTEXT_PROCESSORS defined in your settings
-                          file will be ignored but the template will otherwise render fine.
-            @template     The template file path to render.  This is relative to the app_path/controller_TEMPLATES_DIR/ directory.
-                          For example, to render app_path/templates/page1, set template="page1.html", assuming you have
-                          set up the variables as described in the documentation above.
-            @context      A dictionary of name=value variables to send to the template page.  This can be a real dictionary
-                          or a Django Context object.
-            @def_name     Limits output to a specific top-level Mako <%block> or <%def> section within the template.
-                          For example, def_name="foo" will call <%block name="foo"></%block> or <%def name="foo()"></def> within the template.
-            @subdir       The sub-folder within the app where the template resides.  Templates are normally placed
-                          in project/appname/templates/, which is the default value.
-            @content_type The MIME type of the response.  Defaults to settings.DEFAULT_CONTENT_TYPE (usually 'text/html').
-            @status       The HTTP response status code.  Defaults to 200 (OK).
-            @charset      The charset to encode the processed template string (the output) with.  Defaults to settings.DEFAULT_CHARSET (usually 'utf-8').
-
-        Returns a Django HttpResponse containing the rendered template.
-
-        Examples of use from within appname/views/someview.py:
-
-            from django_mako_plus import view_function
-
-            @view_function
-            def process_request(request):
-                # return an HTML template in appname/templates/sometemplate.html
-                return render_to_string(request, 'sometemplate.html', { 'var1': 'value' })
-
-            @view_function
-            def another_func(request):
-                # return some dynamic JS in appname/scripts/sometemplate.js (which has embedded Mako code)
-                return render_to_string(request, 'sometemplate.js', { 'var1': 'value' }, subdir="scripts")
-
-            @view_function
-            def yet_another(request):
-                # return a single <block name="toolbar"> instead of the entire template in appname/templates/sometemplate.html
-                return render_to_string(request, 'sometemplate.html', { 'var1': 'value' }, def_name='toolbar')
-
-        The method triggers two signals:
-            1. dmp_signal_pre_render_template: you can (optionally) return a new Mako Template object from a receiver to replace
-               the normal template object that is used for the render operation.
-            2. dmp_signal_post_render_template: you can (optionally) return a string to replace the string from the normal
-               template object render.
-        '''
-        template_loader = get_dmp_instance().get_template_loader(app_name, subdir)
-        template_adapter = template_loader.get_template(template)
-        warnings.warn('As of DMP 4.2, `dmp_render` has changed to `request.dmp_render`. Please see the documentation for more information.', DeprecationWarning)
-        return getattr(template_adapter, 'render_to_response')(context=context, request=request, def_name=def_name, content_type=content_type, status=status, charset=charset)
-
-    # outer function return
-    return wrapper
 

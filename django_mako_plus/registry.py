@@ -4,7 +4,6 @@
 
 from django.apps import apps, AppConfig
 
-from .template import render_to_string_shortcut_deprecated, render_to_response_shortcut_deprecated
 from .util import get_dmp_instance
 
 import threading
@@ -63,18 +62,4 @@ def register_app(app):
         get_dmp_instance().get_template_loader(app, 'templates', create=True)
         get_dmp_instance().get_template_loader(app, 'scripts', create=True)
         get_dmp_instance().get_template_loader(app, 'styles', create=True)
-
-        # DEPRECATED: will remove these module-level functions at some point
-        #
-        # add the shortcut functions (only to the main templates, we don't do to scripts or styles
-        # because people generally don't call those directly).  This is a monkey patch, but it is
-        # an incredibly useful one because it makes calling app-specific rendering functions much
-        # easier.
-        #
-        # Django's shortcut to return an *HttpResponse* is render(), and its template method to render a *string* is also render().
-        # Good job on naming there, folks.  That's going to confuse everyone.  But I'm matching it to be consistent despite the potential confusion.
-        #
-        app.module.dmp_render_to_string = render_to_string_shortcut_deprecated(app.name)
-        app.module.dmp_render = render_to_response_shortcut_deprecated(app.name)
-
 

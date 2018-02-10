@@ -12,7 +12,7 @@ In the `initial tutorial <tutorial_urlparams.html>`_, you learned that any extra
     @view_function
     def process_request(request, hrs:int=12, mins:int=30):
         ...
-        
+
 In the above function, ``hrs`` and ``mins`` are set to the following integers:
 
 +--------------------------------------------------+-----------------------------------------------------------------------+
@@ -149,7 +149,7 @@ When your inner function is decorated with ``@wraps``, DMP is able to "unwrap" t
 Raw Parameter Values
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
-In its view middleware, DMP populates the ``request.urlparams[ ]`` list with all URL parts *after* the first two parts (``/homepage/index/``), up to the ``?`` (query string).  For example, the URL ``/homepage/index/144/A58UX/`` has two urlparams: ``144`` and ``A58UX``.  These can be accessed as ``request.urlparams[0]`` and ``request.urlparams[1]`` throughout your view function.
+In its view middleware, DMP populates the ``request.dmp.urlparams[ ]`` list with all URL parts *after* the first two parts (``/homepage/index/``), up to the ``?`` (query string).  For example, the URL ``/homepage/index/144/A58UX/`` has two urlparams: ``144`` and ``A58UX``.  These can be accessed as ``request.dmp.urlparams[0]`` and ``request.dmp.urlparams[1]`` throughout your view function.
 
 Empty parameters and trailing slashes are handled in a specific way.  The following table gives examples:
 
@@ -174,14 +174,14 @@ Denoting "empty" parameters in the url is uncertain because:
 1. Unless told otherwise, many web servers compact double slashes into single slashes. ``http://localhost:8000/storefront/receipt//second/`` becomes ``http://localhost:8000/storefront/receipt/second/``, preventing you from ever seeing the empty first paramter.
 2. There is no real concept of "None" in a URL, only an empty string or some character *denoting* the absence of value.
 
-Because of these difficulties, the urlparams list is programmed to never return None and never raise IndexError.  Even in a short URL with only a few parameters, accessing ``request.urlparams[50]`` returns an empty string.
+Because of these difficulties, the urlparams list is programmed to never return None and never raise IndexError.  Even in a short URL with only a few parameters, accessing ``request.dmp.urlparams[50]`` returns an empty string.
 
-For this reason, the default converters for booleans and Models objects equate the empty string *and* dash '-' as the token for False and None, respectively.  The single dash is especially useful because it provides a character in the URL (so your web server doesn't compact that position) and explicitly states the value.  Your custom converters can override this behavior, but be sure to check for the empty string in ``request.urlparams`` instead of ``None``.
+For this reason, the default converters for booleans and Models objects equate the empty string *and* dash '-' as the token for False and None, respectively.  The single dash is especially useful because it provides a character in the URL (so your web server doesn't compact that position) and explicitly states the value.  Your custom converters can override this behavior, but be sure to check for the empty string in ``request.dmp.urlparams`` instead of ``None``.
 
 Extending the Default Converter
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The built-in DMP converter is built to be extended.  When you need to add a new type, simply plug a new method into the converter.  
+The built-in DMP converter is built to be extended.  When you need to add a new type, simply plug a new method into the converter.
 
 Conversion methods are linked to types with the ``@DefaultConverter.convert_method`` decorator.  At system startup, the class registers these types and methods, sorted by type specificity.  On each request, the converter object searches its registered methods based on the type hints.
 
@@ -216,7 +216,7 @@ Change ``homepage/__init__.py`` to the following code:
                 # otherwise, assume an email address
                 else:
                     return User.objects.get(email=value)
-                
+
             except User.DoesNotExist:
                 raise Http404('User "{}" not found.'.format(value))
 
@@ -236,8 +236,8 @@ Then create ``homepage/views/userinfo.py``:
         context = {
             'user': user,
         }
-        return request.dmp_render('userinfo.html', context)
-    
+        return request.render('userinfo.html', context)
+
 Finally, create ``homepage/templates/userinfo.html``:
 
     <%inherit file="base.htm" />
@@ -273,7 +273,7 @@ In other words, the following may raise an error that models aren't ready yet:
         @DefaultConverter.convert_method(User)
         def convert_user(self, value, parameter, task):
             ...
-   
+
 In the above code, ``User`` is imported when the source file is loaded in to Python and again in the decorator call.  Since Django is still setting up, it raises an exception.  The solution is to use a string in ``app.Model`` format, e.g. ``"auth.User"``.  Then, import the model class within your converter method.
 
 Using strings for types may or may not be necessary, depending on how your project imports are written.  This format is only allowed for model classes and not for other types like ``"str"``.
@@ -335,7 +335,7 @@ Then change ``/homepage/views/index.py`` to the following:
         context = {
             'now': now,
         }
-        return request.dmp_render('index.html', context)
+        return request.render('index.html', context)
 
 When you load http://localhost:8000/homepage/index/6:30/ in your browser, DMP will use ``convert_timedelta()`` to parse the hours and minutes from the first url parameter.
 
@@ -384,7 +384,7 @@ The following is a repeat of the "Extending" example above, modified to raise a 
         context = {
             'now': now,
         }
-        return request.dmp_render('index.html', context)
+        return request.render('index.html', context)
 
 In summary, adding keyword arguments to ``@view_function(...)`` allows you set values *per view function*, which enables common converter functions to contain per-function logic.
 
@@ -432,7 +432,7 @@ In most cases, ``value`` and ``parameter.type`` are all you need to make a conve
         context = {
             'now': now,
         }
-        return request.dmp_render('index.html', context)
+        return request.render('index.html', context)
 
 In this case, the converter is called twice: once for ``delta`` and once for ``forward``.  This will happen *even if the URL is too short*.  Consider how the following URLs would be handled:
 

@@ -17,7 +17,7 @@ Let's add some "work" to the process by adding the current server time to the in
         context = {
             'now': datetime.now(),
         }
-        return request.dmp_render('index.html', context)
+        return request.render('index.html', context)
 
 Reload your server and browser page, and you should see the exact same page. It might look the same, but something very important happened in the routing. Rather than going straight to the ``index.html`` page, processing went to your new ``index.py`` file. At the end of the ``process_request`` function above, we manually render the ``index.html`` file. In other words, we're now doing extra "work" before the rendering. This is the place to do database connections, modify objects, prepare and handle forms, etc. It keeps complex code out of your html pages.
 
@@ -97,13 +97,13 @@ DMP provides a second function, ``dmp_render_to_string``. This is nearly the sam
         context = {
             'now': datetime.now(),
         }
-        return request.dmp_render('index.html', context)
+        return request.render('index.html', context)
 
 
 But That's Not Django!
 --------------------------------
 
-In the above code, you may have noticed that we didn't use the "normal" Django shortcuts like ``render`` and ``render_to_response``.  DMP provides the shortcuts like ``dmp_render`` because its renderers are tied to apps (which is different than Django).  
+In the above code, you may have noticed that we didn't use the "normal" Django shortcuts like ``render`` and ``render_to_response``.  DMP provides the shortcuts like ``dmp_render`` because its renderers are tied to apps (which is different than Django).
 
 But that doesn't mean you can't use the standard Django shortcuts, ``TemplateResponse``, and ``SimpleTemplateResponse`` with DMP.  There's a full page devoted to the topic, so `take a side trip to the topic on "Django Template Functions" <topics_django.html>`_ if you want to stick to the normal Django API.
 

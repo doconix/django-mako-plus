@@ -44,7 +44,7 @@ class ConverterInfo(object):
         self.sort_key = None
         self.declared_order = ConverterInfo.DECLARED_ORDER  # order it was declared in source code
         ConverterInfo.DECLARED_ORDER = 0 if ConverterInfo.DECLARED_ORDER == sys.maxsize else ConverterInfo.DECLARED_ORDER + 1
-        
+
     def _delayed_init(self):
         # we allow the type for models to be declared as a string, such as "auth.User"
         # because real types can't be referenced until Django finishes initialization
@@ -58,7 +58,7 @@ class ConverterInfo(object):
                 self.convert_type = apps.get_model(app_name, model_name)
             except LookupError as e:
                 raise ImproperlyConfigured('"{}" is not a valid model name. {}'.format(self.convert_type, e))
-        
+
         # we reverse sort by ( len(mro), source code order ) so subclasses match first
         # on same types, last declared method sorts first
         self.sort_key = ( -1 * len(inspect.getmro(self.convert_type)), -1 * self.declared_order )
@@ -84,8 +84,8 @@ class BaseConverter(object):
     def __init__(self):
         self.converters = []
         self._delayed_init_run = False
-        
-    
+
+
     def _delayed_init(self):
         '''
         Populates the registry of types to converters for this Converter object.  This method is
@@ -93,25 +93,25 @@ class BaseConverter(object):
         This implementation short circuits until all apps are ready.
         '''
         # This is called by _check_converter() below, and it is delayed (instead of using __init__)
-        # because model class strings can't be switched to models until the app registry is populated.  
+        # because model class strings can't be switched to models until the app registry is populated.
         # This could be called once from DMP's AppConfig.ready(), but since each view function can have
         # a separate converters, and since the default converter can be changed at any time, I'm doing
         # it when a ConversionTask object is created (part of DMP request processing).
         if self._delayed_init_run or not apps.ready:
             return
         self._delayed_init_run = True
-        
+
         # converter methods within this class (subclass) were tagged earlier by the decorator
-        # with the CONVERT_TYPES_KEY.  go through all methods in this class (subclass) and 
+        # with the CONVERT_TYPES_KEY.  go through all methods in this class (subclass) and
         # gather the ConverterInfo objects into a big list
         for name, method in inspect.getmembers(self, inspect.ismethod):
             self.converters.extend(getattr(method, ConverterInfo.CONVERT_TYPES_KEY, ()))
-            
+
         # allow each ConverterInfo to init, such as convert any model string "auth.User" to real class type
         for ci in self.converters:
             ci._delayed_init()
-            
-        # sort the most specialized types to be first.  this allows subclass types to match instead 
+
+        # sort the most specialized types to be first.  this allows subclass types to match instead
         # of their superclasses (if both are in the list).
         self.converters.sort(key=attrgetter('sort_key'))
 
@@ -120,7 +120,7 @@ class BaseConverter(object):
         '''
         Converts the given value to the type expected by the view function.
 
-            value:      value from request.urlparams to convert
+            value:      value from request.dmp.urlparams to convert
                         The value will always be a string, even if empty '' (never None).
 
             parameter:  an instance of ViewParameter.  See that class above for more information.
@@ -129,7 +129,7 @@ class BaseConverter(object):
                         module:             A reference to the module containing the view function.
                         function:           A reference to the view function.
                         converter:          A reference to the currently-running converter callable.
-                        urlparams:          The unconverted request.urlparams list of strings from the url,
+                        urlparams:          The unconverted request.dmp.urlparams list of strings from the url,
                                             provided for cases when converting a value depends on another.
 
         This method should do one of the following:
@@ -166,7 +166,7 @@ class DefaultConverter(BaseConverter):
     The default converter that comes with DMP.  URL parameter converters
     can be any callable.  This implementation is an extensible class with pluggable
     methods for conversion of different types.
-    
+
     The processing function is in super: BaseConverter.__call__().
     '''
     def _check_default(self, value, parameter, task, default_chars):
@@ -177,8 +177,8 @@ class DefaultConverter(BaseConverter):
                 raise ValueError('Value was empty, but no default value is given in view function for parameter: {} ({})'.format(parameter.position, parameter.name))
             return parameter.default
         return value
-        
-    
+
+
     @BaseConverter.convert_method(HttpRequest)
     def convert_http_request(self, value, parameter, task):
         '''
@@ -187,7 +187,7 @@ class DefaultConverter(BaseConverter):
         but I can't see a reason it would ever need to be "converted" outside of middleware.
         '''
         return value
-        
+
 
     @BaseConverter.convert_method(object)
     def convert_object(self, value, parameter, task):
@@ -207,8 +207,8 @@ class DefaultConverter(BaseConverter):
             Anything else is returned as-is (url params are already strings)
         '''
         return self._check_default(value, parameter, task, ( '', None ))
-        
-    
+
+
     @BaseConverter.convert_method(int, float)
     def convert_number(self, value, parameter, task):
         '''
@@ -314,7 +314,7 @@ def _check_converter(converter):
     # default or instantiate if necessary
     if converter is None:
         converter = get_default_converter()
-    elif inspect.isclass(converter): 
+    elif inspect.isclass(converter):
         converter = converter()
     # ensure callable
     if not callable(converter):

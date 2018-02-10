@@ -50,7 +50,7 @@ from .http import HttpResponseJavascriptRedirect
 
 # the convenience functions
 #
-# Instead of these functions, consider using request.dmp_render() and request.dmp_render_to_string(),
+# Instead of these functions, consider using request.render() and request.render_to_string(),
 # which are monkey-patched onto every DMP-enabled app at load time.  See the documentation
 # for information on why we do this.
 #
@@ -80,6 +80,3 @@ from .provider import template_links, template_obj_links
 from .provider import BaseProvider
 from .provider import LinkProvider, CssLinkProvider, JsLinkProvider, JsContextProvider, jscontext
 from .provider import CompileProvider, CompileScssProvider, CompileLessProvider
-# html content providers (deprecated)
-from .provider import MakoCssProvider, MakoJsProvider
-from .provider import link_css, link_js, link_template_css, link_template_js

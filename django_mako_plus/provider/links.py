@@ -15,7 +15,7 @@ import json
 class LinkProvider(BaseProvider):
     '''Base class for providers that create links'''
     # the default options are for CSS files
-    default_options = merge_dicts(BaseProvider.default_options, {  
+    default_options = merge_dicts(BaseProvider.default_options, {
         'group': 'styles',
         'filename': '{appdir}/somedir/{template}.static.file',
     })
@@ -30,7 +30,7 @@ class LinkProvider(BaseProvider):
             if self.version_id is None:
                 self.version_id = int(os.stat(fullpath).st_mtime)
             # make it relative to the project root, and ensure we have forward slashes (even on windows) because this is for urls
-            self.href = posixpath.join(settings.STATIC_URL, os.path.relpath(fullpath, settings.BASE_DIR))  
+            self.href = posixpath.join(settings.STATIC_URL, os.path.relpath(fullpath, settings.BASE_DIR))
 
     def get_content(self, provider_run):
         '''Subclasses should override this method'''
@@ -39,7 +39,7 @@ class LinkProvider(BaseProvider):
 
 class CssLinkProvider(LinkProvider):
     '''Generates a CSS <link>'''
-    default_options = merge_dicts(LinkProvider.default_options, { 
+    default_options = merge_dicts(LinkProvider.default_options, {
         'filename': '{appdir}/styles/{template}.css',
         'skip_duplicates': True,
     })
@@ -47,9 +47,9 @@ class CssLinkProvider(LinkProvider):
         if self.href is None:
             return None
         return '<link id="{uid}" data-context="{contextid}" rel="stylesheet" type="text/css" href="{href}?{version}" />'.format(
-            uid=wuid(),           
+            uid=wuid(),
             contextid=provider_run.uid,
-            href=self.href, 
+            href=self.href,
             version=self.version_id,
             skip_duplicates='true' if self.options['skip_duplicates'] else 'false',
         )
@@ -57,7 +57,7 @@ class CssLinkProvider(LinkProvider):
 
 class JsLinkProvider(LinkProvider):
     '''Generates a JS <script>.'''
-    default_options = merge_dicts(LinkProvider.default_options, {  
+    default_options = merge_dicts(LinkProvider.default_options, {
         'group': 'scripts',
         'filename': '{appdir}/scripts/{template}.js',
         'async': False,
@@ -66,11 +66,11 @@ class JsLinkProvider(LinkProvider):
         if self.href is None:
             return None
         return '<script>DMP_CONTEXT.addScript("{uid}", "{contextid}", "{app}/{template}", "{href}?{version}", {async});</script>'.format(
-            uid=wuid(),           
-            contextid=provider_run.uid,  
+            uid=wuid(),
+            contextid=provider_run.uid,
             app=self.app_config.name.replace('"', '\\"'),
             template=self.template_name.replace('"', '\\"'),
-            href=self.href.replace('\\', '/'), 
+            href=self.href.replace('\\', '/'),
             version=self.version_id,
             async='true' if self.options['async'] else 'false',
         )
@@ -78,11 +78,11 @@ class JsLinkProvider(LinkProvider):
 
 class JsContextProvider(BaseProvider):
     '''Adds all js_context() variables to DMP_CONTEXT'''
-    default_options = merge_dicts(LinkProvider.default_options, {  
+    default_options = merge_dicts(LinkProvider.default_options, {
         'group': 'scripts',
         'encoder': 'django.core.serializers.json.DjangoJSONEncoder',
     })
-    
+
     def init(self):
         super().init()
         self.encoder = import_string(self.options['encoder'])
@@ -92,14 +92,17 @@ class JsContextProvider(BaseProvider):
         html = []
         html.append('<script>')
         if provider_run.chain_index == 0:
+            # context_data = {   # start with some defaults
+            #     '__router_app__',
+            # }
             context_data = { k: provider_run.context[k] for k in provider_run.context.kwargs if isinstance(k, jscontext) }
             html.append('DMP_CONTEXT.set("{version}", "{contextid}", {data});'.format(
                 version=__version__,
-                contextid=provider_run.uid,  
+                contextid=provider_run.uid,
                 data=json.dumps(context_data, cls=self.encoder, separators=(',', ':')) if context_data else '{}',
             ))
         html.append('DMP_CONTEXT.linkContextByName("{contextid}", "{app}/{template}");'.format(
-            contextid=provider_run.uid,  
+            contextid=provider_run.uid,
             app=self.app_config.name.replace('"', '\\"'),
             template=self.template_name.replace('"', '\\"'),
         ))
@@ -113,8 +116,8 @@ class jscontext(str):
     Marks a key in the context dictionary as a JS context item.
     JS context items are sent to the template like normal,
     but they are also added to the runtime JS namespace.
-    
+
     See the tutorial for more information on this function.
     '''
     # no code needed, just using the class for identity
-    
+

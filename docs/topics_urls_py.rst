@@ -6,7 +6,7 @@ This page describes how URL patterns are understood by DMP as well as how to mod
 Default App and Page
 ---------------------------
 
-As alluded to above, when the url doesn't contain the app and/or page, such as ``http://www.yourserver.com/``, DMP uses the default app and page specified in your  settings.py variables: ``DEFAULT_PAGE`` and ``DEFAULT_APP``.  
+As alluded to above, when the url doesn't contain the app and/or page, such as ``http://www.yourserver.com/``, DMP uses the default app and page specified in your  settings.py variables: ``DEFAULT_PAGE`` and ``DEFAULT_APP``.
 
 In the following table, the default app is set to ``homepage`` and your default page is set to ``index.html``:
 
@@ -73,7 +73,7 @@ app, page, and function to call:
 -  ``(?P<dmp_router_app>[_a-zA-Z0-9\-]+)`` is the app name. If omitted, it is set to ``DEFAULT_APP`` in settings.
 -  ``(?P<dmp_router_page>[_a-zA-Z0-9\-]+)`` is the view module name. If omitted, it is set to ``DEFAULT_APP`` in settings.
 -  ``(?P<dmp_router_function>[_a-zA-Z0-9\.\-]+)`` is the function name.  If omitted, it is set to ``process_request``.
--  ``(?P<urlparams>.*)`` is the url parameters, and it should normally  span multiple slashes. The default patterns set this value to  anything after the page name. This value is split on the slash ``/``   to form the ``request.urlparams`` list. If omitted, it is set to the empty list ``[]``.
+-  ``(?P<urlparams>.*)`` is the url parameters, and it should normally  span multiple slashes. The default patterns set this value to  anything after the page name. This value is split on the slash ``/``   to form the ``request.dmp.urlparams`` list. If omitted, it is set to the empty list ``[]``.
 
 The following URL pattern can be used to embed an object ID parameter (named 'id' in this case) into DMP's conventional URL pattern (between the app name and the page name):
 

@@ -69,9 +69,9 @@ Suppose you have the following template, view, and JS files:
         context = {
             'now': datetime.now().strftime('%H:%M'),
         }
-        if request.urlparams[0] == 'gettime':
-            return request.dmp_render('index.html', context, def_name='server_time')
-        return request.dmp_render('index.html', context)
+        if request.dmp.urlparams[0] == 'gettime':
+            return request.render('index.html', context, def_name='server_time')
+        return request.render('index.html', context)
 
 **``index.js``**:
 
@@ -82,7 +82,7 @@ Suppose you have the following template, view, and JS files:
         $('.server-time').load('/homepage/index/gettime/');
     });
 
-On initial page load, the ``if request.urlparams[0] == 'gettime':`` statement is false, so the full ``index.html`` file is rendered. However, when the update button's click event is run, the statement is **true** because ``/gettime`` is added as the first url parameter. This is just one way to switch the ``dmp_render`` call. We could also have used a regular CGI parameter, request method (GET or POST), or any other way to perform the logic.
+On initial page load, the ``if request.dmp.urlparams[0] == 'gettime':`` statement is false, so the full ``index.html`` file is rendered. However, when the update button's click event is run, the statement is **true** because ``/gettime`` is added as the first url parameter. This is just one way to switch the ``dmp_render`` call. We could also have used a regular CGI parameter, request method (GET or POST), or any other way to perform the logic.
 
 When the ``if`` statement goes **true**, DMP renders the ``server_time`` block of the template instead of the entire template. This corresponds nicely to the way the Ajax call was made: ``$('.server-time').load()``.
 
@@ -140,10 +140,10 @@ Since ``counter`` won't get defined when ``def_name='server_time'``, **``index.p
         context = {
             'now': datetime.now().strftime('%H:%M:%S'),
         }
-        if request.urlparams[0] == 'gettime':
+        if request.dmp.urlparams[0] == 'gettime':
             context['counter'] = 100
-            return request.dmp_render('index.html', context, def_name='server_time')
-        return request.dmp_render('index.html', context)
+            return request.render('index.html', context, def_name='server_time')
+        return request.render('index.html', context)
 
     The ``def_name`` parameter can be used to call both ``<%block>`` and
     ``<%def>`` tags in your templates. The two are very similar within

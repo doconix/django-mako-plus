@@ -38,9 +38,6 @@ class RedirectException(BaseRedirectException):
 
     A custom header is set in the response.  This allows middleware, your web server, or
     calling JS code to adjust the redirect if needed.
-
-    The permanent=... and as_javascript=... are deprecated in favor of JavascriptRedirectException
-    and PermanentRedirectException.
     '''
     def __init__(self, redirect_to, *args, **kwargs):
         self.redirect_to = redirect_to
@@ -49,11 +46,6 @@ class RedirectException(BaseRedirectException):
 
     def get_response(self, request, *args, **kwargs):
         '''Returns the redirect response for this exception.'''
-        # for the two deprecated options
-        if kwargs.pop('permanent', None):
-            return PermanentRedirectException(self.redirect_to, *self.args, **self.kwargs).get_response(request)
-        if kwargs.pop('as_javascript', None):
-            return JavascriptRedirectException(self.redirect_to, *self.args, **self.kwargs).get_response(request)
         # normal process
         response = HttpResponseRedirect(self.redirect_to)
         response[REDIRECT_HEADER_KEY] = self.redirect_to
@@ -126,7 +118,7 @@ class JavascriptRedirectException(RedirectException):
 class SassCompileException(Exception):
     '''
     DEPRECATED.  This will be removed at some point.
-    
+
     Raised when a .scss file won't compile
     '''
     def __init__(self, cmd, message):

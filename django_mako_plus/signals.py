@@ -3,7 +3,7 @@ from django.dispatch import Signal
 
 #############################################################
 ###   Signals that we send from DMP
-###   
+###
 ###   See the standard documentation on Django regarding
 ###   signals.  Also see the DMP documentation on these
 ###   specific signals.
@@ -12,12 +12,12 @@ from django.dispatch import Signal
 #  If the method returns an HttpResponse object, processing stops and the object is returned to the browser.
 #
 #    request     :: The request object, which has several attributes that might be of interest:
-#                       request.dmp_router_app      :: The app name, based on the current url.
-#                       request.dmp_router_page     :: The page name (the views/.py file or templates/.html file), based on the current url.
-#                       request.urlparams           :: Any extra url parameters, based on the current url.
-#                       request.dmp_router_module   :: The module where the view function is located.
-#                       request.dmp_router_function :: The specific view function within the module to call.
-#    view_args   :: The list of positional arguments to be sent to the view function. 
+#                       request.dmp.app      :: The app name, based on the current url.
+#                       request.dmp.page     :: The page name (the views/.py file or templates/.html file), based on the current url.
+#                       request.dmp.urlparams           :: Any extra url parameters, based on the current url.
+#                       request.dmp.module   :: The module where the view function is located.
+#                       request.dmp.function :: The specific view function within the module to call.
+#    view_args   :: The list of positional arguments to be sent to the view function.
 #    view_kwargs :: The dictionary of keyword arguments to be sent to the view function.
 #
 dmp_signal_pre_process_request = Signal(providing_args=['request', 'view_args', 'view_kwargs'])
@@ -27,7 +27,7 @@ dmp_signal_pre_process_request = Signal(providing_args=['request', 'view_args', 
 #
 #    request      :: The request object
 #    response     :: The return from the process_request method, normally an HttpResponse object.
-#    view_args    :: The list of positional arguments that was to the view. 
+#    view_args    :: The list of positional arguments that was to the view.
 #    view_kwargs  :: The dictionary of keyword arguments that was sent to the view function.
 #
 dmp_signal_post_process_request = Signal(providing_args=['request', 'response', 'view_args', 'view_kwargs'])

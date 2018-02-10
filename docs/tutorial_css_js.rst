@@ -48,7 +48,7 @@ The framework knows how to follow template inheritance. For example, since ``ind
         margin: 0;
         padding: 15px;
     }
-    
+
 Since base.htm will be the parent page of nearly every HTML page on your site, these common styles will apply to all pages. If you view source in the browser, you'll see the CSS files were included as follows:
 
 .. code:: html
@@ -59,8 +59,6 @@ Since base.htm will be the parent page of nearly every HTML page on your site, t
 Note that ``base.css`` is included first because it's at the top of the hierarchy. Styles from ``index.css`` override any conflicting styles from ``base.css``, which makes sense because ``index.html`` is the final template in the inheritance chain.
 
     You might be wondering about the big number after the html source ``<link>``. That's the file modification time, in minutes since 1970. This is included because browsers don't automatically download new CSS files (I'm looking at you here Chrome!). They use their cached versions until a specified date, often far in the future (this duration is set by your web server). By adding a number to the end of the file, browsers think the CSS files are "new" because the "filename" changes whenever you change the file. Trixy browserses...
-
-    Note that previous versions of DMP enabled ``*.cssm`` and ``*.jsm`` files, but this functionality is now deprecated.  Instead, DMP now does JS context variables, described in the next section.
 
 
 Javascript
@@ -99,14 +97,14 @@ Lets compare the server time with the browser time allows us to calculate the ti
         context = {
             jscontext('now'): datetime.now(),
         }
-        return request.dmp_render('index.html', context)
+        return request.render('index.html', context)
 
 Reload your browser, and then right-click and "Inspect" to see your DOM.  The ``<script>`` tag now looks like this:
 
 ::
 
     <script type="text/javascript" src="/static/homepage/scripts/index.js?1509480811" data-context="{&#34;now&#34;: &#34;2017-10-31T20:13:33.084&#34;}"></script>
-    
+
 When you tag a context key with ``jscontext('now')``, DMP adds it as a data attribute to the HTML script tag.  Note that variables sent via ``jscontext`` must be serializable by Django's ``django.core.serializers.json.DjangoJSONEncoder`` (although you can set a custom encoder if needed).  The default encoder includes all the typical types, plus datetime, date, time, timedelta, Decimal, and UUID.
 
 Let's use the variable in ``index.js``:
@@ -122,8 +120,8 @@ Let's use the variable in ``index.js``:
             $('.browser-time').text('The current browser is ' + hours + ' hours off of the server time zone.');
         });
     })(DMP_CONTEXT.get());
-    
-Reload your browser, and you should see the calculation of hours.  
+
+Reload your browser, and you should see the calculation of hours.
 
     I realize the double closures (DMP_CONTEXT, jQuery) could be refactored, but I'm trying to be consistent with the previous examples.
 

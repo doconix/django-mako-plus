@@ -39,8 +39,8 @@ Compare the old vs. the new:
 +--------------------------------------------------+------------------------------------------+
 
 URL parameters don't take the place of form parameters. You'll still use GET and POST parameters to submit forms.  You'll still use name/value pairs when it makes sense, such as on a search page.  URL parameters are best used for object ids and other simple items that pages need to display, such as the product id in the previous example.
-    
-DMP sends "extra" parameters (``411`` and ``A58UX`` above) to your view function.  You only need to add variables for these parameters to your view function signature.  In addition, DMP automatically converts values into ``ints``, ``booleans``, and even your ``Models``. 
+
+DMP sends "extra" parameters (``411`` and ``A58UX`` above) to your view function.  You only need to add variables for these parameters to your view function signature.  In addition, DMP automatically converts values into ``ints``, ``booleans``, and even your ``Models``.
 
 
 A New View Function Signature
@@ -64,7 +64,7 @@ Let's modify ``homepage/views/index.py`` to support adjusting the current date b
         context = {
             'now': now,
         }
-        return request.dmp_render('index.html', context)
+        return request.render('index.html', context)
 
 
 We'll use the ``homepage/templates/index.html`` file we created in previous tutorial parts:
@@ -112,7 +112,7 @@ Add the following type hints to your ``process_request`` function, and remove th
         context = {
             'now': now,
         }
-        return request.dmp_render('index.html', context)
+        return request.render('index.html', context)
 
 DMP casts the parameters by inspecting the method signature of ``process_request`` which specifies the parameter name, a color, and the type.  If a conversion error occurs, the default converter raises Http404.  All of this is configurable and extensible (read on).
 

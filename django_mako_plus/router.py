@@ -40,48 +40,48 @@ def route_request(request, *args, **kwargs):
         # an outer try that catches the redirect exceptions
         try:
             # ensure we have a _dmp_router_callable variable on request
-            if getattr(request, '_dmp_router_callable', None) is None:
-                raise ImproperlyConfigured("Variable request._dmp_router_callable does not exist (check MIDDLEWARE for `django_mako_plus.RequestInitMiddleware`).")
+            if getattr(request, 'dmp_router', None) is None:
+                raise ImproperlyConfigured("Variable request.dmp.function_obj does not exist (check MIDDLEWARE for `django_mako_plus.RequestInitMiddleware`).")
 
             # output the variables so the programmer can debug where this is routing
-            log.info('processing: app=%s, page=%s, module=%s, func=%s, urlparams=%s', request.dmp_router_app, request.dmp_router_page, request.dmp_router_module, request.dmp_router_function, request.urlparams)
+            log.info('processing: app=%s, page=%s, module=%s, func=%s, urlparams=%s', request.dmp.app, request.dmp.page, request.dmp.module, request.dmp.function, request.dmp.urlparams)
 
             # if we had a view not found, raise a 404
-            if isinstance(request._dmp_router_callable, RegistryExceptionRouter):
-                log.info(request._dmp_router_callable.message(request))
-                return request._dmp_router_callable.get_response(request, *args, **kwargs)
+            if isinstance(request.dmp.function_obj, RegistryExceptionRouter):
+                log.info(request.dmp.function_obj.message(request))
+                return request.dmp.function_obj.get_response(request, *args, **kwargs)
 
             # log the view
-            log.info('calling %s', request._dmp_router_callable.message(request))
+            log.info('calling %s', request.dmp.function_obj.message(request))
 
             # call view function with any args and any remaining kwargs
-            response = request._dmp_router_callable.get_response(request, *args, **kwargs)
+            response = request.dmp.function_obj.get_response(request, *args, **kwargs)
 
             # if we didn't get a correct response back, send a 500
             if not isinstance(response, (HttpResponse, StreamingHttpResponse)):
-                msg = '%s failed to return an HttpResponse (or the post-signal overwrote it).  Returning 500 error.' % request._dmp_router_callable.message(request)
+                msg = '%s failed to return an HttpResponse (or the post-signal overwrote it).  Returning 500 error.' % request.dmp.function_obj.message(request)
                 log.info(msg)
                 return HttpResponseServerError(msg)
 
             # return the response
             return response
-            
+
         except InternalRedirectException as ivr:
             # send the signal
             if DMP_OPTIONS.get('SIGNALS', False):
                 dmp_signal_internal_redirect_exception.send(sender=sys.modules[__name__], request=request, exc=ivr)
             # resolve to a function
-            request.dmp_router_module = ivr.redirect_module
-            request.dmp_router_function = ivr.redirect_function
-            log.info('received an InternalViewRedirect to %s.%s', request.dmp_router_module, request.dmp_router_function)
-            request._dmp_router_callable = get_router(request.dmp_router_module, request.dmp_router_function, verify_decorator=False)
-            if isinstance(request._dmp_router_callable, RegistryExceptionRouter):
-                log.info('could not fulfill InternalViewRedirect because %s.%s does not exist.', request.dmp_router_module, request.dmp_router_function)
+            request.dmp.module = ivr.redirect_module
+            request.dmp.function = ivr.redirect_function
+            log.info('received an InternalViewRedirect to %s.%s', request.dmp.module, request.dmp.function)
+            request.dmp.function_obj = get_router(request.dmp.module, request.dmp.function, verify_decorator=False)
+            if isinstance(request.dmp.function_obj, RegistryExceptionRouter):
+                log.info('could not fulfill InternalViewRedirect because %s.%s does not exist.', request.dmp.module, request.dmp.function)
             # let it wrap back to the top of the "while True" loop to restart the routing
 
         except RedirectException as e: # redirect to another page
-            if request.dmp_router_class is None:
-                log.info('%s redirected processing to %s', request._dmp_router_callable.message(request), e.redirect_to)
+            if request.dmp.class_obj is None:
+                log.info('%s redirected processing to %s', request.dmp.function_obj.message(request), e.redirect_to)
             # send the signal
             if DMP_OPTIONS.get('SIGNALS', False):
                 dmp_signal_redirect_exception.send(sender=sys.modules[__name__], request=request, exc=e)
@@ -204,7 +204,7 @@ class ViewFunctionRouter(object):
         request = kwargs.get('request', args[0])
         ctask = ConversionTask(request, self.module, self.function, self.decorator_kwargs)
         args = list(args)
-        urlparam_i = 0  
+        urlparam_i = 0
         # add urlparams into the arguments and convert the values
         for parameter_i, parameter in enumerate(self.parameters):
             try:
@@ -218,8 +218,8 @@ class ViewFunctionRouter(object):
                 elif parameter_i < len(args):
                     args[parameter_i] = ctask.converter(args[parameter_i], parameter, ctask)
                 # urlparam value?
-                elif urlparam_i < len(request.urlparams):
-                    kwargs[parameter.name] = ctask.converter(request.urlparams[urlparam_i], parameter, ctask)
+                elif urlparam_i < len(request.dmp.urlparams):
+                    kwargs[parameter.name] = ctask.converter(request.dmp.urlparams[urlparam_i], parameter, ctask)
                     urlparam_i += 1
                 # can we assign a default value?
                 elif parameter.default is not inspect.Parameter.empty:
@@ -227,8 +227,8 @@ class ViewFunctionRouter(object):
                 # fallback is None
                 else:
                     kwargs[parameter.name] = ctask.converter(None, parameter, ctask)
-                    
-            except BaseRedirectException as e:   
+
+            except BaseRedirectException as e:
                 log.info('Redirect exception raised during conversion of parameter %s (%s): %s', parameter.position, parameter.name, e)
                 raise
             except Http404 as e:
@@ -237,7 +237,7 @@ class ViewFunctionRouter(object):
             except Exception as e:
                 log.info('Raising Http404 because exception raised during conversion of parameter %s (%s): %s', parameter.position, parameter.name, e, exc_info=e)
                 raise Http404('Invalid parameter specified in the url')
-                
+
         # send the pre-signal
         if DMP_OPTIONS.get('SIGNALS', False):
             for receiver, ret_response in dmp_signal_pre_process_request.send(sender=sys.modules[__name__], request=request, view_args=args, view_kwargs=kwargs):
@@ -252,13 +252,13 @@ class ViewFunctionRouter(object):
             for receiver, ret_response in dmp_signal_post_process_request.send(sender=sys.modules[__name__], request=request, response=response, view_args=args, view_kwargs=kwargs):
                 if ret_response is not None:
                     response = ret_response # sets it to the last non-None in the signal receiver chain
-                    
+
         # return the response
         return response
 
 
     def message(self, request):
-        return 'view function {}.{}'.format(request.dmp_router_module, request.dmp_router_function)
+        return 'view function {}.{}'.format(request.dmp.module, request.dmp.function)
 
 
 
@@ -281,7 +281,7 @@ class ClassBasedRouter(object):
 
 
     def message(self, request):
-        return 'class-based view function {}.{}.{}'.format(request.dmp_router_module, request.dmp_router_class, request.dmp_router_function)
+        return 'class-based view function {}.{}.{}'.format(request.dmp.module, request.dmp.class_obj, request.dmp.function)
 
 
 
@@ -301,7 +301,7 @@ class TemplateViewRouter(object):
 
 
     def message(self, request):
-        return 'template {} (view function {}.{} not found)'.format(self.template_name, request.dmp_router_module, request.dmp_router_function)
+        return 'template {} (view function {}.{} not found)'.format(self.template_name, request.dmp.module, request.dmp.function)
 
 
 
@@ -351,5 +351,6 @@ class ViewParameter(object):
             self.type.__qualname__ if self.type is not None else '<not specified>',
             self.default,
         )
+
 
 
