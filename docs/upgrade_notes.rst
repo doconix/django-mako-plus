@@ -3,11 +3,23 @@ Upgrade Notes
 
 This document contains upgrade notes for those already using DMP.  We started the document at version 4.3.
 
-4.4.1 - November, 2018
+4.4.1 - February, 2018
 
-1. The parameter keys in urls.py has changed.  You only need to adjust your urls.py if you have custom patterns.  For those doing it the normal way (including DMP's urls.py), no change is necessary.
+Most changes can be summarized in the DMP settings.py options.  We recommend comparing your settings.py file against the current template (see file project_template/project_name/settings.py-tpl on GitHub).  This will likely signal all the changes you may need to make.
 
-2. All of the deprecated functions and methods have been removed.  These have built up over the last couple years, so time to break with them.  These include:
+1. The biggest change is the variables DMP attaches to the request have been moved to an object, available as `request.dmp`.  This causes less namespace pollution of the request and allows easier changes going forward.  The following are the old => new:
+
+    -
+
+2. Static files (CSS/JS): MakoCssProvider, MakoJsProvider, link_css, link_js, link_template_css, link_template_js are removed.  Instad, use ${ django_mako_plus.links() } once in the <head> section of your base page.
+
+3. RedirectException: Optional parameters 'permanent' and 'as_javascript' are removed.  Use the subclasses by these names instead.
+
+4. SCSS Compiling: The entire sass.py file is removed, including functions check_template_scss, compile_scss_file, compile_scssm_file.  Instead, use the Sass compile provider.  See providers for more information.
+
+5. The parameter keys in urls.py has changed.  You only need to adjust your urls.py if you have custom patterns.  For those doing it the normal way (including DMP's urls.py), no change is necessary.
+
+6. Rendering: render_to_string_shortcut_deprecated and render_to_response_shortcut_deprecated are removed, but this shouldn't affect anyone because they are internal function.
 
 
 
