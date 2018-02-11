@@ -1,14 +1,12 @@
 from django.conf import settings
 from django.utils.module_loading import import_string
 
-from ..uid import wuid
 from ..util import merge_dicts
 from ..version import __version__
 from .base import BaseProvider
 
 import os
 import os.path
-import posixpath
 import json
 
 
@@ -33,9 +31,8 @@ class LinkProvider(BaseProvider):
         super().__init__(*args, **kwargs)
         fullpath = self.options_format(self.options['filename'])
         try:
-            self.mtime = os.stat(fullpath)
-            # make it relative to the project root, and ensure we have forward slashes (even on windows) because this is for urls
-            self.href = posixpath.join(settings.STATIC_URL, os.path.relpath(fullpath, settings.BASE_DIR))
+            self.mtime = int(os.stat(fullpath).st_mtime)
+            self.href = os.path.relpath(fullpath, settings.BASE_DIR).replace('\\', '/')
         except FileNotFoundError:
             self.mtime = None
             self.href = None
@@ -50,21 +47,15 @@ class CssLinkProvider(LinkProvider):
     })
 
     def provide(self, provider_run, data):
-        if self.href is not None:
-            data['urls'].append('{}?{}'.format(
-                self.href.replace('\\', '/'),
-                provider_run.version_id if provider_run.version_id is not None else self.mtime,
-            ))
-
-    def finish(self, provider_run, data):
-        if len(data['urls']) == 0:
-            return
-        provider_run.write('<script>')
-        provider_run.write('DMP_CONTEXT.loadStyles({urls}, {skip_duplicates});'.format(
-            urls=json.dumps(data['urls']),
+        if self.href is None:
+            return None
+        provider_run.write('<link data-context="{contextid}" rel="stylesheet" type="text/css" href="{static}{href}?{version}" />'.format(
+            contextid=provider_run.uid,
+            static=settings.STATIC_URL,
+            href=self.href,
+            version=provider_run.version_id if provider_run.version_id is not None else self.mtime,
             skip_duplicates='true' if self.options['skip_duplicates'] else 'false',
         ))
-        provider_run.write('</script>')
 
 
 class JsLinkProvider(LinkProvider):
@@ -79,6 +70,7 @@ class JsLinkProvider(LinkProvider):
         data['urls'] = []
 
     def provide(self, provider_run, data):
+        # delaying printing of tag because the JsContextProvider delays and this must go after it
         if self.href is not None:
             data['urls'].append('{}?{}'.format(
                 self.href.replace('\\', '/'),
@@ -86,15 +78,13 @@ class JsLinkProvider(LinkProvider):
             ))
 
     def finish(self, provider_run, data):
-        if len(data['urls']) == 0:
-            return
-        provider_run.write('<script>')
-        provider_run.write('DMP_CONTEXT.load("{contextid}", {urls}, {async});'.format(
-            contextid=provider_run.uid,
-            urls=json.dumps(data['urls']),
-            async='true' if self.options['async'] else 'false',
-        ))
-        provider_run.write('</script>')
+        for url in data['urls']:
+            provider_run.write('<script data-context="{contextid}" src="{static}{url}"{async}></script>'.format(
+                contextid=provider_run.uid,
+                static=settings.STATIC_URL,
+                url=url,
+                async=' async="async"' if self.options['async'] else '',
+            ))
 
 
 class JsContextProvider(BaseProvider):

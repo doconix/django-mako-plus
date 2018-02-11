@@ -80,4 +80,3 @@ from .provider import template_links, template_obj_links
 from .provider.base import BaseProvider
 from .provider.compile import CompileProvider, CompileScssProvider, CompileLessProvider
 from .provider.static_links import LinkProvider, CssLinkProvider, JsLinkProvider, JsContextProvider, jscontext
-from .provider.webpack import WebpackEntryProvider, WebpackCssEntryProvider, WebpackJsEntryProvider

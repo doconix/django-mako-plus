@@ -15,7 +15,6 @@ import io
 
 def links(tself, version_id=None, group=None):
     '''Returns the HTML for the given provider group (or all groups if None)'''
-    request = tself.context.get('request')
     provider_run = ProviderRun(tself, version_id, group)
     provider_run.get_content()
     return provider_run.get_content()
@@ -47,8 +46,6 @@ def template_obj_links(request, template_obj, context=None, version_id=None, gro
     # if our DMP-defined MakoTemplateAdapter, switch to the embedded Mako Template
     template_obj = getattr(template_obj, 'mako_template', template_obj)
     # create a mako context so it seems like we are inside a render
-    # I'm hacking into private Mako methods here, but I can't see another
-    # way to do this.  Hopefully this can be rectified at some point.
     context_dict = {
         'request': request,
     }
@@ -57,11 +54,18 @@ def template_obj_links(request, template_obj, context=None, version_id=None, gro
             context_dict.update(d)
     elif context is not None:
         context_dict.update(context)
-    context_dict.pop('self', None)  # some contexts have self in them, and it messes up render_unicode below because we get two selfs
-    runtime_context = mako.runtime.Context(io.BytesIO(), **context_dict)
+    mako_context = create_mako_context(template_obj, **context_dict)
+    return links(mako_context['self'], version_id=version_id, group=group)
+
+
+def create_mako_context(template_obj, **kwargs):
+    # I'm hacking into private Mako methods here, but I can't see another
+    # way to do this.  Hopefully this can be rectified at some point.
+    kwargs.pop('self', None)  # some contexts have self in them, and it messes up render_unicode below because we get two selfs
+    runtime_context = mako.runtime.Context(io.BytesIO(), **kwargs)
     runtime_context._set_with_template(template_obj)
     _, mako_context = mako.runtime._populate_self_namespace(runtime_context, template_obj)
-    return links(mako_context['self'], version_id=version_id, group=group)
+    return mako_context
 
 
 

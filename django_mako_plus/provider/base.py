@@ -27,14 +27,13 @@ class BaseProvider(object):
     default_options = {
         'group': 'styles',
     }
-    def __init__(self, app_config, template_path, options, provider_index):
+    def __init__(self, app_config, template_path, options):
         self.app_config = app_config
         self.template_path = template_path
         # this next variable assumes the template is in the "normal" location: app/subdir/
         parts = os.path.splitext(self.template_path)[0].split(os.path.sep)
         self.template_name = os.path.sep.join(parts[1:]) if len(parts) > 1 else self.template_path
         self.options = merge_dicts(self.default_options, options)     # combined options dictionary
-        self.provider_index = provider_index
 
     @property
     def group(self):

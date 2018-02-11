@@ -6,7 +6,7 @@ If your page is named ``mypage.html``, DMP will automatically include ``mypage.c
 
 We'll now continue with the advanced version.
 
-Javascript
+Javascript Matters
 ----------------------------------
 
 Your ``base.htm`` file contains the following script link:
@@ -17,7 +17,7 @@ Your ``base.htm`` file contains the following script link:
 
 This file contains a few functions that DMP uses to run scripts and send context variables to your javascript.  It is important that this link be loaded **before** any DMP calls are done in your templates.
 
-When running in production mode, your web server (IIS, Nginx, etc.) should serve this file rather than Django.  Or you may want to include the file in a packager like webpack.  In any case, the file just needs to be included on every page of your site, so do it in an efficient way for your setup.
+When running in production mode, your web server (IIS, Nginx, etc.) should serve this file rather than Django.  Or you may want to include the file in a bundler like webpack.  In any case, the file just needs to be included on every page of your site, so do it in an efficient way for your setup.
 
 The following is an example setting for Nginx:
 
@@ -52,72 +52,86 @@ In the `tutorial <tutorial_css_js.html>`_, you learned to send context variables
         }
         return request.render('index.html', context)
 
-DMP responds with a bootstrap script that creates the following:
+Two providers in DMP go to work.  First, the ``JsContextProvider`` adds the values to its variable in context (initially created by ``dmp-common.js``). This script goes right into the generated html, which means the values can change per request.  Your script file uses these context variables, essentially allowing your Python view to influence Javascript files in the browser, even cached ones!
+
+::
+
+    <script>DMP_CONTEXT.set('u1234567890abcdef', { "now": "2020-02-11 09:32:35.41233"}, ...)</script>
+
+Second, the ``JsLinkProvider`` adds a script tag for your script--immediately after the context.  The ``data-context`` attribute on this tag links it to your data in ``DMP_CONTEXT``.
 
 ::
 
     <script src="/static/homepage/scripts/index.js?1509480811" data-context="u1234567890abcdef"></script>
 
-The bootstrap script places the context data in ``window.DMP_CONTEXT`` under the generated, unique context id.  Your script pulls it from this namespace with the following:
+|
+
+    *Your script should immediately get a reference to the context data object*.  The Javascript global variable ``document.currentScript`` points at the correct ``<script>`` tag *on initial script run only*.  If you delay through ``async`` or a ready function, DMP will still most likely get the right context, but in certain cases (see below) you might get another script's context!
+
+|
+
+The following is a template for getting context data.  It retrieves the context immediately and creates a closure for scope:
 
 ::
 
     (function(context) {
-        // your code here, such as
+        // main code here
         console.log(context);
     })(DMP_CONTEXT.get());
 
-The above code creates a closure for the ``context`` variable, which allows each of your scripts to use the same variable name without stepping on one another.
+Alternatively, the following is a template for getting context data **and** using a ``ready`` (onload) handler.  It retrieves the context reference immediately, but delays the main processing until document load is finished.
 
-The context magic uses ``document.currentScript``, which exists in the initial run of any script. The drawback is the default approach only works with modern browsers (Chrome 29+, Firefox 4+, Safari 8+, Edge 1+, Opera 16+). If your site visitors use browsers older than these, including any version of IE, you need to include a polyfill, such as `a polyfill <https://github.com/JamesMGreene/document.currentScript>`_.
-
-If you are using an onload callback function, such as a JQuery ready function, be sure to embed the callback within the closure.  The ``document.currentScript`` variable only exists during the initial run of the script, so it's gone by the time the callback executes.  Here's an example of the right way to do it:
+Delaying with jQuery ``ready()``:
 
 ::
 
-    (function(context) {
-        $(function() {
-            // your code here, such as
+    $(function(context) {
+        return function() {
+            // main code here
             console.log(context);
-        });
-    })(DMP_CONTEXT.get());
+        }
+    }(DMP_CONTEXT.get()));
 
-Selecting on Template
-^^^^^^^^^^^^^^^^^^^^^^^^
+Delaying with pure Javascript:
 
-If your script must execute within a callback or if ``document.currentScript`` isn't a native or polyfill option, you can still get the context vairables using the app and template names. The following code retrieves the context for ``homepage`` app, ``index.html`` template:
 ::
 
+    document.addEventListener("DOMContentLoaded", function(context) {
+        return function() {
+            // main code here
+            console.log(context);
+        }
+    }(DMP_CONTEXT.get()));
+
+
+Handling the "Certain Cases"
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Above, we said that DMP could get the wrong context in "certain cases".  These are fringe issues, but you should handle them when developing libraries or widgets that might get ajax'd in many places.
+
+Here's an example of when this might occur:
+
+1. Your code uses jQuery.ajax() to retrieve ``snippet.html``, which has accompanying ``snippet.js`` and ``another.js`` files.
+2. When jQuery receives the response, it strips the ``<script>`` element from the html.  The html is inserted in the DOM **without** the tag (this behavior is how jQuery is written -- it avoids a security issue by doing this).
+3. jQuery executes the script code as a string, disconnected from the DOM.
+4. Since DMP can't use the predictable ``document.currentScript`` variable, it defaults to the last-inserted context.  This is normally a good assumption.
+5. However, suppose the two ``.js`` files were inserted during two different render() calls on the server. Two context dictionaries will be included in the html, and only one of them will be the "last" one.
+6. Both scripts run with the same, incorrect context.  Do not pass Go. Do not collect $200. No context for you.
+
+The solution is to help DMP by specifying the context by its ``app/template`` key:
+
+::
+
+    // look away Ma -- being explicit here!
     (function(context) {
         // your code here, such as
         console.log(context);
     })(DMP_CONTEXT.get('homepage/index'));
 
-The primary drawback of this approach is the hard-coded name selection can be fragile, such as when you change the template name and forget to match the code.
+In the above code, DMP retrieves correct context by template name.  Even if the given template has been loaded twice, the latest one will be active (thus giving the right context).  Problem solved.
 
-Script Element
-^^^^^^^^^^^^^^^^^^^^
+    A third alternative is to get the context by using a ``<script>`` DOM object as the argument to ``.get``. This approach always returns the correct context.
 
-If neither of the above methods work in your situation, you can select the ``<script>`` element manually. There are a number of fallback methods you can use to get a reference to the element. For example, the following selects on the ``src`` attribute:
-
-::
-
-    (function(context) {
-        // your code here, such as
-        console.log(context);
-    })(DMP_CONTEXT.get(document.querySelector('script[src*="/static/homepage/scripts/index.js"]'));
-
-
-Bootstrap Script
-^^^^^^^^^^^^^^^^^^^^^^
-
-If you are paying close attention, you may have noticed that DMP actually sends a bootstrap script that creates the real script tag dynamically. Sending a script to add a script might seem like James Moriarty trying to get off the holodeck, but stick with me.
-
-The ``document.currentScript`` variable is available during the execution of a script only during its immediate execution.  That means it is **not** available during ajax returns or callbacks. Front-end libraries like JQuery strip ``<script>`` tags because ``.innerHtml`` treats them like text instead of code. These libraries insert the content normally and **afterwards** execute the script code. This makes ``currentScript === null`` by the time your script actually runs. Boo.
-
-Why does it matter?  Because ``currentScript`` is how we get context variables from the script tag to the Javascript namespace. With DMP's approach, the script is able to load inline, via ajax, via callback, or any other way.  The only drawback to this approach is scripts added this way run **after** the scripts written directly in the HTML (even when ``async=false``).  Once hard coded scripts are finished, browsers run through the DMP-linked scripts in the order they were added to the DOM.
-
-Since several scripts (one for each super-template in the template's inheritance) need the same context data, DMP stores the data in the common namespace ``window.dmp_context``.
 
 Bundlers
 ---------------------
@@ -244,7 +258,7 @@ Each type of provider takes additional settings that allow you to customize loca
 * ``appdir`` - the absolute path to the app directory
 * ``template`` - the name of the template being rendered
 
-    **Provider Order is Important:**  Just like Django middleware, the providers are run in the order listed.  If one provider depends on the work of another, be sure to list them in the right order.  For example, the ``JsContextProvider`` provides context variables for scripts, so it must be placed before ``JsLinkProvider``.  That way, the variables are loaded when the scripts run.
+    **Order Matters:**  Just like Django middleware, the providers are run in the order listed.  If one provider depends on the work of another, be sure to list them in the right order.  For example, the ``JsContextProvider`` provides context variables for scripts, so it must be placed before ``JsLinkProvider``.  That way, the variables are loaded when the scripts run.
 
 The following more-detailed version enumerates all the options (set to their defaults).
 
@@ -349,14 +363,21 @@ Suppose you need custom preprocessing of static files or custom template content
             'here': '.',
         })
 
-        def start(self, provider_run, chain_index, provider_index):
-            '''Called on each provider at the start of run - use provider_run.write() for content'''
-            pass
+    def start(self, provider_run, data):
+        '''
+        Called on the *main* template's provider list as the run starts.
+        Initialize values in the data dictionary here.
+        '''
+        pass
 
-        def finish(self, provider_run, chain_index, provider_index):
-            '''Called on each provider at the end of run - use provider_run.write() for content'''
-            pass
+    def provide(self, provider_run, data):
+        '''Called on *each* template's provider list in the chain - use provider_run.write() for content'''
+        pass
 
-        def provide(self, provider_run, chain_index, provider_index):
-            '''Called on each provider for each template in a run - use provider_run.write() for content'''
-            pass
+    def finish(self, provider_run, data):
+        '''
+        Called on the *main* template's provider list as the run finishes
+        Finalize values in the data dictionary here.
+        '''
+        pass
+

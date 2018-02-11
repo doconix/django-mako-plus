@@ -10,6 +10,7 @@
             __version__: '5.0.1',   // DMP version to check for mismatches
             contexts: {},           // contextid -> context1
             contextsByName: {},     // app/template -> [ context1, context2, ... ]
+            last_set: null,         // last inserted context (see getAll() below)
 
             /* Adds data to the DMP context under the given key */
             set: function(version, contextid, data, templates) {
@@ -18,6 +19,7 @@
                 }
                 // link this contextid to the data
                 DMP_CONTEXT.contexts[contextid] = data;
+                DMP_CONTEXT.last_set = data
                 // reverse lookups by name to contextid
                 for (var i = 0; i < templates.length; i++) {
                     if (DMP_CONTEXT.contextsByName[templates[i]] === undefined) {
@@ -26,22 +28,6 @@
                     DMP_CONTEXT.contextsByName[templates[i]].push(contextid);
                 }
 
-            },
-
-            /* Adds one or more <script> element dynamically, which ensures the fetched script has document.currentScript (see docs) */
-            load: function(contextid, urls, async) {
-                for (var i = urls.length - 1; i >= 0; i--) {
-                    var n = document.createElement("script");
-                    n.async = async;
-                    n.setAttribute("data-context", contextid);
-                    n.src = urls[i];
-                    // try to add immediately after this script's tag, with fallback to <head>
-                    if (document.currentScript) {
-                        document.currentScript.parentNode.insertBefore(n, document.currentScript.nextSibling);
-                    } else {
-                        document.head.appendChild(n);
-                    }
-                }
             },
 
             /*
@@ -73,22 +59,15 @@
             */
             getAll: function(option) {
                 var ret = [];
+                option = option || document.currentScript;      // default to currently-running script
 
-                // default to currentScript if undefined
-                if (option === undefined || option === null) {
-                    if (document.currentScript === undefined) {
-                        throw Error('document.currentScript is undefined. DMP_CONTEXT.get() can only be done during initial script processing (not in callbacks or event handling).');
-                    }
-                    option = document.currentScript;
-                }
-
-                // if still undefined, we can't pull anything
-                if (option === undefined || option === null) {
-                    return ret;
+                // if empty option, get the last-added context
+                if (!option) {
+                    ret.push(DMP_CONTEXT.last_set);
                 }
 
                 // "app/template"
-                if (typeof option === 'string' || option instanceof String) {
+                else if (typeof option === 'string' || option instanceof String) {
                     var namemap = DMP_CONTEXT.contextsByName[option];
                     if (namemap !== undefined) {
                         for (var i = 0; i < namemap.length; i++) {
