@@ -2,6 +2,7 @@
 // the widest possible browser base
 
 (function() {
+
     if (window.DMP_CONTEXT === undefined) {
 
         window.DMP_CONTEXT = {
@@ -29,21 +30,17 @@
 
             /* Adds one or more <script> element dynamically, which ensures the fetched script has document.currentScript (see docs) */
             load: function(contextid, urls, async) {
-                var last_n = null;
-                for (var i = 0; i < urls.length; i++) {
+                for (var i = urls.length - 1; i >= 0; i--) {
                     var n = document.createElement("script");
                     n.async = async;
                     n.setAttribute("data-context", contextid);
                     n.src = urls[i];
                     // try to add immediately after this script's tag, with fallback to <head>
-                    if (last_n != null) {
-                        last_n.parentNode.insertBefore(n, last_n.nextSibling);
-                    } else if (document.currentScript) {
+                    if (document.currentScript) {
                         document.currentScript.parentNode.insertBefore(n, document.currentScript.nextSibling);
                     } else {
                         document.head.appendChild(n);
                     }
-                    last_n = n;
                 }
             },
 

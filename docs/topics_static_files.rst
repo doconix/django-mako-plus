@@ -1,4 +1,4 @@
-Static Files: Images and Other Media
+Static Files: Collecting
 ============================================
 
 .. contents::
@@ -22,7 +22,7 @@ At deployment, collect static files out of these directories with the following 
 ::
 
     python3 manage.py dmp_collectstatic
-    
+
 Since many projects contain both DMP and regular Django apps, collect static files with both commands:
 
 ::
@@ -129,10 +129,10 @@ If you need to include additional directories or files, specify them with the ``
 ::
 
     python3 manage.py dmp_collectstatic --include-dir=global-media --include-dir=global-styles --include-file=*.png
-    
+
 If you have ``rcssmin`` and ``rjsmin`` installed (via pip), DMP will minify your CSS and JS during the collection process.  If you are minifying with another tool (webpack, Google's minifier, etc.), disable minification with:
 
 ::
 
     python3 manage.py dmp_collectstatic --no-minify
-    
+

@@ -1,4 +1,4 @@
-Rendering CSS and JS
+Static Files: Providers
 ================================
 
 In the `tutorial <tutorial_css_js.html>`_, you learned how to automatically include CSS and JS based on your page name .
@@ -6,47 +6,7 @@ If your page is named ``mypage.html``, DMP will automatically include ``mypage.c
 
 We'll now continue with the advanced version.
 
-Preprocessors (Scss and Less)
------------------------------------
-
-If you are using preprocessors for your CSS or JS, DMP can automatically compile files.  While this could alternatively be done with an editor plugin or with a 'watcher' process, letting DMP compile for you keeps the responsibility within your project settings (rather than per-programmer-dependent setups).
-
-Suppose your template ``index.html`` contains the typical code:
-
-.. code:: html
-
-    <head>
-        ${ django_mako_plus.links(self) }
-    </head>
-
-When enabled, DMP looks for ``app_folder/styles/index.scss``.  If it exists, DMP checks the timestamp of the compiled version, ``app_folder/styles/index.css``, to see if if recompilation is needed.  If needed, it runs ``scss`` before generating ``<link type="text/css" />`` for the file.
-
-During development, this check is done every time the template is rendered.  During production, this check is done only once -- the first time the template is rendered.
-
-Rendering Other Pages
-------------------------------
-
-But suppose you need to autorender the JS or CSS from a page *other than the one currently rendering*?  For example, you need to include the CSS and JS for ``otherpage.html`` while ``mypage.html`` is rendering.  This is a bit of a special case, but it has been useful at times.
-
-To include CSS and JS by name, use the following within any template on your site (``mypage.html`` in this example):
-
-::
-
-    ## instead of using the normal:
-    ## ${ django_mako_plus.links(self) }
-    ##
-    ## specify the app and page name:
-    ${ django_mako_plus.template_links(request, 'homepage', 'otherpage.html', context)
-
-
-Rendering Nonexistent Pages
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-This special case is for times when you need the CSS and JS autorendered, but don't need a template for HTML.  The ``force`` parameter allows you to force the rendering of CSS and JS files, even if DMP can't find the HTML file.   Since ``force`` defaults True, the calls just above will render even if the template isn't found.
-
-In other words, this behavior already happens; just use the calls above.  Even if ``otherpage.html`` doesn't exist, you'll get ``otherpage.css`` and ``otherpage.js`` in the current page content.
-
-common.js
+Javascript
 ----------------------------------
 
 Your ``base.htm`` file contains the following script link:
@@ -75,7 +35,7 @@ If you don't know the location of DMP on your server, try this command:
 
 
 (context) => { javascript }
------------------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 In the `tutorial <tutorial_css_js.html>`_, you learned to send context variables to *.js files using ``jscontext``:
 
@@ -159,7 +119,7 @@ Why does it matter?  Because ``currentScript`` is how we get context variables f
 
 Since several scripts (one for each super-template in the template's inheritance) need the same context data, DMP stores the data in the common namespace ``window.dmp_context``.
 
-Javascript Bundles
+Bundlers
 ---------------------
 
 Getting fancy with something like Webpack, Browserify, or another bundler?  DMP scripts can go into your bundles, just like everything else.
@@ -183,6 +143,48 @@ Suppose your template is named, ``mytemplate.html``. The paired JS file, ``mytem
             // behavior here!
         }
     })(DMP_CONTEXT.get('homepage/mytemplate'));
+
+
+Preprocessors (Scss and Less)
+-----------------------------------
+
+If you are using preprocessors for your CSS or JS, DMP can automatically compile files.  While this could alternatively be done with an editor plugin or with a 'watcher' process, letting DMP compile for you keeps the responsibility within your project settings (rather than per-programmer-dependent setups).
+
+Suppose your template ``index.html`` contains the typical code:
+
+.. code:: html
+
+    <head>
+        ${ django_mako_plus.links(self) }
+    </head>
+
+When enabled, DMP looks for ``app_folder/styles/index.scss``.  If it exists, DMP checks the timestamp of the compiled version, ``app_folder/styles/index.css``, to see if if recompilation is needed.  If needed, it runs ``scss`` before generating ``<link type="text/css" />`` for the file.
+
+During development, this check is done every time the template is rendered.  During production, this check is done only once -- the first time the template is rendered.
+
+Rendering Other Pages
+------------------------------
+
+But suppose you need to autorender the JS or CSS from a page *other than the one currently rendering*?  For example, you need to include the CSS and JS for ``otherpage.html`` while ``mypage.html`` is rendering.  This is a bit of a special case, but it has been useful at times.
+
+To include CSS and JS by name, use the following within any template on your site (``mypage.html`` in this example):
+
+::
+
+    ## instead of using the normal:
+    ## ${ django_mako_plus.links(self) }
+    ##
+    ## specify the app and page name:
+    ${ django_mako_plus.template_links(request, 'homepage', 'otherpage.html', context)
+
+
+Rendering Nonexistent Pages
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+This special case is for times when you need the CSS and JS autorendered, but don't need a template for HTML.  The ``force`` parameter allows you to force the rendering of CSS and JS files, even if DMP can't find the HTML file.   Since ``force`` defaults True, the calls just above will render even if the template isn't found.
+
+In other words, this behavior already happens; just use the calls above.  Even if ``otherpage.html`` doesn't exist, you'll get ``otherpage.css`` and ``otherpage.js`` in the current page content.
+
 
 Groups
 -----------------
@@ -217,20 +219,20 @@ The framework is built to be extended for custom file types.  When you call ``li
             'APP_DIRS': True,
             'OPTIONS': {
                 'CONTENT_PROVIDERS': [
-                    # generates links for app/styles/template.css
-                    { 'provider': 'django_mako_plus.CssLinkProvider' },
-
-                    # generates links for app/scripts/template.js
-                    { 'provider': 'django_mako_plus.JsLinkProvider' },
-
-                    # adds JS context
-                    { 'provider': 'django_mako_plus.JsContextProvider' },
-
                     # compiles app/styles/template.scss to app/styles/template/css
                     { 'provider': 'django_mako_plus.CompileScssProvider' },
 
                     # compiles app/styles/template.less to app/styles/template/css
                     { 'provider': 'django_mako_plus.CompileLessProvider' },
+
+                    # generates links for app/styles/template.css
+                    { 'provider': 'django_mako_plus.CssLinkProvider' },
+
+                    # adds JS context
+                    { 'provider': 'django_mako_plus.JsContextProvider' },
+
+                    # generates links for app/scripts/template.js
+                    { 'provider': 'django_mako_plus.JsLinkProvider' },
                 ],
             }
         }
@@ -241,6 +243,8 @@ Each type of provider takes additional settings that allow you to customize loca
 * ``appname`` - the name of the template's app
 * ``appdir`` - the absolute path to the app directory
 * ``template`` - the name of the template being rendered
+
+    **Provider Order is Important:**  Just like Django middleware, the providers are run in the order listed.  If one provider depends on the work of another, be sure to list them in the right order.  For example, the ``JsContextProvider`` provides context variables for scripts, so it must be placed before ``JsLinkProvider``.  That way, the variables are loaded when the scripts run.
 
 The following more-detailed version enumerates all the options (set to their defaults).
 
@@ -253,37 +257,10 @@ The following more-detailed version enumerates all the options (set to their def
             'APP_DIRS': True,
             'OPTIONS': {
                 'CONTENT_PROVIDERS': [
-                    # generates links for app/styles/template.css
-                    {
-                        'provider': 'django_mako_plus.CssLinkProvider'
-                        'group': 'styles',
-                        'weight': 0,
-                        'filename': '{appdir}/styles/{template}.css',
-                        'skip_duplicates': True,
-                    },
-
-                    # generates links for app/scripts/template.js
-                    {
-                        'provider': 'django_mako_plus.JsLinkProvider'
-                        'group': 'scripts',
-                        'weight': 0,
-                        'filename': '{appdir}/scripts/{template}.js',
-                        'async': False,
-                    },
-
-                    # adds JS context
-                    {
-                        'provider': 'django_mako_plus.JsContextProvider'
-                        'group': 'scripts',
-                        'weight': 0,
-                        'encoder': 'django.core.serializers.json.DjangoJSONEncoder',
-                    },
-
                     # compiles app/styles/template.scss to app/styles/template/css
                     {
                         'provider': 'django_mako_plus.CompileScssProvider'
                         'group': 'styles',
-                        'weight': 10,
                         'source': '{appdir}/styles/{template}.scss',
                         'output': '{appdir}/styles/{template}.css',
                         'command': [ shutil.which('scss'), '--unix-newlines', '{appdir}/styles/{template}.scss', '{appdir}/styles/{template}.css' ],
@@ -293,17 +270,37 @@ The following more-detailed version enumerates all the options (set to their def
                     {
                         'provider': 'django_mako_plus.CompileLessProvider'
                         'group': 'styles',
-                        'weight': 10,
                         'source': '{appdir}/styles/{template}.less',
                         'output': '{appdir}/styles/{template}.css',
                         'command': [ shutil.which('lessc'), '--source-map', '{appdir}/styles/{template}.less', '{appdir}/styles/{template}.css' ],
+                    },
+
+                    # generates links for app/styles/template.css
+                    {
+                        'provider': 'django_mako_plus.CssLinkProvider'
+                        'group': 'styles',
+                        'filename': '{appdir}/styles/{template}.css',
+                        'skip_duplicates': True,
+                    },
+
+                    # adds JS context
+                    {
+                        'provider': 'django_mako_plus.JsContextProvider'
+                        'group': 'scripts',
+                        'encoder': 'django.core.serializers.json.DjangoJSONEncoder',
+                    },
+
+                    # generates links for app/scripts/template.js
+                    {
+                        'provider': 'django_mako_plus.JsLinkProvider'
+                        'group': 'scripts',
+                        'filename': '{appdir}/scripts/{template}.js',
+                        'async': False,
                     },
                 ],
             }
         }
     ]
-
-The ``weight`` setting determines which providers run first (higher weights go first).
 
 As an example, consider the `Transcrypt files <https://www.transcrypt.org/>`_ project, which transpiles Python code into Javascript. It lets you write browser scripts in our favorite language (note the source looks for ``.py`` files. The provider settings tells DMP to compile your Transcrypt files when needed. The first provider transpiles the source, and the second one creates the ``<script>`` link to the output file.
 

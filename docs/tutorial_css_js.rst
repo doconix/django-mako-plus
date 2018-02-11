@@ -125,12 +125,12 @@ Reload your browser, and you should see the calculation of hours.
 
     I realize the double closures (DMP_CONTEXT, jQuery) could be refactored, but I'm trying to be consistent with the previous examples.
 
-    The context is sent to the script via a data attribute on the ``<script>`` element.  The closure surrounding everything keeps the variable local to this script.  Read more about this in `the topic on CSS and JS <topics_css_js.html>`_.
+    The context is sent to the script via a data attribute on the ``<script>`` element.  The closure surrounding everything keeps the variable local to this script.  Read more about this in `the topic on CSS and JS <topics_providers.html>`_.
 
 Bundlers like Webpack, Browserify, etc.
 ------------------------------------------
 
-If you are using JS bundles, DMP files can go right in the bundles.  See bundling in `Rendering CSS and JS <topics_css_js.html>`_ for more information..
+If you are using JS bundles, DMP files can go right in the bundles.  See bundling in `Rendering CSS and JS <topics_providers.html>`_ for more information..
 
 Behind the CSS and JS Curtain
 -----------------------------
@@ -147,4 +147,4 @@ The calls to ``links()`` include the ``<link>`` and ``<script>`` tags for the te
 
 This all works because the ``index.html`` template extends from the ``base.htm`` template. If you fail to inherit from ``base.htm`` or ``base_ajax.htm``, DMP won't be able to include the support files.
 
-Read more about providers in `Rendering CSS and JS <topics_css_js.html>`_.
+Read more about providers in `Rendering CSS and JS <topics_providers.html>`_.

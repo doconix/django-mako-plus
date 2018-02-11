@@ -6,7 +6,7 @@ from django.utils.module_loading import import_string
 
 from .template import MakoTemplateLoader, MakoTemplateAdapter
 from .registry import register_app, is_dmp_app as registry_is_dmp_app
-from .provider import init_providers
+from .provider.runner import init_providers
 from .util import DMP_INSTANCE_KEY, DMP_OPTIONS, get_dmp_app_configs
 
 from mako.template import Template

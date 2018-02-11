@@ -77,6 +77,7 @@ from .util import get_dmp_app_configs
 from .provider import links
 from .provider import template_links, template_obj_links
 # html content providers
-from .provider import BaseProvider
-from .provider import LinkProvider, CssLinkProvider, JsLinkProvider, JsContextProvider, jscontext
-from .provider import CompileProvider, CompileScssProvider, CompileLessProvider
+from .provider.base import BaseProvider
+from .provider.compile import CompileProvider, CompileScssProvider, CompileLessProvider
+from .provider.static_links import LinkProvider, CssLinkProvider, JsLinkProvider, JsContextProvider, jscontext
+from .provider.webpack import WebpackEntryProvider, WebpackCssEntryProvider, WebpackJsEntryProvider

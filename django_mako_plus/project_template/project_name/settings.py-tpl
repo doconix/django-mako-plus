@@ -97,22 +97,13 @@ TEMPLATES = [
             # determines whether DMP will send its custom signals during the process
             'SIGNALS': False,
 
-            # # static file providers - these autoinclude *.css and *.js files
+            # # static file providers - these process and autoinclude files such as *.css and *.js files
             # 'CONTENT_PROVIDERS': [
-            #     # generates links for app/styles/template.css
-            #     { 'provider': 'django_mako_plus.CssLinkProvider' },
-            #
-            #     # adds JS context
-            #     { 'provider': 'django_mako_plus.JsContextProvider' },
-            #
-            #     # generates links for app/scripts/template.js
-            #     { 'provider': 'django_mako_plus.JsLinkProvider' },
-            #
-            #     # compiles app/styles/template.scss to app/styles/template/css
-            #     { 'provider': 'django_mako_plus.CompileScssProvider' },
-            #
-            #     # compiles app/styles/template.less to app/styles/template/css
-            #     { 'provider': 'django_mako_plus.CompileLessProvider' },
+            #     { 'provider': 'django_mako_plus.CompileScssProvider' },   # compiles app/styles/template.scss to app/styles/template/css
+            #     { 'provider': 'django_mako_plus.CompileLessProvider' },   # compiles app/styles/template.less to app/styles/template/css
+            #     { 'provider': 'django_mako_plus.CssLinkProvider' },       # generates links for app/styles/template.css
+            #     { 'provider': 'django_mako_plus.JsContextProvider' },     # adds JS context
+            #     { 'provider': 'django_mako_plus.JsLinkProvider' },        # generates links for app/scripts/template.js
             # ],
 
             # see the DMP online tutorial for information about this setting

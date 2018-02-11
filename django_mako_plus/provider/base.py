@@ -1,48 +1,9 @@
-from django.core.exceptions import ImproperlyConfigured
-from django.utils.module_loading import import_string
 from django.utils.encoding import force_text
 
-from ..util import DMP_OPTIONS, merge_dicts
+from ..util import merge_dicts
 
 import os
 import os.path
-
-
-
-##################################################
-###   Static File Provider Factory
-
-
-DEFAULT_CONTENT_PROVIDERS = [
-    { 'provider': 'django_mako_plus.CssLinkProvider' },
-    { 'provider': 'django_mako_plus.JsLinkProvider'  },
-    { 'provider': 'django_mako_plus.JsContextProvider' },
-]
-
-
-def init_providers():
-    '''Called when the DMP template engine is created by Django'''
-    # these provider factories are used to create providers for the templates in the system
-    DMP_OPTIONS['RUNTIME_PROVIDER_FACTS'] = [ ProviderFactory(provider_def) for provider_def in DMP_OPTIONS.get('CONTENT_PROVIDERS', DEFAULT_CONTENT_PROVIDERS) ]
-    DMP_OPTIONS['RUNTIME_PROVIDER_FACTS'].sort(key=lambda pf: pf.options['weight'], reverse=True)
-
-
-class ProviderFactory(object):
-    '''Creator for a given Provider definition in settings.py.'''
-    def __init__(self, provider_def):
-        self.options = {}
-        try:
-            self.provider_class = provider_def['provider']
-        except KeyError:
-            raise ImproperlyConfigured('The Django Mako Plus template OPTIONS were not set up correctly in settings.py; a CONTENT_PROVIDERS item is missing `provider`.')
-        if isinstance(self.provider_class, str):
-            self.provider_class = import_string(self.provider_class)
-        if not issubclass(self.provider_class, BaseProvider):
-            raise ImproperlyConfigured('The Django Mako Plus template OPTIONS were not set up correctly in settings.py; The `provider` value must be a subclass of django_mako_plus.BaseProvider.')
-        self.options = merge_dicts(self.provider_class.default_options, provider_def)
-
-    def create(self, app_config, template_path, provider_index):
-        return self.provider_class(app_config, template_path, self.options, provider_index)
 
 
 
@@ -65,7 +26,6 @@ class BaseProvider(object):
     '''
     default_options = {
         'group': 'styles',
-        'weight': 0,  # higher weights run first
     }
     def __init__(self, app_config, template_path, options, provider_index):
         self.app_config = app_config
@@ -80,18 +40,42 @@ class BaseProvider(object):
     def group(self):
         return self.options['group']
 
-    def provide(self, provider_run, data):
-        '''Called on each provider for each template in a run - use provider_run.write() for content'''
+    def start(self, provider_run, data):
+        '''
+        Called on the *main* template's provider list as the run starts.
+        Initialize values in the data dictionary here.
+        '''
         pass
 
-    def format_string(self, val):
+    def provide(self, provider_run, data):
+        '''Called on *each* template's provider list in the chain - use provider_run.write() for content'''
+        pass
+
+    def finish(self, provider_run, data):
         '''
-        Helper function that runs st.format with some standard named options.
-        val.format() is called with {appname}, {appdir}, {template}.
+        Called on the *main* template's provider list as the run finishes
+        Finalize values in the data dictionary here.
         '''
-        return force_text(val).format(
-            appname=self.app_config.name,
-            appdir=self.app_config.path,
-            template=self.template_name,
-        )
+        pass
+
+
+    ##################################
+    ###  Helper functions
+
+    def options_format(self, val, **extra):
+        '''
+        Runs val.format() with some named arguments:
+            {appname}
+            {appdir}
+            {template}
+        '''
+        d = {
+            'appname': self.app_config.name,
+            'appdir': self.app_config.path,
+            'template': self.template_name,
+        }
+        d.update(extra)
+        return force_text(val).format(**d)
+
+
 

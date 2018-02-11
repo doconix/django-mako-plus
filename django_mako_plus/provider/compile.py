@@ -15,27 +15,27 @@ class CompileProvider(BaseProvider):
     is done only once (the first time a template is run) per server start.
 
     Special format keywords for use in the options:
+        {appname} - The app name for the template being rendered.
         {appdir} - The app directory for the template being rendered (full path).
         {template} - The name of the template being rendered, without its extension.
     '''
     # the command line should be specified as a list (see the subprocess module)
     default_options = merge_dicts(BaseProvider.default_options, {
         'group': 'styles',
-        'weight': 10,
         'source': '{appdir}/somedir/{template}.source',
         'output': '{appdir}/somedir/{template}.output',
         'command': [ 'echo', '{appdir}/somedir/{template}.source', '{appdir}/somedir/{template}.output' ],
     })
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        source_path = self.format_string(self.options['source'])
+        source_path = self.options_format(self.options['source'])
         if os.path.exists(source_path):
             source_stat = os.stat(source_path)
-            compiled_path = self.format_string(self.options['output'])
+            compiled_path = self.options_format(self.options['output'])
             compiled_exists = os.path.exists(compiled_path)
             compiled_stat = os.stat(compiled_path) if compiled_exists else None
             if not compiled_exists or source_stat.st_mtime > compiled_stat.st_mtime:
-                run_command(*[ self.format_string(a) for a in self.options['command'] ])
+                run_command(*[ self.options_format(a) for a in self.options['command'] ])
 
 
 class CompileScssProvider(CompileProvider):
