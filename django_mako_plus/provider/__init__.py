@@ -24,9 +24,7 @@ from .links import LinkProvider, CssLinkProvider, JsLinkProvider, JsContextProvi
 
 # key to attach Provider objects to Mako Template objects during producting mode.
 # I attach it to template objects because templates are already cached by mako, so
-# caching them here would result in double-caching.  It's a bit of a
-# monkey-patch to set them as attributes in the Mako templates, but it's efficient
-# and encapsulated entirely within this file
+# caching them here would result in double-caching.
 PROVIDERS_KEY = '_django_mako_plus_providers_'
 
 
@@ -34,87 +32,59 @@ PROVIDERS_KEY = '_django_mako_plus_providers_'
 ###  Primary functions
 
 def links(tself, version_id=None, group=None):
-    '''
-    Returns the HTML for the given provider group.
-
-        Add this at the top (<head> section) of your template:
-        ${ django_mako_plus.static_group(self, 'styles') }
-
-        Add this at the bottom of your template:
-        ${ django_mako_plus.static_group(self, 'scripts') }
-
-        Or, to get all content in one call:
-        ${ django_mako_plus.static_group(self) }
-
-    Suppose you have two html files connected via template inheritance: index.html
-    and base.htm.  This method will render the links for all static files
-    with the names of either of these two templates.  Assuming the default
-    providers are listed in settings.py, up to four files are linked/sourced:
-
-        base.htm       Generates a <style> link for app/styles/base.css
-            |          and a <style> source for app/styles/base.cssm
-            |
-        index.html     Generates a <style> link for app/styles/index.css
-                       and a <style> source for app/styles/index.cssm
-
-    This call must be made from within a rendering Mako template because
-    this is where you have access to the "self" namespace.
-    If you need to render these links outside of a template, see link_template_css()
-    below.
-
-    The optional version_id parameter is to overcome browser caches.  On some browsers,
-    changes to your CSS/JS files don't get downloaded because the browser waits a time
-    to check for a new version.  This wait time is set by your web server,
-    and it's normally a good thing to speed everything up.  However,
-    when you upload new CSS/JS files, you want all browsers to download the new
-    files even if their cached versions have't expired yet.
-    By adding an arbitrary id to the end of the .css and .js files, browsers will
-    see the files as *new* anytime that id changes.  The default method
-    for calculating the id is the file modification time (minutes since 1970).
-    '''
+    '''Returns the HTML for the given provider group (or all groups if None)'''
     request = tself.context.get('request')
     provider_run = ProviderRun(tself, version_id, group)
+    provider_run.get_content()
     return provider_run.get_content()
 
 
 class ProviderRun(object):
-    '''Information for a run through a chain of template info objects and providers on each one.'''
+    '''A run through a template inheritance'''
     def __init__(self, tself, version_id=None, group=None):
         self.uid = wuid()                           # a unique id for this run
+        self.template = tself.template              # the template object
         self.request = tself.context.get('request') # request from the render()
         self.context = tself.context                # context from the render()
         self.group = group                          # the provider group being rendered (usually None)
-        self.chain_index = 0                        # current index of the inheritance chain as the run goes
-
+        self.version_id = version_id                # unique number for overriding the cache (see LinkProvider)
+        self._buffer = None                         # html to send back to the browser (providers add to this)
+        # provider data is separate from provider objects because a template (and its providers) can be in many chains at once,
+        # such as base.htm's providers being in almost every chain on the site. this makes it unique to each provider on this run.
+        self.provider_data = [ {} for i in range(len(DMP_OPTIONS['RUNTIME_PROVIDER_FACTS'])) ]
         # discover the ancestor templates for this template `self`
         self.chain = []
+        self.chain_index = 0
+        # a set of providers for each template
         while tself is not None:
             # check if already attached to template, create if necessary
             providers = getattr(tself.template, PROVIDERS_KEY, None)
             if providers is None:
                 app_config, template_path = split_app(tself.template.filename)
-                providers = [ pf.create(app_config, template_path, version_id) for pf in DMP_OPTIONS['RUNTIME_PROVIDERS'] ]
+                providers = [ pf.create(app_config, template_path, i) for i, pf in enumerate(DMP_OPTIONS['RUNTIME_PROVIDER_FACTS']) ]
                 if not settings.DEBUG: # attach to template for speed in production mode
                     setattr(tself.template, PROVIDERS_KEY, providers)
             self.chain.append(providers)
             # loop with the next inherited template
             tself = tself.inherits
-        self.chain.reverse() # we need furthest ancestor first, current template last so current template (such as CSS) can override ancestors
-
+        # we need furthest ancestor first, current template last so current template (such as CSS) can override ancestors
+        self.chain.reverse()
 
     def get_content(self):
-        '''Loops each TemplateInfo providers list, returning the combined content.'''
-        self.chain_index = 0
-        self.html = []
+        '''Runs the providers for each template in the current inheritance chain, returning the combined content.'''
+        self._buffer = io.StringIO()
+        self.chain_index = -1
         for providers in self.chain:
-            for provider_i, provider in enumerate(providers):
-                if self.group is None or provider.group == self.group:
-                    content = provider.get_content(self)
-                    if content:
-                        self.html.append(content)
             self.chain_index += 1
-        return '\n'.join(self.html)
+            for provider, data in zip(providers, self.provider_data):
+                if self.group is None or provider.group == self.group:
+                    provider.provide(self, data)
+        return self._buffer.getvalue()
 
+    def write(self, content):
+        self._buffer.write(content)
+        if settings.DEBUG:
+            self._buffer.write('\n')
 
 
 def template_links(request, app, template_name, context=None, version_id=None, group=None, force=True):

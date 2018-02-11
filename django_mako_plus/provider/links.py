@@ -16,43 +16,41 @@ class LinkProvider(BaseProvider):
     '''Base class for providers that create links'''
     # the default options are for CSS files
     default_options = merge_dicts(BaseProvider.default_options, {
-        'group': 'styles',
+        # subclasses override both of these
+        'group': 'static.file',
         'filename': '{appdir}/somedir/{template}.static.file',
     })
-    def init(self):
-        self.href = None
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         fullpath = self.format_string(self.options['filename'])
-        if os.path.exists(fullpath):
-            # the version_id is a unique number either given by the project or by reading the last modified time of the file
-            # it is important to add to links (see make_link in the subclasses) because it makes the url unique, which
-            # forces browsers to re-download the file despite a previous version being in their cache.  Without this id,
-            # some browsers (Chrome, I'm looking at you) use the cached version even after updates to the file.
-            if self.version_id is None:
-                self.version_id = int(os.stat(fullpath).st_mtime)
+        try:
+            self.mtime = os.stat(fullpath)
             # make it relative to the project root, and ensure we have forward slashes (even on windows) because this is for urls
             self.href = posixpath.join(settings.STATIC_URL, os.path.relpath(fullpath, settings.BASE_DIR))
-
-    def get_content(self, provider_run):
-        '''Subclasses should override this method'''
-        return '<div class="DMP_LinkProvider">{}</div>'.format(self.href)
+        except FileNotFoundError:
+            self.mtime = None
+            self.href = None
 
 
 class CssLinkProvider(LinkProvider):
     '''Generates a CSS <link>'''
     default_options = merge_dicts(LinkProvider.default_options, {
+        'group': 'styles',
         'filename': '{appdir}/styles/{template}.css',
         'skip_duplicates': True,
+        'weight': 0,
     })
-    def get_content(self, provider_run):
+
+    def provide(self, provider_run, data):
         if self.href is None:
             return None
-        return '<link id="{uid}" data-context="{contextid}" rel="stylesheet" type="text/css" href="{href}?{version}" />'.format(
-            uid=wuid(),
+        provider_run.write('<link data-context="{contextid}" rel="stylesheet" type="text/css" href="{href}?{version}" />'.format(
             contextid=provider_run.uid,
             href=self.href,
-            version=self.version_id,
+            version=provider_run.version_id if provider_run.version_id is not None else self.mtime,
             skip_duplicates='true' if self.options['skip_duplicates'] else 'false',
-        )
+        ))
 
 
 class JsLinkProvider(LinkProvider):
@@ -61,19 +59,28 @@ class JsLinkProvider(LinkProvider):
         'group': 'scripts',
         'filename': '{appdir}/scripts/{template}.js',
         'async': False,
+        'weight': 4,  # see JsContextProvider
     })
-    def get_content(self, provider_run):
-        if self.href is None:
-            return None
-        return '<script>DMP_CONTEXT.addScript("{uid}", "{contextid}", "{app}/{template}", "{href}?{version}", {async});</script>'.format(
-            uid=wuid(),
-            contextid=provider_run.uid,
-            app=self.app_config.name.replace('"', '\\"'),
-            template=self.template_name.replace('"', '\\"'),
-            href=self.href.replace('\\', '/'),
-            version=self.version_id,
-            async='true' if self.options['async'] else 'false',
-        )
+
+    def provide(self, provider_run, data):
+        # if the first template in the chain, set up a list for our urls
+        if provider_run.chain_index == 0:
+            data['urls'] = []
+        # on every template in the chain, add the url if the file exists
+        if self.href is not None:
+            data['urls'].append('{}?{}'.format(
+                self.href.replace('\\', '/'),
+                provider_run.version_id if provider_run.version_id is not None else self.mtime,
+            ))
+        # on the last template, print all the urls we've collected
+        if provider_run.chain_index == len(provider_run.chain) - 1 and len(data['urls']) > 0:
+            provider_run.write('<script>')
+            provider_run.write('DMP_CONTEXT.load("{contextid}", {urls}, {async});'.format(
+                contextid=provider_run.uid,
+                urls=json.dumps(data['urls']),
+                async='true' if self.options['async'] else 'false',
+            ))
+            provider_run.write('</script>')
 
 
 class JsContextProvider(BaseProvider):
@@ -81,34 +88,38 @@ class JsContextProvider(BaseProvider):
     default_options = merge_dicts(LinkProvider.default_options, {
         'group': 'scripts',
         'encoder': 'django.core.serializers.json.DjangoJSONEncoder',
+        'weight': 5,  # must be higher than JsLinkProvider (context must come first so it is available when JS is loaded)
     })
 
-    def init(self):
-        super().init()
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self.encoder = import_string(self.options['encoder'])
+        self.template = "{}/{}".format(self.app_config.name, self.template_name)
 
-    def get_content(self, provider_run):
-        # send the context with the main template (would be redundant to do for ancestors)
-        html = []
-        html.append('<script>')
+    def provide(self, provider_run, data):
+        # if the first template in the chain, set up a list for our templates
         if provider_run.chain_index == 0:
-            # context_data = {   # start with some defaults
-            #     '__router_app__',
-            # }
-            context_data = { k: provider_run.context[k] for k in provider_run.context.kwargs if isinstance(k, jscontext) }
-            html.append('DMP_CONTEXT.set("{version}", "{contextid}", {data});'.format(
+            data['templates'] = []
+        # on every template in the chain, add the template
+        data['templates'].append(self.template)
+        # on the last template, print the context, including the list of templates we've collected
+        if provider_run.chain_index == len(provider_run.chain) - 1 and len(data['templates']) > 0:
+            context_data = {
+                jscontext('__router__'): {
+                    'template': self.template,
+                    'app': provider_run.request.dmp.app if provider_run.request is not None else None,
+                    'page': provider_run.request.dmp.page if provider_run.request is not None else None,
+                },
+            }
+            context_data.update({ k: provider_run.context[k] for k in provider_run.context.kwargs if isinstance(k, jscontext) })
+            provider_run.write('<script>')
+            provider_run.write('DMP_CONTEXT.set("{version}", "{contextid}", {data}, {templates});'.format(
                 version=__version__,
                 contextid=provider_run.uid,
                 data=json.dumps(context_data, cls=self.encoder, separators=(',', ':')) if context_data else '{}',
+                templates=json.dumps(data['templates']),
             ))
-        html.append('DMP_CONTEXT.linkContextByName("{contextid}", "{app}/{template}");'.format(
-            contextid=provider_run.uid,
-            app=self.app_config.name.replace('"', '\\"'),
-            template=self.template_name.replace('"', '\\"'),
-        ))
-        html.append('</script>')
-        return ('\n' if settings.DEBUG else '').join(html)
-
+            provider_run.write('</script>')
 
 
 class jscontext(str):

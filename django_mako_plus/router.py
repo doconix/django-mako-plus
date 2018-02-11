@@ -44,7 +44,7 @@ def route_request(request, *args, **kwargs):
                 raise ImproperlyConfigured("Variable request.dmp.function_obj does not exist (check MIDDLEWARE for `django_mako_plus.RequestInitMiddleware`).")
 
             # output the variables so the programmer can debug where this is routing
-            log.info('processing: app=%s, page=%s, module=%s, func=%s, urlparams=%s', request.dmp.app, request.dmp.page, request.dmp.module, request.dmp.function, request.dmp.urlparams)
+            log.info(str(request.dmp))
 
             # if we had a view not found, raise a 404
             if isinstance(request.dmp.function_obj, RegistryExceptionRouter):

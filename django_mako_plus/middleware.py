@@ -65,7 +65,6 @@ class RequestInitMiddleware(MiddlewareMixin):
             view_kwargs.pop('dmp_function', None),
             view_kwargs.pop('urlparams', '').strip(),
         )
-        print(request.dmp)
 
 
 class RoutingData(object):
@@ -109,15 +108,21 @@ class RoutingData(object):
 
 
     def __repr__(self):
-        return
+        return 'Router: app={}, page={}, module={}, function={}, urlparams={}'.format(
+             self.app,
+             self.page,
+             self.module if self.class_obj is None else (self.module + '.' + self.class_obj.__qualname__),
+             self.function,
+             self.urlparams,
+        )
 
     def _debug(self):
         return 'django_mako_plus RoutingData:' + \
             ''.join(('\n\t{: <16}{}'.format(k, v) for k, v in (
                 ( 'app', self.app ),
                 ( 'page', self.page ),
-                ( 'function', self.function ),
                 ( 'module', self.module ),
+                ( 'function', self.function ),
                 ( 'class_obj', self.class_obj ),
                 ( 'function_obj', self.function_obj ),
                 ( 'urlparams', self.urlparams ),

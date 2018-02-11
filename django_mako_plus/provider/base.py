@@ -22,8 +22,9 @@ DEFAULT_CONTENT_PROVIDERS = [
 
 def init_providers():
     '''Called when the DMP template engine is created by Django'''
-    DMP_OPTIONS['RUNTIME_PROVIDERS'] = [ ProviderFactory(provider_def) for provider_def in DMP_OPTIONS.get('CONTENT_PROVIDERS', DEFAULT_CONTENT_PROVIDERS) ]
-    DMP_OPTIONS['RUNTIME_PROVIDERS'].sort(key=lambda pf: pf.options['weight'], reverse=True)
+    # these provider factories are used to create providers for the templates in the system
+    DMP_OPTIONS['RUNTIME_PROVIDER_FACTS'] = [ ProviderFactory(provider_def) for provider_def in DMP_OPTIONS.get('CONTENT_PROVIDERS', DEFAULT_CONTENT_PROVIDERS) ]
+    DMP_OPTIONS['RUNTIME_PROVIDER_FACTS'].sort(key=lambda pf: pf.options['weight'], reverse=True)
 
 
 class ProviderFactory(object):
@@ -40,8 +41,8 @@ class ProviderFactory(object):
             raise ImproperlyConfigured('The Django Mako Plus template OPTIONS were not set up correctly in settings.py; The `provider` value must be a subclass of django_mako_plus.BaseProvider.')
         self.options = merge_dicts(self.provider_class.default_options, provider_def)
 
-    def create(self, app_config, template_path, version_id):
-        return self.provider_class(app_config, template_path, self.options, version_id)
+    def create(self, app_config, template_path, provider_index):
+        return self.provider_class(app_config, template_path, self.options, provider_index)
 
 
 
@@ -50,42 +51,38 @@ class ProviderFactory(object):
 
 class BaseProvider(object):
     '''
-    A list of providers is attached to each template as it is process.
-    These are cached with the template, so .__init__() is only called once
-    per system runtime, while .append_content() is called for each
-    request.  Optimize the methods accordingly.
+    A list of provider instances is attached to each template in the system.
+    During a provider run, all provider lists are run.
+
+        base.htm      [ JsLinkProvider1, CssLinkProvider1, ... ]
+           |
+        app_base.htm  [ JsLinkProvider2, CssLinkProvider2, ... ]
+           |
+        index.html    [ JsLinkProvider3, CssLinkProvider3, ... ]
+
+    The data argument sent into provide() spans a run vertically, meaning
+    the three JsLinkProviders above share the same data dict.
     '''
     default_options = {
         'group': 'styles',
         'weight': 0,  # higher weights run first
     }
-    def __init__(self, app_config, template_path, options, version_id):
+    def __init__(self, app_config, template_path, options, provider_index):
         self.app_config = app_config
         self.template_path = template_path
-        # this next variable assumes the template is in the "normal" location: app/templates/
+        # this next variable assumes the template is in the "normal" location: app/subdir/
         parts = os.path.splitext(self.template_path)[0].split(os.path.sep)
         self.template_name = os.path.sep.join(parts[1:]) if len(parts) > 1 else self.template_path
         self.options = merge_dicts(self.default_options, options)     # combined options dictionary
-        self.version_id = version_id                                  # unique number for overriding the cache (see LinkProvider)
-        self.init()
-
+        self.provider_index = provider_index
 
     @property
     def group(self):
         return self.options['group']
 
-
-    def init(self):
-        '''Called at the end of the constructor.'''
-
-
-    def get_content(self, provider_run):
-        '''
-        Called each time the template renders.  Should return a string
-        to be included in the HTML output, or None if no content.
-        '''
-        return None
-
+    def provide(self, provider_run, data):
+        '''Called on each provider for each template in a run - use provider_run.write() for content'''
+        pass
 
     def format_string(self, val):
         '''
@@ -97,3 +94,4 @@ class BaseProvider(object):
             appdir=self.app_config.path,
             template=self.template_name,
         )
+

@@ -3,7 +3,7 @@ Upgrade Notes
 
 This document contains upgrade notes for those already using DMP.  We started the document at version 4.3.
 
-4.4.1 - February, 2018
+5.0.1 - February, 2018
 
 Most changes can be summarized in the DMP settings.py options.  We recommend comparing your settings.py file against the current template (see file project_template/project_name/settings.py-tpl on GitHub).  This will likely signal all the changes you may need to make.
 

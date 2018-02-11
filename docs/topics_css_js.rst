@@ -352,27 +352,14 @@ Suppose you need custom preprocessing of static files or custom template content
             'here': '.',
         })
 
-        def init(self):
-            # This is called from the constructor.
-            # It runs once (the first time the template
-            # is rendered). Place any setup code here,
-            # or omit the method if you don't need it.
-            #
-            # Fields set by DMP that might be useful:
-            #    self.app_config = Django AppConfig object
-            #    self.app_config.path = '/absolute/path/to/app/'
-            #    self.template_path = 'path to template filename, relative to the app path'
-            #    self.template_name = 'current template name without extension'
-            #    self.options = { 'dictionary': 'of all options' }
-            #    self.version_id = 'a unique number - see the docs'
+        def start(self, provider_run, chain_index, provider_index):
+            '''Called on each provider at the start of run - use provider_run.write() for content'''
+            pass
 
-        def get_content(self, request, context):
-            # This is called during template rendering
-            # It runs once per template - each time links()
-            # is called.
-            #
-            # This method sbould return the content to be added
-            # to the rendered output.
-            #
-            return '<div>Some content or css or js or whatever</div>'
+        def finish(self, provider_run, chain_index, provider_index):
+            '''Called on each provider at the end of run - use provider_run.write() for content'''
+            pass
 
+        def provide(self, provider_run, chain_index, provider_index):
+            '''Called on each provider for each template in a run - use provider_run.write() for content'''
+            pass

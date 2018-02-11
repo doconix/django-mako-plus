@@ -70,7 +70,7 @@ class URLParamList(list):
 
 def merge_dicts(*dicts):
     '''
-    Merges an arbitrary number of dicts, starting 
+    Merges an arbitrary number of dicts, starting
     with the first argument and updating through the
     last argument (last dict wins on conflicting keys).
     '''
@@ -78,13 +78,13 @@ def merge_dicts(*dicts):
     for d in dicts:
         merged.update(d)
     return merged
-    
- 
+
+
 
 def split_app(path):
     '''
     Splits a path on the app, returning (app config, relative path within app).
-    
+
     This function uses os.path.samefile to split even if a path is specified differently.
     The drawback is significantly reduced speed because of a double loop, so use with care.
     '''
@@ -101,8 +101,5 @@ def split_app(path):
         if app_config is not None:
             return app_config, os.path.sep.join(parts[i:])
     return None, path
-        
-        
-    
 
 

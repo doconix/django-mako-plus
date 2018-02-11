@@ -64,10 +64,10 @@ class MakoTemplates(BaseEngine):
         for processor in itertools.chain(_builtin_context_processors, DMP_OPTIONS.get('CONTEXT_PROCESSORS', [])):
             context_processors.append(import_string(processor))
         self.template_context_processors = tuple(context_processors)
-        
+
         # set up the static file providers
         init_providers()
-        
+
         # add a template renderer for each DMP-enabled app
         for app_config in get_dmp_app_configs():
             register_app(app_config)
@@ -97,9 +97,9 @@ class MakoTemplates(BaseEngine):
 
         Because DMP templates are always app-specific (Django only searches
         a global set of directories), the template_name MUST be in the format:
-        "app_name/template.html" (even on Windows).  DMP splits the template_name 
+        "app_name/template.html" (even on Windows).  DMP splits the template_name
         string on the slash to get the app name and template name.
-        
+
         Template rendering can be limited to a specific def/block within the template
         by specifying `#def_name`, e.g. `myapp/mytemplate.html#myblockname`.
         '''
