@@ -74,10 +74,17 @@ The following is a template for getting context data.  It retrieves the context 
 
 ::
 
+    // arrow style
+    (context => {
+        // main code here
+        console.log(context)
+    })(DMP_CONTEXT.get())
+
+    // function style
     (function(context) {
         // main code here
-        console.log(context);
-    })(DMP_CONTEXT.get());
+        console.log(context)
+    })(DMP_CONTEXT.get())
 
 Alternatively, the following is a template for getting context data **and** using a ``ready`` (onload) handler.  It retrieves the context reference immediately, but delays the main processing until document load is finished.
 
@@ -85,23 +92,37 @@ Delaying with jQuery ``ready()``:
 
 ::
 
+    // arrow style
+    $((context => () => {
+        // main code here
+        console.log(context)
+    })(DMP_CONTEXT.get()))
+
+    // function style
     $(function(context) {
         return function() {
             // main code here
-            console.log(context);
+            console.log(context)
         }
-    }(DMP_CONTEXT.get()));
+    }(DMP_CONTEXT.get()))
 
 Delaying with pure Javascript:
 
 ::
 
+    // arrow style
+    document.addEventListener("DOMContentLoaded", (context => () => {
+        // main code here
+        console.log(context)
+    })(DMP_CONTEXT.get()))
+
+    // function style
     document.addEventListener("DOMContentLoaded", function(context) {
         return function() {
             // main code here
-            console.log(context);
+            console.log(context)
         }
-    }(DMP_CONTEXT.get()));
+    }(DMP_CONTEXT.get()))
 
 
 Handling the "Certain Cases"
