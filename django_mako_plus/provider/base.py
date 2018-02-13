@@ -1,4 +1,5 @@
 from django.utils.encoding import force_text
+from django.conf import settings
 
 from ..util import merge_dicts
 
@@ -24,9 +25,12 @@ class BaseProvider(object):
     The data argument sent into provide() spans a run vertically, meaning
     the three JsLinkProviders above share the same data dict.
     '''
+
     default_options = {
         'group': 'styles',
+        'enabled': True,
     }
+
     def __init__(self, app_config, template_path, options):
         self.app_config = app_config
         self.template_path = template_path
@@ -58,20 +62,24 @@ class BaseProvider(object):
         pass
 
 
+
     ##################################
     ###  Helper functions
 
     def options_format(self, val, **extra):
         '''
         Runs val.format() with some named arguments:
-            {appname}
-            {appdir}
-            {template}
+
+        {appname} - The app name for the template being rendered.
+        {template} - The name of the template being rendered, without its extension.
+        {appdir} - The app directory for the template being rendered (full path).
+        {staticdir} - The static directory as defined in settings.
         '''
         d = {
             'appname': self.app_config.name,
             'appdir': self.app_config.path,
             'template': self.template_name,
+            'staticdir': getattr(settings, 'STATIC_ROOT', None),
         }
         d.update(extra)
         return force_text(val).format(**d)

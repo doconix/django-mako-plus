@@ -22,7 +22,8 @@ DEFAULT_CONTENT_PROVIDERS = [
 
 def init_providers():
     '''Called when the DMP template engine is created by Django'''
-    DMP_OPTIONS['RUNTIME_PROVIDER_FACTS'] = [ ProviderFactory(provider_def) for provider_def in DMP_OPTIONS.get('CONTENT_PROVIDERS', DEFAULT_CONTENT_PROVIDERS) ]
+    providers = [ ProviderFactory(provider_def) for provider_def in DMP_OPTIONS.get('CONTENT_PROVIDERS', DEFAULT_CONTENT_PROVIDERS) ]
+    DMP_OPTIONS['RUNTIME_PROVIDER_FACTS'] = [ pf for pf in providers if pf.options['enabled'] ]
 
 
 class ProviderFactory(object):
@@ -41,6 +42,7 @@ class ProviderFactory(object):
 
     def create(self, app_config, template_path):
         return self.provider_class(app_config, template_path, self.options)
+
 
 
 

@@ -16,7 +16,6 @@ import io
 def links(tself, version_id=None, group=None):
     '''Returns the HTML for the given provider group (or all groups if None)'''
     provider_run = ProviderRun(tself, version_id, group)
-    provider_run.get_content()
     return provider_run.get_content()
 
 

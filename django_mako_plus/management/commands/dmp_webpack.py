@@ -25,17 +25,12 @@ PROVIDERS = [
     {
         'provider': 'django_mako_plus.JsLinkProvider',
         'group': 'scripts',
-        'filename': '{appdir}/scripts/__javascript__/{template}.js',
+        'path': '{appdir}/scripts/__javascript__/{template}.js',
     },
     {
         'provider': 'django_mako_plus.JsLinkProvider',
     },
 ]
-
-
-
-
-
 
 
 
@@ -109,36 +104,33 @@ class Command(BaseCommand):
     def create_entry(self, config):
         '''Creates a webpack __entry__.js file in the given app'''
         templates_dir = os.path.join(config.path, 'templates')
-        entryfile = os.path.join(templates_dir, '__entry__.js')
-        self.message('Creating {}'.format(os.path.relpath(entryfile, settings.BASE_DIR)))
+        entry_filename = os.path.join(config.path, 'scripts', '__entry__.js')
+        self.message('Creating {}'.format(os.path.relpath(entry_filename, settings.BASE_DIR)))
         # map templates to their scripts
         page_map = {}
         for template_name in os.listdir(templates_dir):
             if os.path.isfile(os.path.join(os.path.join(templates_dir, template_name))):
                 template_obj = get_dmp_instance().get_template_loader(config, create=True).get_mako_template(template_name)
-                page_map.update(self.template_scripts(template_obj))
+                pages = self.template_scripts(template_obj)
+                page_map.update(pages)
         # write the file
-        entry_filename = os.path.join(config.path, 'scripts', '__entry__.js')
         if not self.options['overwrite'] and os.path.exists(entry_filename):
             raise ValueError('Refusing to destroy existing file: %s.  Use --overwrite option or remove the file.' % (entry_filename,))
         with open(entry_filename, 'w') as fout:
-            items = []
-            for page, scripts in page_map.items():
-                items.append('"%s": %s' % (
-                    page,
-                    'function() { ' + '; '.join([ 'require("%s")' % (s,) for s in scripts ]) + '; },'
-                ))
             fout.write('''
 (function(context) {
-    var pageMap = {
-%s
-    }
-    var func = pageMap[context.__router__.template];
-    if (func) {
-        func()
-    }
+    DMP_CONTEXT.appBundle = DMP_CONTEXT.appBundle || {};
+            ''')
+            for page, scripts in page_map.items():
+                fout.write('''
+    DMP_CONTEXT.appBundle["%s"] = function() { %s; };
+                ''' % (
+                    page,
+                    '; '.join([ 'require("%s")' % (s,) for s in scripts ]),
+                ))
+            fout.write('''
 })(DMP_CONTEXT.get());
-            ''' % '\n'.join(items))
+            ''')
 
 
     def template_scripts(self, template_obj):

@@ -16,8 +16,9 @@ class CompileProvider(BaseProvider):
 
     Special format keywords for use in the options:
         {appname} - The app name for the template being rendered.
-        {appdir} - The app directory for the template being rendered (full path).
         {template} - The name of the template being rendered, without its extension.
+        {appdir} - The app directory for the template being rendered (full path).
+        {staticdir} - The static directory as defined in settings.
     '''
     # the command line should be specified as a list (see the subprocess module)
     default_options = merge_dicts(BaseProvider.default_options, {

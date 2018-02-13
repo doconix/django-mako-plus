@@ -254,11 +254,12 @@ The framework is built to be extended for custom file types.  When you call ``li
 
 Each type of provider takes additional settings that allow you to customize locations, automatic compilation, etc.  When reading most options, DMP runs the option through str.format() with the following formatting kwargs:
 
-* ``appname`` - the name of the template's app
-* ``appdir`` - the absolute path to the app directory
-* ``template`` - the name of the template being rendered
+* {appname} - The app name for the template being rendered.
+* {template} - The name of the template being rendered, without its extension.
+* {appdir} - The app directory for the template being rendered (full path).
+* {staticdir} - The static directory as defined in settings.
 
-    **Order Matters:**  Just like Django middleware, the providers are run in the order listed.  If one provider depends on the work of another, be sure to list them in the right order.  For example, the ``JsContextProvider`` provides context variables for scripts, so it must be placed before ``JsLinkProvider``.  That way, the variables are loaded when the scripts run.
+    **Order Matters:**  Just like Django middleware, the providers are run in order.  If one provider depends on the work of another, be sure to list them in the right order.  For example, the ``JsContextProvider`` provides context variables for scripts, so it must be placed before ``JsLinkProvider``.  That way, the variables are loaded when the scripts run.
 
 The following more-detailed version enumerates all the options (set to their defaults).
 

@@ -99,6 +99,7 @@ class RoutingData(object):
                 self.function = request.method.lower()
         else:
             self.module = None
+            self.class_obj = None
             self.function_obj = None
 
         # parse the urlparams

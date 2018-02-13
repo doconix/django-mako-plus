@@ -8,7 +8,12 @@ from .base import BaseProvider
 import os
 import os.path
 import json
+import glob
+from collections import namedtuple
 
+
+
+FileInfo = namedtuple('FileInfo', ( 'url', 'mtime' ))
 
 class LinkProvider(BaseProvider):
     '''
@@ -17,52 +22,51 @@ class LinkProvider(BaseProvider):
 
     Special format keywords for use in the options:
         {appname} - The app name for the template being rendered.
-        {appdir} - The app directory for the template being rendered (full path).
         {template} - The name of the template being rendered, without its extension.
+        {appdir} - The app directory for the template being rendered (full path).
+        {staticdir} - The static directory as defined in settings.
     '''
     # the default options are for CSS files
     default_options = merge_dicts(BaseProvider.default_options, {
         # subclasses override both of these
         'group': 'static.file',
-        'filename': '{appdir}/somedir/{template}.static.file',
+        'path': '{appdir}/somedir/{template}.static.file',
     })
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        fullpath = self.options_format(self.options['filename'])
-        try:
-            self.mtime = int(os.stat(fullpath).st_mtime)
-            self.href = os.path.relpath(fullpath, settings.BASE_DIR).replace('\\', '/')
-        except FileNotFoundError:
-            self.mtime = None
-            self.href = None
+        self.matches = []
+        for fullpath in glob.iglob(self.options_format(self.options['path'])):
+            self.matches.append(FileInfo(
+                os.path.relpath(fullpath, settings.BASE_DIR).replace('\\', '/'),
+                int(os.stat(fullpath).st_mtime),
+            ))
 
 
 class CssLinkProvider(LinkProvider):
     '''Generates a CSS <link>'''
     default_options = merge_dicts(LinkProvider.default_options, {
         'group': 'styles',
-        'filename': '{appdir}/styles/{template}.css',
+        'path': '{appdir}/styles/{template}.css',
         'skip_duplicates': True,
     })
 
     def provide(self, provider_run, data):
-        if self.href is None:
-            return None
-        provider_run.write('<link data-context="{contextid}" rel="stylesheet" type="text/css" href="{static}{href}?{version}" />'.format(
-            contextid=provider_run.uid,
-            static=settings.STATIC_URL,
-            href=self.href,
-            version=provider_run.version_id if provider_run.version_id is not None else self.mtime,
-            skip_duplicates='true' if self.options['skip_duplicates'] else 'false',
-        ))
+        for fi in self.matches:
+            provider_run.write('<link data-context="{contextid}" rel="stylesheet" type="text/css" href="{static}{url}?{version}" />'.format(
+                contextid=provider_run.uid,
+                static=settings.STATIC_URL,
+                url=fi.url,
+                version=provider_run.version_id if provider_run.version_id is not None else fi.mtime,
+                skip_duplicates='true' if self.options['skip_duplicates'] else 'false',
+            ))
 
 
 class JsLinkProvider(LinkProvider):
     '''Generates a JS <script>.'''
     default_options = merge_dicts(LinkProvider.default_options, {
         'group': 'scripts',
-        'filename': '{appdir}/scripts/{template}.js',
+        'path': '{appdir}/scripts/{template}.js',
         'async': False,
     })
 
@@ -71,10 +75,10 @@ class JsLinkProvider(LinkProvider):
 
     def provide(self, provider_run, data):
         # delaying printing of tag because the JsContextProvider delays and this must go after it
-        if self.href is not None:
+        for fi in self.matches:
             data['urls'].append('{}?{}'.format(
-                self.href.replace('\\', '/'),
-                provider_run.version_id if provider_run.version_id is not None else self.mtime,
+                fi.url.replace('\\', '/'),
+                provider_run.version_id if provider_run.version_id is not None else fi.mtime,
             ))
 
     def finish(self, provider_run, data):

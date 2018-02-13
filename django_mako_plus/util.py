@@ -103,3 +103,19 @@ def split_app(path):
     return None, path
 
 
+
+EMPTY = object()
+
+def getdefaultattr(obj, name, default=EMPTY, factory=EMPTY):
+    '''
+    Gets the given attribute from the object,
+    creating it with a default or by calling
+    a factory if needed.
+    '''
+    try:
+        return getattr(obj, name)
+    except AttributeError:
+        pass
+    val = default if default is not EMPTY else factory() if factory is not EMPTY else None
+    setattr(obj, name, val)
+    return val

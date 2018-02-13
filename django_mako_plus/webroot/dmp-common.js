@@ -10,7 +10,7 @@
             __version__: '5.0.1',   // DMP version to check for mismatches
             contexts: {},           // contextid -> context1
             contextsByName: {},     // app/template -> [ context1, context2, ... ]
-            last_set: null,         // last inserted context (see getAll() below)
+            lastContext: null,      // last inserted context (see getAll() below)
 
             /* Adds data to the DMP context under the given key */
             set: function(version, contextid, data, templates) {
@@ -19,7 +19,7 @@
                 }
                 // link this contextid to the data
                 DMP_CONTEXT.contexts[contextid] = data;
-                DMP_CONTEXT.last_set = data
+                DMP_CONTEXT.lastContext = data
                 // reverse lookups by name to contextid
                 for (var i = 0; i < templates.length; i++) {
                     if (DMP_CONTEXT.contextsByName[templates[i]] === undefined) {
@@ -63,7 +63,7 @@
 
                 // if empty option, get the last-added context
                 if (!option) {
-                    ret.push(DMP_CONTEXT.last_set);
+                    ret.push(DMP_CONTEXT.lastContext);
                 }
 
                 // "app/template"
