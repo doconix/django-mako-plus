@@ -64,7 +64,7 @@ Let's modify ``homepage/views/index.py`` to support adjusting the current date b
         context = {
             'now': now,
         }
-        return request.render('index.html', context)
+        return request.dmp.render('index.html', context)
 
 
 We'll use the ``homepage/templates/index.html`` file we created in previous tutorial parts:
@@ -112,7 +112,7 @@ Add the following type hints to your ``process_request`` function, and remove th
         context = {
             'now': now,
         }
-        return request.render('index.html', context)
+        return request.dmp.render('index.html', context)
 
 DMP casts the parameters by inspecting the method signature of ``process_request`` which specifies the parameter name, a color, and the type.  If a conversion error occurs, the default converter raises Http404.  All of this is configurable and extensible (read on).
 

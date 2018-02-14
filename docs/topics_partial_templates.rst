@@ -70,8 +70,8 @@ Suppose you have the following template, view, and JS files:
             'now': datetime.now().strftime('%H:%M'),
         }
         if request.dmp.urlparams[0] == 'gettime':
-            return request.render('index.html', context, def_name='server_time')
-        return request.render('index.html', context)
+            return request.dmp.render('index.html', context, def_name='server_time')
+        return request.dmp.render('index.html', context)
 
 **``index.js``**:
 
@@ -142,8 +142,8 @@ Since ``counter`` won't get defined when ``def_name='server_time'``, **``index.p
         }
         if request.dmp.urlparams[0] == 'gettime':
             context['counter'] = 100
-            return request.render('index.html', context, def_name='server_time')
-        return request.render('index.html', context)
+            return request.dmp.render('index.html', context, def_name='server_time')
+        return request.dmp.render('index.html', context)
 
     The ``def_name`` parameter can be used to call both ``<%block>`` and
     ``<%def>`` tags in your templates. The two are very similar within

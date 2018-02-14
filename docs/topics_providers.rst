@@ -50,7 +50,7 @@ In the `tutorial <tutorial_css_js.html>`_, you learned to send context variables
         context = {
             jscontext('now'): datetime.now(),
         }
-        return request.render('index.html', context)
+        return request.dmp.render('index.html', context)
 
 Two providers in DMP go to work.  First, the ``JsContextProvider`` adds the values to its variable in context (initially created by ``dmp-common.js``). This script goes right into the generated html, which means the values can change per request.  Your script file uses these context variables, essentially allowing your Python view to influence Javascript files in the browser, even cached ones!
 
@@ -69,6 +69,9 @@ Second, the ``JsLinkProvider`` adds a script tag for your script--immediately af
     *Your script should immediately get a reference to the context data object*.  The Javascript global variable ``document.currentScript`` points at the correct ``<script>`` tag *on initial script run only*.  If you delay through ``async`` or a ready function, DMP will still most likely get the right context, but in certain cases (see below) you might get another script's context!
 
 |
+
+Examples
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The following is a template for getting context data.  It retrieves the context immediately and creates a closure for scope:
 

@@ -97,40 +97,41 @@ Lets compare the server time with the browser time allows us to calculate the ti
         context = {
             jscontext('now'): datetime.now(),
         }
-        return request.render('index.html', context)
+        return request.dmp.render('index.html', context)
 
 Reload your browser, and then right-click and "Inspect" to see your DOM.  The ``<script>`` tag now looks like this:
 
 ::
 
-    <script type="text/javascript" src="/static/homepage/scripts/index.js?1509480811" data-context="{&#34;now&#34;: &#34;2017-10-31T20:13:33.084&#34;}"></script>
+    <script type="text/javascript" src="/static/homepage/scripts/index.js?1509480811" data-context="u5a8240023befacbc327df447012720"></script>
 
-When you tag a context key with ``jscontext('now')``, DMP adds it as a data attribute to the HTML script tag.  Note that variables sent via ``jscontext`` must be serializable by Django's ``django.core.serializers.json.DjangoJSONEncoder`` (although you can set a custom encoder if needed).  The default encoder includes all the typical types, plus datetime, date, time, timedelta, Decimal, and UUID.
+When you tag a context key with ``jscontext('now')``, DMP adds it to a context object and connects it via ``data-context``.  Note that variables sent via ``jscontext`` must be serializable by Django's ``django.core.serializers.json.DjangoJSONEncoder`` (although you can set a custom encoder if needed).  The default encoder includes all the typical types, plus datetime, date, time, timedelta, Decimal, and UUID.
 
 Let's use the variable in ``index.js``:
 
 .. code:: javascript
 
-    (function(context) {
-        $(function() {
-            console.log(context);
-            var serverTime = new Date(context.now);   // server time (from DMP_CONTEXT)
-            var browserTime = new Date();             // browser time
-            var hours = Math.round(Math.abs(serverTime - browserTime) / 36e5);
-            $('.browser-time').text('The current browser is ' + hours + ' hours off of the server time zone.');
-        });
-    })(DMP_CONTEXT.get());
+    $(function(context) {
+        return function() {
+            console.log(context)
+            var serverTime = new Date(context.now)   // server time (from DMP_CONTEXT)
+            var browserTime = new Date()             // browser time
+            var hours = Math.round(Math.abs(serverTime - browserTime) / 36e5)
+            $('.browser-time').text('The current browser is ' + hours + ' hours off of the server time zone.')
+        }
+    }(DMP_CONTEXT.get()))
 
 Reload your browser, and you should see the calculation of hours.
 
-    I realize the double closures (DMP_CONTEXT, jQuery) could be refactored, but I'm trying to be consistent with the previous examples.
-
     The context is sent to the script via a data attribute on the ``<script>`` element.  The closure surrounding everything keeps the variable local to this script.  Read more about this in `the topic on CSS and JS <topics_providers.html>`_.
+
+    Also, see `providers <topics_providers.html#examples>`_ for the es6 arrow-style syntax for this closure.
+
 
 Bundlers like Webpack, Browserify, etc.
 ------------------------------------------
 
-If you are using JS bundles, DMP files can go right in the bundles.  See bundling in `Rendering CSS and JS <topics_providers.html>`_ for more information..
+If you are using JS bundles, DMP files can go right in the bundles.  See bundling in `Rendering CSS and JS <topics_providers.html>`_ for more information.
 
 Behind the CSS and JS Curtain
 -----------------------------

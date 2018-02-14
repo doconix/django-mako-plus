@@ -61,7 +61,7 @@ The client side is now ready, so let's create the
         context = {
             'now': datetime.now(),
         }
-        return request.render('index_time.html', context)
+        return request.dmp.render('index_time.html', context)
 
 Finally, create the ``/homepage/templates/index_time.html`` template,
 which is rendered at the end of ``process_request()`` above:
@@ -110,7 +110,7 @@ file:
         context = {
             'now': datetime.now(),
         }
-        return request.render('index.gettime.html', context)
+        return request.dmp.render('index.gettime.html', context)
 
 Note the function is decorated with ``@view_function``, and it contains the function body from our now-deleted ``index_time.py``. The framework recognizes **any** function with this decorator as an available endpoint for urls, not just the hard-coded ``process_request`` function. In other words, you can actually name your view methods any way you like, as long as you follow the pattern described in this section.
 

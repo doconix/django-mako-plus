@@ -50,7 +50,7 @@ from .http import HttpResponseJavascriptRedirect
 
 # the convenience functions
 #
-# Instead of these functions, consider using request.render() and request.render_to_string(),
+# Instead of these functions, consider using request.dmp.render() and request.dmp.render_to_string(),
 # which are monkey-patched onto every DMP-enabled app at load time.  See the documentation
 # for information on why we do this.
 #

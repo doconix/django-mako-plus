@@ -17,7 +17,7 @@ With DMP, your class-based view will be discovered via request url, so you have 
             context = {
                 'now': datetime.now().strftime(request.dmp.urlparams[0] if request.dmp.urlparams[0] else '%H:%M'),
             }
-            return request.render('index.html', context)
+            return request.dmp.render('index.html', context)
 
     class discovery_section(View):
         def get(self, request):

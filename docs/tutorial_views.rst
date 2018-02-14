@@ -17,7 +17,7 @@ Let's add some "work" to the process by adding the current server time to the in
         context = {
             'now': datetime.now(),
         }
-        return request.render('index.html', context)
+        return request.dmp.render('index.html', context)
 
 Reload your server and browser page, and you should see the exact same page. It might look the same, but something very important happened in the routing. Rather than going straight to the ``index.html`` page, processing went to your new ``index.py`` file. At the end of the ``process_request`` function above, we manually render the ``index.html`` file. In other words, we're now doing extra "work" before the rendering. This is the place to do database connections, modify objects, prepare and handle forms, etc. It keeps complex code out of your html pages.
 
@@ -97,7 +97,7 @@ DMP provides a second function, ``dmp_render_to_string``. This is nearly the sam
         context = {
             'now': datetime.now(),
         }
-        return request.render('index.html', context)
+        return request.dmp.render('index.html', context)
 
 
 But That's Not Django!

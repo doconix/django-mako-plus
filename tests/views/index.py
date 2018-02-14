@@ -12,14 +12,14 @@ import datetime
 
 @view_function
 def process_request(request):
-    return request.render('index.html', {
+    return request.dmp.render('index.html', {
         'current_time': datetime.datetime.now(),
     })
 
 
 @view_function
 def basic(request):
-    return request.render('index.basic.html', {})
+    return request.dmp.render('index.basic.html', {})
 
 
 ###  Class-based endpoint  ###

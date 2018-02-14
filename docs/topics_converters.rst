@@ -236,7 +236,7 @@ Then create ``homepage/views/userinfo.py``:
         context = {
             'user': user,
         }
-        return request.render('userinfo.html', context)
+        return request.dmp.render('userinfo.html', context)
 
 Finally, create ``homepage/templates/userinfo.html``:
 
@@ -335,7 +335,7 @@ Then change ``/homepage/views/index.py`` to the following:
         context = {
             'now': now,
         }
-        return request.render('index.html', context)
+        return request.dmp.render('index.html', context)
 
 When you load http://localhost:8000/homepage/index/6:30/ in your browser, DMP will use ``convert_timedelta()`` to parse the hours and minutes from the first url parameter.
 
@@ -384,7 +384,7 @@ The following is a repeat of the "Extending" example above, modified to raise a 
         context = {
             'now': now,
         }
-        return request.render('index.html', context)
+        return request.dmp.render('index.html', context)
 
 In summary, adding keyword arguments to ``@view_function(...)`` allows you set values *per view function*, which enables common converter functions to contain per-function logic.
 
@@ -432,7 +432,7 @@ In most cases, ``value`` and ``parameter.type`` are all you need to make a conve
         context = {
             'now': now,
         }
-        return request.render('index.html', context)
+        return request.dmp.render('index.html', context)
 
 In this case, the converter is called twice: once for ``delta`` and once for ``forward``.  This will happen *even if the URL is too short*.  Consider how the following URLs would be handled:
 
