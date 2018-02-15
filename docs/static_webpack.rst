@@ -36,7 +36,7 @@ All of these steps are explained on the `Webpack <https://webpack.js.org/>`_ web
 Entry File
 ---------------------------
 
-In DMP, searching for scripts starts with the template name.  In keeping with this pattern, the ``dmp_webpack`` management command loads each template your apps and includes its script through ``require()``.  The command creates ``app/scripts/__entry__.js`` as an entry point for webpack.  Try running the command on an app that contains several template-related .js files:
+DMP searches for scripts starting with a template name.  In keeping with this pattern, the ``dmp_webpack`` management command loads each template your apps and includes its script through ``require()``.  The command creates ``app/scripts/__entry__.js`` as an entry point for webpack.  Try running the command on an app that contains several template-related .js files:
 
 ::
 
