@@ -54,6 +54,6 @@ Use the DMP convenience functions to be more dynamic, to interact directly with 
 
 See the `Mako documentation <http://www.makotemplates.org/>`__ for more information on working directly with Mako template objects. Mako has many features that go well beyond the DMP interface.
 
-    The convenience functions are perfectly fine if they suit your needs, but the ``dmp_render`` function described at the beginning of the tutorial is likely the best choice for most users because it doesn't hard code the app name. The convenience functions are not Django-API compliant.
+    The convenience functions are perfectly fine if they suit your needs, but the ``request.dmp.render`` function described at the beginning of the tutorial is likely the best choice for most users because it doesn't hard code the app name. The convenience functions are not Django-API compliant.
 
 

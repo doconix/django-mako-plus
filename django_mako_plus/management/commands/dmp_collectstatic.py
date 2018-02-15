@@ -53,7 +53,7 @@ INITIAL_RULES = (
     Rule('styles',                               level=0,    filetype=TYPE_DIRECTORY, score=6),
 
     # ignore the template cache directories
-    Rule(DMP_OPTIONS.get('TEMPLATES_CACHE_DIR'), level=None, filetype=TYPE_DIRECTORY, score=-3),
+    Rule(DMP_OPTIONS['TEMPLATES_CACHE_DIR'],     level=None, filetype=TYPE_DIRECTORY, score=-3),
     # ignore python cache directories
     Rule('__pycache__',                          level=None, filetype=TYPE_DIRECTORY, score=-3),
     # ignore compiled python files

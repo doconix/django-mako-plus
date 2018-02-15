@@ -1,4 +1,4 @@
-Static Files: Collecting
+Collecting for Deployment
 ============================================
 
 .. contents::

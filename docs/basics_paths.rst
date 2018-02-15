@@ -99,7 +99,7 @@ Second Way (this way uses the standard Django API):
 Content Types and Status Codes
 --------------------------------
 
-The ``dmp_render()`` function determines the mime type from the template extension and returns a *200* status code. What if you need to return JSON, CSV, or a 404 not found?  The function takes these parameters too. A few examples:
+The ``request.dmp.render()`` function determines the mime type from the template extension and returns a *200* status code. What if you need to return JSON, CSV, or a 404 not found?  The function takes these parameters too. A few examples:
 
 .. code:: python
 
@@ -130,7 +130,7 @@ If the templates you need to access are within your project directory, no extra 
 
 Note the starting slash on the path. That tells DMP to start searching at your project root.
 
-Don't confuse the slashes in the above call with the slash used in Django's ``render`` function. When you call ``render``, the slash separates the app and filename. The above call uses ``dmp_render``, which is a different function. You should really standardize on one or the other throughout your project.
+Don't confuse the slashes in the above call with the slash used in Django's ``render`` function. When you call ``render``, the slash separates the app and filename. The above call uses ``request.dmp.render``, which is a different function. You should really standardize on one or the other throughout your project.
 
 Case 2: Templates Outside Your Project Directory
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

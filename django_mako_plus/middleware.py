@@ -60,8 +60,8 @@ class RequestInitMiddleware(MiddlewareMixin):
         # create the RoutingData object
         request.dmp = RoutingData(
             request,
-            view_kwargs.pop('dmp_app', None) or DMP_OPTIONS.get('DEFAULT_APP'),
-            view_kwargs.pop('dmp_page', None) or DMP_OPTIONS.get('DEFAULT_PAGE', 'index'),
+            view_kwargs.pop('dmp_app', None) or DMP_OPTIONS['DEFAULT_APP'],
+            view_kwargs.pop('dmp_page', None) or DMP_OPTIONS['DEFAULT_PAGE'],
             view_kwargs.pop('dmp_function', None),
             view_kwargs.pop('urlparams', '').strip(),
         )

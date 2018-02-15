@@ -3,34 +3,13 @@ from django.core.management.base import BaseCommand, CommandError
 from django_mako_plus.util import DMP_OPTIONS, get_dmp_app_configs
 
 from django_mako_plus.provider import create_mako_context
-from django_mako_plus.provider.runner import ProviderRun, ProviderFactory
+from django_mako_plus.provider.runner import ProviderRun, create_factories
 from django_mako_plus.util import get_dmp_instance, split_app
 
 import glob
 import os, os.path, shutil
 import json
-
-
-
-PROVIDERS = [
-    {
-        'provider': 'django_mako_plus.CompileProvider',
-        'group': 'scripts',
-        'source': '{appdir}/scripts/{template}.py',
-        'output': '{appdir}/scripts/__javascript__/{template}.js',
-        'command': ['transcrypt', '-b', '-e', '6', '-n', '-p', '.none', '-xp', settings.BASE_DIR, '{appdir}/scripts/{template}.py'] \
-                   if settings.DEBUG else \
-                   ['/usr/local/bin/transcrypt', '-b', '-e', '6', '-p', '.none', '-xp', settings.BASE_DIR, '{appdir}/scripts/{template}.py'],
-    },
-    {
-        'provider': 'django_mako_plus.JsLinkProvider',
-        'group': 'scripts',
-        'path': '{appdir}/scripts/__javascript__/{template}.js',
-    },
-    {
-        'provider': 'django_mako_plus.JsLinkProvider',
-    },
-]
+from collections import OrderedDict
 
 
 
@@ -88,7 +67,7 @@ class Command(BaseCommand):
             raise CommandError('Your settings.py file is missing the BASE_DIR setting.')
 
         # run for each dmp-enabled app
-        self.factories = [ ProviderFactory(provider_def) for provider_def in PROVIDERS ]
+        self.factories = create_factories('WEBPACK_PROVIDERS')
         for config in get_dmp_app_configs():
             if not options['appname'] or config.name in options['appname']:
                 self.create_entry(config)
@@ -105,9 +84,8 @@ class Command(BaseCommand):
         '''Creates a webpack __entry__.js file in the given app'''
         templates_dir = os.path.join(config.path, 'templates')
         entry_filename = os.path.join(config.path, 'scripts', '__entry__.js')
-        self.message('Creating {}'.format(os.path.relpath(entry_filename, settings.BASE_DIR)))
         # map templates to their scripts
-        page_map = {}
+        page_map = OrderedDict()
         for template_name in os.listdir(templates_dir):
             if os.path.isfile(os.path.join(os.path.join(templates_dir, template_name))):
                 template_obj = get_dmp_instance().get_template_loader(config, create=True).get_mako_template(template_name)
@@ -116,25 +94,31 @@ class Command(BaseCommand):
         # write the file
         if not self.options['overwrite'] and os.path.exists(entry_filename):
             raise ValueError('Refusing to destroy existing file: %s.  Use --overwrite option or remove the file.' % (entry_filename,))
-        with open(entry_filename, 'w') as fout:
-            fout.write('''
-(function(context) {
-    DMP_CONTEXT.appBundle = DMP_CONTEXT.appBundle || {};
-            ''')
-            for page, scripts in page_map.items():
-                fout.write('''
-    DMP_CONTEXT.appBundle["%s"] = function() { %s; };
-                ''' % (
-                    page,
-                    '; '.join([ 'require("%s")' % (s,) for s in scripts ]),
-                ))
-            fout.write('''
-})(DMP_CONTEXT.get());
-            ''')
+        if len(page_map) == 0:
+            self.message('Templates in app {} had no matching scripts'.format(config.name))
+        else:
+            self.message('Templates in app {} required {} script(s); creating {}'.format(config.name, len(page_map), os.path.relpath(entry_filename, settings.BASE_DIR)))
+            with open(entry_filename, 'w') as fout:
+                fout.write('(context => {\n')
+                for page, scripts in page_map.items():
+                    fout.write('    DMP_CONTEXT.appBundles["%s"] = () => { %s; };\n' % (
+                        page,
+                        '; '.join([ 'require("%s")' % (s,) for s in scripts ]),
+                    ))
+                fout.write('})(DMP_CONTEXT.get());\n')
 
 
     def template_scripts(self, template_obj):
         '''Maps the scripts used by the given template and its ancestors'''
+        # for this algorithm to work, providers must populate the provider data dictionary like this example.
+        # the built-in JsLinkProvider does this already.
+        # provider_data = {
+        #     'urls': [
+        #         '/static/app/scripts/first.js',
+        #         '/static/app/scripts/second.js',
+        #         ...
+        #     ]
+        # }
         mako_context = create_mako_context(template_obj)
         inner_run = ProviderRun(mako_context['self'], factories=self.factories)
         inner_run.get_content()

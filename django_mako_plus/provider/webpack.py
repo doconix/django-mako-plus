@@ -10,6 +10,8 @@ import os.path
 import json
 
 
+EMPTY_SET = set()
+
 
 class AppJsBundleProvider(LinkProvider):
     '''
@@ -33,13 +35,13 @@ class AppJsBundleProvider(LinkProvider):
     def provide(self, provider_run, data):
         # call the function for this view every time
         key = '{}/{}'.format(self.app_config.name, self.template_name)
-        data['scripts'].append('if (DMP_CONTEXT.appBundle["%s"]) { DMP_CONTEXT.appBundle["%s"]() };' % (key, key))
+        data['scripts'].append('if (DMP_CONTEXT.appBundles["%s"]) { DMP_CONTEXT.appBundles["%s"]() };' % (key, key))
 
     def finish(self, provider_run, data):
         '''Runs only on the main template in the chain.'''
         for fi in self.matches:
             # only print the first instance of a given href (one per request)
-            js_done = getdefaultattr(provider_run.request, '__dmp_AppJsBundleProvider__', factory=set)
+            js_done = getdefaultattr(provider_run.request, '__dmp_AppJsBundleProvider__', factory=set) if provider_run.request is not None else EMPTY_SET
             if fi.url not in js_done:
                 provider_run.write('<script data-context="{contextid}" src="{static}{href}?{version}"{async}></script>'.format(
                     contextid=provider_run.uid,

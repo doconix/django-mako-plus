@@ -13,17 +13,15 @@ import io
 ###   Static File Provider Factory
 
 
-DEFAULT_CONTENT_PROVIDERS = [
-    { 'provider': 'django_mako_plus.CssLinkProvider' },
-    { 'provider': 'django_mako_plus.JsContextProvider' },
-    { 'provider': 'django_mako_plus.JsLinkProvider'  },
-]
-
-
 def init_providers():
     '''Called when the DMP template engine is created by Django'''
-    providers = [ ProviderFactory(provider_def) for provider_def in DMP_OPTIONS.get('CONTENT_PROVIDERS', DEFAULT_CONTENT_PROVIDERS) ]
-    DMP_OPTIONS['RUNTIME_PROVIDER_FACTS'] = [ pf for pf in providers if pf.options['enabled'] ]
+    DMP_OPTIONS['RUNTIME_PROVIDER_FACTS'] = create_factories()
+
+
+def create_factories(key='CONTENT_PROVIDERS'):
+    '''Called from here as well as dmp_webpack.py'''
+    providers = ( ProviderFactory(provider_def) for provider_def in DMP_OPTIONS[key] )
+    return [ pf for pf in providers if pf.options['enabled'] ]
 
 
 class ProviderFactory(object):

@@ -26,12 +26,12 @@ Most changes can be summarized in the DMP settings.py options.  We recommend com
 +--------------------------------+--------------------------------+
 | `request.urlparams`            | `request.dmp.urlparams`        |
 +--------------------------------+--------------------------------+
-| `request.dmp_render`           | `request.dmp.render`           |
+| `request.request.dmp.render`           | `request.dmp.render`           |
 +--------------------------------+--------------------------------+
-| `request.dmp_render_to_string` | `request.dmp.render_to_string` |
+| `request.request.dmp.render_to_string` | `request.dmp.render_to_string` |
 +--------------------------------+--------------------------------+
 
-    *Important:* As noted in the table above, search your codebase for ``request.dmp_render`` and replace with ``request.dmp.render``.
+    *Important:* As noted in the table above, search your codebase for ``request.request.dmp.render`` and replace with ``request.dmp.render``.
 
 2. Static files (CSS/JS): MakoCssProvider, MakoJsProvider, link_css, link_js, link_template_css, link_template_js are removed.  Instad, use ${ django_mako_plus.links() } once in the <head> section of your base page.
 

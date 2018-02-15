@@ -4,6 +4,7 @@ from django.template import TemplateDoesNotExist
 from django.template.backends.base import BaseEngine
 from django.utils.module_loading import import_string
 
+from .defaults import DEFAULT_OPTIONS
 from .template import MakoTemplateLoader, MakoTemplateAdapter
 from .registry import register_app, is_dmp_app as registry_is_dmp_app
 from .provider.runner import init_providers
@@ -30,7 +31,7 @@ _builtin_context_processors = (
 
 # regex to split the template name in get_template()
 # "myapp/mytemplate.html#myblock" gives groups:
-# ('myapp', '/mytemplate.html', 'mytemplate.html', '#myblockname', 'myblockname')
+# ('myapp', '/mytemplate.html', 'mytemplate.html', '#myblock', 'myblock')
 RE_TEMPLATE_NAME = re.compile('([^/?#]*)?(/([^#]*))?(#(.*))?')
 
 
@@ -45,11 +46,18 @@ class MakoTemplates(BaseEngine):
     '''
     def __init__(self, params):
         '''Constructor'''
-        # pop the settings.py options into the DMP options
+        # start with the default options
+        DMP_OPTIONS.update(DEFAULT_OPTIONS)
+
+        # pop the settings.py options into the DMP optionsRUNTIME_TEMPLATE_IMPORTS
         try:
             DMP_OPTIONS.update(params.pop('OPTIONS'))
         except KeyError:
             raise ImproperlyConfigured('The Django Mako Plus template OPTIONS were not set up correctly in settings.py.  Please ensure the OPTIONS is set in the template setup.')
+
+        # django_mako_plus is always available in templates
+        DMP_OPTIONS['RUNTIME_TEMPLATE_IMPORTS'] = [ 'import django_mako_plus' ]
+        DMP_OPTIONS['RUNTIME_TEMPLATE_IMPORTS'].extend(DMP_OPTIONS['DEFAULT_TEMPLATE_IMPORTS'])
 
         # cache our instance in the util module for get_dmp_instance
         # this is a bit of a hack, but it makes calling utility methods possible and efficient
@@ -61,7 +69,7 @@ class MakoTemplates(BaseEngine):
 
         # set up the context processors
         context_processors = []
-        for processor in itertools.chain(_builtin_context_processors, DMP_OPTIONS.get('CONTEXT_PROCESSORS', [])):
+        for processor in itertools.chain(_builtin_context_processors, DMP_OPTIONS['CONTEXT_PROCESSORS']):
             context_processors.append(import_string(processor))
         self.template_context_processors = tuple(context_processors)
 
@@ -86,7 +94,7 @@ class MakoTemplates(BaseEngine):
         Compiles a template from the given string.
         This is one of the required methods of Django template engines.
         '''
-        mako_template = Template(template_code, imports=DMP_OPTIONS.get('DEFAULT_TEMPLATE_IMPORTS'), input_encoding=DMP_OPTIONS.get('DEFAULT_TEMPLATE_ENCODING', 'utf-8'))
+        mako_template = Template(template_code, imports=DMP_OPTION['RUNTIME_TEMPLATE_IMPORTS'], input_encoding=DMP_OPTIONS['RUNTIME_TEMPLATE_ENCODING'])
         return MakoTemplateAdapter(mako_template)
 
 

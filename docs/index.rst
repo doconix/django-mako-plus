@@ -71,6 +71,8 @@ Contents
     upgrade_notes
     installation
     tutorial
+    basics
+    static
     topics
 
 

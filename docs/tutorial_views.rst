@@ -78,11 +78,11 @@ The Render Functions
 
     This section explains the two render functions included with DMP. If you just want to get things working, skip over this section. You can always come back later for an explanation of how things are put together.
 
-In the example above, we used the ``dmp_render`` function to render our template. It's the DMP equivalent of Django's ``render`` shortcut function. The primary difference between the two functions (other than, obviously, the names) is DMP's function is **coupled to the current app**. In contrast, Django searches for templates in a flat list of directories -- while your apps might have templates in them, Django just searches through them in order. DMP's structure is logically app-based: each of your apps contains a ``templates`` directory, and DMP always searches the *current* app directly. With DMP, there are no worries about template name clashes or finding issues.
+In the example above, we used the ``request.dmp.render`` function to render our template. It's the DMP equivalent of Django's ``render`` shortcut function. The primary difference between the two functions (other than, obviously, the names) is DMP's function is **coupled to the current app**. In contrast, Django searches for templates in a flat list of directories -- while your apps might have templates in them, Django just searches through them in order. DMP's structure is logically app-based: each of your apps contains a ``templates`` directory, and DMP always searches the *current* app directly. With DMP, there are no worries about template name clashes or finding issues.
 
 At the beginning of each request, DMP's middleware determines the current app (i.e. the first item in the url) and adds two render functions to the request object.  These are available throughout your request, with no imports needed.  As long as you are rendering a template in the request's current app, DMP knows where to find the template file.
 
-DMP provides a second function, ``dmp_render_to_string``. This is nearly the same as ``dmp_render``, but ``dmp_render_to_string`` returns a string rather than an ``HttpResponse`` object.
+DMP provides a second function, ``request.dmp.render_to_string``. This is nearly the same as ``request.dmp.render``, but ``request.dmp.render_to_string`` returns a string rather than an ``HttpResponse`` object.
 
 **You really don't need to worry about any of this.**  Templates are rendered in the current app 99% of the time, so just use this code unless you are in a special use case:
 
@@ -103,7 +103,7 @@ DMP provides a second function, ``dmp_render_to_string``. This is nearly the sam
 But That's Not Django!
 --------------------------------
 
-In the above code, you may have noticed that we didn't use the "normal" Django shortcuts like ``render`` and ``render_to_response``.  DMP provides the shortcuts like ``dmp_render`` because its renderers are tied to apps (which is different than Django).
+In the above code, you may have noticed that we didn't use the "normal" Django shortcuts like ``render`` and ``render_to_response``.  DMP provides the shortcuts like ``request.dmp.render`` because its renderers are tied to apps (which is different than Django).
 
 But that doesn't mean you can't use the standard Django shortcuts, ``TemplateResponse``, and ``SimpleTemplateResponse`` with DMP.  There's a full page devoted to the topic, so `take a side trip to the topic on "Django Template Functions" <topics_django.html>`_ if you want to stick to the normal Django API.
 

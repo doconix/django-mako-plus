@@ -12,8 +12,8 @@ class Command(BaseCommand):
     args = ''
     help = 'Removes compiled template cache folders in your DMP-enabled app directories.'
     can_import_settings = True
-    
-    
+
+
     def add_arguments(self, parser):
         parser.add_argument(
             '--trial-run',
@@ -55,10 +55,6 @@ class Command(BaseCommand):
         except AttributeError as e:
             print(e)
             raise CommandError('Your settings.py file is missing the BASE_DIR setting.')
-
-        # enssure we have a template cache dir set
-        if not DMP_OPTIONS.get('TEMPLATES_CACHE_DIR'):
-            raise CommandError('Your TEMPLATES_CACHE_DIR option in settings.py is either missing or empty.')
 
         # check each dmp-enabled app
         for config in get_dmp_app_configs():

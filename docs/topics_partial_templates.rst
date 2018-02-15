@@ -55,7 +55,7 @@ Suppose you have the following template, view, and JS files:
         </div>
     </%block>
 
-**``index.py``** with an ``if`` statement and two ``dmp_render`` calls:
+**``index.py``** with an ``if`` statement and two ``request.dmp.render`` calls:
 
 .. code:: python
 
@@ -82,7 +82,7 @@ Suppose you have the following template, view, and JS files:
         $('.server-time').load('/homepage/index/gettime/');
     });
 
-On initial page load, the ``if request.dmp.urlparams[0] == 'gettime':`` statement is false, so the full ``index.html`` file is rendered. However, when the update button's click event is run, the statement is **true** because ``/gettime`` is added as the first url parameter. This is just one way to switch the ``dmp_render`` call. We could also have used a regular CGI parameter, request method (GET or POST), or any other way to perform the logic.
+On initial page load, the ``if request.dmp.urlparams[0] == 'gettime':`` statement is false, so the full ``index.html`` file is rendered. However, when the update button's click event is run, the statement is **true** because ``/gettime`` is added as the first url parameter. This is just one way to switch the ``request.dmp.render`` call. We could also have used a regular CGI parameter, request method (GET or POST), or any other way to perform the logic.
 
 When the ``if`` statement goes **true**, DMP renders the ``server_time`` block of the template instead of the entire template. This corresponds nicely to the way the Ajax call was made: ``$('.server-time').load()``.
 
@@ -126,7 +126,7 @@ The tricky part of block rendering is ensuring your variables are accessible. Yo
         </div>
     </%block>
 
-Since ``counter`` won't get defined when ``def_name='server_time'``, **``index.py``** must add it to the ``context`` (but only for the Ajax-oriented ``dmp_render`` function):
+Since ``counter`` won't get defined when ``def_name='server_time'``, **``index.py``** must add it to the ``context`` (but only for the Ajax-oriented ``request.dmp.render`` function):
 
 .. code:: python
 

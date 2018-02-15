@@ -37,7 +37,7 @@ for config in get_dmp_app_configs():
         ])
 
 # if we have a default app, take over short urls
-if DMP_OPTIONS.get('DEFAULT_APP') is not None:
+if DMP_OPTIONS['DEFAULT_APP']:
     urlpatterns.extend([
         # /page.function/urlparams
         re_path(r'^(?P<dmp_page>[_a-zA-Z0-9\-]+)\.(?P<dmp_function>[_a-zA-Z0-9\.\-]*)/?(?P<urlparams>.*?)/?$', route_request, name='DMP /page.function'),

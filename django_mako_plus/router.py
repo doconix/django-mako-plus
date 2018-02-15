@@ -68,7 +68,7 @@ def route_request(request, *args, **kwargs):
 
         except InternalRedirectException as ivr:
             # send the signal
-            if DMP_OPTIONS.get('SIGNALS', False):
+            if DMP_OPTIONS['SIGNALS']:
                 dmp_signal_internal_redirect_exception.send(sender=sys.modules[__name__], request=request, exc=ivr)
             # resolve to a function
             request.dmp.module = ivr.redirect_module
@@ -83,7 +83,7 @@ def route_request(request, *args, **kwargs):
             if request.dmp.class_obj is None:
                 log.info('%s redirected processing to %s', request.dmp.function_obj.message(request), e.redirect_to)
             # send the signal
-            if DMP_OPTIONS.get('SIGNALS', False):
+            if DMP_OPTIONS['SIGNALS']:
                 dmp_signal_redirect_exception.send(sender=sys.modules[__name__], request=request, exc=e)
             # send the browser the redirect command
             return e.get_response(request)
@@ -239,7 +239,7 @@ class ViewFunctionRouter(object):
                 raise Http404('Invalid parameter specified in the url')
 
         # send the pre-signal
-        if DMP_OPTIONS.get('SIGNALS', False):
+        if DMP_OPTIONS['SIGNALS']:
             for receiver, ret_response in dmp_signal_pre_process_request.send(sender=sys.modules[__name__], request=request, view_args=args, view_kwargs=kwargs):
                 if isinstance(ret_response, (HttpResponse, StreamingHttpResponse)):
                     return ret_response
@@ -248,7 +248,7 @@ class ViewFunctionRouter(object):
         response = self.function(*args, **kwargs)
 
         # send the post-signal
-        if DMP_OPTIONS.get('SIGNALS', False):
+        if DMP_OPTIONS['SIGNALS']:
             for receiver, ret_response in dmp_signal_post_process_request.send(sender=sys.modules[__name__], request=request, response=response, view_args=args, view_kwargs=kwargs):
                 if ret_response is not None:
                     response = ret_response # sets it to the last non-None in the signal receiver chain

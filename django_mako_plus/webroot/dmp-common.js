@@ -11,6 +11,7 @@
             contexts: {},           // contextid -> context1
             contextsByName: {},     // app/template -> [ context1, context2, ... ]
             lastContext: null,      // last inserted context (see getAll() below)
+            appBundles: {},          // for the webpack provider
 
             /* Adds data to the DMP context under the given key */
             set: function(version, contextid, data, templates) {

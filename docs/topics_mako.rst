@@ -84,7 +84,7 @@ Location, Location, Location...
 
 One subtle, but very important, change in DMP is the **location of your templates**. In the above code, homepage is listed twice because the first specifies the app to use, and the second specfies the subdirectory within ``app/templates/``.
 
-This is because *Django's concept of "template finding" through a number of app and other directories doesn't exist in DMP.* Instead, DMP templates are app-aware; if you were using the DMP-specific functions, like ``dmp_render()``, you wouldn't even need to specify the app. However, since this section is about minimal changes, we're using the standard Django functions.
+This is because *Django's concept of "template finding" through a number of app and other directories doesn't exist in DMP.* Instead, DMP templates are app-aware; if you were using the DMP-specific functions, like ``request.dmp.render()``, you wouldn't even need to specify the app. However, since this section is about minimal changes, we're using the standard Django functions.
 
 If you don't like the double-homepage whammy (and I would agree), move your template files up one directory. The following two cases show the options:
 

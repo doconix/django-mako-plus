@@ -1,7 +1,7 @@
-Django Template Functions
-==========================
+Django-Style Template Rendering
+=====================================
 
-In the `tutorial <tutorial_views.html>`_ , you may have noticed that we didn't use the "normal" Django shortcuts like ``render`` and ``render_to_response``.  DMP provides the shortcuts like ``dmp_render`` because its renderers are tied to apps (which is different than Django).
+In the `tutorial <tutorial_views.html>`_ , you may have noticed that we didn't use the "normal" Django shortcuts like ``render`` and ``render_to_response``.  DMP provides the shortcuts like ``request.dmp.render`` because its renderers are tied to apps (which is different than Django).
 
 But that doesn't mean you can't use the standard Django shortcuts and template classes with DMP.  As a template engine, DMP conforms to the Django standard.  If you want to use Django's shortcuts and be more standard, here's how to do it.
 
@@ -47,12 +47,12 @@ To use these classes with DMP, use the file pattern we just discussed: ``app/tem
     # using SimpleTemplateResponse:
     from django.template.response import SimpleTemplateResponse
     return SimpleTemplateResponse('homepage/index.html', context)
-    
+
     # using TemplateResponse with an explicit template object:
     from django.template.response import TemplateResponse
     from django_mako_plus import get_template as dmp_get_template
     return TemplateResponse(request, dmp_get_template('homepage', 'index.html'), context)
-    
+
 
 Further Reading about Template Locations
 ------------------------------------------
