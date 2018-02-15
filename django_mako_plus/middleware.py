@@ -63,7 +63,7 @@ class RequestInitMiddleware(MiddlewareMixin):
             view_kwargs.pop('dmp_app', None) or DMP_OPTIONS['DEFAULT_APP'],
             view_kwargs.pop('dmp_page', None) or DMP_OPTIONS['DEFAULT_PAGE'],
             view_kwargs.pop('dmp_function', None),
-            view_kwargs.pop('urlparams', '').strip(),
+            view_kwargs.pop('dmp_urlparams', '').strip(),
         )
 
 

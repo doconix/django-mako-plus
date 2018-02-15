@@ -89,7 +89,7 @@ The following more-detailed version enumerates all the options (set to their def
                     },{
                         # generates links for app script bundles created by `python manage.py dmp_webpack`
                         'provider': 'django_mako_plus.AppJsBundleProvider',
-                        'path': '{appname}/scripts/__bundle__.js',
+                        'filename': '{appname}/scripts/__bundle__.js',
                         'async': False,
                         'enabled': True,
                     },
@@ -143,7 +143,7 @@ Every provider has an ``enabled`` boolean option that sets whether it should be 
 
     {
         'provider': 'django_mako_plus.AppJsBundleProvider',
-        'path': STATIC_URL + '{appname}/scripts/__bundle__.js',
+        'filename': STATIC_URL + '{appname}/scripts/__bundle__.js',
         'enabled': not DEBUG,
     }
 

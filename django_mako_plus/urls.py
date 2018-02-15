@@ -29,9 +29,9 @@ for config in get_dmp_app_configs():
     # these are in order of specificity, with the most specific ones at the top
         urlpatterns.extend([
             # /app/page.function/urlparams
-            re_path(r'^{}/(?P<dmp_page>[_a-zA-Z0-9\-]+)\.(?P<dmp_function>[_a-zA-Z0-9\.\-]+)/?(?P<urlparams>.*?)/?$'.format(config.name), route_request, { 'dmp_app': config.name }, name='DMP /app/page.function'),
+            re_path(r'^{}/(?P<dmp_page>[_a-zA-Z0-9\-]+)\.(?P<dmp_function>[_a-zA-Z0-9\.\-]+)/?(?P<dmp_urlparams>.*?)/?$'.format(config.name), route_request, { 'dmp_app': config.name }, name='DMP /app/page.function'),
             # /app/page/urlparams
-            re_path(r'^{}/(?P<dmp_page>[_a-zA-Z0-9\-]+)/?(?P<urlparams>.*?)/?$'.format(config.name), route_request, { 'dmp_app': config.name }, name='DMP /app/page'),
+            re_path(r'^{}/(?P<dmp_page>[_a-zA-Z0-9\-]+)/?(?P<dmp_urlparams>.*?)/?$'.format(config.name), route_request, { 'dmp_app': config.name }, name='DMP /app/page'),
             # /app
             re_path(r'^{}/?$'.format(config.name), route_request, { 'dmp_app': config.name }, name='DMP /app'),
         ])
@@ -40,9 +40,9 @@ for config in get_dmp_app_configs():
 if DMP_OPTIONS['DEFAULT_APP']:
     urlpatterns.extend([
         # /page.function/urlparams
-        re_path(r'^(?P<dmp_page>[_a-zA-Z0-9\-]+)\.(?P<dmp_function>[_a-zA-Z0-9\.\-]*)/?(?P<urlparams>.*?)/?$', route_request, name='DMP /page.function'),
+        re_path(r'^(?P<dmp_page>[_a-zA-Z0-9\-]+)\.(?P<dmp_function>[_a-zA-Z0-9\.\-]*)/?(?P<dmp_urlparams>.*?)/?$', route_request, name='DMP /page.function'),
         # /page/urlparams
-        re_path(r'^(?P<dmp_page>[_a-zA-Z0-9\-]+)/?(?P<urlparams>.*?)/?$', route_request, name='DMP /page'),
+        re_path(r'^(?P<dmp_page>[_a-zA-Z0-9\-]+)/?(?P<dmp_urlparams>.*?)/?$', route_request, name='DMP /page'),
         # / with nothing else
         re_path(r'^$', route_request, name='DMP /'),
     ])

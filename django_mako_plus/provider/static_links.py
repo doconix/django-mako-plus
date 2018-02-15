@@ -30,13 +30,13 @@ class LinkProvider(BaseProvider):
     default_options = merge_dicts(BaseProvider.default_options, {
         # subclasses override both of these
         'group': 'static.file',
-        'path': '{appdir}/somedir/{template}.static.file',
+        'filename': '{appdir}/somedir/{template}.static.file',
     })
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.matches = []
-        for fullpath in glob.iglob(self.options_format(self.options['path'])):
+        for fullpath in glob.iglob(self.options_format(self.options['filename'])):
             self.matches.append(FileInfo(
                 os.path.relpath(fullpath, settings.BASE_DIR).replace('\\', '/'),
                 int(os.stat(fullpath).st_mtime),
@@ -47,7 +47,7 @@ class CssLinkProvider(LinkProvider):
     '''Generates a CSS <link>'''
     default_options = merge_dicts(LinkProvider.default_options, {
         'group': 'styles',
-        'path': '{appdir}/styles/{template}.css',
+        'filename': '{appdir}/styles/{template}.css',
         'skip_duplicates': True,
     })
 
@@ -66,7 +66,7 @@ class JsLinkProvider(LinkProvider):
     '''Generates a JS <script>.'''
     default_options = merge_dicts(LinkProvider.default_options, {
         'group': 'scripts',
-        'path': '{appdir}/scripts/{template}.js',
+        'filename': '{appdir}/scripts/{template}.js',
         'async': False,
     })
 

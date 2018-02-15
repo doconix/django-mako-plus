@@ -25,7 +25,7 @@ class AppJsBundleProvider(LinkProvider):
     '''
     default_options = merge_dicts(LinkProvider.default_options, {
         'group': 'scripts',
-        'path': '{appdir}/scripts/__bundle__.js',
+        'filename': '{appdir}/scripts/__bundle__.js',
         'async': False,
     })
 
