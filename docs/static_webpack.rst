@@ -31,6 +31,7 @@ Before we begin, be sure ``Node.js`` and ``npm`` are installed and runnable from
 
 Additionally, be sure your ``package.json`` file contains an entry to build with webpack: ``"scripts": { "build": "webpack" }``.
 
+All of these steps are explained on the `Webpack <https://webpack.js.org/>`_ web site.
 
 Entry File
 ---------------------------
