@@ -33,8 +33,14 @@ Note that on Windows machines, ``pip3`` may need to be replaced with ``pip``:
 
 Create a Django project
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+There are two ways you can start a new DMP project. The first is to use the command-line interface that comes bundled
+with django-mako-plus.
 
-Create a Django project, and specify that you want a DMP-style project layout:
+::
+
+    dmp new project mysite
+
+The previous command is just a shortcut to the following method of using django to create a new project, specifying that you want a DMP-style project layout:
 
 ::
 
@@ -56,10 +62,15 @@ Don't forget to migrate to synchronize your database and create a superuser:
 Create a DMP-Style App
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Change to your project directory in the terminal/console, then create a new Django-Mako-Plus app with the following:
+Change to your project directory in the terminal/console, then create a new Django-Mako-Plus app.
+
+As with creating a DMP project, there are two ways to create a DMP app. One can use the shortcut provided with the DMP command-line-interface,
+or use django's ``manage.py startapp`` command with a ``--template`` option.
 
 .. code:: python
 
+    dmp new app homepage
+    # or alternatively...
     python3 manage.py startapp --template=http://cdn.rawgit.com/doconix/django-mako-plus/master/app_template.zip --extension=py,htm,html homepage
 
 **After** the new ``homepage`` app is created, add your new app to the ``INSTALLED_APPS`` list in ``settings.py``:
