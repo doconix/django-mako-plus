@@ -18,7 +18,7 @@ The framework is built to be extended for custom file types.  When you call ``li
                     { 'provider': 'django_mako_plus.CompileLessProvider' },  # compiles app/styles/template.less to app/styles/template/css
                     { 'provider': 'django_mako_plus.CssLinkProvider' },      # generates links for app/styles/template.css
                     { 'provider': 'django_mako_plus.JsLinkProvider' },       # generates links for app/scripts/template.js
-                    { 'provider': 'django_mako_plus.AppJsBundleProvider' },  # generates links for app script bundles
+                    { 'provider': 'django_mako_plus.AppJsBundleProvider' },  # generates links for app script bundles created by `python manage.py dmp_webpack`
                 ],
             }
         }
@@ -50,54 +50,44 @@ The following more-detailed version enumerates all the options (set to their def
             'APP_DIRS': True,
             'OPTIONS': {
                 'CONTENT_PROVIDERS': [
-                    # adds JS context - should be listed first
                     {
+                        # adds JS context - should be listed first
                         'provider': 'django_mako_plus.JsContextProvider'
                         'group': 'scripts',
                         'encoder': 'django.core.serializers.json.DjangoJSONEncoder',
                         'enabled': True,
-                    },
-
-                    # compiles app/styles/template.scss to app/styles/template.css
-                    {
+                    },{
+                        # compiles app/styles/template.scss to app/styles/template.css
                         'provider': 'django_mako_plus.CompileScssProvider'
                         'group': 'styles',
                         'source': '{appdir}/styles/{template}.scss',
                         'output': '{appdir}/styles/{template}.css',
                         'command': [ shutil.which('scss'), '--unix-newlines', '{appdir}/styles/{template}.scss', '{appdir}/styles/{template}.css' ],
                         'enabled': True,
-                    },
-
-                    # compiles app/styles/template.less to app/styles/template/css
-                    {
+                    },{
+                        # compiles app/styles/template.less to app/styles/template/css
                         'provider': 'django_mako_plus.CompileLessProvider'
                         'group': 'styles',
                         'source': '{appdir}/styles/{template}.less',
                         'output': '{appdir}/styles/{template}.css',
                         'command': [ shutil.which('lessc'), '--source-map', '{appdir}/styles/{template}.less', '{appdir}/styles/{template}.css' ],
                         'enabled': True,
-                    },
-
-                    # generates links for app/styles/template.css
-                    {
+                    },{
+                        # generates links for app/styles/template.css
                         'provider': 'django_mako_plus.CssLinkProvider'
                         'group': 'styles',
                         'filename': '{appdir}/styles/{template}.css',
                         'skip_duplicates': True,
                         'enabled': True,
-                    },
-
-                    # generates links for app/scripts/template.js
-                    {
+                    },{
+                        # generates links for app/scripts/template.js
                         'provider': 'django_mako_plus.JsLinkProvider'
                         'group': 'scripts',
                         'filename': '{appdir}/scripts/{template}.js',
                         'async': False,
                         'enabled': True,
-                    },
-
-                    # generates links for webpack bundles (see DMP's webpack page)
-                    {
+                    },{
+                        # generates links for app script bundles created by `python manage.py dmp_webpack`
                         'provider': 'django_mako_plus.AppJsBundleProvider',
                         'path': '{appname}/scripts/__bundle__.js',
                         'async': False,
