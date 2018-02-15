@@ -1,7 +1,7 @@
 Scripts and Context
 ================================
 
-In the `tutorial <tutorial_css_js.html>`_, you learned to send context variables to *.js files using ``jscontext``:
+In the `tutorial <tutorial_css_js.html>`_, you learned to send context variables to ``*.js`` files using ``jscontext``:
 
 .. code:: python
 

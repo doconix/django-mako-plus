@@ -63,6 +63,8 @@ Then create ``homepage/views/userinfo.py``:
 
 Finally, create ``homepage/templates/userinfo.html``:
 
+::
+
     <%inherit file="base.htm" />
 
     <%block name="content">
@@ -163,7 +165,7 @@ Then change ``/homepage/views/index.py`` to the following:
 When you load http://localhost:8000/homepage/index/6:30/ in your browser, DMP will use ``convert_timedelta()`` to parse the hours and minutes from the first url parameter.
 
 @view_function(custom='arguments')
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
++++++++++++++++++++++++++++++++++++++
 
 View-specific settings to common converter functions as arguments in the view decorator.  For example, when parameter conversion errors occur, you may want to show a custom message or redirect to a URL instead of raising an Http404.
 
