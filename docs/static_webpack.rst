@@ -100,7 +100,14 @@ DMP is also capable of creating the link and calling the page function as part o
 
 ::
 
-    'provider': 'django_mako_plus.AppJsBundleProvider',
-    'path': '{appname}/scripts/__bundle__.js',
+    {
+        'provider': 'django_mako_plus.AppJsBundleProvider',
+        'path': '{appname}/scripts/__bundle__.js',
+    }
 
 When a template is rendered, DMP will look the bundle using the ``path`` above.  If a match is found, DMP prints 1) a ``<script>`` tag to load the bundle, and 2) an inline script to call the right function for the page being rendered.  Since ``AppJsBundleProvider`` is a normal provider, this all happens during the ``${ django_mako_plus.links() }`` call you have on your site base template.
+
+Dev vs. Prod
+^^^^^^^^^^^^^^^^^
+
+In many instances, you may use the ``AppJsBundleProivder`` differently during development than on a production server.  See the

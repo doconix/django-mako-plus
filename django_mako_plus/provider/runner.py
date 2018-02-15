@@ -21,7 +21,7 @@ def init_providers():
 def create_factories(key='CONTENT_PROVIDERS'):
     '''Called from here as well as dmp_webpack.py'''
     providers = ( ProviderFactory(provider_def) for provider_def in DMP_OPTIONS[key] )
-    return [ pf for pf in providers if pf.options['enabled'] ]
+    return [ pf for pf in providers if pf.options.get['enabled'] ]
 
 
 class ProviderFactory(object):

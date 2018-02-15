@@ -13,35 +13,33 @@ The framework is built to be extended for custom file types.  When you call ``li
             'APP_DIRS': True,
             'OPTIONS': {
                 'CONTENT_PROVIDERS': [
-                    # adds JS context - should be listed first
-                    { 'provider': 'django_mako_plus.JsContextProvider' },
-
-                    # compiles app/styles/template.scss to app/styles/template.css
-                    { 'provider': 'django_mako_plus.CompileScssProvider' },
-
-                    # compiles app/styles/template.less to app/styles/template/css
-                    { 'provider': 'django_mako_plus.CompileLessProvider' },
-
-                    # generates links for app/styles/template.css
-                    { 'provider': 'django_mako_plus.CssLinkProvider' },
-
-                    # generates links for app/scripts/template.js
-                    { 'provider': 'django_mako_plus.JsLinkProvider' },
+                    { 'provider': 'django_mako_plus.JsContextProvider' },    # adds JS context - should be listed first
+                    { 'provider': 'django_mako_plus.CompileScssProvider' },  # compiles app/styles/template.scss to app/styles/template.css
+                    { 'provider': 'django_mako_plus.CompileLessProvider' },  # compiles app/styles/template.less to app/styles/template/css
+                    { 'provider': 'django_mako_plus.CssLinkProvider' },      # generates links for app/styles/template.css
+                    { 'provider': 'django_mako_plus.JsLinkProvider' },       # generates links for app/scripts/template.js
+                    { 'provider': 'django_mako_plus.AppJsBundleProvider' },  # generates links for app script bundles
                 ],
             }
         }
     ]
 
-Each type of provider takes additional settings that allow you to customize locations, automatic compilation, etc.  When reading most options, DMP runs the option through str.format() with the following formatting kwargs:
+Within file location values, each provider recognizes the following tokens:
 
-* {appname} - The app name for the template being rendered.
-* {template} - The name of the template being rendered, without its extension.
-* {appdir} - The app directory for the template being rendered (full path).
-* {staticdir} - The static directory as defined in settings.
+* ``{appname}`` - The app name for the template being rendered.
+* ``{template}`` - The name of the template being rendered, without its extension.
+* ``{appdir}`` - The app directory for the template being rendered (full path).
+* ``{staticdir}`` - The static directory as defined in settings.
 
-    **Order Matters:**  Just like Django middleware, the providers are run in order.  If one provider depends on the work of another, be sure to list them in the right order.  For example, the ``JsContextProvider`` provides context variables for scripts, so it must be placed before ``JsLinkProvider``.  That way, the variables are loaded when the scripts run.
+Order Matters
+--------------------
 
-The following more-detailed version enumerates all the options (set to their defaults).
+Just like Django middleware, the providers are run in order.  If one provider depends on the work of another, be sure to list them in the right order.  For example, the ``JsContextProvider`` provides context variables for scripts, so it must be placed before ``JsLinkProvider``.  That way, the variables are loaded when the scripts run.
+
+Enumerated Settings
+-------------------------
+
+The following more-detailed version enumerates all the options (set to their defaults):
 
 ::
 
@@ -57,6 +55,7 @@ The following more-detailed version enumerates all the options (set to their def
                         'provider': 'django_mako_plus.JsContextProvider'
                         'group': 'scripts',
                         'encoder': 'django.core.serializers.json.DjangoJSONEncoder',
+                        'enabled': True,
                     },
 
                     # compiles app/styles/template.scss to app/styles/template.css
@@ -66,6 +65,7 @@ The following more-detailed version enumerates all the options (set to their def
                         'source': '{appdir}/styles/{template}.scss',
                         'output': '{appdir}/styles/{template}.css',
                         'command': [ shutil.which('scss'), '--unix-newlines', '{appdir}/styles/{template}.scss', '{appdir}/styles/{template}.css' ],
+                        'enabled': True,
                     },
 
                     # compiles app/styles/template.less to app/styles/template/css
@@ -75,6 +75,7 @@ The following more-detailed version enumerates all the options (set to their def
                         'source': '{appdir}/styles/{template}.less',
                         'output': '{appdir}/styles/{template}.css',
                         'command': [ shutil.which('lessc'), '--source-map', '{appdir}/styles/{template}.less', '{appdir}/styles/{template}.css' ],
+                        'enabled': True,
                     },
 
                     # generates links for app/styles/template.css
@@ -83,6 +84,7 @@ The following more-detailed version enumerates all the options (set to their def
                         'group': 'styles',
                         'filename': '{appdir}/styles/{template}.css',
                         'skip_duplicates': True,
+                        'enabled': True,
                     },
 
                     # generates links for app/scripts/template.js
@@ -91,11 +93,23 @@ The following more-detailed version enumerates all the options (set to their def
                         'group': 'scripts',
                         'filename': '{appdir}/scripts/{template}.js',
                         'async': False,
+                        'enabled': True,
+                    },
+
+                    # generates links for webpack bundles (see DMP's webpack page)
+                    {
+                        'provider': 'django_mako_plus.AppJsBundleProvider',
+                        'path': '{appname}/scripts/__bundle__.js',
+                        'async': False,
+                        'enabled': True,
                     },
                 ],
             }
         }
     ]
+
+Example: Running a Transpiler
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 As an example, consider the `Transcrypt files <https://www.transcrypt.org/>`_ project, which transpiles Python code into Javascript. It lets you write browser scripts in our favorite language (note the source looks for ``.py`` files. The provider settings tells DMP to compile your Transcrypt files when needed. The first provider transpiles the source, and the second one creates the ``<script>`` link to the output file.
 
@@ -124,6 +138,25 @@ As an example, consider the `Transcrypt files <https://www.transcrypt.org/>`_ pr
             }
         }
     ]
+
+
+Dev vs. Prod
+-------------------------------
+
+Providers are triggered by a call to ``${ django_mako_plus.links(self) }``.  By default, they run in both development and production mode.
+
+However, you may need different settings in the two modes.  For example, certain providers may only be needed when ``DEBUG=True``, or you may need have options values (such as the ``filename`` pattern on link providers) for production mode.
+
+Every provider has an ``enabled`` boolean option that sets whether it should be active or not.  Clever use of this variable can make providers activate under different circumstances.  The following setting uses ``settings.DEBUG`` to run the ``AppJsBundleProvider`` only at production time:
+
+::
+
+    {
+        'provider': 'django_mako_plus.AppJsBundleProvider',
+        'path': STATIC_URL + '{appname}/scripts/__bundle__.js',
+        'enabled': not DEBUG,
+    }
+
 
 
 Custom Providers
