@@ -33,6 +33,41 @@ Additionally, be sure your ``package.json`` file contains an entry to build with
 
 All of these steps are explained on the `Webpack <https://webpack.js.org/>`_ web site.
 
+settings.py
+------------------------
+
+By default, the ``dmp_webpack`` management command finds JS files using ``JsLinkProvider`` -- the same class that DMP normally uses to match .js files.  If you are using the default providers, move along. This part is just for those who have customized things.
+
+If you've defined custom providers in your DMP options in settings.py, you may need to replicate those changes in the ``WEBPACK_PROVIDERS`` list.  This list is defined the same way as the normal ``CONTENT_PROVIDERS`` list.  Following is an example:
+
+::
+
+    TEMPLATES = [
+        {
+            'NAME': 'django_mako_plus',
+            'BACKEND': 'django_mako_plus.MakoTemplates',
+            'APP_DIRS': True,
+            'OPTIONS': {
+                # these are using during a `python manage.py dmp_webpack` run - these are the ones you should customize (if desired)
+                # the JS files found by these providers are the ones placed in __entry__.js
+                # the providers listed here should extend django_mako_plus.LinkProvider
+                'WEBPACK_PROVIDERS': [
+                    { 'provider': 'django_mako_plus.JsLinkProvider' },       # generates links for app/scripts/template.js
+                ],
+                # these are used at runtime (not during __entry__.js creation) and
+                # are listed here for completeness - they don't affect the dmp_webpack run
+                'CONTENT_PROVIDERS': [
+                    { 'provider': 'django_mako_plus.JsContextProvider' },    # adds JS context - should be listed first
+                    { 'provider': 'django_mako_plus.CssLinkProvider' },      # generates links for app/styles/template.css
+                    { 'provider': 'django_mako_plus.JsLinkProvider' },       # generates links for app/scripts/template.js
+                    { 'provider': 'django_mako_plus.AppJsBundleProvider' },  # generates links for app script bundles created by `python manage.py dmp_webpack`
+                ],
+            }
+        }
+    ]
+
+
+
 Entry File
 ---------------------------
 
