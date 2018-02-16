@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
+from mako.exceptions import MakoException
 from django_mako_plus.util import DMP_OPTIONS, get_dmp_app_configs
-
 from django_mako_plus.provider import create_mako_context
 from django_mako_plus.provider.runner import ProviderRun, create_factories
 from django_mako_plus.util import get_dmp_instance, split_app
@@ -82,22 +82,28 @@ class Command(BaseCommand):
 
     def create_entry(self, config):
         '''Creates a webpack __entry__.js file in the given app'''
+        self.message('{}/'.format(config.name))
         templates_dir = os.path.join(config.path, 'templates')
         entry_filename = os.path.join(config.path, 'scripts', '__entry__.js')
         # map templates to their scripts
         page_map = OrderedDict()
         for template_name in os.listdir(templates_dir):
             if os.path.isfile(os.path.join(os.path.join(templates_dir, template_name))):
-                template_obj = get_dmp_instance().get_template_loader(config, create=True).get_mako_template(template_name)
+                try:
+                    template_obj = get_dmp_instance().get_template_loader(config, create=True).get_mako_template(template_name)
+                except MakoException as e:
+                    self.message('\t{}: Mako could not compile (not a template?)'.format(template_name), 3)
+                    continue
                 pages = self.template_scripts(template_obj)
                 page_map.update(pages)
+                self.message('\t{}: {}'.format(template_name, pages), 3)
         # write the file
         if not self.options['overwrite'] and os.path.exists(entry_filename):
-            raise ValueError('Refusing to destroy existing file: %s.  Use --overwrite option or remove the file.' % (entry_filename,))
+            raise ValueError('\tRefusing to destroy existing file: {} (use --overwrite option or remove the file)'.format(entry_filename), 1)
         if len(page_map) == 0:
-            self.message('Templates in app {} had no matching scripts'.format(config.name))
+            self.message('\tno matching scripts')
         else:
-            self.message('Templates in app {} required {} script(s); creating {}'.format(config.name, len(page_map), os.path.relpath(entry_filename, settings.BASE_DIR)))
+            self.message('\twriting {} matching templates in {}'.format(len(page_map), os.path.relpath(entry_filename, settings.BASE_DIR)))
             with open(entry_filename, 'w') as fout:
                 fout.write('(context => {\n')
                 for page, scripts in page_map.items():
@@ -109,16 +115,19 @@ class Command(BaseCommand):
 
 
     def template_scripts(self, template_obj):
-        '''Maps the scripts used by the given template and its ancestors'''
-        # for this algorithm to work, providers must populate the provider data dictionary like this example.
-        # the built-in JsLinkProvider does this already.
-        # provider_data = {
-        #     'urls': [
-        #         '/static/app/scripts/first.js',
-        #         '/static/app/scripts/second.js',
-        #         ...
-        #     ]
-        # }
+        '''
+        Maps the scripts used by the given template and its ancestors
+
+        For this algorithm to work, providers must populate the provider data dictionary like this example.
+        the built-in JsLinkProvider does this already.
+        provider_data = {
+            'urls': [
+                '/static/app/scripts/first.js',
+                '/static/app/scripts/second.js',
+                ...
+            ]
+        }
+        '''
         mako_context = create_mako_context(template_obj)
         inner_run = ProviderRun(mako_context['self'], factories=self.factories)
         inner_run.get_content()
