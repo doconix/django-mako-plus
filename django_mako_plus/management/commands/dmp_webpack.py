@@ -49,7 +49,6 @@ class Command(BaseCommand):
         )
 
 
-
     def handle(self, *args, **options):
         # save the options for later
         self.options = options
@@ -82,31 +81,19 @@ class Command(BaseCommand):
 
     def create_entry(self, config):
         '''Creates a webpack __entry__.js file in the given app'''
-        self.message('{}/'.format(config.name))
-        templates_dir = os.path.join(config.path, 'templates')
+        self.message('Searching {}/'.format(config.name))
         entry_filename = os.path.join(config.path, 'scripts', '__entry__.js')
-        # map templates to their scripts
-        page_map = OrderedDict()
-        for template_name in os.listdir(templates_dir):
-            if os.path.isfile(os.path.join(os.path.join(templates_dir, template_name))):
-                try:
-                    template_obj = get_dmp_instance().get_template_loader(config, create=True).get_mako_template(template_name)
-                except MakoException as e:
-                    self.message('\t{}: Mako could not compile (not a template?)'.format(template_name), 3)
-                    continue
-                pages = self.template_scripts(template_obj)
-                page_map.update(pages)
-                self.message('\t{}: {}'.format(template_name, pages), 3)
+        script_map = self.generate_script_map(config)
         # write the file
         if not self.options['overwrite'] and os.path.exists(entry_filename):
             raise ValueError('\tRefusing to destroy existing file: {} (use --overwrite option or remove the file)'.format(entry_filename), 1)
-        if len(page_map) == 0:
+        if len(script_map) == 0:
             self.message('\tno matching scripts')
         else:
-            self.message('\twriting {} matching templates in {}'.format(len(page_map), os.path.relpath(entry_filename, settings.BASE_DIR)))
+            self.message('\twriting {} matching templates in {}'.format(len(script_map), os.path.relpath(entry_filename, settings.BASE_DIR)))
             with open(entry_filename, 'w') as fout:
                 fout.write('(context => {\n')
-                for page, scripts in page_map.items():
+                for page, scripts in script_map.items():
                     fout.write('    DMP_CONTEXT.appBundles["%s"] = () => { %s; };\n' % (
                         page,
                         '; '.join([ 'require("%s")' % (s,) for s in scripts ]),
@@ -114,9 +101,36 @@ class Command(BaseCommand):
                 fout.write('})(DMP_CONTEXT.get());\n')
 
 
-    def template_scripts(self, template_obj):
+    def generate_script_map(self, config):
         '''
-        Maps the scripts used by the given template and its ancestors
+        Maps templates in this app to their scripts.  This function iterates through
+        app/templates/* to find the templates in this app.  Returns the following
+        dictionary:
+
+        {
+            'app/template1': [ './scripts/template1.js', './scripts/supertemplate1.js' ],
+            'app/template2': [ './scripts/template2.js', './scripts/supertemplate2.js', './scripts/supersuper2.js' ],
+            ...
+        }
+        '''
+        script_map = OrderedDict()
+        templates_dir = os.path.join(config.path, 'templates')
+        for template_name in os.listdir(templates_dir):
+            if os.path.isfile(os.path.join(os.path.join(templates_dir, template_name))):
+                scripts = self.template_scripts(config, template_name)
+                if len(scripts) > 0:
+                    key = '{}/{}'.format(config.name, os.path.splitext(template_name)[0])
+                    script_map[key] = scripts
+                    self.message('\t{}: {}'.format(key, scripts), 3)
+        return script_map
+
+
+    def template_scripts(self, config, template_name):
+        '''
+        Returns a list of scripts used by the given template object AND its ancestors.
+
+        This runs a ProviderRun on the given template (as if it were being displayed).
+        This allows the WEBPACK_PROVIDERS to provide the JS files to us.
 
         For this algorithm to work, providers must populate the provider data dictionary like this example.
         the built-in JsLinkProvider does this already.
@@ -128,24 +142,17 @@ class Command(BaseCommand):
             ]
         }
         '''
+        template_obj = get_dmp_instance().get_template_loader(config, create=True).get_mako_template(template_name, force=True)
         mako_context = create_mako_context(template_obj)
         inner_run = ProviderRun(mako_context['self'], factories=self.factories)
         inner_run.get_content()
-        pages = {}
+        scripts = []
         for data in inner_run.provider_data:
-            # determine the app and template
-            app_config, template_path = split_app(template_obj.filename)
-            _, filename = template_path.split('/', 1)
-            page, _ = os.path.splitext(filename)
-            # determine the relative location of the urls
-            scripts_dir = os.path.join(app_config.name, 'scripts')
-            scripts = []
+            scripts_dir = os.path.join(config.name, 'scripts')
             for url in data.get('urls', []):
                 url = url.split('?')[0]
                 scripts.append(os.path.join('.', os.path.relpath(url, scripts_dir)))
-            if len(scripts) > 0:
-                pages['{}/{}'.format(app_config.name, page)] = scripts
-        return pages
+        return scripts
 
 
 

@@ -2,5 +2,5 @@
 # This allows it to import into the runtime DMP as well as
 # setup.py during installation.
 
-__version__ = '5.0.7'
+__version__ = '5.0.8'
 

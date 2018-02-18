@@ -1,4 +1,4 @@
-Scripts and Context
+Sending Data to JS
 ================================
 
 In the `tutorial <tutorial_css_js.html>`_, you learned to send context variables to ``*.js`` files using ``jscontext``:
@@ -28,14 +28,42 @@ Second, the ``JsLinkProvider`` adds a script tag for your script--immediately af
 
     <script src="/static/homepage/scripts/index.js?1509480811" data-context="u1234567890abcdef"></script>
 
-|
+Serialization
+------------------------------
 
-    *Your script should immediately get a reference to the context data object*.  The Javascript global variable ``document.currentScript`` points at the correct ``<script>`` tag *on initial script run only*.  If you delay through ``async`` or a ready function, DMP will still most likely get the right context, but in certain cases (see below) you might get another script's context!
+The context dictionary is sent to Javascript using JSON, which places limits on the types of objects you can mark with ``jscontext``.  This normally means only strings, booleans, numbers, lists, and dictionaries are available.
 
-|
+However, there may be times when you need to send "full" objects.  When preparing the JS object, DMP looks for a class method named ``__jscontext__`` in the context values.  If the method exists on a value, DMP calls it and includes the return as the reduced, "JSON-compatible" version of the object.  The following is an example:
 
-Examples
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. code:: python
+
+    class NonJsonObject(object):
+        def __init__(self):
+            # this is a complex, C-based structure
+            self.root = etree.fromString('...')
+
+        def __jscontext__(self):
+            # this return string is what DMP will place in the context
+            return etree.tostring(self.root)
+
+
+When you add a ``NonJsonObject`` instance to the render context, you'll still get the full ``NonJsonObject`` in your template code (since it's running on the server side). But it's reduced with ``instance.__jscontext__()`` to transit to the browser JS runtime:
+
+.. code:: python
+
+    def process_request(request):
+        obj = NonJsonObject()
+        context = {
+            # DMP will call obj.__jscontext__() and send the result to JS
+            jscontext('myobj'): obj,
+        }
+        return request.dmp.render('template.html', context)
+
+
+Referencing the Context
+-----------------------------
+
+*Your script should immediately get a reference to the context data object*.  The Javascript global variable ``document.currentScript`` points at the correct ``<script>`` tag *on initial script run only*.  If you delay through ``async`` or a ready function, DMP will still most likely get the right context, but in certain cases (see below) you might get another script's context!
 
 The following is a template for getting context data.  It retrieves the context immediately and creates a closure for scope:
 

@@ -106,7 +106,7 @@ def split_app(path):
 
 EMPTY = object()
 
-def getdefaultattr(obj, name, default=EMPTY, factory=EMPTY):
+def getdefaultattr(obj, name, default=None, factory=EMPTY):
     '''
     Gets the given attribute from the object,
     creating it with a default or by calling
@@ -116,6 +116,6 @@ def getdefaultattr(obj, name, default=EMPTY, factory=EMPTY):
         return getattr(obj, name)
     except AttributeError:
         pass
-    val = default if default is not EMPTY else factory() if factory is not EMPTY else None
+    val = factory() if factory is not EMPTY else None
     setattr(obj, name, val)
     return val

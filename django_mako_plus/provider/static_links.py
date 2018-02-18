@@ -123,7 +123,10 @@ class JsContextProvider(BaseProvider):
                 'page': provider_run.request.dmp.page if provider_run.request is not None else None,
             },
         }
-        context_data.update({ k: provider_run.context[k] for k in provider_run.context.kwargs if isinstance(k, jscontext) })
+        for k in provider_run.context.kwargs:
+            if isinstance(k, jscontext):
+                value = provider_run.context[k]
+                context_data[k] = value.__jscontext__() if hasattr(value, '__jscontext__') else value
         provider_run.write('<script>')
         provider_run.write('DMP_CONTEXT.set("{version}", "{contextid}", {data}, {templates});'.format(
             version=__version__,
