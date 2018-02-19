@@ -179,8 +179,8 @@ class MakoTemplateAdapter(object):
 
         # PRIMARY FUNCTION: render the template
         template_name = '%s::%s' % (self.mako_template.filename or 'string', def_name or 'body')
-        if log.isEnabledFor(logging.DEBUG):
-            log.debug('rendering template %s', template_name)
+        if log.isEnabledFor(logging.INFO):
+            log.info('rendering template %s', template_name)
         if settings.DEBUG:
             try:
                 content = render_obj.render_unicode(**context_dict)

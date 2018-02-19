@@ -31,12 +31,13 @@ class BaseProvider(object):
         'enabled': True,
     }
 
-    def __init__(self, app_config, template_path, options):
+    def __init__(self, app_config, template_file, options):
         self.app_config = app_config
-        self.template_path = template_path
+        self.template_file = template_file
+        self.template_dir = os.path.abspath(os.path.dirname(self.template_file))
         # this next variable assumes the template is in the "normal" location: app/subdir/
-        parts = os.path.splitext(self.template_path)[0].split(os.path.sep)
-        self.template_name = os.path.sep.join(parts[1:]) if len(parts) > 1 else self.template_path
+        parts = os.path.splitext(self.template_file)[0].split(os.path.sep)
+        self.template_name = os.path.sep.join(parts[1:]) if len(parts) > 1 else self.template_file
         self.options = merge_dicts(self.default_options, options)     # combined options dictionary
 
     @property
@@ -71,14 +72,16 @@ class BaseProvider(object):
         Runs val.format() with some named arguments:
 
         {appname} - The app name for the template being rendered.
-        {template} - The name of the template being rendered, without its extension.
         {appdir} - The app directory for the template being rendered (full path).
+        {template} - The name of the template being rendered, without its extension.
+        {templatedir} - The directory of the current template (full path).
         {staticdir} - The static directory as defined in settings.
         '''
         d = {
             'appname': self.app_config.name,
             'appdir': self.app_config.path,
             'template': self.template_name,
+            'templatedir': self.template_dir,
             'staticdir': getattr(settings, 'STATIC_ROOT', None),
         }
         d.update(extra)

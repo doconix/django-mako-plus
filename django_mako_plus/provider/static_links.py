@@ -1,10 +1,11 @@
 from django.conf import settings
 from django.utils.module_loading import import_string
 
-from ..util import merge_dicts
+from ..util import merge_dicts, log
 from ..version import __version__
 from .base import BaseProvider
 
+import logging
 import os
 import os.path
 import json
@@ -22,21 +23,25 @@ class LinkProvider(BaseProvider):
 
     Special format keywords for use in the options:
         {appname} - The app name for the template being rendered.
-        {template} - The name of the template being rendered, without its extension.
         {appdir} - The app directory for the template being rendered (full path).
+        {template} - The name of the template being rendered, without its extension.
+        {templatedir} - The directory of the current template (full path).
         {staticdir} - The static directory as defined in settings.
     '''
     # the default options are for CSS files
     default_options = merge_dicts(BaseProvider.default_options, {
-        # subclasses override both of these
         'group': 'static.file',
         'filename': '{appdir}/somedir/{template}.static.file',
     })
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.matches = []
-        for fullpath in glob.iglob(self.options_format(self.options['filename'])):
+        file_pat = os.path.normpath(self.options_format(self.options['filename']))
+        if log.isEnabledFor(logging.DEBUG):
+            log.debug('%s searching for %s', self.__class__.__qualname__, file_pat)
+        for fullpath in glob.iglob(file_pat):
+            if log.isEnabledFor(logging.INFO):
+                log.info('found %s', file_pat)
             self.matches.append(FileInfo(
                 os.path.relpath(fullpath, settings.BASE_DIR).replace('\\', '/'),
                 int(os.stat(fullpath).st_mtime),

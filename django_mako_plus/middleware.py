@@ -109,7 +109,7 @@ class RoutingData(object):
 
 
     def __repr__(self):
-        return 'Router: app={}, page={}, module={}, function={}, urlparams={}'.format(
+        return 'RoutingData: app={}, page={}, module={}, function={}, urlparams={}'.format(
              self.app,
              self.page,
              self.module if self.class_obj is None else (self.module + '.' + self.class_obj.__qualname__),

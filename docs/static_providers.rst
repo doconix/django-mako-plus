@@ -27,8 +27,9 @@ The framework is built to be extended for custom file types.  When you call ``li
 Within file location values, each provider recognizes the following tokens:
 
 * ``{appname}`` - The app name for the template being rendered.
-* ``{template}`` - The name of the template being rendered, without its extension.
 * ``{appdir}`` - The app directory for the template being rendered (full path).
+* ``{template}`` - The name of the template being rendered, without its extension.
+* ``{templatedir}`` - The directory of the current template (full path).
 * ``{staticdir}`` - The static directory as defined in settings.
 
 Order Matters
@@ -61,7 +62,8 @@ The following more-detailed version enumerates all the options (set to their def
                         'provider': 'django_mako_plus.CompileScssProvider'
                         'group': 'styles',
                         'source': '{appdir}/styles/{template}.scss',
-                        'output': '{appdir}/styles/{template}.css',
+                        'target': '{appdir}/styles/{template}.css',
+                        'needs_compile': lambda source, target: not os.path.exists(target) or os.stat(source).st_mtime > os.stat(target).st_mtime,
                         'command': [ shutil.which('scss'), '--unix-newlines', '{appdir}/styles/{template}.scss', '{appdir}/styles/{template}.css' ],
                         'enabled': True,
                     },{
@@ -69,7 +71,8 @@ The following more-detailed version enumerates all the options (set to their def
                         'provider': 'django_mako_plus.CompileLessProvider'
                         'group': 'styles',
                         'source': '{appdir}/styles/{template}.less',
-                        'output': '{appdir}/styles/{template}.css',
+                        'target': '{appdir}/styles/{template}.css',
+                        'needs_compile': lambda source, target: not os.path.exists(target) or os.stat(source).st_mtime > os.stat(target).st_mtime,
                         'command': [ shutil.which('lessc'), '--source-map', '{appdir}/styles/{template}.less', '{appdir}/styles/{template}.css' ],
                         'enabled': True,
                     },{
@@ -116,7 +119,7 @@ As an example, consider the `Transcrypt files <https://www.transcrypt.org/>`_ pr
                         'provider': 'django_mako_plus.CompileProvider',
                         'group': 'scripts',
                         'source': '{appdir}/scripts/{template}.py',
-                        'output': '{appdir}/scripts/__javascript__/{template}.js',
+                        'target': '{appdir}/scripts/__javascript__/{template}.js',
                         'command': [ 'transcrypt', '--map', '--build', '--nomin', '{appdir}/scripts/{template}.py' ],
                     },
                     {

@@ -38,8 +38,8 @@ class ProviderFactory(object):
             raise ImproperlyConfigured('The Django Mako Plus template OPTIONS were not set up correctly in settings.py; The `provider` value must be a subclass of django_mako_plus.BaseProvider.')
         self.options = merge_dicts(self.provider_class.default_options, provider_def)
 
-    def create(self, app_config, template_path):
-        return self.provider_class(app_config, template_path, self.options)
+    def create(self, app_config, template_file):
+        return self.provider_class(app_config, template_file, self.options)
 
 
 
@@ -79,8 +79,8 @@ class ProviderRun(object):
             # check if already attached to template, create if necessary
             providers = getattr(tself.template, PROVIDERS_KEY, None)
             if providers is None:
-                app_config, template_path = split_app(tself.template.filename)
-                providers = [ pf.create(app_config, template_path) for pf in factories ]
+                app_config, template_file = split_app(tself.template.filename)
+                providers = [ pf.create(app_config, template_file) for pf in factories ]
                 if not settings.DEBUG: # attach to template for speed in production mode
                     setattr(tself.template, PROVIDERS_KEY, providers)
             self.chain.append(providers)

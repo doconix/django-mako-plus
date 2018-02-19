@@ -19,8 +19,9 @@ class AppJsBundleProvider(LinkProvider):
 
     Special format keywords for use in the options:
         {appname} - The app name for the template being rendered.
-        {template} - The name of the template being rendered, without its extension.
         {appdir} - The app directory for the template being rendered (full path).
+        {template} - The name of the template being rendered, without its extension.
+        {templatedir} - The directory of the current template (full path).
         {staticdir} - The static directory as defined in settings.
     '''
     default_options = merge_dicts(LinkProvider.default_options, {
