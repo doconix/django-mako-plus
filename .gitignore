@@ -2,7 +2,7 @@
 *.pot
 *.pyc
 .DS_Store
-cached_templates/
+__dmpcache__
 django.mo
 *.tfile
 .emacs-project
