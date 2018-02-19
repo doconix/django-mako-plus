@@ -13,7 +13,7 @@ class Tester(TestCase):
         self.assertTrue(b'tests/scripts/static_files.js' in resp.content)
         self.assertTrue(b'tests/styles/static_files.css' in resp.content)
         # jscontext output
-        self.assertTrue(b'DMP_CONTEXT.addScript' in resp.content)
+        self.assertTrue(b'DMP_CONTEXT.set' in resp.content)
         self.assertTrue(b'data-context' in resp.content)
         self.assertTrue(b'key1' in resp.content)
         self.assertTrue(b'value1' in resp.content)

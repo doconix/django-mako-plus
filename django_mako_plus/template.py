@@ -36,6 +36,7 @@ class MakoTemplateLoader(object):
         the DMP cache.  Instead, call get_template_loader() or
         get_template_loader_for_path().
         '''
+        self.app_path = app_path
         # calculate the template directory and check that it exists
         if template_subdir is None:  # None skips adding the template_subdir
             self.template_dir = os.path.abspath(app_path)

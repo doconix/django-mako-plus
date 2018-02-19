@@ -94,7 +94,7 @@ class MakoTemplates(BaseEngine):
         Compiles a template from the given string.
         This is one of the required methods of Django template engines.
         '''
-        mako_template = Template(template_code, imports=DMP_OPTION['RUNTIME_TEMPLATE_IMPORTS'], input_encoding=DMP_OPTIONS['RUNTIME_TEMPLATE_ENCODING'])
+        mako_template = Template(template_code, imports=DMP_OPTIONS['RUNTIME_TEMPLATE_IMPORTS'], input_encoding=DMP_OPTIONS['DEFAULT_TEMPLATE_ENCODING'])
         return MakoTemplateAdapter(mako_template)
 
 

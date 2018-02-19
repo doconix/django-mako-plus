@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.utils.module_loading import import_string
 
-from ..util import merge_dicts, log
+from ..util import merge_dicts, flatten, log
 from ..version import __version__
 from .base import BaseProvider
 
@@ -14,55 +14,46 @@ from collections import namedtuple
 
 
 
-FileInfo = namedtuple('FileInfo', ( 'url', 'mtime' ))
-
 class LinkProvider(BaseProvider):
     '''
     Renders links like <link> and <script> based on the name of the template
     and supertemplates.
-
-    Special format keywords for use in the options:
-        {appname} - The app name for the template being rendered.
-        {appdir} - The app directory for the template being rendered (full path).
-        {template} - The name of the template being rendered, without its extension.
-        {templatedir} - The directory of the current template (full path).
-        {staticdir} - The static directory as defined in settings.
     '''
     # the default options are for CSS files
     default_options = merge_dicts(BaseProvider.default_options, {
         'group': 'static.file',
-        'filename': '{appdir}/somedir/{template}.static.file',
+        # function that returns the filename that should be checked and if exists, linked by the provider
+        'filename': lambda pr: 'app/subdir/template.ext',
     })
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.matches = []
-        file_pat = os.path.normpath(self.options_format(self.options['filename']))
+        filepath = self.options['filename'](self)
+        self.filename = os.path.relpath(filepath, settings.BASE_DIR).replace('\\', '/')
         if log.isEnabledFor(logging.DEBUG):
-            log.debug('%s searching for %s', self.__class__.__qualname__, file_pat)
-        for fullpath in glob.iglob(file_pat):
+            log.debug('%s searching for %s', self.__class__.__qualname__, self.filename)
+        try:
+            self.mtime = int(os.stat(filepath).st_mtime)
             if log.isEnabledFor(logging.INFO):
-                log.info('found %s', file_pat)
-            self.matches.append(FileInfo(
-                os.path.relpath(fullpath, settings.BASE_DIR).replace('\\', '/'),
-                int(os.stat(fullpath).st_mtime),
-            ))
+                log.info('found %s', self.filename)
+        except FileNotFoundError:
+            self.mtime = 0
 
 
 class CssLinkProvider(LinkProvider):
     '''Generates a CSS <link>'''
     default_options = merge_dicts(LinkProvider.default_options, {
         'group': 'styles',
-        'filename': '{appdir}/styles/{template}.css',
+        'filename': lambda pr: os.path.join(*flatten(pr.app_config.path, 'styles', pr.subdir_parts[1:], pr.template_name + '.css')),
         'skip_duplicates': True,
     })
 
     def provide(self, provider_run, data):
-        for fi in self.matches:
+        if self.mtime > 0:
             provider_run.write('<link data-context="{contextid}" rel="stylesheet" type="text/css" href="{static}{url}?{version}" />'.format(
                 contextid=provider_run.uid,
                 static=settings.STATIC_URL,
-                url=fi.url,
-                version=provider_run.version_id if provider_run.version_id is not None else fi.mtime,
+                url=self.filename,
+                version=provider_run.version_id if provider_run.version_id is not None else self.mtime,
                 skip_duplicates='true' if self.options['skip_duplicates'] else 'false',
             ))
 
@@ -71,7 +62,7 @@ class JsLinkProvider(LinkProvider):
     '''Generates a JS <script>.'''
     default_options = merge_dicts(LinkProvider.default_options, {
         'group': 'scripts',
-        'filename': '{appdir}/scripts/{template}.js',
+        'filename': lambda pr: os.path.join(*flatten(pr.app_config.path, 'scripts', pr.subdir_parts[1:], pr.template_name + '.js')),
         'async': False,
     })
 
@@ -80,10 +71,10 @@ class JsLinkProvider(LinkProvider):
 
     def provide(self, provider_run, data):
         # delaying printing of tag because the JsContextProvider delays and this must go after it
-        for fi in self.matches:
+        if self.mtime > 0:
             data['urls'].append('{}?{}'.format(
-                fi.url.replace('\\', '/'),
-                provider_run.version_id if provider_run.version_id is not None else fi.mtime,
+                self.filename.replace('\\', '/'),
+                provider_run.version_id if provider_run.version_id is not None else self.mtime,
             ))
 
     def finish(self, provider_run, data):

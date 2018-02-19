@@ -5,13 +5,15 @@ STOP_RENDERING = runtime.STOP_RENDERING
 __M_dict_builtin = dict
 __M_locals_builtin = locals
 _magic_number = 10
-_modified_time = 1492811712.121209
+_modified_time = 1519053308.25155
 _enable_loop = True
-_template_filename = '/Users/conan/Documents/data/programming/django-mako-plus/tests/templates/basic.html'
-_template_uri = 'basic.html'
+_template_filename = '/Users/conan/Documents/data/programming/django-mako-plus/tests/templates/static_files.html'
+_template_uri = 'static_files.html'
 _source_encoding = 'utf-8'
 import django_mako_plus
+import django_mako_plus
 import os, os.path, re, json
+from django_mako_plus import django_syntax, jinja2_syntax, alternate_syntax
 _exports = ['content']
 
 
@@ -49,7 +51,7 @@ def render_content(context,**pageargs):
         def content():
             return render_content(context)
         __M_writer = context.writer()
-        __M_writer('\n    <p>Hello world, this is DMP.</p>\n')
+        __M_writer('\n    <p>Hello world, testing the static files.  See scripts/ and styles/</p\n')
         return ''
     finally:
         context.caller_stack._pop_frame()
@@ -57,6 +59,6 @@ def render_content(context,**pageargs):
 
 """
 __M_BEGIN_METADATA
-{"uri": "basic.html", "line_map": {"52": 3, "58": 52, "36": 1, "29": 0, "46": 3}, "filename": "/Users/conan/Documents/data/programming/django-mako-plus/tests/templates/basic.html", "source_encoding": "utf-8"}
+{"filename": "/Users/conan/Documents/data/programming/django-mako-plus/tests/templates/static_files.html", "uri": "static_files.html", "source_encoding": "utf-8", "line_map": {"48": 3, "60": 54, "54": 3, "38": 1, "31": 0}}
 __M_END_METADATA
 """

@@ -23,55 +23,55 @@ class Tester(TestCase):
         self.assertEqual(resp.status_code, 200)
         req = resp.wsgi_request
         # urlparams should be empty
-        self.assertFalse(req.urlparams)
+        self.assertFalse(req.dmp.urlparams)
         # test each parameter for its default
-        self.assertEqual(req.converted_params['s'], '')
-        self.assertEqual(req.converted_params['i'], 1)
-        self.assertEqual(req.converted_params['f'], 2.0)
-        self.assertFalse(req.converted_params['b'])
-        self.assertIsNone(req.converted_params['ic'])
+        self.assertEqual(req.dmp.converted_params['s'], '')
+        self.assertEqual(req.dmp.converted_params['i'], 1)
+        self.assertEqual(req.dmp.converted_params['f'], 2.0)
+        self.assertFalse(req.dmp.converted_params['b'])
+        self.assertIsNone(req.dmp.converted_params['ic'])
 
     def test_set_params(self):
         resp = self.client.get('/tests/converter/mystr/3/4/1/2/')
         self.assertEqual(resp.status_code, 200)
         req = resp.wsgi_request
-        self.assertEqual(req.converted_params['s'], 'mystr')
-        self.assertEqual(req.converted_params['i'], 3)
-        self.assertEqual(req.converted_params['f'], 4.0)
-        self.assertTrue(req.converted_params['b'])
-        self.assertEqual(req.converted_params['ic'], IceCream.objects.get(pk=2))
+        self.assertEqual(req.dmp.converted_params['s'], 'mystr')
+        self.assertEqual(req.dmp.converted_params['i'], 3)
+        self.assertEqual(req.dmp.converted_params['f'], 4.0)
+        self.assertTrue(req.dmp.converted_params['b'])
+        self.assertEqual(req.dmp.converted_params['ic'], IceCream.objects.get(pk=2))
 
     def test_boolean(self):
         resp = self.client.get('/tests/converter/s/3/4//-/')
         self.assertEqual(resp.status_code, 200)
         req = resp.wsgi_request
-        self.assertFalse(req.converted_params['b'])
+        self.assertFalse(req.dmp.converted_params['b'])
         resp = self.client.get('/tests/converter/s/3/4/-/-/')
         self.assertEqual(resp.status_code, 200)
         req = resp.wsgi_request
-        self.assertFalse(req.converted_params['b'])
+        self.assertFalse(req.dmp.converted_params['b'])
         resp = self.client.get('/tests/converter/s/3/4/0/-/')
         self.assertEqual(resp.status_code, 200)
         req = resp.wsgi_request
-        self.assertFalse(req.converted_params['b'])
+        self.assertFalse(req.dmp.converted_params['b'])
         resp = self.client.get('/tests/converter/s/3/4/T/-/')
         self.assertEqual(resp.status_code, 200)
         req = resp.wsgi_request
-        self.assertTrue(req.converted_params['b'])
+        self.assertTrue(req.dmp.converted_params['b'])
         resp = self.client.get('/tests/converter/s/3/4/T/%20/')
         self.assertEqual(resp.status_code, 200)
         req = resp.wsgi_request
-        self.assertTrue(req.converted_params['b'])
+        self.assertTrue(req.dmp.converted_params['b'])
 
     def test_float(self):
         resp = self.client.get('/tests/converter/s/3/4/1/-/')
         self.assertEqual(resp.status_code, 200)
         req = resp.wsgi_request
-        self.assertEqual(req.converted_params['f'], 4.0)
+        self.assertEqual(req.dmp.converted_params['f'], 4.0)
         resp = self.client.get('/tests/converter/s/3/4.0/1/-/')
         self.assertEqual(resp.status_code, 200)
         req = resp.wsgi_request
-        self.assertEqual(req.converted_params['f'], 4.0)
+        self.assertEqual(req.dmp.converted_params['f'], 4.0)
         # bad value
         resp = self.client.get('/tests/converter/s/3/bad/1/-/')
         self.assertEqual(resp.status_code, 404)
@@ -80,7 +80,7 @@ class Tester(TestCase):
         resp = self.client.get('/tests/converter/s/3/4/1/-/')
         self.assertEqual(resp.status_code, 200)
         req = resp.wsgi_request
-        self.assertEqual(req.converted_params['i'], 3)
+        self.assertEqual(req.dmp.converted_params['i'], 3)
         # bad value
         resp = self.client.get('/tests/converter/s/bad/4/1/-/')
         self.assertEqual(resp.status_code, 404)
@@ -90,12 +90,12 @@ class Tester(TestCase):
         resp = self.client.get('/tests/converter/s/3/4/1/-/')
         self.assertEqual(resp.status_code, 200)
         req = resp.wsgi_request
-        self.assertIsNone(req.converted_params['ic'])
+        self.assertIsNone(req.dmp.converted_params['ic'])
         # should pull id=1
         resp = self.client.get('/tests/converter/s/3/4/1/1/')
         self.assertEqual(resp.status_code, 200)
         req = resp.wsgi_request
-        self.assertEqual(req.converted_params['ic'], IceCream.objects.get(id=1))
+        self.assertEqual(req.dmp.converted_params['ic'], IceCream.objects.get(id=1))
         # there is no id=5
         resp = self.client.get('/tests/converter/s/3/4/1/5/')
         self.assertEqual(resp.status_code, 404)
@@ -108,18 +108,18 @@ class Tester(TestCase):
         self.assertEqual(resp.status_code, 200)
         req = resp.wsgi_request
         # urlparams should be empty
-        self.assertFalse(req.urlparams)
+        self.assertFalse(req.dmp.urlparams)
         # test each parameter for its default
-        self.assertIsNone(req.converted_params['d'])
-        self.assertIsNone(req.converted_params['dt'])
-        self.assertIsNone(req.converted_params['dttm'])
+        self.assertIsNone(req.dmp.converted_params['d'])
+        self.assertIsNone(req.dmp.converted_params['dt'])
+        self.assertIsNone(req.dmp.converted_params['dttm'])
 
     def test_datetime(self):
         resp = self.client.get('/tests/converter.more_testing/1.23/2026-10-25/2026-10-25%2014:30:59/3/')
         self.assertEqual(resp.status_code, 200)
         req = resp.wsgi_request
-        self.assertIsInstance(req.converted_params['dt'], datetime.date)
-        self.assertIsInstance(req.converted_params['dttm'], datetime.datetime)
+        self.assertIsInstance(req.dmp.converted_params['dt'], datetime.date)
+        self.assertIsInstance(req.dmp.converted_params['dttm'], datetime.datetime)
         # bad date
         resp = self.client.get('/tests/converter.more_testing/1.23/abcd/2026-10-25%2014:30:59/3/')
         self.assertEqual(resp.status_code, 404)
@@ -131,8 +131,8 @@ class Tester(TestCase):
         resp = self.client.get('/tests/converter.more_testing/1.23/2026-10-25/2026-10-25%2014:30:59/3/')
         self.assertEqual(resp.status_code, 200)
         req = resp.wsgi_request
-        self.assertIsInstance(req.converted_params['d'], decimal.Decimal)
-        self.assertEqual(req.converted_params['d'], decimal.Decimal('1.23'))
+        self.assertIsInstance(req.dmp.converted_params['d'], decimal.Decimal)
+        self.assertEqual(req.dmp.converted_params['d'], decimal.Decimal('1.23'))
         # bad decimal
         resp = self.client.get('/tests/converter.more_testing/abcd/2026-10-25/2026-10-25%2014:30:59/3/')
         self.assertEqual(resp.status_code, 404)
@@ -140,15 +140,15 @@ class Tester(TestCase):
         resp = self.client.get('/tests/converter.more_testing/-/2026-10-25/2026-10-25%2014:30:59/3/')
         self.assertEqual(resp.status_code, 200)
         req = resp.wsgi_request
-        self.assertIsNone(req.converted_params['d'])
+        self.assertIsNone(req.dmp.converted_params['d'])
 
     def test_override_with_myint(self):
         set_default_converter(TestingConverter2)
         resp = self.client.get('/tests/converter.more_testing/-/-/-/3/')
         self.assertEqual(resp.status_code, 200)
         req = resp.wsgi_request
-        self.assertEqual(req.converted_params['mi'], 103)
-        self.assertIsInstance(req.converted_params['mi'], MyInt)
+        self.assertEqual(req.dmp.converted_params['mi'], 103)
+        self.assertIsInstance(req.dmp.converted_params['mi'], MyInt)
 
     def test_custom_convert_function(self):
         resp = self.client.get('/tests/converter.custom_convert_function/1/2/3/4/5/6/')
@@ -162,16 +162,16 @@ class Tester(TestCase):
         resp = self.client.get('/tests/converter.class_based/1/2/')
         self.assertEqual(resp.status_code, 200)
         req = resp.wsgi_request
-        self.assertEquals(req.urlparams, [ '1', '2' ])
-        self.assertEquals(req.converted_params['i'], 1)
-        self.assertEquals(req.converted_params['f'], 2)
+        self.assertEquals(req.dmp.urlparams, [ '1', '2' ])
+        self.assertEquals(req.dmp.converted_params['i'], 1)
+        self.assertEquals(req.dmp.converted_params['f'], 2)
         # POST
         resp = self.client.post('/tests/converter.class_based/1/2/')
         self.assertEqual(resp.status_code, 200)
         req = resp.wsgi_request
-        self.assertEquals(req.urlparams, [ '1', '2' ])
-        self.assertEquals(req.converted_params['i'], 1)
-        self.assertEquals(req.converted_params['f'], 2)
+        self.assertEquals(req.dmp.urlparams, [ '1', '2' ])
+        self.assertEquals(req.dmp.converted_params['i'], 1)
+        self.assertEquals(req.dmp.converted_params['f'], 2)
 
 
 
@@ -184,9 +184,9 @@ class Tester(TestCase):
 class TestingConverter(DefaultConverter):
     def __call__(self, value, parameter, task):
         value = super().__call__(value, parameter, task)
-        if not hasattr(task.request, 'converted_params'):
-            task.request.converted_params = {}
-        task.request.converted_params[parameter.name] = value
+        if not hasattr(task.request.dmp, 'converted_params'):
+            task.request.dmp.converted_params = {}
+        task.request.dmp.converted_params[parameter.name] = value
         return value
 
 

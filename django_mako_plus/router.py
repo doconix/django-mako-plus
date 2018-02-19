@@ -265,6 +265,7 @@ class ViewFunctionRouter(object):
 class ClassBasedRouter(object):
     '''Router for class-based views.'''
     def __init__(self, module, instance, decorator_kwargs):
+        self.instance = instance
         self.endpoints = {}
         for mthd_name in instance.http_method_names:  # get parameters from the first http-based method (get, post, etc.)
             func = getattr(instance, mthd_name, None)
@@ -280,8 +281,13 @@ class ClassBasedRouter(object):
         return HttpResponseNotAllowed([ e.upper() for e in self.endpoints.keys() ])
 
 
+    @property
+    def name(self):
+        return self.instance.__class__.__qualname__
+
+
     def message(self, request):
-        return 'class-based view function {}.{}.{}'.format(request.dmp.module, request.dmp.class_obj, request.dmp.function)
+        return 'class-based view function {}.{}.{}'.format(request.dmp.module, self.name, request.dmp.function)
 
 
 

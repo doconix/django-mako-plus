@@ -112,7 +112,7 @@ class RoutingData(object):
         return 'RoutingData: app={}, page={}, module={}, function={}, urlparams={}'.format(
              self.app,
              self.page,
-             self.module if self.class_obj is None else (self.module + '.' + self.class_obj.__qualname__),
+             self.module if self.class_obj is None else (self.module + '.' + self.class_obj.name),
              self.function,
              self.urlparams,
         )

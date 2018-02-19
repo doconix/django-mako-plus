@@ -5,11 +5,12 @@ STOP_RENDERING = runtime.STOP_RENDERING
 __M_dict_builtin = dict
 __M_locals_builtin = locals
 _magic_number = 10
-_modified_time = 1492824694.038183
+_modified_time = 1519053308.199994
 _enable_loop = True
 _template_filename = '/Users/conan/Documents/data/programming/django-mako-plus/tests/templates/filters.html'
 _template_uri = 'filters.html'
 _source_encoding = 'utf-8'
+import django_mako_plus
 import django_mako_plus
 import os, os.path, re, json
 from django_mako_plus import django_syntax, jinja2_syntax, alternate_syntax
@@ -55,6 +56,6 @@ def render_body(context,**pageargs):
 
 """
 __M_BEGIN_METADATA
-{"source_encoding": "utf-8", "line_map": {"48": 3, "50": 7, "19": 0, "39": 1, "56": 50, "28": 5}, "uri": "filters.html", "filename": "/Users/conan/Documents/data/programming/django-mako-plus/tests/templates/filters.html"}
+{"filename": "/Users/conan/Documents/data/programming/django-mako-plus/tests/templates/filters.html", "uri": "filters.html", "source_encoding": "utf-8", "line_map": {"49": 3, "51": 7, "20": 0, "40": 1, "57": 51, "29": 5}}
 __M_END_METADATA
 """

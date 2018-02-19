@@ -18,6 +18,8 @@ DEBUG = True
 ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
     'django_mako_plus',
     'tests',
 ]
@@ -34,39 +36,11 @@ TEMPLATES = [
         'NAME': 'django_mako_plus',
         'BACKEND': 'django_mako_plus.MakoTemplates',
         'OPTIONS': {
-            # functions to automatically add variables to the params/context before templates are rendered
-            'CONTEXT_PROCESSORS': [
-                'django.template.context_processors.static',            # adds "STATIC_URL" from settings.py
-                'django.template.context_processors.debug',             # adds debug and sql_queries
-                'django.template.context_processors.request',           # adds "request" object
-                'django_mako_plus.context_processors.settings',         # adds "settings" dictionary
-            ],
-
-            # identifies where the Mako template cache will be stored, relative to each template directory
-            'TEMPLATES_CACHE_DIR': '.cached_templates',
-
-            # the default app and page to render in Mako when the url is too short
-            'DEFAULT_PAGE': 'index',
             'DEFAULT_APP': 'tests',
-
-            # the default encoding of template files
-            'DEFAULT_TEMPLATE_ENCODING': 'utf-8',
-
-            # these are included in every template by default - if you put your most-used libraries here, you won't have to import them exlicitly in templates
             'DEFAULT_TEMPLATE_IMPORTS': [
                 'import django_mako_plus',
                 'import os, os.path, re, json',
                 'from django_mako_plus import django_syntax, jinja2_syntax, alternate_syntax',
-            ],
-
-            # whether to send the custom DMP signals -- set to False for a slight speed-up in router processing
-            # determines whether DMP will send its custom signals during the process
-            'SIGNALS': False,
-
-            # see the DMP online tutorial for information about this setting
-            # it can normally be empty
-            'TEMPLATES_DIRS': [
-                # '/var/somewhere/templates/',
             ],
         },
     },

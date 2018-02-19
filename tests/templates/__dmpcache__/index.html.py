@@ -5,11 +5,12 @@ STOP_RENDERING = runtime.STOP_RENDERING
 __M_dict_builtin = dict
 __M_locals_builtin = locals
 _magic_number = 10
-_modified_time = 1492874605.229856
+_modified_time = 1519053308.209973
 _enable_loop = True
-_template_filename = '/Users/conan/Documents/data/programming/django-mako-plus/tests/templates/index.basic.html'
-_template_uri = 'index.basic.html'
+_template_filename = '/Users/conan/Documents/data/programming/django-mako-plus/tests/templates/index.html'
+_template_uri = 'index.html'
 _source_encoding = 'utf-8'
+import django_mako_plus
 import django_mako_plus
 import os, os.path, re, json
 from django_mako_plus import django_syntax, jinja2_syntax, alternate_syntax
@@ -33,6 +34,7 @@ def render_body(context,**pageargs):
         __M_locals = __M_dict_builtin(pageargs=pageargs)
         def content():
             return render_content(context._locals(__M_locals))
+        current_time = context.get('current_time', UNDEFINED)
         __M_writer = context.writer()
         __M_writer('\n\n')
         if 'parent' not in context._data or not hasattr(context._data['parent'], 'content'):
@@ -49,8 +51,11 @@ def render_content(context,**pageargs):
     try:
         def content():
             return render_content(context)
+        current_time = context.get('current_time', UNDEFINED)
         __M_writer = context.writer()
-        __M_writer('\n    <p>Hello world, this is DMP.</p>\n')
+        __M_writer('\n    <p>Hello world, this is DMP.</p>\n    <p>The current time is ')
+        __M_writer(str( current_time ))
+        __M_writer('.</p>\n')
         return ''
     finally:
         context.caller_stack._pop_frame()
@@ -58,6 +63,6 @@ def render_content(context,**pageargs):
 
 """
 __M_BEGIN_METADATA
-{"filename": "/Users/conan/Documents/data/programming/django-mako-plus/tests/templates/index.basic.html", "source_encoding": "utf-8", "uri": "index.basic.html", "line_map": {"53": 3, "59": 53, "37": 1, "30": 0, "47": 3}}
+{"filename": "/Users/conan/Documents/data/programming/django-mako-plus/tests/templates/index.html", "uri": "index.html", "source_encoding": "utf-8", "line_map": {"64": 58, "49": 3, "39": 1, "56": 3, "57": 5, "58": 5, "31": 0}}
 __M_END_METADATA
 """

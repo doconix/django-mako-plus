@@ -28,7 +28,8 @@ def run_command(*args, raise_exception=True):
         import shutil
         run_command(shutil.which('program'), '-l', '/Users/me/My Documents')
     '''
-    log.info('%s', ' '.join(args))
+    args = [ str(a) for a in args ]
+    log.info('running %s', ' '.join(args))
     p = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE)
     stdout, stderr = p.communicate()
     returninfo = ReturnInfo(p.returncode, stdout.decode('utf8'), stderr.decode('utf8'))
@@ -44,6 +45,6 @@ class CommandError(Exception):
         self.command = command
         self.returninfo = returninfo
         super().__init__('CommandError')
-        
+
     def __str__(self):
         return '[return value: {}] {}; {}'.format(self.returninfo.code, self.returninfo.stdout[:1000], self.returninfo.stderr[:1000])

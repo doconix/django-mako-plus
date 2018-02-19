@@ -2,8 +2,9 @@ from django.apps import apps
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 
-import base64, os, os.path
-
+import base64
+import os, os.path
+import collections
 
 # this is populated with the dictionary of options in engine.py when
 # Django initializes the template engine
@@ -80,6 +81,14 @@ def merge_dicts(*dicts):
     return merged
 
 
+def flatten(*args):
+    '''Generator that recursively flattens embedded lists, tuples, etc.'''
+    for arg in args:
+        if isinstance(arg, collections.Iterable) and not isinstance(arg, (str, bytes)):
+            yield from flatten(*arg)
+        else:
+            yield arg
+
 
 def split_app(path):
     '''
@@ -101,7 +110,6 @@ def split_app(path):
         if app_config is not None:
             return app_config, os.path.sep.join(parts[i:])
     return None, path
-
 
 
 EMPTY = object()
