@@ -5,6 +5,7 @@ from .static_links import LinkProvider
 
 import os
 import os.path
+import posixpath
 
 
 EMPTY_SET = set()
@@ -26,7 +27,7 @@ class AppJsBundleProvider(LinkProvider):
     def provide(self, provider_run, data):
         # instead of adding a script tag for each template (like the JsLinkProider does),
         # we just need to trigger the function for this page from the function
-        data['templates'].append('{}/{}'.format(self.app_config.name, self.template_name))
+        data['templates'].append(posixpath.join(*flatten(self.app_config.name, self.subdir_parts[1:], self.template_name)))
 
     def finish(self, provider_run, data):
         '''Runs only on the main template in the chain.'''
