@@ -30,11 +30,11 @@ class LinkProvider(BaseProvider):
         filepath = self.options['filename'](self)
         self.filename = os.path.relpath(filepath, settings.BASE_DIR).replace('\\', '/')
         if log.isEnabledFor(logging.DEBUG):
-            log.debug('%s searching for %s', self.__class__.__qualname__, self.filename)
+            log.debug('[%s] %s searching for %s', self.template_file, self.__class__.__qualname__, self.filename)
         try:
             self.mtime = int(os.stat(filepath).st_mtime)
             if log.isEnabledFor(logging.INFO):
-                log.info('found %s', self.filename)
+                log.info('[%s] found %s', self.template_file, self.filename)
         except FileNotFoundError:
             self.mtime = 0
 
@@ -48,14 +48,15 @@ class CssLinkProvider(LinkProvider):
     })
 
     def provide(self, provider_run, data):
-        if self.mtime > 0:
-            provider_run.write('<link data-context="{contextid}" rel="stylesheet" type="text/css" href="{static}{url}?{version}" />'.format(
-                contextid=provider_run.uid,
-                static=settings.STATIC_URL,
-                url=self.filename,
-                version=provider_run.version_id if provider_run.version_id is not None else self.mtime,
-                skip_duplicates='true' if self.options['skip_duplicates'] else 'false',
-            ))
+        if self.mtime == 0:
+            return
+        provider_run.write('<link data-context="{contextid}" rel="stylesheet" type="text/css" href="{static}{url}?{version}" />'.format(
+            contextid=provider_run.uid,
+            static=settings.STATIC_URL,
+            url=self.filename,
+            version=provider_run.version_id if provider_run.version_id is not None else self.mtime,
+            skip_duplicates='true' if self.options['skip_duplicates'] else 'false',
+        ))
 
 
 class JsLinkProvider(LinkProvider):
@@ -71,11 +72,12 @@ class JsLinkProvider(LinkProvider):
 
     def provide(self, provider_run, data):
         # delaying printing of tag because the JsContextProvider delays and this must go after it
-        if self.mtime > 0:
-            data['urls'].append('{}?{}'.format(
-                self.filename.replace('\\', '/'),
-                provider_run.version_id if provider_run.version_id is not None else self.mtime,
-            ))
+        if self.mtime == 0:
+            return
+        data['urls'].append('{}?{}'.format(
+            self.filename.replace('\\', '/'),
+            provider_run.version_id if provider_run.version_id is not None else self.mtime,
+        ))
 
     def finish(self, provider_run, data):
         for url in data['urls']:

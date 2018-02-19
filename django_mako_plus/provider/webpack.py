@@ -1,13 +1,10 @@
 from django.conf import settings
-from django.utils.module_loading import import_string
 
-from ..util import merge_dicts, getdefaultattr
-from ..version import __version__
+from ..util import merge_dicts, getdefaultattr, flatten
 from .static_links import LinkProvider
 
 import os
 import os.path
-import json
 
 
 EMPTY_SET = set()
@@ -16,46 +13,40 @@ EMPTY_SET = set()
 class AppJsBundleProvider(LinkProvider):
     '''
     Generates a JS <script> for the app-level bundle.
-
-    Special format keywords for use in the options:
-        {appname} - The app name for the template being rendered.
-        {appdir} - The app directory for the template being rendered (full path).
-        {template} - The name of the template being rendered, without its extension.
-        {templatedir} - The directory of the current template (full path).
-        {staticdir} - The static directory as defined in settings.
     '''
     default_options = merge_dicts(LinkProvider.default_options, {
         'group': 'scripts',
-        'filename': '{appdir}/scripts/__bundle__.js',
+        'filename': lambda pr: os.path.join(*flatten(pr.app_config.path, 'scripts', '__bundle__.js')),
         'async': False,
     })
 
     def start(self, provider_run, data):
-        data['scripts'] = []
+        data['templates'] = []
 
     def provide(self, provider_run, data):
-        # call the function for this view every time
-        key = '{}/{}'.format(self.app_config.name, self.template_name)
-        data['scripts'].append('if (DMP_CONTEXT.appBundles["%s"]) { DMP_CONTEXT.appBundles["%s"]() };' % (key, key))
+        # instead of adding a script tag for each template (like the JsLinkProider does),
+        # we just need to trigger the function for this page from the function
+        data['templates'].append('{}/{}'.format(self.app_config.name, self.template_name))
 
     def finish(self, provider_run, data):
         '''Runs only on the main template in the chain.'''
-        for fi in self.matches:
-            # only print the first instance of a given href (one per request)
-            js_done = getdefaultattr(provider_run.request, '__dmp_AppJsBundleProvider__', factory=set) if provider_run.request is not None else EMPTY_SET
-            if fi.url not in js_done:
-                provider_run.write('<script data-context="{contextid}" src="{static}{href}?{version}"{async}></script>'.format(
-                    contextid=provider_run.uid,
-                    static=settings.STATIC_URL,
-                    href=fi.url,
-                    version=provider_run.version_id if provider_run.version_id is not None else fi.mtime,
-                    async=' async="async"' if self.options['async'] else '',
-                ))
-                js_done.add(fi.url)
-        # print the script
+        if self.mtime == 0 or len(data['templates']) == 0:
+            return
+        # add a <script> tag for the bundle (unless we already did so on this request)
+        previous_bundles = getdefaultattr(provider_run.request.dmp, '__prev_app_bundles__', factory=set) if provider_run.request is not None else EMPTY_SET
+        if self.filename not in previous_bundles:
+            provider_run.write('<script data-context="{contextid}" src="{static}{href}?{version}"{async}></script>'.format(
+                contextid=provider_run.uid,
+                static=settings.STATIC_URL,
+                href=self.filename,
+                version=provider_run.version_id if provider_run.version_id is not None else self.mtime,
+                async=' async="async"' if self.options['async'] else '',
+            ))
+            previous_bundles.add(self.filename)
+        # trigger the functions for the template chain
         provider_run.write('<script data-context="{}">'.format(provider_run.uid))
-        for line in data['scripts']:
-            provider_run.write(line)
+        for template in data['templates']:
+            provider_run.write('if (DMP_CONTEXT.appBundles["%s"]) { DMP_CONTEXT.appBundles["%s"]() };' % (template, template))
         provider_run.write('</script>')
 
 

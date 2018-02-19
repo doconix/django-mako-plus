@@ -112,16 +112,30 @@ class Command(BaseCommand):
             'app/template2': [ './scripts/template2.js', './scripts/supertemplate2.js', './scripts/supersuper2.js' ],
             ...
         }
+
+        Any files or subdirectories starting with double-underscores (e.g. __dmpcache__) are skipped.
         '''
         script_map = OrderedDict()
-        templates_dir = os.path.join(config.path, 'templates')
-        for template_name in os.listdir(templates_dir):
-            if os.path.isfile(os.path.join(os.path.join(templates_dir, template_name))):
-                scripts = self.template_scripts(config, template_name)
-                if len(scripts) > 0:
-                    key = '{}/{}'.format(config.name, os.path.splitext(template_name)[0])
-                    script_map[key] = scripts
-                    self.message('\t{}: {}'.format(key, scripts), 3)
+        template_root = os.path.join(config.path, 'templates')
+        def recurse(folder):
+            for filename in os.listdir(os.path.join(template_root, folder)):
+                if filename.startswith('__'):
+                    continue
+                filerel = os.path.join(folder, filename)
+                filepath = os.path.join(os.path.join(template_root, filerel))
+                if os.path.isdir(filepath):
+                    recurse(filerel)
+
+                elif os.path.isfile(filepath):
+                    scripts = self.template_scripts(config, filerel)
+                    key = '{}/{}'.format(config.name, os.path.splitext(filerel)[0])
+                    if len(scripts) > 0:
+                        script_map[key] = scripts
+                        self.message('\t{}: {}'.format(key, scripts), 3)
+                    else:
+                        self.message('\t{}: none found'.format(key), 3)
+
+        recurse('')
         return script_map
 
 
@@ -150,7 +164,7 @@ class Command(BaseCommand):
         for data in inner_run.provider_data:
             scripts_dir = os.path.join(config.name, 'scripts')
             for url in data.get('urls', []):
-                url = url.split('?')[0]
+                url = url.split('?', 1)[0]
                 scripts.append(os.path.join('.', os.path.relpath(url, scripts_dir)))
         return scripts
 

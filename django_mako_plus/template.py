@@ -90,7 +90,6 @@ class MakoTemplateLoader(object):
         '''
         if template is None:
             raise TemplateLookupException('Template "%s" not found in search path: %s.' % (template, self.template_search_dirs))
-
         # get the template
         try:
             template_obj = self.tlookup.get_template(template)
