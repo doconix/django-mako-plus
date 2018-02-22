@@ -57,4 +57,4 @@ To use these classes with DMP, use the file pattern we just discussed: ``app/tem
 Further Reading about Template Locations
 ------------------------------------------
 
-The topic on `Template Location/Import <topics_templates.html>`_ describes the nuances of template directories, inheritance, and discovery.
+The topic on `Template Location/Import <basics_paths.html>`_ describes the nuances of template directories, inheritance, and discovery.

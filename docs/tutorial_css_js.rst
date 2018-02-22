@@ -107,7 +107,7 @@ Reload your browser, and then right-click and "Inspect" to see your DOM.  The ``
 
 When you tag a context key with ``jscontext('now')``, DMP adds it to a context object and connects it via ``data-context``.  Note that variables sent via ``jscontext`` must be serializable by Django's ``django.core.serializers.json.DjangoJSONEncoder`` (although you can set a custom encoder if needed).  The default encoder includes all the typical types, plus datetime, date, time, timedelta, Decimal, and UUID.
 
-Let's use the variable in ``index.js``:
+Let's use the variable in ``index.js``.  Note this example uses a ``jQuery`` ready function, but `regular JS works too <static_context.html#referencing-the-context>`_.
 
 .. code:: javascript
 
@@ -123,9 +123,7 @@ Let's use the variable in ``index.js``:
 
 Reload your browser, and you should see the calculation of hours.
 
-    The context is sent to the script via a data attribute on the ``<script>`` element.  The closure surrounding everything keeps the variable local to this script.  Read more about this in `the topic on CSS and JS <topics_providers.html>`_.
-
-    Also, see `providers <topics_providers.html#examples>`_ for the es6 arrow-style syntax for this closure.
+    The context is sent to the script via a data attribute on the ``<script>`` element.  The closure surrounding everything keeps the variable local to this script.  `Read more about this <static_webpack.html#examples>`_.
 
 
 Bundlers like Webpack, Browserify, etc.

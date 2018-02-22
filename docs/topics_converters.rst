@@ -112,7 +112,7 @@ Alternatively, your custom converter method can raise an exception, which bubble
 
 Certain exceptions are automatically handled by DMP and Django.  Raising these exceptions can trigger certain behavior in the system:
 
-* DMP handles `several redirect exceptions <topics_redirecting.html>`_.
+* DMP handles `several redirect exceptions <basics_redirecting.html>`_.
 * Django handles exceptions like `Http404 <https://docs.djangoproject.com/en/dev/topics/http/views/#the-http404-exception>`_.
 
 Example 2: ``timedelta``
