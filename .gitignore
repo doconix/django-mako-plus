@@ -10,3 +10,4 @@ django.mo
 .#*
 __pycache__
 _build
+.vscode

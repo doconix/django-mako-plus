@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand, CommandError
 from django.conf import settings
 
-from django_mako_plus.util import get_dmp_app_configs
+from django_mako_plus.registry import get_dmp_apps
 
 import glob
 import os
@@ -14,11 +14,11 @@ class Command(BaseCommand):
     args = ''
     help = 'Removes orphaned *.css, *.css.map, *.cssm, and *.cssm.map files from your DMP styles/ folders that no longer have companion *.scss files.'
     can_import_settings = True
-    
-    
+
+
     def add_arguments(self, parser):
         parser.add_argument(
-            '--trial-run', 
+            '--trial-run',
             action='store_true',
             dest='trial_run',
             default=False,
@@ -73,7 +73,7 @@ class Command(BaseCommand):
             raise CommandError('Your settings.py file is missing the BASE_DIR setting.')
 
         # create a list of directories to check (default to each app's styles/)
-        styles_directories = [ os.path.join(config.path, 'styles') for config in get_dmp_app_configs() ]
+        styles_directories = [ os.path.join(config.path, 'styles') for config in get_dmp_apps() ]
         if self.options['directory']:
             if not os.path.isdir(self.options['directory']):
                 raise CommandError('The specified directory does not exist: {}'.format(self.options['directory']))

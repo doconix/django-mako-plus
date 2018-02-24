@@ -28,4 +28,3 @@ def csrf(request):
         'csrf_input': csrf_input_lazy(request),
         'csrf_token': csrf_token_lazy(request),
     }
-

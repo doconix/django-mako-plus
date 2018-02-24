@@ -13,7 +13,7 @@ You should see a congratulations page. If you don't, go back to the installation
 For the Impatient
 -----------------------
 
-If you are an experienced web developer and just want to get going, check out the example files in your new app: 
+If you are an experienced web developer and just want to get going, check out the example files in your new app:
 
 * ``homepage/template/base.htm``
 * ``homepage/template/index.htm``
@@ -47,16 +47,14 @@ Let's explore the directory structure of your new app:
         apps.py
         models.py
         tests.py
-        
+
 The directories should be fairly self-explanatory. Note they are **different** than a traditional Django app structure.  In short, put images and other support files in media/, Javascript in scripts/, CSS in styles/, html files in templates/, and Django views in views/.
 
     Note that a common pattern among Django developers is converting several files to directories: ``models.py`` to ``models/`` and ``tests.py`` to ``tests/``, but that's a discussion outside of DMP.
 
-The following setting is automatically done when you created your app, but if you created your app structure manually, DMP-enabled apps must have the following in the ``appname/__init__.py`` file:
 
-.. code:: python
-
-    DJANGO_MAKO_PLUS = True
+Your First Pages
+------------------
 
 Let's start with the two primary html template files: ``base.htm`` and ``index.html``.
 
@@ -101,7 +99,7 @@ The real HTML is kept in the ``base.htm`` file. It looks like this:
             <header>
                 <h1>Welcome to the homepage app!<h1>
             </header>
-        
+
             <main>
                 <%block name="content">
                     Site content goes here in sub-templates.
@@ -117,7 +115,7 @@ Pay special attention to the ``<%block name="content">`` section, which is overr
 The purpose of the inheritance from ``base.htm`` is to get a consistent look, menu, etc. across all pages of your site. When you create additional pages, simply override the ``content`` block, similar to the way ``index.html`` does it.
 
     Don't erase anything in the base.htm file. In particular, ``django_mako_plus.links()`` and the ``dmp-common.min.js`` script are important.
-    As much as you probably want to clean up the mess, try your best to leave these alone. 
+    As much as you probably want to clean up the mess, try your best to leave these alone.
 
 **'Undefined' object has no attribute 'get\_static':**
 
@@ -134,7 +132,7 @@ Then clear out the compiled templates caches:
 ::
 
     python manage.py dmp_cleanup
-    
+
 **DMP_CONTEXT is not defined**
 
 If you get this error, the ``/django_mako_plus/dmp-common.min.js`` script is not being loaded.  Check the following:

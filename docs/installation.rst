@@ -96,7 +96,7 @@ If everything is working, `skip ahead to the tutorial <tutorial.html>`_.
 Existing Project
 ---------------------------------
 
-Install Python and ensure you can run ``python3`` (or ``python``) at the command prompt. The framework requires Python 3.4+.
+If you already have an existing project that you'd like to integrate DMP into, follow the directions in this section.  First, install Python and ensure you can run ``python3`` (or ``python``) at the command prompt. The framework requires Python 3.4+.
 
 Install Django, Mako, and DMP
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -177,7 +177,7 @@ Add a logger to help you debug (optional but highly recommended!):
     }
 
 Add the Django-Mako-Plus engine to the ``TEMPLATES`` list. Note that a
-standard Django project already has the ``TEMPLATES =`` line.
+standard Django project already has the ``TEMPLATES =`` line and the 'django' template backend.
 
 .. code:: python
 
@@ -186,50 +186,13 @@ standard Django project already has the ``TEMPLATES =`` line.
             'NAME': 'django_mako_plus',
             'BACKEND': 'django_mako_plus.MakoTemplates',
             'OPTIONS': {
-                # functions to automatically add variables to the params/context before templates are rendered
-                'CONTEXT_PROCESSORS': [
-                    'django.template.context_processors.static',            # adds "STATIC_URL" from settings.py
-                    'django.template.context_processors.debug',             # adds debug and sql_queries
-                    'django.template.context_processors.request',           # adds "request" object
-                    'django.contrib.auth.context_processors.auth',          # adds "user" and "perms" objects
-                    'django.contrib.messages.context_processors.messages',  # adds messages from the messages framework
-                    'django_mako_plus.context_processors.settings',         # adds "settings" dictionary
-                ],
-
-                # identifies where the Mako template cache will be stored, relative to each template directory
-                'TEMPLATES_CACHE_DIR': '.cached_templates',
-
-                # the default app and page to render in Mako when the url is too short
-                # if None (no default app), DMP will not capture short URLs
-                'DEFAULT_APP': 'homepage',
-                'DEFAULT_PAGE': 'index',
-
-                # the default encoding of template files
-                'DEFAULT_TEMPLATE_ENCODING': 'utf-8',
-
-                # imports for every template
-                'DEFAULT_TEMPLATE_IMPORTS': [
-                    # import DMP (required)
-                    'import django_mako_plus',
-
-                    # uncomment this next line to enable alternative syntax blocks within your Mako templates
-                    # 'from django_mako_plus import django_syntax, jinja2_syntax, alternate_syntax
-
-                    # the next two lines are just examples of including common imports in templates
-                    # 'from datetime import datetime',
-                    # 'import os, os.path, re, json',
-                ],
-
-                # whether to send the custom DMP signals -- set to False for a slight speed-up in router processing
-                # determines whether DMP will send its custom signals during the process
-                'SIGNALS': False,
-
-                # see the DMP online tutorial for information about this setting
-                # it can normally be empty
-                'TEMPLATES_DIRS': [
-                    # '/var/somewhere/templates/',
-                ],
+                # see the options in the DMP docs if you want to customize anything
             },
+        },
+        {
+            'NAME': 'django',
+            'BACKEND': 'django.template.backends.django.DjangoTemplates',
+            # ...
         },
     ]
 
@@ -253,7 +216,7 @@ Clean out all the cached template files. This should be done **anytime you make 
 Enable the Django-Mako-Plus Router
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Add the Django-Mako-Plus router in your ``urls.py`` file (the default admin is also included here for completeness). 
+Add the Django-Mako-Plus router in your ``urls.py`` file (the default admin is also included here for completeness).
 
 .. code:: python
 
@@ -305,13 +268,6 @@ Open your web browser to http://localhost:8000/. You should see a
 message welcoming you to the homepage app.
 
 If everything is working, skip ahead to the tutorial.
-
-
-Not a designated DMP app?
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-If DMP tells you that an app you're trying to access "is not a designated DMP app", you missed something above. Rather than go above and trying again, go on to the next section on converting existing apps for a summary of everything needed to make a valid DMP app. You're likely missing something in this list, and by going through this next section, you'll ensure all the needed pieces are in place. I'll bet you didn't set the ``DJANGO_MAKO_PLUS = True`` part in your app's init file. Another possible reason is you didn't list ``homepage`` as one of your ``INSTALLED_APPS`` as described above.
-
 
 
 Subdirectory: /mysite/

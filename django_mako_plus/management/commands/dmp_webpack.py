@@ -1,10 +1,10 @@
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
 from mako.exceptions import MakoException
-from django_mako_plus.util import DMP_OPTIONS, get_dmp_app_configs
+from django_mako_plus.registry import get_dmp_apps
 from django_mako_plus.provider import create_mako_context
 from django_mako_plus.provider.runner import ProviderRun, create_factories
-from django_mako_plus.util import get_dmp_instance, split_app
+from django_mako_plus.util import get_dmp_instance, split_app, DMP_OPTIONS
 
 import glob
 import os, os.path, shutil
@@ -67,7 +67,7 @@ class Command(BaseCommand):
 
         # run for each dmp-enabled app
         self.factories = create_factories('WEBPACK_PROVIDERS')
-        for config in get_dmp_app_configs():
+        for config in get_dmp_apps():
             if not options['appname'] or config.name in options['appname']:
                 self.create_entry(config)
 

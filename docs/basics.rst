@@ -1,4 +1,4 @@
-The Basics
+Basic Concepts
 ==========================
 
 After the tutorial, start through these topics to learn how to use DMP.
@@ -6,7 +6,7 @@ After the tutorial, start through these topics to learn how to use DMP.
 .. toctree::
     :maxdepth: 1
 
-    basics_defaults
+    basics_settings
     basics_variables
     basics_paths
     basics_convenience

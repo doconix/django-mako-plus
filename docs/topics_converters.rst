@@ -21,8 +21,6 @@ Change ``homepage/__init__.py`` to the following code:
 
 .. code:: python
 
-    DJANGO_MAKO_PLUS = True
-
     from django.http import Http404
     from django_mako_plus import set_default_converter, DefaultConverter
     import re
@@ -123,8 +121,6 @@ In the tutorial, we `created a view function <tutorial_urlparams.html#adding-typ
 Change ``homepage/__init__.py`` to the following code:
 
 .. code:: python
-
-    DJANGO_MAKO_PLUS = True
 
     from django_mako_plus import set_default_converter, DefaultConverter
     from datetime import datetime, timedelta

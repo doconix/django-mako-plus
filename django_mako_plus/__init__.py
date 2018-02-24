@@ -13,9 +13,9 @@ default_app_config = 'django_mako_plus.Config'
 from .version import __version__
 
 
-# the app config
+# the app config and registry
 from .apps import Config
-
+from .registry import register_dmp_app
 
 # the router and middleware
 from .middleware import RequestInitMiddleware
@@ -64,7 +64,6 @@ from .convenience import get_template_loader_for_path
 
 # the utilities
 from .util import get_dmp_instance
-from .util import get_dmp_app_configs
 
 
 # the urls

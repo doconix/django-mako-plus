@@ -30,17 +30,6 @@ def get_dmp_instance():
         raise ImproperlyConfigured('The Django Mako Plus template engine did not initialize correctly.  Check your logs for previous errors that may have caused initialization to fail, and check that DMP is set correctly in settings.py.')
 
 
-def get_dmp_app_configs():
-    '''
-    Gets the DMP-enabled app configs, which will be a subset of all installed apps.  This is a generator function.
-    This method does not use the registry cache.  Instead, it looks through all Django apps in settings.py and
-    yields any with "DJANGO_MAKO_PLUS = True" in its __init__.py.
-    '''
-    for config in apps.get_app_configs():
-        # check for the DJANGO_MAKO_PLUS = True in the app (should be in app/__init__.py)
-        if getattr(config.module, 'DJANGO_MAKO_PLUS', False):
-            yield config
-
 
 
 ################################################################
@@ -97,7 +86,8 @@ def split_app(path):
     This function uses os.path.samefile to split even if a path is specified differently.
     The drawback is significantly reduced speed because of a double loop, so use with care.
     '''
-    configs = list(get_dmp_app_configs())  # cache the generator results so we can go through it several times
+    from django_mako_plus.registry import get_dmp_apps
+    configs = list(get_dmp_apps())
     def get_config(app_dir):
         if os.path.exists(app_dir):
             for config in configs:

@@ -1,6 +1,7 @@
 from django.core.management.commands.makemessages import Command as MakeMessagesCommand
 
-from django_mako_plus.util import get_dmp_instance, get_dmp_app_configs
+from django_mako_plus.util import get_dmp_instance
+from django_mako_plus.registry import get_dmp_apps
 
 import os
 import os.path
@@ -19,7 +20,7 @@ class Command(MakeMessagesCommand):
 
     def handle(self, *args, **options):
         # go through each dmp_enabled app and compile its mako templates
-        for app_config in get_dmp_app_configs():
+        for app_config in get_dmp_apps():
             self.compile_mako_files(app_config)
 
         # add any extra xgettext_options (the regular makemessages doesn't do this, and I need to include other aliases like _(), _z(), etc.

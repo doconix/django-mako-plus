@@ -3,23 +3,28 @@
 ###   in the DMP system
 
 from django.apps import apps, AppConfig
+from django.core.exceptions import ImproperlyConfigured
 
-from .util import get_dmp_instance
+from .util import get_dmp_instance, DMP_OPTIONS
 
 import threading
 
 
-# lock to keep register_app() thread safe
+# lock to keep register() thread safe
 rlock = threading.RLock()
 
 # the DMP-enabled AppConfigs in the system (by name)
 DMP_ENABLED_APPS = {}
 
 
-
 ###############################################################
 ###   Registration functions for apps and view functions
 ###
+
+def get_dmp_apps():
+    '''Returns a sequence of DMP-enabled apps'''
+    return DMP_ENABLED_APPS.values()
+
 
 def is_dmp_app(app):
     '''
@@ -33,27 +38,35 @@ def is_dmp_app(app):
     return app in DMP_ENABLED_APPS
 
 
-def register_app(app):
-    '''
-    Registers an app as a "DMP-enabled" app and creates a cached
-    template renderer to make processing faster. The app parameter can
-    be either the name of the app or an AppConfig object.
+def assert_dmp_app(app):
+    '''Raises an AssertionException with a help mesage if the given app is not registered as a DMP app'''
+    assert is_dmp_app(app), '''DMP's app-specific render functions were not placed on the request object. Likely reasons:
+1) A template was rendered before the middleware's process_view() method was called (move after middleware call or use DMP's render_template() function which can be used anytime).
+2) This app is not registered as a Django app (ensure the app is listed in `INSTALLED_APPS` in settings file).
+3) This app is not registered as a DMP-enabled app (check `APP_DISCOVERY` in settings file or see DMP docs).'''
 
-    This is called by MakoTemplates (engine.py) during system startup.
+
+
+def register_dmp_app(app, inject_urls=False):
     '''
-    if isinstance(app, str):
-        app = apps.get_app_config(app)
+    Registers an app as a "DMP-enabled" app.  Normally, DMP does this
+    automatically during system startup.
+
+    If auto-discovery is disabled, call this method to register
+    an app as DMP-enabled.  This should be done in the app's
+    AppConfig.ready() method so registration happens *before* Django
+    processes through urls.py.
+    '''
+    # this can only be done *before* django processes through urls.py
+    if DMP_OPTIONS.get('RUNTIME_ADDED_URLS'):
+        raise ImproperlyConfigured("App registration attempted too late in the startup process. "
+                                   "Apps can no longer be registered with DMP because Django has already processed urls.py. "
+                                   "Please call register_dmp_app() earlier in the process (ideally during the app's AppConfig.ready() method).")
 
     # since this only runs at startup, this lock doesn't affect performance
+    if isinstance(app, str):
+        app = apps.get_app_config(app)
     with rlock:
-        # short circuit if already in the DMP_ENABLED_APPS
-        if app.name in DMP_ENABLED_APPS:
-            return
-
-        # check for the DJANGO_MAKO_PLUS flag in the module
-        if not getattr(app.module, 'DJANGO_MAKO_PLUS', False):
-            return
-
         # first time for this app, so add to our dictionary
         DMP_ENABLED_APPS[app.name] = app
 
@@ -62,4 +75,5 @@ def register_app(app):
         get_dmp_instance().get_template_loader(app, 'templates', create=True)
         get_dmp_instance().get_template_loader(app, 'scripts', create=True)
         get_dmp_instance().get_template_loader(app, 'styles', create=True)
+
 

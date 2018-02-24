@@ -7,10 +7,9 @@ except ImportError:
     # create a dummy MiddlewareMixin if older Django
     MiddlewareMixin = object
 
-from .registry import is_dmp_app
+from .registry import assert_dmp_app
 from .router import ClassBasedRouter, get_router
 from .util import DMP_OPTIONS, URLParamList, get_dmp_instance
-
 
 
 ##########################################################
@@ -132,7 +131,7 @@ class RoutingData(object):
 
     def render(self, template, context=None, def_name=None, subdir='templates', content_type=None, status=None, charset=None):
         '''App-specific render function that renders templates in the *current app*, attached to the request for convenience'''
-        self._assert_app()
+        assert_dmp_app(self.app)
         template_loader = get_dmp_instance().get_template_loader(self.app, subdir)
         template_adapter = template_loader.get_template(template)
         return getattr(template_adapter, 'render_to_response')(context=context, request=self.request, def_name=def_name, content_type=content_type, status=status, charset=charset)
@@ -140,22 +139,14 @@ class RoutingData(object):
 
     def render_to_string(self, template, context=None, def_name=None, subdir='templates'):
         '''App-specific render function that renders templates in the *current app*, attached to the request for convenience'''
-        self._assert_app()
+        assert_dmp_app(self.app)
         template_loader = get_dmp_instance().get_template_loader(self.app, subdir)
         template_adapter = template_loader.get_template(template)
         return getattr(template_adapter, 'render')(context=context, request=request, def_name=def_name)
 
-
-    def _assert_app(self):
-        assert is_dmp_app(self.app), '''DMP's app-specific render functions were not placed on the request object. Likely reasons:
-1) This app is not registered as a Django app (ensure the app is listed in `INSTALLED_APPS` in settings file).
-2) This app is not a DMP-enabled app (check for `DJANGO_MAKO_PLUS = True` in appdir/__init__.py).
-3) A template was rendered before the middleware's process_view() method was called (move after middleware call or use DMP's render_template() function which can be used anytime).'''
 
 
 
 # This singleton is set on the request object early in the request (during middleware).
 # Once urls.py has processed, request.dmp is changed to a populated RoutingData object.
 INITIAL_ROUTING_DATA = RoutingData()
-
-

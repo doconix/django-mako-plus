@@ -1,7 +1,8 @@
 from django.core.management.base import BaseCommand, CommandError
 from django.conf import settings
 
-from django_mako_plus.util import DMP_OPTIONS, get_dmp_app_configs
+from django_mako_plus.util import DMP_OPTIONS
+from django_mako_plus.registry import get_dmp_apps
 
 import os, os.path, shutil
 
@@ -57,7 +58,7 @@ class Command(BaseCommand):
             raise CommandError('Your settings.py file is missing the BASE_DIR setting.')
 
         # check each dmp-enabled app
-        for config in get_dmp_app_configs():
+        for config in get_dmp_apps():
             self.message('Cleaning up app: {}'.format(config.name), level=1)
             for subdir in ( 'templates', 'scripts', 'styles' ):
                 cache_dir = os.path.join(config.path, subdir, DMP_OPTIONS['TEMPLATES_CACHE_DIR'])

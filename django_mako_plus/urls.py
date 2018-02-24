@@ -5,8 +5,8 @@ except ImportError:
     from django.conf.urls import url as re_path  # Django 1.x
 from django.views.static import serve
 from .router import route_request
-from .registry import is_dmp_app
-from .util import DMP_OPTIONS, get_dmp_app_configs
+from .registry import is_dmp_app, get_dmp_apps
+from .util import DMP_OPTIONS
 import os, os.path
 
 
@@ -25,16 +25,16 @@ urlpatterns = [
 ]
 
 # app-specific patterns for each DMP-enabled app
-for config in get_dmp_app_configs():
+for config in get_dmp_apps():
     # these are in order of specificity, with the most specific ones at the top
-        urlpatterns.extend([
-            # /app/page.function/urlparams
-            re_path(r'^{}/(?P<dmp_page>[_a-zA-Z0-9\-]+)\.(?P<dmp_function>[_a-zA-Z0-9\.\-]+)/?(?P<dmp_urlparams>.*?)/?$'.format(config.name), route_request, { 'dmp_app': config.name }, name='DMP /app/page.function'),
-            # /app/page/urlparams
-            re_path(r'^{}/(?P<dmp_page>[_a-zA-Z0-9\-]+)/?(?P<dmp_urlparams>.*?)/?$'.format(config.name), route_request, { 'dmp_app': config.name }, name='DMP /app/page'),
-            # /app
-            re_path(r'^{}/?$'.format(config.name), route_request, { 'dmp_app': config.name }, name='DMP /app'),
-        ])
+    urlpatterns.extend([
+        # /app/page.function/urlparams
+        re_path(r'^{}/(?P<dmp_page>[_a-zA-Z0-9\-]+)\.(?P<dmp_function>[_a-zA-Z0-9\.\-]+)/?(?P<dmp_urlparams>.*?)/?$'.format(config.name), route_request, { 'dmp_app': config.name }, name='DMP /app/page.function'),
+        # /app/page/urlparams
+        re_path(r'^{}/(?P<dmp_page>[_a-zA-Z0-9\-]+)/?(?P<dmp_urlparams>.*?)/?$'.format(config.name), route_request, { 'dmp_app': config.name }, name='DMP /app/page'),
+        # /app
+        re_path(r'^{}/?$'.format(config.name), route_request, { 'dmp_app': config.name }, name='DMP /app'),
+    ])
 
 # if we have a default app, take over short urls
 if DMP_OPTIONS['DEFAULT_APP']:
@@ -47,3 +47,6 @@ if DMP_OPTIONS['DEFAULT_APP']:
         re_path(r'^$', route_request, name='DMP /'),
     ])
 
+
+# so the registry knows it can't add any more apps
+DMP_OPTIONS['RUNTIME_ADDED_URLS'] = True

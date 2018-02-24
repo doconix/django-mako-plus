@@ -1,4 +1,5 @@
 from django.apps import apps, AppConfig
+from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.template import TemplateDoesNotExist
 from django.template.backends.base import BaseEngine
@@ -6,9 +7,9 @@ from django.utils.module_loading import import_string
 
 from .defaults import DEFAULT_OPTIONS
 from .template import MakoTemplateLoader, MakoTemplateAdapter
-from .registry import register_app, is_dmp_app as registry_is_dmp_app
+from .registry import register_dmp_app, assert_dmp_app
 from .provider.runner import init_providers
-from .util import DMP_INSTANCE_KEY, DMP_OPTIONS, get_dmp_app_configs
+from .util import DMP_INSTANCE_KEY, DMP_OPTIONS
 
 from mako.template import Template
 
@@ -48,6 +49,7 @@ class MakoTemplates(BaseEngine):
         '''Constructor'''
         # start with the default options
         DMP_OPTIONS.update(DEFAULT_OPTIONS)
+        DMP_OPTIONS['RUNTIME_ADDED_URLS'] = False
 
         # pop the settings.py options into the DMP optionsRUNTIME_TEMPLATE_IMPORTS
         try:
@@ -76,17 +78,12 @@ class MakoTemplates(BaseEngine):
         # set up the static file providers
         init_providers()
 
-        # add a template renderer for each DMP-enabled app
-        for app_config in get_dmp_app_configs():
-            register_app(app_config)
+        # add a template renderer for each app in the project directory
+        if DMP_OPTIONS['APP_DISCOVERY'] != 'none':
+            for config in apps.get_app_configs():
+                if DMP_OPTIONS['APP_DISCOVERY'] == 'all' or os.path.samefile(os.path.dirname(config.path), settings.BASE_DIR):
+                    register_dmp_app(config)
 
-
-    def is_dmp_app(self, app):
-        '''
-        Returns True if the given app is a DMP-enabled app.  The app parameter can
-        be either the name of the app or an AppConfig object.
-        '''
-        return registry_is_dmp_app(app)
 
 
     def from_string(self, template_code):
@@ -128,16 +125,15 @@ class MakoTemplates(BaseEngine):
         but it can be any subdirectory name of the given app.
 
         Normally, you should not have to call this method.  Django automatically
-        generates two shortcut functions for every DMP-registered app (apps with
-        DJANGO_MAKO_PLUS = True), and these shortcut functions are the preferred
-        way to render templates.
+        generates two shortcut functions for every DMP-registered apps,
+        and these shortcut functions are the preferred way to render templates.
 
         This method is useful when you want a custom template loader to a directory
         that does not conform to the app_dir/templates/* pattern.
 
         If the loader is not found in the DMP cache, one of two things occur:
           1. If create=True, it is created automatically and returned.  This overrides
-             the need to set DJANGO_MAKO_PLUS=True in the app's __init__.py file.
+             the need to register the app as a DMP app.
           2. If create=False, a TemplateDoesNotExist is raised.  This is the default
              behavior.
         '''
@@ -151,8 +147,8 @@ class MakoTemplates(BaseEngine):
         path = os.path.join(app.path, subdir)
 
         # if create=False, the loader must already exist in the cache
-        if not create and path not in self.template_loaders:
-            raise TemplateDoesNotExist("%s has not been registered as a DMP app.  Did you forget to include the DJANGO_MAKO_PLUS=True line in your app's __init__.py?" % app.name)
+        if not create:
+            assert_dmp_app(app)
 
         # return the template by path
         return self.get_template_loader_for_path(path, use_cache=True)
@@ -165,9 +161,8 @@ class MakoTemplates(BaseEngine):
         a loader for that specific directory.
 
         Normally, you should not have to call this method.  Django automatically
-        generates two shortcut functions for every DMP-registered app (apps with
-        DJANGO_MAKO_PLUS = True), and these shortcut functions are the preferred
-        way to render templates.
+        adds request.dmp.render() and request.dmp.render_to_string() on each
+        request.
 
         This method is useful when you want a custom template loader for a specific
         directory that may be outside your project directory or that is otherwise
@@ -193,5 +188,3 @@ class MakoTemplates(BaseEngine):
 
         # return
         return loader
-
-

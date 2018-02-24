@@ -1,7 +1,8 @@
 from django.core.management.base import BaseCommand, CommandError
 from django.conf import settings
 
-from django_mako_plus.util import DMP_OPTIONS, get_dmp_app_configs
+from django_mako_plus.util import DMP_OPTIONS
+from django_mako_plus.registry import get_dmp_apps
 
 import os, os.path, shutil, fnmatch
 
@@ -160,7 +161,7 @@ class Command(BaseCommand):
         self.add_user_rules()
 
         # go through the DMP apps and collect the static files
-        for config in get_dmp_app_configs():
+        for config in get_dmp_apps():
             self.message('Processing app {}'.format(config.name), 1)
             self.copy_dir(config.path, os.path.abspath(os.path.join(dest_root, config.name)))
 
