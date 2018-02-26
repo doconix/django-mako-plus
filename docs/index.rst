@@ -28,7 +28,7 @@ Features
 - Automatically sets `context variables </tutorial_css_js.html#static-and-dynamic-javascript>`_ in the Javascript namespace.
 - Provides `Django-style signals </topics_signals.html>`_.
 - Extends Django's redirecting with `exception-based redirecting </topics_redirecting.html>`_.
-- Supports `language translations </topics_translation.html>`_, `class-based views </topics_class_views.html>`_, and collection of `static files </topics_providers.html>`_.
+- Supports `language translations </topics_translation.html>`_, `class-based views </topics_class_views.html>`_, and collection of `static files </static.html>`_.
 - Includes a comprehensive `test suite <https://github.com/doconix/django-mako-plus/tree/master/tests>`_.
 
 DMP doesn't replace Django; the standard router and template engine can be used alongside it.
@@ -83,4 +83,3 @@ Compatability
 DMP requires Python 3.4+ and Django 1.9+.
 
 The first Django 2.0+ release was in December 2017.
-

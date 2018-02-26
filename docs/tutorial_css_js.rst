@@ -129,7 +129,7 @@ Reload your browser, and you should see the calculation of hours.
 Bundlers like Webpack, Browserify, etc.
 ------------------------------------------
 
-If you are using JS bundles, DMP files can go right in the bundles.  See bundling in `Rendering CSS and JS <topics_providers.html>`_ for more information.
+If you are using JS bundles, DMP files can go right in the bundles.  See bundling in `Rendering CSS and JS <static.html>`_ for more information.
 
 Behind the CSS and JS Curtain
 -----------------------------
@@ -146,4 +146,4 @@ The calls to ``links()`` include the ``<link>`` and ``<script>`` tags for the te
 
 This all works because the ``index.html`` template extends from the ``base.htm`` template. If you fail to inherit from ``base.htm`` or ``base_ajax.htm``, DMP won't be able to include the support files.
 
-Read more about providers in `Rendering CSS and JS <topics_providers.html>`_.
+Read more about providers in `Rendering CSS and JS <static.html>`_.
