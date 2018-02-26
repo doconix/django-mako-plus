@@ -7,7 +7,7 @@ from django.utils.module_loading import import_string
 
 from .defaults import DEFAULT_OPTIONS
 from .template import MakoTemplateLoader, MakoTemplateAdapter
-from .registry import register_dmp_app, assert_dmp_app
+from .registry import register_dmp_app, ensure_dmp_app
 from .provider.runner import init_providers
 from .util import DMP_INSTANCE_KEY, DMP_OPTIONS
 
@@ -49,7 +49,6 @@ class MakoTemplates(BaseEngine):
         '''Constructor'''
         # start with the default options
         DMP_OPTIONS.update(DEFAULT_OPTIONS)
-        DMP_OPTIONS['RUNTIME_ADDED_URLS'] = False
 
         # pop the settings.py options into the DMP optionsRUNTIME_TEMPLATE_IMPORTS
         try:
@@ -79,7 +78,7 @@ class MakoTemplates(BaseEngine):
         init_providers()
 
         # add a template renderer for each app in the project directory
-        if DMP_OPTIONS['APP_DISCOVERY'] != 'none':
+        if DMP_OPTIONS['APP_DISCOVERY'] != 'none' and DMP_OPTIONS['APP_DISCOVERY'] is not False:
             for config in apps.get_app_configs():
                 if DMP_OPTIONS['APP_DISCOVERY'] == 'all' or os.path.samefile(os.path.dirname(config.path), settings.BASE_DIR):
                     register_dmp_app(config)
@@ -148,7 +147,7 @@ class MakoTemplates(BaseEngine):
 
         # if create=False, the loader must already exist in the cache
         if not create:
-            assert_dmp_app(app)
+            ensure_dmp_app(app)
 
         # return the template by path
         return self.get_template_loader_for_path(path, use_cache=True)

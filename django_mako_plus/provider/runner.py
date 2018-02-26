@@ -80,6 +80,8 @@ class ProviderRun(object):
             providers = getattr(tself.template, PROVIDERS_KEY, None)
             if providers is None:
                 app_config, template_file = split_app(tself.template.filename)
+                if app_config is None:
+                    raise ImproperlyConfigured("Could not determine the app for template {}. Is this template's app registered as a DMP app?".format(tself.template.filename))
                 providers = [ pf.create(app_config, template_file) for pf in factories ]
                 if not settings.DEBUG: # attach to template for speed in production mode
                     setattr(tself.template, PROVIDERS_KEY, providers)
@@ -110,6 +112,3 @@ class ProviderRun(object):
         self._buffer.write(content)
         if settings.DEBUG:
             self._buffer.write('\n')
-
-
-

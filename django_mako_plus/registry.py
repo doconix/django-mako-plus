@@ -38,12 +38,13 @@ def is_dmp_app(app):
     return app in DMP_ENABLED_APPS
 
 
-def assert_dmp_app(app):
+def ensure_dmp_app(app):
     '''Raises an AssertionException with a help mesage if the given app is not registered as a DMP app'''
-    assert is_dmp_app(app), '''DMP's app-specific render functions were not placed on the request object. Likely reasons:
+    if not is_dmp_app(app):
+        raise ImproperlyConfigured('''DMP's app-specific render functions were not placed on the request object. Likely reasons:
 1) A template was rendered before the middleware's process_view() method was called (move after middleware call or use DMP's render_template() function which can be used anytime).
 2) This app is not registered as a Django app (ensure the app is listed in `INSTALLED_APPS` in settings file).
-3) This app is not registered as a DMP-enabled app (check `APP_DISCOVERY` in settings file or see DMP docs).'''
+3) This app is not registered as a DMP-enabled app (check `APP_DISCOVERY` in settings file or see DMP docs).''')
 
 
 
@@ -58,10 +59,10 @@ def register_dmp_app(app, inject_urls=False):
     processes through urls.py.
     '''
     # this can only be done *before* django processes through urls.py
-    if DMP_OPTIONS.get('RUNTIME_ADDED_URLS'):
+    if apps.ready:
         raise ImproperlyConfigured("App registration attempted too late in the startup process. "
-                                   "Apps can no longer be registered with DMP because Django has already processed urls.py. "
-                                   "Please call register_dmp_app() earlier in the process (ideally during the app's AppConfig.ready() method).")
+                                   "Apps can no longer be registered with DMP because Django has already set up. "
+                                   "Please call register_dmp_app() earlier in the process (ideally during AppConfig.ready() in yourapp/apps.py).")
 
     # since this only runs at startup, this lock doesn't affect performance
     if isinstance(app, str):
@@ -75,5 +76,3 @@ def register_dmp_app(app, inject_urls=False):
         get_dmp_instance().get_template_loader(app, 'templates', create=True)
         get_dmp_instance().get_template_loader(app, 'scripts', create=True)
         get_dmp_instance().get_template_loader(app, 'styles', create=True)
-
-

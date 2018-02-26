@@ -144,4 +144,3 @@ class jscontext(str):
     See the tutorial for more information on this function.
     '''
     # no code needed, just using the class for identity
-

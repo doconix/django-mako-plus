@@ -85,6 +85,7 @@ def split_app(path):
 
     This function uses os.path.samefile to split even if a path is specified differently.
     The drawback is significantly reduced speed because of a double loop, so use with care.
+    ProviderRun uses this, but only during the first run of a template (cached after that).
     '''
     from django_mako_plus.registry import get_dmp_apps
     configs = list(get_dmp_apps())

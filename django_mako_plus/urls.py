@@ -5,10 +5,9 @@ except ImportError:
     from django.conf.urls import url as re_path  # Django 1.x
 from django.views.static import serve
 from .router import route_request
-from .registry import is_dmp_app, get_dmp_apps
+from .registry import get_dmp_apps
 from .util import DMP_OPTIONS
 import os, os.path
-
 
 
 #########################################################
@@ -46,7 +45,3 @@ if DMP_OPTIONS['DEFAULT_APP']:
         # / with nothing else
         re_path(r'^$', route_request, name='DMP /'),
     ])
-
-
-# so the registry knows it can't add any more apps
-DMP_OPTIONS['RUNTIME_ADDED_URLS'] = True

@@ -5,6 +5,7 @@ from django.test import TestCase
 from django_mako_plus.util import get_dmp_instance
 from django_mako_plus.template import MakoTemplateAdapter
 from django_mako_plus.template import MakoTemplateLoader
+from django_mako_plus.registry import is_dmp_app
 
 import os
 import os.path
@@ -16,9 +17,9 @@ class Tester(TestCase):
     def setUpTestData(cls):
         cls.tests_app = apps.get_app_config('tests')
 
-    def test_is_dmp_app(self):
-        self.assertTrue(get_dmp_instance().is_dmp_app('tests'))
-        self.assertFalse(get_dmp_instance().is_dmp_app('nonexistent_app'))
+    def test_ensure_dmp_app(self):
+        self.assertTrue(is_dmp_app('tests'))
+        self.assertFalse(is_dmp_app('nonexistent_app'))
 
     def test_from_string(self):
         template = get_dmp_instance().from_string('${ 2 + 2 }')
