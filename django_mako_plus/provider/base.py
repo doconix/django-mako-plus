@@ -13,17 +13,7 @@ import os.path
 
 class BaseProvider(object):
     '''
-    A list of provider instances is attached to each template in the system.
-    During a provider run, all provider lists are run.
-
-        base.htm      [ JsLinkProvider1, CssLinkProvider1, ... ]
-           |
-        app_base.htm  [ JsLinkProvider2, CssLinkProvider2, ... ]
-           |
-        index.html    [ JsLinkProvider3, CssLinkProvider3, ... ]
-
-    The data argument sent into provide() spans a run vertically, meaning
-    the three JsLinkProviders above share the same data dict.
+    Abstract base provider class.  An instance is tied to a template at runtime.
     '''
 
     default_options = {
@@ -59,6 +49,3 @@ class BaseProvider(object):
         Finalize values in the data dictionary here.
         '''
         pass
-
-
-

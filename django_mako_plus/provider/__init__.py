@@ -15,8 +15,9 @@ import io
 
 def links(tself, version_id=None, group=None):
     '''Returns the HTML for the given provider group (or all groups if None)'''
-    provider_run = ProviderRun(tself, version_id, group)
-    return provider_run.get_content()
+    pr = ProviderRun(tself, version_id, group)
+    pr.run()
+    return pr.getvalue()
 
 
 def template_links(request, app, template_name, context=None, version_id=None, group=None, force=True):
@@ -65,7 +66,3 @@ def create_mako_context(template_obj, **kwargs):
     runtime_context._set_with_template(template_obj)
     _, mako_context = mako.runtime._populate_self_namespace(runtime_context, template_obj)
     return mako_context
-
-
-
-

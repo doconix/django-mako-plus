@@ -148,27 +148,24 @@ class Command(BaseCommand):
 
         For this algorithm to work, providers must populate the provider data dictionary like this example.
         the built-in JsLinkProvider does this already.
-        provider_data = {
-            'urls': [
-                '/static/app/scripts/first.js',
-                '/static/app/scripts/second.js',
-                ...
-            ]
-        }
+            column_data = {
+                'urls': [
+                    '/static/app/scripts/first.js',
+                    '/static/app/scripts/second.js',
+                    ...
+                ]
+            }
         '''
         template_obj = get_dmp_instance().get_template_loader(config, create=True).get_mako_template(template_name, force=True)
         mako_context = create_mako_context(template_obj)
         inner_run = ProviderRun(mako_context['self'], factories=self.factories)
-        inner_run.get_content()
+        inner_run.run()
         scripts = []
-        for data in inner_run.provider_data:
+        for data in inner_run.column_data:
             scripts_dir = os.path.join(config.name, 'scripts')
             for url in data.get('urls', []):
                 url = url.split('?', 1)[0]
-                scripts.append(os.path.join('.', os.path.relpath(url, scripts_dir)))
+                rel = os.path.relpath(url, scripts_dir)
+                if not rel.startswith('..'):   # only include this app's scripts in the entry file
+                    scripts.append(os.path.join('.', rel))
         return scripts
-
-
-
-
-
