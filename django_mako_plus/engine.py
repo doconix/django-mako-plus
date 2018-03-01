@@ -7,7 +7,7 @@ from django.utils.module_loading import import_string
 
 from .defaults import DEFAULT_OPTIONS
 from .template import MakoTemplateLoader, MakoTemplateAdapter
-from .registry import register_dmp_app, ensure_dmp_app
+from .registry import register_dmp_app, ensure_dmp_app, is_dmp_app
 from .provider.runner import init_providers
 from .util import DMP_INSTANCE_KEY, DMP_OPTIONS
 
@@ -110,6 +110,8 @@ class MakoTemplates(BaseEngine):
         match = RE_TEMPLATE_NAME.match(template_name)
         if match is None or match.group(1) is None or match.group(3) is None:
             raise TemplateDoesNotExist('Invalid template_name format for a DMP template.  This method requires that the template name be in app_name/template.html format (separated by slash).')
+        if not is_dmp_app(match.group(1)):
+            raise TemplateDoesNotExist('Not a DMP app, so deferring to other template engines for this template')
         return self.get_template_loader(match.group(1)).get_template(match.group(3), def_name=match.group(5))
 
 
