@@ -126,6 +126,7 @@ Reload your browser, and you should see the calculation of hours.
     The context is sent to the script via a data attribute on the ``<script>`` element.  The closure surrounding everything keeps the variable local to this script.  `Read more about this <static_webpack.html#examples>`_.
 
 
+
 Bundlers like Webpack, Browserify, etc.
 ------------------------------------------
 

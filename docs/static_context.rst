@@ -1,4 +1,4 @@
-Sending Data to JS
+The JS Context
 ================================
 
 In the `tutorial <tutorial_css_js.html>`_, you learned to send context variables to ``*.js`` files using ``jscontext``:
@@ -27,6 +27,17 @@ Second, the ``JsLinkProvider`` adds a script tag for your script--immediately af
 ::
 
     <script src="/static/homepage/scripts/index.js?1509480811" data-context="u1234567890abcdef"></script>
+
+
+TypeError: ``context.now`` is undefined
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+If things are working, open your browser console/inspector and see if JS is giving you any messages.  The following are a few reasons that the context might be undefined:
+
+* Your JS code is running too late.  If you reverse the closure functions, the code doesn't run in time to catch the context.  Compare your code with the examples below.
+* You might be missing script lines ``<script src="/django_mako_plus/dmp-common.min.js"></script>`` and ``${ django_mako_plus.links(self) }``, or these might be reversed.
+* ``/django_mako_plus/dmp-common.min.js`` might not be available.  Check for a 404 error in the Network tab of your browser's inspector.
+
 
 Serialization
 ------------------------------
@@ -147,4 +158,3 @@ The solution is to help DMP by specifying the context by its ``app/template`` ke
 In the above code, DMP retrieves correct context by template name.  Even if the given template has been loaded twice, the latest one will be active (thus giving the right context).  Problem solved.
 
     A third alternative is to get the context by using a ``<script>`` DOM object as the argument to ``.get``. This approach always returns the correct context.
-
