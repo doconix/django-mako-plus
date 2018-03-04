@@ -35,41 +35,24 @@ class Command(BaseCommand):
             help='Set verbosity to level 0, which silences all messages (see --verbosity).'
         )
         parser.add_argument(
-            'appname',
-            type=str,
-            nargs='*',
-            help='The name of an app. If omitted, __entry__.js files are created in all DMP apps.'
-        )
-        parser.add_argument(
             '--overwrite',
             action='store_true',
             dest='overwrite',
             default=False,
             help='Overwrite existing __entry__.js if necessary.'
         )
-
-
-    def handle(self, *args, **options):
-        # save the options for later
-        self.options = options
-        if self.options['verbose']:
-            self.options['verbosity'] = 3
-        if self.options['quiet']:
-            self.options['verbosity'] = 0
-
-        # ensure we have a base directory
-        try:
-            if not os.path.isdir(os.path.abspath(settings.BASE_DIR)):
-                raise CommandError('Your settings.py BASE_DIR setting is not a valid directory.  Please check your settings.py file for the BASE_DIR variable.')
-        except AttributeError as e:
-            print(e)
-            raise CommandError('Your settings.py file is missing the BASE_DIR setting.')
-
-        # run for each dmp-enabled app
-        self.factories = create_factories('WEBPACK_PROVIDERS')
-        for config in get_dmp_apps():
-            if not options['appname'] or config.name in options['appname']:
-                self.create_entry(config)
+        parser.add_argument(
+            '--single',
+            type=str,
+            metavar='FILENAME',
+            help='Instead of per-app entry files, create a single file that includes the JS for all listed apps.'
+        )
+        parser.add_argument(
+            'appname',
+            type=str,
+            nargs='*',
+            help='The name of one or more DMP apps. If omitted, all DMP apps are processed.'
+        )
 
 
     def message(self, msg, level=1):
@@ -79,26 +62,39 @@ class Command(BaseCommand):
             print(msg)
 
 
-    def create_entry(self, config):
-        '''Creates a webpack __entry__.js file in the given app'''
-        self.message('Searching {}/'.format(config.name))
-        entry_filename = os.path.join(config.path, 'scripts', '__entry__.js')
-        script_map = self.generate_script_map(config)
-        # write the file
-        if not self.options['overwrite'] and os.path.exists(entry_filename):
-            raise ValueError('\tRefusing to destroy existing file: {} (use --overwrite option or remove the file)'.format(entry_filename), 1)
-        if len(script_map) == 0:
-            self.message('\tno matching scripts')
+    def handle(self, *args, **options):
+        # save the options for later
+        self.options = options
+        if self.options['verbose']:
+            self.options['verbosity'] = 3
+        if self.options['quiet']:
+            self.options['verbosity'] = 0
+        self.factories = create_factories('WEBPACK_PROVIDERS')
+
+        # ensure we have a base directory
+        try:
+            if not os.path.isdir(os.path.abspath(settings.BASE_DIR)):
+                raise CommandError('Your settings.py BASE_DIR setting is not a valid directory.  Please check your settings.py file for the BASE_DIR variable.')
+        except AttributeError as e:
+            print(e)
+            raise CommandError('Your settings.py file is missing the BASE_DIR setting.')
+
+        # main runner for per-app files
+        if self.options['single'] is None:
+            for config in get_dmp_apps():
+                if not options['appname'] or config.name in options['appname']:
+                    self.message('Searching `{}` app...'.format(config.name))
+                    filename = os.path.join(config.path, 'scripts', '__entry__.js')
+                    self.create_entry_file(filename, self.generate_script_map(config))
+
+        # main runner for one sitewide file
         else:
-            self.message('\twriting {} matching templates in {}'.format(len(script_map), os.path.relpath(entry_filename, settings.BASE_DIR)))
-            with open(entry_filename, 'w') as fout:
-                fout.write('(context => {\n')
-                for page, scripts in script_map.items():
-                    fout.write('    DMP_CONTEXT.appBundles["%s"] = () => { %s; };\n' % (
-                        page,
-                        '; '.join([ 'require("%s")' % (s,) for s in scripts ]),
-                    ))
-                fout.write('})(DMP_CONTEXT.get());\n')
+            script_map = {}
+            for config in get_dmp_apps():
+                if not options['appname'] or config.name in options['appname']:
+                    self.message('Searching `{}` app...'.format(config.name))
+                    script_map.update(self.generate_script_map(config))
+            self.create_entry_file(self.options['single'], script_map)
 
 
     def generate_script_map(self, config):
@@ -165,7 +161,23 @@ class Command(BaseCommand):
             scripts_dir = os.path.join(config.name, 'scripts')
             for url in data.get('urls', []):
                 url = url.split('?', 1)[0]
-                rel = os.path.relpath(url, scripts_dir)
-                if not rel.startswith('..'):   # only include this app's scripts in the entry file
-                    scripts.append(os.path.join('.', rel))
+                scripts.append(os.path.relpath(url, settings.BASE_DIR))
         return scripts
+
+
+    def create_entry_file(self, filename, script_map):
+        '''Creates an entry file for the given script map'''
+        if len(script_map) == 0:
+            return
+        if not self.options['overwrite'] and os.path.exists(filename):
+            raise ValueError('Refusing to destroy existing file: {} (use --overwrite option or remove the file)'.format(filename))
+        self.message('Creating {}'.format(os.path.relpath(filename, settings.BASE_DIR)))
+        with open(filename, 'w') as fout:
+            fout.write('(context => {\n')
+            filedir = os.path.dirname(filename)
+            for page, scripts in script_map.items():
+                fout.write('    DMP_CONTEXT.appBundles["%s"] = () => { %s; };\n' % (
+                    page,
+                    '; '.join([ 'require("./%s")' % os.path.relpath(s, filedir) for s in scripts ]),
+                ))
+            fout.write('})(DMP_CONTEXT.get());\n')

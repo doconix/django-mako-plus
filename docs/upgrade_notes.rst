@@ -3,6 +3,10 @@ Upgrade Notes
 
 This document contains upgrade notes for those already using DMP.  We started the document at version 4.3.
 
+5.1.1 - March, 2018
+
+I refactored the webpack providers and workflow, but I doubt anyone is using them yet.  If you happen to have jumped on this in the past three weeks that 5.0 was out, be sure to read the webpack page and change your settings appropriately.
+
 5.0.1 - February, 2018
 
 1. The DMP options in settings.py has changed a little.  We recommend comparing your settings.py file against the current template (see file django_mako_plus/defaults.py on GitHub).

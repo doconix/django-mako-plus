@@ -189,3 +189,8 @@ Suppose you need custom preprocessing of static files or custom template content
         '''
         pass
 
+Your provider will be instantitated once for each template in the system. When a template is first rendered at production time, your provider will be instantiated and cached with the template for future use.  This single instance for a template will be used regardless of when the template is rendered -- as an ancestor of another template or as a final template.
+
+Wherever possible, move code to the constructor so the calls to ``start``, ``provide``, and ``finish`` can be as fast as possible.  In particular, ``provide`` is called for the template **and** every supertemplate.
+
+    During development (``DEBUG = True``), providers are instantiated **every** time the template is rendered.  In effect, each render of a template is treated as if it were the "first time".  This allows template/script/css changes to be seen without a server restart.
