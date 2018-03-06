@@ -22,12 +22,15 @@ class LinkProvider(BaseProvider):
     # the default options are for CSS files
     default_options = merge_dicts(BaseProvider.default_options, {
         'group': 'static.file',
-        # function that returns the filename that should be checked and if exists, linked by the provider
-        'filename': lambda pr: 'app/subdir/template.ext',
+        # string for the absolute path to the filename that should be linked (if it exists)
+        # if this is a function/lambda, DMP will run the function to get the string path
+        'filename': 'app/subdir/template.ext',
     })
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        filepath = self.options['filename'](self)
+        filepath = self.options['filename']
+        if callable(filepath):  # if a function, call it to get the path
+            filepath = filepath(self)
         self.filename = os.path.relpath(filepath, settings.BASE_DIR).replace('\\', '/')
         if log.isEnabledFor(logging.DEBUG):
             log.debug('[%s] %s searching for %s', self.template_file, self.__class__.__qualname__, self.filename)

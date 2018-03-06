@@ -158,7 +158,6 @@ class Command(BaseCommand):
         inner_run.run()
         scripts = []
         for data in inner_run.column_data:
-            scripts_dir = os.path.join(config.name, 'scripts')
             for url in data.get('urls', []):
                 url = url.split('?', 1)[0]
                 scripts.append(os.path.relpath(url, settings.BASE_DIR))
