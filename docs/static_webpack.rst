@@ -82,16 +82,16 @@ The following is an example of the settings needed when using bundles.  Note tha
                     },
                     {
                         'provider': 'django_mako_plus.JsLinkProvider',
-                        'enabled': ns.DEBUG,      # DEVELOPMENT only
+                        'enabled': DEBUG,      # DEVELOPMENT only
                     },
                     {
                         'provider': 'django_mako_plus.WebpackJsLinkProvider',
-                        'filename': lambda pr: os.path.join(*flatten(pr.app_config.path, 'scripts', '__bundle__.js')),
-                        'enabled': not ns.DEBUG,  # PRODUCTION only
+                        'filename': lambda pr: os.path.join(pr.app_config.path, 'scripts', '__bundle__.js'),
+                        'enabled': not DEBUG,  # PRODUCTION only
                     },
                     {
                         'provider': 'django_mako_plus.WebpackJsCallProvider',
-                        'enabled': not ns.DEBUG,  # PRODUCTION only
+                        'enabled': not DEBUG,  # PRODUCTION only
                     },
                 ],
                 # these are using during a `python manage.py dmp_webpack` run - these are the ones you should customize (if desired)
