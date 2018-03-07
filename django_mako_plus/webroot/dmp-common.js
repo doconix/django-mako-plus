@@ -1,13 +1,12 @@
 // note that I'm intentionally using older JS syntax to meet
 // the widest possible browser base
-
 (function() {
 
     if (window.DMP_CONTEXT === undefined) {
 
         window.DMP_CONTEXT = {
 
-            __version__: '5.1.3',   // DMP version to check for mismatches
+            __version__: '5.1.4',   // DMP version to check for mismatches
             contexts: {},           // contextid -> context1
             contextsByName: {},     // app/template -> [ context1, context2, ... ]
             lastContext: null,      // last inserted context (see getAll() below)
@@ -15,6 +14,7 @@
 
             /* Adds data to the DMP context under the given key */
             set: function(version, contextid, data, templates) {
+                console.log('setting', contextid)
                 if (DMP_CONTEXT.__version__ != version) {
                     console.warn('DMP framework version is ' + version + ', while dmp-common.js is ' + DMP_CONTEXT.__version__ + '. Unexpected behavior may occur.');
                 }
@@ -60,14 +60,18 @@
             */
             getAll: function(option) {
                 var ret = [];
-                option = option || document.currentScript;      // default to currently-running script
 
-                // if empty option, get the last-added context
+                // if empty option and we have currentScript[data-context="something"], use that for the option
+                if (!option && document.currentScript && document.currentScript.getAttribute('data-context')) {
+                    option = document.currentScript;
+                }
+
+                // if still empty option, get the last-added context
                 if (!option) {
                     ret.push(DMP_CONTEXT.lastContext);
                 }
 
-                // "app/template"
+                // if a string, assume it is a context name in format "app/template"
                 else if (typeof option === 'string' || option instanceof String) {
                     var namemap = DMP_CONTEXT.contextsByName[option];
                     if (namemap !== undefined) {
@@ -80,8 +84,8 @@
                     }
                 }
 
-                // script element
-                else if (option.nodeType === 1 && option.nodeName.toLowerCase() == 'script') {
+                // if script[current-context="something"]
+                else if (option.nodeType === 1 && option.nodeName.toLowerCase() == 'script' && option.getAttribute('data-context')) {
                     var c = DMP_CONTEXT.contexts[option.getAttribute('data-context')];
                     if (c !== undefined) {
                         ret.push(c);

@@ -84,12 +84,14 @@ class JsLinkProvider(LinkProvider):
 
     def finish(self, provider_run, data):
         for url in data['urls']:
+            provider_run.write('<script>console.log("Before")</script>')
             provider_run.write('<script data-context="{contextid}" src="{static}{url}"{async}></script>'.format(
                 contextid=provider_run.uid,
                 static=settings.STATIC_URL,
                 url=url,
                 async=' async="async"' if self.options['async'] else '',
             ))
+            provider_run.write('<script>console.log("After")</script>')
 
 
 class JsContextProvider(BaseProvider):
