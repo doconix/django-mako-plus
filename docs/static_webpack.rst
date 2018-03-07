@@ -1,7 +1,7 @@
 JS Bundling with Webpack
 ================================
 
-    This is an advanced topic, which means you'll see a lot of red code on this page.  Apologies in advance for the denseness of some of this.  It bears no relation to the denseness (or lack thereof) of the author.
+    Apologies in advance for the denseness of this page; it bears no relation to the denseness (or lack thereof) of the author.
 
 As you know, DMP automatically creates links for your static files.  When you render ``app/templates/mypage.html``, DMP creates a script tag for ``app/scripts/mypage.js`` and a style tag for ``app/styles/mypage.css``.  This is the default configuration.
 
@@ -30,15 +30,15 @@ This provider wraps each script inside a function inside the larger bundle.  Sin
 Overview
 -------------------
 
-The following is an overview of the development workflow:
+First we'll present an overview of the process.  Note that some steps only work correctly once you've continued through the setup in this document.
 
 1. Create your templates and scripts normally. Templates go in ``yourapp/templates/``.  Scripts go in ``yourapp/scripts/``.
-2. If you haven't done so, update your settings file to include a ``WEBPACK_PROVIDERS`` section.  The ``dmp__webpack`` command uses this to find your scripts.
+2. If you haven't done so, update your settings file to include a ``WEBPACK_PROVIDERS`` section.  The ``dmp_webpack`` command uses this when generating the entry file.
 3. Run ``python manage.py dmp_webpack --overwrite``.  This (re)creates an ``appname/scripts/__entry__.js`` file in each of your apps.  This command should be run anytime you create or remove ``.js`` files. It's not necessary when you modify said files.
 4. If you haven't done so, run ``npm init`` and create the package.json file.
-5. If you haven't done so, create ``webpack.config.js`` in your project root.  In this file, include an entry line for each of the ``__entry__.js`` files in your apps.
-6. If developing: Run ``npm run watch``. Webpack does its magic and creates ``appname/scripts/__bundle__.js``. Whenever you modify a ``.js`` file, webpack will sense a change in the force and recompile the bundle(s).
-7. If deploying to a server:  Run ``npm run build``.  Webpack does its magic and creates ``appname/scripts/__bundle__.js``. Then continue deployment normally: collect your static files and upload to your server.
+5. If you haven't done so, create ``webpack.config.js`` in your project root.  In this file, include an entry line for each ``__entry__.js`` file (usually one per app).
+6. If developing, run ``npm run dev``; if deploying, run ``npm run build``.  Webpack does its magic and creates ``appname/scripts/__bundle__.js``. Whenever you modify a ``.js`` file, webpack will sense a change in the force and recompile the bundle(s).
+7.  If you haven't done so, update your settings file to include two providers in ``CONTENT_PROVIDERS``: ``django_mako_plus.WebpackJsLinkProvider`` and ``django_mako_plus.WebpackJsCallProvider``.  These activate the bundles when browsers load your pages.
 
 
 Grok Webpack?
@@ -48,14 +48,14 @@ In the discussion below, I'll assume you already understand how to use `npm <htt
 
 Before we begin, be sure ``Node.js`` and ``npm`` are installed and runnable from the command line.  Install webpack (``npm install webpack``).  You should now have a ``node_modules/`` directory in your project.  All of these steps are explained on the `Webpack <https://webpack.js.org/>`_ web site.
 
-The following is an example ``package.json`` file:
+The following is an example ``package.json`` file for Webpack 4:
 
 {
   "name": "myproject",
   "version": "1.0.0",
   "scripts": {
-    "build": "webpack",
-    "watch": "webpack --watch"
+    "dev": "webpack --mode development --watch",
+    "build": "webpack --mode production"
   }
 }
 
@@ -63,7 +63,7 @@ The following is an example ``package.json`` file:
 settings.py
 ------------------------
 
-The following is an example of the settings needed when using bundles.  Note that the example only lists the JS-related providers (it doesn't include the providers for CSS that would normally be there as well).  Note also that it does not include the normal ``JsLinkProvider`` because JS is coming from bundles rather than page-specific JS files.
+The following is an example of the settings needed when using bundles.  Note that the example is limited to the bundle-related providers -- you'll likely have additional providers for things like CSS files.
 
 ::
 
@@ -77,8 +77,13 @@ The following is an example of the settings needed when using bundles.  Note tha
                 'CONTENT_PROVIDERS': [
                     # injects jscontext-tagged context variables into JS
                     { 'provider': 'django_mako_plus.JsContextProvider' },
+
                     # <script> tags for the JS bundle file(s); filename can be a function (like below) or a string
-                    { 'provider': 'django_mako_plus.WebpackJsLinkProvider', 'filename': lambda pr: os.path.join(pr.app_config.path, 'scripts', '__bundle__.js') },
+                    # if your base template hard codes a link to the bundle(s), you don't need this
+                    { 'provider': 'django_mako_plus.WebpackJsLinkProvider',
+                        'filename': lambda pr: os.path.join(pr.app_config.path, 'scripts', '__bundle__.js')
+                    },
+
                     # calls the appropriate bundle functions for the current page
                     { 'provider': 'django_mako_plus.WebpackJsCallProvider' },
                 ],
@@ -94,30 +99,10 @@ The following is an example of the settings needed when using bundles.  Note tha
     ]
 
 
-CONTENT_PROVIDERS
-~~~~~~~~~~~~~~~~~~~~~
-
-The ``CONTENT_PROVIDERS`` setting is used to find scripts during the normal running of your servers.
-
-The ``WebpackJsLinkProvider`` finds ``appname/scripts/__bundle__.js`` files and  generates ``<script>`` links for the template (and supertemplate) being rendered.  If you need to customize the location, the ``filename`` can be specified as a string OR as a function/lambda.  If defined as a function instead of a lambda, it should return an absolute path to the bundle file.  The following is an example:
-
-::
-
-    def get_bundle_filename(pr):
-        return os.path.join(settings.BASE_DIR, pr.app_config.name, 'bundle path and filename')
-
-The ``pr`` parameter is a subclass of ``django_mako_plus.provider.base.BaseProvider``. It contains information that can be useful in constructing the filename:
-
-* ``pr.app_config``: The AppConfig for the current template's app.
-* ``pr.template_file``: The current template's filename.
-* ``pr.subdir``: The current template's directory.
-* ``pr.template_name``: The name of the current template (filename sans the extension).
-* ``pr.options``: The options dictionary from settings for this provider (plus any default options not specified in settings).
-
 WEBPACK_PROVIDERS
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-The ``WEBPACK_PROVIDERS`` setting is used exclusively by ``python manage.py dmp_webpack``, where your ``__entry__.js`` files are generated.  Any providers listed here are used to discover the JS files for your templates.
+In the above settings, ``WEBPACK_PROVIDERS`` is used by ``python manage.py dmp_webpack``, where your ``__entry__.js`` files are generated.  Any providers listed here are used to discover the JS files for your templates.
 
 DMP searches for scripts starting with a template name.  In keeping with this pattern, the ``dmp_webpack`` management command loads each template your apps and includes its script through ``require()``.  The command creates ``app/scripts/__entry__.js`` as an entry point for webpack.  Try running the command on an app that contains several template-related .js files:
 
@@ -131,14 +116,15 @@ The ``--overwrite`` option tells the command to overwrite any existing entry scr
 ::
 
     (context => {
-        DMP_CONTEXT.appBundles["learn/index"] = () => { require("./../../homepage/scripts/base_site.js"); require("./index.js"); };
-        DMP_CONTEXT.appBundles["learn/support"] = () => { require("./../../homepage/scripts/base_site.js"); };
-        DMP_CONTEXT.appBundles["learn/resource"] = () => { require("./../../homepage/scripts/base_site.js"); require("./resource.js"); };
-        DMP_CONTEXT.appBundles["learn/course"] = () => { require("./../../homepage/scripts/base_site.js"); require("./course.js"); };
-        DMP_CONTEXT.appBundles["learn/base_learn"] = () => { require("./../../homepage/scripts/base_site.js"); };
+        DMP_CONTEXT.appBundles["learn/index"] = () => { require("./../../homepage/scripts/base.js"); require("./index.js"); };
+        DMP_CONTEXT.appBundles["learn/support"] = () => { require("./../../homepage/scripts/base.js"); };
+        DMP_CONTEXT.appBundles["learn/resource"] = () => { require("./../../homepage/scripts/base.js"); require("./resource.js"); };
+        DMP_CONTEXT.appBundles["learn/course"] = () => { require("./../../homepage/scripts/base.js"); require("./course.js"); };
+        DMP_CONTEXT.appBundles["learn/base_learn"] = () => { require("./../../homepage/scripts/base.js"); };
     })(DMP_CONTEXT.get());
 
-In the above file, the ``learn/index`` page needs two JS files run: ``index.js`` and ``base_site.js`` (which comes from the homepage app).  Note that even though ``base_site.js`` is listed many times, webpack will only include it once in the bundle.
+In the above file, the ``learn/index`` page needs two JS files run: ``index.js`` and ``base.js`` (which comes from the homepage app).  Note that even though ``base.js`` is listed many times, webpack will only include it once in the bundle.
+
 
 
 Make It So, Bundle One
@@ -178,25 +164,51 @@ During development time, likely want to run webpack in watch mode so it recompil
 
 ::
 
-    npm run watch
+    npm run dev
 
 
 
 Including Bundles in your Pages
 ----------------------------------
 
-Now that the bundles are created, we need to 1) include them with ``<script>`` tags, and 2) call the appropriate function(s) within the bundles (based on the template being shown).
+Now that the bundles are created, we need to 1) include them with ``<script>`` tags, and 2) call the appropriate function(s) within the bundles (based on the template being shown).  This is where ``CONTENT_PROVIDERS`` comes in.  Refer back to the ``settings.py`` example in the section above as your read this section.
 
-The first method of including ``<script>`` tags is enabling ``WebpackJsLinkProvider`` in ``CONTENT_PROVIDERS`` in settings (as in the above settings example).  During the call to ``${ django_mako_plus.links() }``, this provider will include the bundle for the template being rendered.  It will further include additional bundles for supertemplates that the template inherits from (if they are located in other apps).
+The Link Provider
+~~~~~~~~~~~~~~~~~~~~~~~
 
-The second method of including ``<script>`` tags is to place them in base templates, such as ``base.htm`` or an app-specific ``app_base.htm``.  If your templates all inherit from these common templates, the script tags will be placed on the appropriate pages.  In this second method, you can remove ``WebpackJsLinkProvider`` from your settings file.
+The ``WebpackJsLinkProvider`` searches for a file matching ``appname/scripts/__bundle__.js`` for each template in the current inheritance.  When it finds a match, a ``<script>`` tag is included in the page.
 
-    Remember that the bundles contain functions--one per page.  When the bundles are run, the functions are placed in ``window.DMP_CONTEXT``.  The ``WebpackJsCallProvider`` provider does this for you.  It should always come after ``WebpackJsLinkProvider`` so the script functions get loaded first.
+    Alternatively, you can skip automatic bundle discovery altogether and add ``<script>`` tags to the templates yourself.  This may make sense in some situations, especially if you place these manually-created tags in your base template.
 
-Suppose you have a login template with three levels of inheritance: ``account/templates/login.html``, which inherits from ``account/templates/app_base.htm``, which inherits from ``homepage/templates/base.htm``.  Note that the inheritance crosses two apps (``account`` and ``homepage``).  The following happens:
+If you need to customize the location, the ``filename`` can be specified as a string OR as a function/lambda.  The following is an example:
+
+::
+
+    def get_bundle_filename(pr):
+        return os.path.join(settings.BASE_DIR, pr.app_config.name, 'bundle path and filename')
+
+The ``pr`` parameter is a subclass of ``django_mako_plus.provider.base.BaseProvider``. It contains information that can be useful in constructing the filename:
+
+* ``pr.app_config``: The AppConfig for the current template's app.
+* ``pr.template_file``: The current template's filename.
+* ``pr.subdir``: The current template's directory.
+* ``pr.template_name``: The name of the current template (filename sans the extension).
+* ``pr.options``: The options dictionary from settings for this provider (plus any default options not specified in settings).
+
+
+The Function Caller
+~~~~~~~~~~~~~~~~~~~~~~~
+
+The second webpack-related provider listed in the ``settings.py`` file above is ``WebpackJsCallProvider``.  This provider runs the appropriate part of the bundle for the current page.  You'll likely want to use this provider whether you auto-discover or manually code the script tags.
+
+Remember that the bundles contain functions -- one for each page in your app.  These functions *don't* execute when the bundle file is loaded into the browser.  If they did, the JS for every page in your app would run!  Instead, the code for each page is wrapped in a function so it *can* be called when needed.
+
+The ``WebpackJsCallProvider`` looks at the template currently being rendered (and its ancestor templates) and runs the right functions.
+
+An example should make this more clear.  Suppose you have a login template with three levels of inheritance: ``account/templates/login.html``, which inherits from ``account/templates/app_base.htm``, which inherits from ``homepage/templates/base.htm``.  Note that the inheritance crosses two apps (``account`` and ``homepage``).  The following happens:
 
 1. ``WebpackJsLinkProvider`` adds two script tags: the bundle for ``account`` and the bundle for ``homepage``.
-2. ``WebpackJsCallProvider`` adds a script to call the function for each template in the inheritance.
+2. ``WebpackJsCallProvider`` adds three script calls -- one for each template in the inheritance.
 
 ::
     <script data-context="..." src="/static/homepage/scripts/__bundle__.js"></script>

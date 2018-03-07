@@ -8,6 +8,9 @@ Modern web pages are made up of three primary parts: HTML, CSS, and Javascript (
 
 Convention over configuration.  Just like a slice of home-baked apple pie.
 
+    If you are using a bundler like `webpack <https://webpack.js.org/>`_, be sure to read `JS Bundling with Webpack <static_webpack.html>`_.
+
+
 A Bit of Style
 ---------------------------------------------------
 
@@ -130,7 +133,8 @@ Reload your browser, and you should see the calculation of hours.
 Bundlers like Webpack, Browserify, etc.
 ------------------------------------------
 
-If you are using JS bundles, DMP files can go right in the bundles.  See bundling in `Rendering CSS and JS <static.html>`_ for more information.
+If you are using JS bundles, DMP fits right in.  See bundling in `JS Bundling with Webpack <static_webpack.html>`_ for more information.
+
 
 Behind the CSS and JS Curtain
 -----------------------------
