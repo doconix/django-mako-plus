@@ -1,4 +1,4 @@
-JS Bundling with Webpack
+Bundling with Webpack
 ================================
 
     Apologies in advance for the denseness of this page; it bears no relation to the denseness (or lack thereof) of the author.
@@ -12,8 +12,9 @@ These bundles can be created in at least two ways:
 1. A bundle for each app.  If you have four DMP apps, you'll have four bundles.  This approach is described below.
 2. A single bundle for your entire site.  If you have four DMP apps, you'll have one bundle.  This approach is described near the end of this document.
 
-Philosophy
----------------
+
+Creating Bundles
+---------------------------------
 
 Lots of different Javascript files exist in a project.  Some are project-wide, such as ``jQuery``.  Some are full apps, such as ``React`` or ``Vue`` apps.  These generally get bundled in their own ways and don't need DMP's involvement.
 
@@ -27,10 +28,9 @@ This provider wraps each script inside a function inside the larger bundle.  Sin
    :align: center
 
 
-Overview
--------------------
 
-First we'll present an overview of the process.  Note that some steps only work correctly once you've continued through the setup in this document.
+
+The following is the recommended process for creating/using bundles:
 
 1. Create your templates and scripts normally. Templates go in ``yourapp/templates/``.  Scripts go in ``yourapp/scripts/``.
 2. If you haven't done so, update your settings file to include a ``WEBPACK_PROVIDERS`` section.  The ``dmp_webpack`` command uses this when generating the entry file.
@@ -42,7 +42,7 @@ First we'll present an overview of the process.  Note that some steps only work 
 
 
 Grok Webpack?
--------------------
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 In the discussion below, I'll assume you already understand how to use `npm <https://www.npmjs.com/>`_, `Webpack <https://webpack.js.org/>`_, and their related tools.  If you need to learn more, stop here and go through the tutorials on these technologies.  Set aside a day or three to learn the configuration options, and then come back and continue. :)
 
@@ -61,7 +61,7 @@ The following is an example ``package.json`` file for Webpack 4:
 
 
 settings.py
-------------------------
+~~~~~~~~~~~~~~~~~~
 
 The following is an example of the settings needed when using bundles.  Note that the example is limited to the bundle-related providers -- you'll likely have additional providers for things like CSS files.
 
@@ -128,7 +128,7 @@ In the above file, the ``learn/index`` page needs two JS files run: ``index.js``
 
 
 Make It So, Bundle One
---------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Once the ``__entry__.js`` files are generated, webpack needs to convert them into bundles.  Create a file in your project root called ``webpack.config.js``.  In the following example, I'm assuming you have two DMP apps: ``account`` and ``homepage``:
 
@@ -222,8 +222,13 @@ An example should make this more clear.  Suppose you have a login template with 
 The ``if`` statements are used because the functions are included in the bundle only if a script file for a given page really exists.  In other words, if ``account/scripts/app_base.js`` doesn't exist, the ``account/app_base`` function won't be in the bundle.
 
 
+Sitewide Bundles
+--------------------
+
+If you need the bundles to span across one or more apps, that's possible too.
+
 One Bundle to Rule Them All
----------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This section describes how to create a single monstrosity that includes the scripts for every DMP app on your site.  In some situations, such as sites with a small number of scripts, a single bundle might be more efficient than several app bundles.  To create a single ``__entry__.js`` file for your entire site, run the following:
 
@@ -240,7 +245,7 @@ When the bundle loads in the browser, the functions for every page will be place
 
 
 A Few Bundles to Rule Them All
-----------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Somewhere in between a sitewide bundle and app-specific bundles lives the multi-app bundle option.  Suppose you want app1 and app2 in one bundle and app3, app4, and app5 in another.  The following commands create the two needed entry files:
 
@@ -270,3 +275,115 @@ To include the ``<script>`` tag for these bundles, use something like the follow
     ]
 
 Note that the function is run once per template -- the first time a template is accessed.  During production, the filename is memoized after the first render of a template.  This means slow functions are fine here, but it also means you can't return something different on each render.
+
+
+CoffeeScript Example
+----------------------------
+
+If you're using Coffee (or TypeScript, or Transpyle, ...), you probably have webpack already up and running.  This example should help explain the specifics for integrating it with DMP scripts.  I'll assume you have both ``*.js`` and ``*.coffee`` files in your ``appname/scripts/`` directories.  The directory structure for the ``account`` app might look like the following:
+
+::
+
+    project/
+        account/
+            scripts/
+                index.coffee
+                another.js
+            templates/
+                index.html
+
+Since they have the same name, the ``index.coffee`` script will be connected with ``index.html`` in our bundle functions.
+
+I'll assume you've installed the npm dependencies with commands like the following:
+
+* ``npm init``
+* ``npm install webpack coffeescript coffee-loader``
+* Create the ``package.json`` file as described above.
+* Create the ``webpack.config.js`` file as described above.
+
+Create the Entry File
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+The project settings file should contain the following for DMP's webpack providers:
+
+::
+
+    'WEBPACK_PROVIDERS': [
+        # app/scripts/*.js (regular JS)
+        { 'provider': 'django_mako_plus.JsLinkProvider' },
+
+        # app/scripts/*.coffee (CoffeeScript files)
+        { 'provider': 'django_mako_plus.JsLinkProvider',
+            'filename': lambda pr: os.path.join(*flatten(pr.app_config.path, 'scripts', pr.subdir_parts[1:], pr.template_name + '.coffee'))
+        },
+
+The above specifies that two providers be used when creating the entry file: one looks for regular JS files, and the other looks for Coffee files.
+
+    With this setup, it's valid to have both ``index.coffee`` and ``index.js`` in the scripts directory.  DMP would run both file functions when ``index.html`` displays.
+
+Now create your entry file(s):
+
+::
+
+    python manage.py dmp_webpack --overwrite
+
+The above command creates ``account/scripts/__entry__.js``.  In the example output below, the JS files for the ancestor templates (``base.htm``) are also present:
+
+::
+
+    (context => {
+        DMP_CONTEXT.appBundles["account/index"] = () => { require("./../../homepage/scripts/base.js"); require("./index.coffee"); };
+    })(DMP_CONTEXT.get());
+
+
+Create the Bundle
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Ensure the coffee loader is included in your ``webpack.config.js`` file:
+
+::
+
+    const path = require('path');
+
+    module.exports = {
+        devtool: 'source-map',
+        entry: {
+            'account': './account/scripts/__entry__.js',
+        },
+        output: {
+            path: path.resolve(__dirname),
+            filename: '[name]/scripts/__bundle__.js'
+        },
+        module: {
+            rules: [
+                {
+                    test: /\.coffee$/,
+                    use: ['coffee-loader']
+                }
+            ]
+        }
+    };
+
+Now create the bundle:
+
+::
+
+    npm run build
+
+During the bundling process, webpack converts the .coffee file to Javascript.  Once ``account/scripts/__bundle__.js`` gets created, you should see the *transpiled* coffee code as well as the base JS.
+
+
+Link the Bundle
+~~~~~~~~~~~~~~~~~~~~~
+
+Finally, tell DMP to add the bundle script and function calls to templates as they render.  In DMP's settings:
+
+::
+
+    'CONTENT_PROVIDERS': [
+        { 'provider': 'django_mako_plus.JsContextProvider' },           # adds the JS context
+        { 'provider': 'django_mako_plus.WebpackJsLinkProvider' },       # <script> tags for JS bundle(s)
+        { 'provider': 'django_mako_plus.WebpackJsCallProvider' },       # call the bundle function(s) for the current page
+    ],
+
+This process should work for most webpack scripts you are bundling.
