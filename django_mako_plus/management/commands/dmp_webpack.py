@@ -85,7 +85,7 @@ class Command(BaseCommand):
                 if not options['appname'] or config.name in options['appname']:
                     self.message('Searching `{}` app...'.format(config.name))
                     filename = os.path.join(config.path, 'scripts', '__entry__.js')
-                    self.create_entry_file(filename, self.generate_script_map(config))
+                    self.create_entry_file(filename, self.generate_script_map(config), True)
 
         # main runner for one sitewide file
         else:
@@ -94,18 +94,47 @@ class Command(BaseCommand):
                 if not options['appname'] or config.name in options['appname']:
                     self.message('Searching `{}` app...'.format(config.name))
                     script_map.update(self.generate_script_map(config))
-            self.create_entry_file(self.options['single'], script_map)
+            self.create_entry_file(self.options['single'], script_map, False)
+
+
+    def create_entry_file(self, filename, script_map, subtree_files_only):
+        '''Creates an entry file for the given script map'''
+        filedir = os.path.dirname(filename)
+        if os.path.exists(filename):
+            if self.options['overwrite']:
+                os.remove(filename)
+            else:
+                raise ValueError('Refusing to destroy existing file: {} (use --overwrite option or remove the file)'.format(filename))
+        # create the lines of the entry file
+        lines = []
+        for page, scripts in script_map.items():
+            require = []
+            for s in scripts:
+                relpath = os.path.relpath(s, filedir)
+                # if subtree_files_only, skip any file that require going up a directory
+                if not subtree_files_only or not relpath.startswith('..'):
+                    require.append('require("./{}")'.format(relpath))
+            if len(require) > 0:
+                lines.append('DMP_CONTEXT.appBundles["{}"] = () => {{ {}; }};'.format(page, '; '.join(require)))
+        # if we created at least one line, write the entry file
+        if len(lines) > 0:
+            self.message('Creating {}'.format(os.path.relpath(filename, settings.BASE_DIR)))
+            with open(filename, 'w') as fout:
+                fout.write('(context => {\n')
+                for line in lines:
+                    fout.write('    {}\n'.format(line))
+                fout.write('})(DMP_CONTEXT.get());\n')
 
 
     def generate_script_map(self, config):
         '''
         Maps templates in this app to their scripts.  This function iterates through
         app/templates/* to find the templates in this app.  Returns the following
-        dictionary:
+        dictionary with paths relative to BASE_DIR:
 
         {
-            'app/template1': [ './scripts/template1.js', './scripts/supertemplate1.js' ],
-            'app/template2': [ './scripts/template2.js', './scripts/supertemplate2.js', './scripts/supersuper2.js' ],
+            'app/template1': [ 'scripts/template1.js', 'scripts/supertemplate1.js' ],
+            'app/template2': [ 'scripts/template2.js', 'scripts/supertemplate2.js', 'scripts/supersuper2.js' ],
             ...
         }
 
@@ -130,7 +159,6 @@ class Command(BaseCommand):
                         self.message('\t{}: {}'.format(key, scripts), 3)
                     else:
                         self.message('\t{}: none found'.format(key), 3)
-
         recurse('')
         return script_map
 
@@ -162,21 +190,3 @@ class Command(BaseCommand):
                 url = url.split('?', 1)[0]
                 scripts.append(os.path.relpath(url, settings.BASE_DIR))
         return scripts
-
-
-    def create_entry_file(self, filename, script_map):
-        '''Creates an entry file for the given script map'''
-        if len(script_map) == 0:
-            return
-        if not self.options['overwrite'] and os.path.exists(filename):
-            raise ValueError('Refusing to destroy existing file: {} (use --overwrite option or remove the file)'.format(filename))
-        self.message('Creating {}'.format(os.path.relpath(filename, settings.BASE_DIR)))
-        with open(filename, 'w') as fout:
-            fout.write('(context => {\n')
-            filedir = os.path.dirname(filename)
-            for page, scripts in script_map.items():
-                fout.write('    DMP_CONTEXT.appBundles["%s"] = () => { %s; };\n' % (
-                    page,
-                    '; '.join([ 'require("./%s")' % os.path.relpath(s, filedir) for s in scripts ]),
-                ))
-            fout.write('})(DMP_CONTEXT.get());\n')
