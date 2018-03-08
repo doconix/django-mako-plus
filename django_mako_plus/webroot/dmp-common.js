@@ -14,7 +14,6 @@
 
             /* Adds data to the DMP context under the given key */
             set: function(version, contextid, data, templates) {
-                console.log('setting', contextid)
                 if (DMP_CONTEXT.__version__ != version) {
                     console.warn('DMP framework version is ' + version + ', while dmp-common.js is ' + DMP_CONTEXT.__version__ + '. Unexpected behavior may occur.');
                 }
