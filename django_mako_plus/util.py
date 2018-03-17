@@ -105,10 +105,6 @@ def split_app(path):
     return None, path
 
 
-EMPTY = object()
-
-
-
 def crc32(filename):
     '''
     Calculates the CRC checksum for a file.
@@ -126,3 +122,19 @@ def crc32(filename):
                 break
             result = zlib.crc32(chunk, result)
     return result
+
+
+EMPTY = object()
+def getdefaultattr(obj, name, default=None, factory=EMPTY):
+    '''
+    Gets the given attribute from the object,
+    creating it with a default or by calling
+    a factory if needed.
+    '''
+    try:
+        return getattr(obj, name)
+    except AttributeError:
+        pass
+    val = factory() if factory is not EMPTY else None
+    setattr(obj, name, val)
+    return val

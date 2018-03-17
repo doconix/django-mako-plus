@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.utils.module_loading import import_string
 
-from ..util import merge_dicts, flatten, log, crc32
+from ..util import merge_dicts, flatten, log, crc32, getdefaultattr
 from ..version import __version__
 from .base import BaseProvider
 
@@ -21,6 +21,8 @@ class LinkProvider(BaseProvider):
     Renders links like <link> and <script> based on the name of the template
     and supertemplates.
     '''
+
+
     # the default options are for CSS files
     default_options = merge_dicts(BaseProvider.default_options, {
         # subclasses should override the group
@@ -28,7 +30,7 @@ class LinkProvider(BaseProvider):
         # string for the absolute path to the filename that should be linked (if it exists)
         # if this is a function/lambda, DMP will run the function to get the string path
         'filename': 'app/subdir/template.ext',
-        # whether to skip duplicate urls generated in the same provider run
+        # how to process duplicate urls found across this request
         'skip_duplicates': False,
     })
     def __init__(self, *args, **kwargs):
@@ -39,37 +41,50 @@ class LinkProvider(BaseProvider):
         self.filename = os.path.relpath(filepath, settings.BASE_DIR).replace('\\', '/')
         if log.isEnabledFor(logging.DEBUG):
             log.debug('[%s] %s searching for %s', self.template_file, self.__class__.__qualname__, self.filename)
+        # file time and version hash
         try:
             self.mtime = int(os.stat(filepath).st_mtime)
             if log.isEnabledFor(logging.INFO):
                 log.info('[%s] found %s', self.template_file, self.filename)
             # version_id combines current time and the CRC32 checksum of file bytes
             self.version_id = (self.mtime << 32) | crc32(filepath)
+            self.url = '{}?v={:x}'.format(
+                self.filename.replace('\\', '/'),
+                self.version_id,
+            )
         except FileNotFoundError:
             self.mtime = 0
             self.version_id = 0
+            self.url = None
 
     def start(self, provider_run, data):
-        # (spans the entire list of providers during the run)
-        provider_run.urls = set()
-        # (spans only this provider across the template chain)
-        data['urls'] = []
+        # add a set to the request (fallback to provider_run if request is None) for skipping duplicates
+        if self.options['skip_duplicates']:
+            data['seen'] = getdefaultattr(
+                provider_run.request.dmp if provider_run.request is not None else provider_run,
+                '_LinkProvider_Filename_Cache_',
+                factory=set,
+            )
+        # enabled providers in the chain go here
+        data['enabled'] = []
 
     def provide(self, provider_run, data):
-        # delaying printing of tag because the JsContextProvider delays and this must go after it
-        if self.mtime == 0:
+        # delaying printing of tag to finish() because the JsContextProvider delays and this must go after it
+
+        # short circuit if the file for this provider doesn't exist
+        if self.url is None:
             return
-        url = '{}?v={:x}'.format(
-            self.filename.replace('\\', '/'),
-            self.version_id,
-        )
-        if not self.options['skip_duplicates'] or url not in provider_run.urls:
-            provider_run.urls.add(url)
-            data['urls'].append(url)
+        # short circut if we're skipping duplicates and we've already seen this one
+        if self.options['skip_duplicates']:
+            if self.filename in data['seen']:
+                return
+            data['seen'].add(self.filename)
+        # if we get here, this provider is enabled, so add it to the list
+        data['enabled'].append(self)
 
     def finish(self, provider_run, data):
-        for url in data['urls']:
-            provider_run.write(self.create_link(provider_run, url))
+        for provider in data['enabled']:
+            provider_run.write(provider.create_link(provider_run))
 
     def create_link(self, provider_run, url):
         raise NotImplementedError('Subclass did not implement `create_link()`')
@@ -87,12 +102,12 @@ class CssLinkProvider(LinkProvider):
         'skip_duplicates': True,
     })
 
-    def create_link(self, provider_run, url):
+    def create_link(self, provider_run):
         '''Creates a link to the given URL'''
         return '<link data-context="{contextid}" rel="stylesheet" type="text/css" href="{static}{url}" />'.format(
             contextid=provider_run.uid,
             static=settings.STATIC_URL,
-            url=url,
+            url=self.url,
         )
 
 
@@ -102,15 +117,15 @@ class JsLinkProvider(LinkProvider):
         'group': 'scripts',
         'filename': lambda pr: os.path.join(*flatten(pr.app_config.path, 'scripts', pr.subdir_parts[1:], pr.template_name + '.js')),
         'async': False,
-        'skip_duplicates': False,
+        'skip_duplicates': False,  # the JS may need to run each time it is included
     })
 
-    def create_link(self, provider_run, url):
+    def create_link(self, provider_run):
         '''Creates a link to the given URL'''
         return '<script data-context="{contextid}" src="{static}{url}"{async}></script>'.format(
             contextid=provider_run.uid,
             static=settings.STATIC_URL,
-            url=url,
+            url=self.url,
             async=' async="async"' if self.options['async'] else '',
         )
 
