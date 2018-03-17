@@ -8,6 +8,7 @@ from ..uid import wuid
 
 import io
 from collections import namedtuple
+import warnings
 
 
 ##################################################
@@ -79,7 +80,8 @@ class ProviderRun(object):
         self.uid = wuid()           # a unique id for this run
         self.request = tself.context.get('request')
         self.context = tself.context
-        self.version_id = version_id
+        if version_id is not None:
+            warnings.warn('The `version_id` parameter in links() is deprecated in favor of automatic file hashes.')
         self.buffer = io.StringIO()
         # Create a table of providers for each template in the ancestry:
         #

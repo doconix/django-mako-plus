@@ -22,6 +22,7 @@ class BaseProvider(object):
     }
 
     def __init__(self, app_config, template_file, options):
+        # In production, this constructor is called only once per template per server run
         self.app_config = app_config
         self.subdir, self.template_file = os.path.split(template_file)
         self.subdir_parts = os.path.normpath(self.subdir).split(os.path.sep)

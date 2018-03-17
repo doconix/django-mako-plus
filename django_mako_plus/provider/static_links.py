@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.utils.module_loading import import_string
 
-from ..util import merge_dicts, flatten, log
+from ..util import merge_dicts, flatten, log, crc32
 from ..version import __version__
 from .base import BaseProvider
 
@@ -43,8 +43,11 @@ class LinkProvider(BaseProvider):
             self.mtime = int(os.stat(filepath).st_mtime)
             if log.isEnabledFor(logging.INFO):
                 log.info('[%s] found %s', self.template_file, self.filename)
+            # version_id combines current time and the CRC32 checksum of file bytes
+            self.version_id = (self.mtime << 32) | crc32(filepath)
         except FileNotFoundError:
             self.mtime = 0
+            self.version_id = 0
 
     def start(self, provider_run, data):
         # (spans the entire list of providers during the run)
@@ -56,9 +59,9 @@ class LinkProvider(BaseProvider):
         # delaying printing of tag because the JsContextProvider delays and this must go after it
         if self.mtime == 0:
             return
-        url = '{}?{}'.format(
+        url = '{}?v={:x}'.format(
             self.filename.replace('\\', '/'),
-            provider_run.version_id if provider_run.version_id is not None else self.mtime,
+            self.version_id,
         )
         if not self.options['skip_duplicates'] or url not in provider_run.urls:
             provider_run.urls.add(url)
@@ -67,6 +70,9 @@ class LinkProvider(BaseProvider):
     def finish(self, provider_run, data):
         for url in data['urls']:
             provider_run.write(self.create_link(provider_run, url))
+
+    def create_link(self, provider_run, url):
+        raise NotImplementedError('Subclass did not implement `create_link()`')
 
 
 #############################################
@@ -87,7 +93,6 @@ class CssLinkProvider(LinkProvider):
             contextid=provider_run.uid,
             static=settings.STATIC_URL,
             url=url,
-            version=provider_run.version_id if provider_run.version_id is not None else self.mtime,
         )
 
 
