@@ -3,6 +3,14 @@ Upgrade Notes
 
 This document contains upgrade notes for those already using DMP.  We started the document at version 4.3.
 
+5.2.1 - Late March, 2018
+
+I continued refactoring the webpack providers and workflow.  While doing this, I updated how DMP calculates the ``version_id`` on static files. It now uses the file modification time PLUS contents checksum.  This method is fast and automatic.
+
+If you are explicitly setting ``version_id`` in your call to links, as in ``${ django_mako_plus.links(self, version_id=...) }``, remove the ``version_id`` parameter.
+
+If you really need to set this, extend the ``JsLinkProvider`` and/or ``CssLinkProvider`` classes with your custom behavior.  It's a very special-case need, so it made sense to automate this for the 99%.
+
 5.1.1 - March, 2018
 
 I refactored the webpack providers and workflow, but I doubt anyone is using them yet.  If you happen to have jumped on this in the past three weeks that 5.0 was out, be sure to read the webpack page and change your settings appropriately.
