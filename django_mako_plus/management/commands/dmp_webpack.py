@@ -1,7 +1,8 @@
+from django.apps import apps as django_apps
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
 from mako.exceptions import MakoException
-from django_mako_plus.registry import get_dmp_apps
+from django_mako_plus.registry import get_dmp_apps, ensure_dmp_app
 from django_mako_plus.provider import create_mako_context
 from django_mako_plus.provider.runner import ProviderRun, create_factories
 from django_mako_plus.util import get_dmp_instance, split_app, DMP_OPTIONS
@@ -79,26 +80,43 @@ class Command(BaseCommand):
             print(e)
             raise CommandError('Your settings.py file is missing the BASE_DIR setting.')
 
+        # the apps to process
+        apps = []
+        for appname in options['appname']:
+            ensure_dmp_app(appname)
+            apps.append(django_apps.get_app_config(appname))
+        if len(apps) == 0:
+            apps = get_dmp_apps()
+
         # main runner for per-app files
         if self.options['single'] is None:
-            for config in get_dmp_apps():
-                if not options['appname'] or config.name in options['appname']:
-                    self.message('Searching `{}` app...'.format(config.name))
-                    filename = os.path.join(config.path, 'scripts', '__entry__.js')
-                    self.create_entry_file(filename, self.generate_script_map(config), True)
+            for app in apps:
+                self.message('Searching `{}` app...'.format(app.name))
+                filename = os.path.join(app.path, 'scripts', '__entry__.js')
+                self.create_entry_file(filename, self.generate_script_map(app), [ app ])
 
         # main runner for one sitewide file
         else:
             script_map = {}
-            for config in get_dmp_apps():
-                if not options['appname'] or config.name in options['appname']:
-                    self.message('Searching `{}` app...'.format(config.name))
-                    script_map.update(self.generate_script_map(config))
-            self.create_entry_file(self.options['single'], script_map, False)
+            for app in apps:
+                self.message('Searching `{}` app...'.format(app.name))
+                script_map.update(self.generate_script_map(app))
+            self.create_entry_file(self.options['single'], script_map, apps)
 
 
-    def create_entry_file(self, filename, script_map, subtree_files_only):
+    def create_entry_file(self, filename, script_map, apps):
         '''Creates an entry file for the given script map'''
+        def in_apps(s):
+            for app in apps:
+                last = None
+                path = os.path.dirname(s)
+                while last != path:
+                    if os.path.samefile(app.path, path):
+                        return True
+                    last = path
+                    path = os.path.dirname(last)
+            return False
+
         filedir = os.path.dirname(filename)
         if os.path.exists(filename):
             if self.options['overwrite']:
@@ -110,10 +128,8 @@ class Command(BaseCommand):
         for page, scripts in script_map.items():
             require = []
             for s in scripts:
-                relpath = os.path.relpath(s, filedir)
-                # if subtree_files_only, skip any file that require going up a directory
-                if not subtree_files_only or not relpath.startswith('..'):
-                    require.append('require("./{}")'.format(relpath))
+                if in_apps(os.path.abspath(s)):
+                    require.append('require("./{}")'.format(os.path.relpath(s, filedir)))
             if len(require) > 0:
                 lines.append('DMP_CONTEXT.appBundles["{}"] = () => {{ {}; }};'.format(page, '; '.join(require)))
         # if we created at least one line, write the entry file

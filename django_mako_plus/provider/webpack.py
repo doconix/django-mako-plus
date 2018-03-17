@@ -1,7 +1,7 @@
 from django.conf import settings
 
 from ..util import merge_dicts, flatten
-from .static_links import JsLinkProvider
+from .static_links import CssLinkProvider, JsLinkProvider
 from .base import BaseProvider
 
 import os
@@ -10,26 +10,28 @@ import posixpath
 
 
 
+class WebpackCssLinkProvider(CssLinkProvider):
+    '''
+    Generates a CSS <link> tag for the sitewide or app-level CSS bundle file, if it exists.
+    '''
+    default_options = merge_dicts(JsLinkProvider.default_options, {
+        'group': 'scripts',
+        'filename': lambda pr: os.path.join(*flatten(pr.app_config.path, 'styles', '__bundle__.css')),
+        'skip_duplicates': True,
+    })
+
+
 class WebpackJsLinkProvider(JsLinkProvider):
     '''
     Generates a JS <script> tag for the sitewide or app-level JS bundle file, if it exists.
     In settings, this provider should be defined *before* WebpackJsCallProvider is defined.
-    (alternatively, sitewide or app bundle links can be included directly in base html templates).
     '''
     default_options = merge_dicts(JsLinkProvider.default_options, {
         'group': 'scripts',
         'filename': lambda pr: os.path.join(*flatten(pr.app_config.path, 'scripts', '__bundle__.js')),
         'async': False,
+        'skip_duplicates': True,
     })
-
-    def finish(self, provider_run, data):
-        # since we are doing a sitewide or app-level bundle, it will likely be in the list many times.
-        # but it only needs to be included once.  otherwise the functionality is identical to JsLinkProvider
-        added = set()
-        data['urls'] = [url for url in data['urls'] if url not in added and not added.add(url)]
-        super().finish(provider_run, data)
-
-
 
 
 class WebpackJsCallProvider(BaseProvider):

@@ -13,6 +13,8 @@ import glob
 from collections import namedtuple
 
 
+#####################################################
+###   Abstract Link Provider
 
 class LinkProvider(BaseProvider):
     '''
@@ -21,10 +23,13 @@ class LinkProvider(BaseProvider):
     '''
     # the default options are for CSS files
     default_options = merge_dicts(BaseProvider.default_options, {
-        'group': 'static.file',
+        # subclasses should override the group
+        'group': 'scripts',
         # string for the absolute path to the filename that should be linked (if it exists)
         # if this is a function/lambda, DMP will run the function to get the string path
         'filename': 'app/subdir/template.ext',
+        # whether to skip duplicate urls generated in the same provider run
+        'skip_duplicates': False,
     })
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -41,6 +46,32 @@ class LinkProvider(BaseProvider):
         except FileNotFoundError:
             self.mtime = 0
 
+    def start(self, provider_run, data):
+        # (spans the entire list of providers during the run)
+        provider_run.urls = set()
+        # (spans only this provider across the template chain)
+        data['urls'] = []
+
+    def provide(self, provider_run, data):
+        # delaying printing of tag because the JsContextProvider delays and this must go after it
+        if self.mtime == 0:
+            return
+        url = '{}?{}'.format(
+            self.filename.replace('\\', '/'),
+            provider_run.version_id if provider_run.version_id is not None else self.mtime,
+        )
+        if not self.options['skip_duplicates'] or url not in provider_run.urls:
+            provider_run.urls.add(url)
+            data['urls'].append(url)
+
+    def finish(self, provider_run, data):
+        for url in data['urls']:
+            provider_run.write(self.create_link(provider_run, url))
+
+
+#############################################
+###   Css and Js Link Providers
+
 
 class CssLinkProvider(LinkProvider):
     '''Generates a CSS <link>'''
@@ -50,16 +81,14 @@ class CssLinkProvider(LinkProvider):
         'skip_duplicates': True,
     })
 
-    def provide(self, provider_run, data):
-        if self.mtime == 0:
-            return
-        provider_run.write('<link data-context="{contextid}" rel="stylesheet" type="text/css" href="{static}{url}?{version}" />'.format(
+    def create_link(self, provider_run, url):
+        '''Creates a link to the given URL'''
+        return '<link data-context="{contextid}" rel="stylesheet" type="text/css" href="{static}{url}" />'.format(
             contextid=provider_run.uid,
             static=settings.STATIC_URL,
-            url=self.filename,
+            url=url,
             version=provider_run.version_id if provider_run.version_id is not None else self.mtime,
-            skip_duplicates='true' if self.options['skip_duplicates'] else 'false',
-        ))
+        )
 
 
 class JsLinkProvider(LinkProvider):
@@ -68,29 +97,22 @@ class JsLinkProvider(LinkProvider):
         'group': 'scripts',
         'filename': lambda pr: os.path.join(*flatten(pr.app_config.path, 'scripts', pr.subdir_parts[1:], pr.template_name + '.js')),
         'async': False,
+        'skip_duplicates': False,
     })
 
-    def start(self, provider_run, data):
-        data['urls'] = []
+    def create_link(self, provider_run, url):
+        '''Creates a link to the given URL'''
+        return '<script data-context="{contextid}" src="{static}{url}"{async}></script>'.format(
+            contextid=provider_run.uid,
+            static=settings.STATIC_URL,
+            url=url,
+            async=' async="async"' if self.options['async'] else '',
+        )
 
-    def provide(self, provider_run, data):
-        # delaying printing of tag because the JsContextProvider delays and this must go after it
-        if self.mtime == 0:
-            return
-        data['urls'].append('{}?{}'.format(
-            self.filename.replace('\\', '/'),
-            provider_run.version_id if provider_run.version_id is not None else self.mtime,
-        ))
 
-    def finish(self, provider_run, data):
-        for url in data['urls']:
-            provider_run.write('<script data-context="{contextid}" src="{static}{url}"{async}></script>'.format(
-                contextid=provider_run.uid,
-                static=settings.STATIC_URL,
-                url=url,
-                async=' async="async"' if self.options['async'] else '',
-            ))
 
+###################################
+###  JS Context Provider
 
 class JsContextProvider(BaseProvider):
     '''

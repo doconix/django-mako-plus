@@ -52,7 +52,8 @@ DEFAULT_OPTIONS = {
 
     # webpack providers
     'WEBPACK_PROVIDERS': [
-        { 'provider': 'django_mako_plus.JsLinkProvider' },        # generates links for app/scripts/template.js
+        { 'provider': 'django_mako_plus.JsLinkProvider' },
+        { 'provider': 'django_mako_plus.CssLinkProvider' },
     ],
 
     # additional template dirs to search
