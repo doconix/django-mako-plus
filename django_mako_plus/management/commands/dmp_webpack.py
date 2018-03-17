@@ -186,15 +186,9 @@ class Command(BaseCommand):
         This runs a ProviderRun on the given template (as if it were being displayed).
         This allows the WEBPACK_PROVIDERS to provide the JS files to us.
 
-        For this algorithm to work, providers must populate the provider data dictionary like this example.
-        the built-in JsLinkProvider does this already.
-            column_data = {
-                'urls': [
-                    '/static/app/scripts/first.js',
-                    '/static/app/scripts/second.js',
-                    ...
-                ]
-            }
+        For this algorithm to work, the providers must extend static_links.LinkProvider
+        because that class creates the 'enabled' list of provider instances, and each
+        provider instance has a url.
         '''
         template_obj = get_dmp_instance().get_template_loader(config, create=True).get_mako_template(template_name, force=True)
         mako_context = create_mako_context(template_obj)
@@ -202,7 +196,8 @@ class Command(BaseCommand):
         inner_run.run()
         scripts = []
         for data in inner_run.column_data:
-            for url in data.get('urls', []):
-                url = url.split('?', 1)[0]
-                scripts.append(os.path.relpath(url, settings.BASE_DIR))
+            for provider in data.get('enabled', []):
+                if getattr(provider, 'url') is not None:
+                    url = provider.url.split('?', 1)[0]
+                    scripts.append(os.path.relpath(url, settings.BASE_DIR))
         return scripts
