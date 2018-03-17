@@ -56,12 +56,12 @@ Since base.htm will be the parent page of nearly every HTML page on your site, t
 
 .. code:: html
 
-    <link rel="stylesheet" type="text/css" href="/static/homepage/styles/base.css?33192040" />
-    <link rel="stylesheet" type="text/css" href="/static/homepage/styles/index.css?33192040" />
+    <link rel="stylesheet" type="text/css" href="/static/homepage/styles/base.css?v=5a8931aee4c59dee" />
+    <link rel="stylesheet" type="text/css" href="/static/homepage/styles/index.css?v=5aac6c929d3401a1" />
 
 Note that ``base.css`` is included first because it's at the top of the hierarchy. Styles from ``index.css`` override any conflicting styles from ``base.css``, which makes sense because ``index.html`` is the final template in the inheritance chain.
 
-    You might be wondering about the big number after the html source ``<link>``. That's the file modification time, in minutes since 1970. This is included because browsers don't automatically download new CSS files (I'm looking at you here Chrome!). They use their cached versions until a specified date, often far in the future (this duration is set by your web server). By adding a number to the end of the file, browsers think the CSS files are "new" because the "filename" changes whenever you change the file. Trixy browserses...
+    You might be wondering about ``?v=5a8931aee4c59dee`` in the link.  That's the file modification time and content checksum for the file. This is included because browsers don't automatically download new static files. They use their cached versions until a specified date, often far in the future. By adding a number to the end of the file, browsers think the CSS files are "new" because the "filename" changes whenever you change the file.  Trixy browserses...
 
 
 Javascript
