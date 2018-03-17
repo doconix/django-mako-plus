@@ -242,7 +242,7 @@ class MakoTemplateAdapter(object):
         except RedirectException: # redirect to another page
             e = sys.exc_info()[1]
             if request is None:
-                log.info('a template redirected processing to %s', request.dmp.module, request.dmp.function, e.redirect_to)
+                log.info('a template redirected processing to %s', e.redirect_to)
             else:
                 log.info('view function %s.%s redirected processing to %s', request.dmp.module, request.dmp.function, e.redirect_to)
             # send the signal
@@ -250,8 +250,3 @@ class MakoTemplateAdapter(object):
                 dmp_signal_redirect_exception.send(sender=sys.modules[__name__], request=request, exc=e)
             # send the browser the redirect command
             return e.get_response(request)
-
-
-
-
-
