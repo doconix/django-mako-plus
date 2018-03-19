@@ -5,11 +5,13 @@ from django.template import TemplateDoesNotExist, TemplateSyntaxError, Context, 
 from mako.exceptions import TopLevelLookupException, TemplateLookupException, CompileException, SyntaxException, html_error_template
 from mako.lookup import TemplateLookup
 from mako.template import Template
+import mako.runtime
 
 from .exceptions import RedirectException
 from .signals import dmp_signal_pre_render_template, dmp_signal_post_render_template, dmp_signal_redirect_exception
 from .util import get_dmp_instance, log, DMP_OPTIONS
 
+import io
 import logging
 import mimetypes
 import os
@@ -250,3 +252,37 @@ class MakoTemplateAdapter(object):
                 dmp_signal_redirect_exception.send(sender=sys.modules[__name__], request=request, exc=e)
             # send the browser the redirect command
             return e.get_response(request)
+
+
+
+
+##########################################################
+###   Helpers
+
+def template_inheritance(obj):
+    '''
+    Generator that iterates the template and its ancestors.
+    The order is from most specialized (furthest descendant) to
+    most general (furthest ancestor).
+
+    `obj` can be either:
+        1. Mako Template object
+        2. Mako `self` object (available within a rendering template)
+    '''
+    if isinstance(obj, Template):
+        obj = create_mako_context(obj)['self']
+    elif isinstance(obj, mako.runtime.Context):
+        obj = obj['self']
+    while obj is not None:
+        yield obj.template
+        obj = obj.inherits
+
+
+def create_mako_context(template_obj, **kwargs):
+    # I'm hacking into private Mako methods here, but I can't see another
+    # way to do this.  Hopefully this can be rectified at some point.
+    kwargs.pop('self', None)  # some contexts have self in them, and it messes up render_unicode below because we get two selfs
+    runtime_context = mako.runtime.Context(io.StringIO(), **kwargs)
+    runtime_context._set_with_template(template_obj)
+    _, mako_context = mako.runtime._populate_self_namespace(runtime_context, template_obj)
+    return mako_context

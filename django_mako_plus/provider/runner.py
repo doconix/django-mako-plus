@@ -3,6 +3,7 @@ from django.core.exceptions import ImproperlyConfigured
 from django.utils.module_loading import import_string
 
 from .base import BaseProvider
+from ..template import template_inheritance
 from ..util import DMP_OPTIONS, split_app, merge_dicts
 from ..uid import wuid
 
@@ -97,7 +98,7 @@ class ProviderRun(object):
         ]
         self.template_providers = [
             [ pf.instance_for_template(template) for pf in factories ]
-            for template in template_inheritance(tself)
+            for template in reversed(list(template_inheritance(tself)))
         ]
         # Column-specific data dictionaries are maintained as the template providers run
         # (one per provider column).  These allow the provider instances of a given
@@ -133,18 +134,3 @@ class ProviderRun(object):
     def getvalue(self):
         '''Returns the buffer string'''
         return self.buffer.getvalue()
-
-
-
-##########################################################
-###   Helpers
-
-def template_inheritance(tself):
-    '''Returns a list of the template and its ancestors, starting with the top-most ancestor'''
-    # I tested a recursive generator to walk the linked list backwards,
-    # but it took about twice as long as this algorithm.
-    templates = []
-    while tself is not None:
-        templates.append(tself.template)
-        tself = tself.inherits
-    return reversed(templates)

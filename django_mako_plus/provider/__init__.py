@@ -1,9 +1,8 @@
 from django.apps import apps
 from django.template import Context
 
-import mako.runtime
-
 from .runner import ProviderRun
+from ..template import create_mako_context
 from ..util import get_dmp_instance
 
 import io
@@ -56,13 +55,3 @@ def template_obj_links(request, template_obj, context=None, version_id=None, gro
         context_dict.update(context)
     mako_context = create_mako_context(template_obj, **context_dict)
     return links(mako_context['self'], version_id=version_id, group=group)
-
-
-def create_mako_context(template_obj, **kwargs):
-    # I'm hacking into private Mako methods here, but I can't see another
-    # way to do this.  Hopefully this can be rectified at some point.
-    kwargs.pop('self', None)  # some contexts have self in them, and it messes up render_unicode below because we get two selfs
-    runtime_context = mako.runtime.Context(io.BytesIO(), **kwargs)
-    runtime_context._set_with_template(template_obj)
-    _, mako_context = mako.runtime._populate_self_namespace(runtime_context, template_obj)
-    return mako_context
