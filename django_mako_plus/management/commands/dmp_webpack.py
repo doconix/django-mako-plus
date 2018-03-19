@@ -159,13 +159,14 @@ class Command(BaseCommand):
         script_map = OrderedDict()
         template_root = os.path.join(config.path, 'templates')
         def recurse(folder):
+            subdirs = []
             for filename in os.listdir(os.path.join(template_root, folder)):
                 if filename.startswith('__'):
                     continue
                 filerel = os.path.join(folder, filename)
                 filepath = os.path.join(os.path.join(template_root, filerel))
                 if os.path.isdir(filepath):
-                    recurse(filerel)
+                    subdirs.append(filerel)
 
                 elif os.path.isfile(filepath):
                     scripts = self.template_scripts(config, filerel)
@@ -175,6 +176,9 @@ class Command(BaseCommand):
                         self.message('\t{}: {}'.format(key, scripts), 3)
                     else:
                         self.message('\t{}: none found'.format(key), 3)
+            for subdir in subdirs:
+                recurse(subdir)
+
         recurse('')
         return script_map
 
