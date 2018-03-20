@@ -82,15 +82,17 @@ def flatten(*args):
             yield arg
 
 
-def split_app(path):
+def split_app(path, sep=os.path.sep):
     '''
     Splits a path on the app, returning (app config, relative path within app).
+    If path is a filesystem path, leave `sep` as default `os.path.sep`.
+    If path is a URL, set `sep='/'`.
     '''
-    parts = path.split(os.path.sep)
+    parts = path.split(sep)
     for i in reversed(range(0, len(parts) - 1)):
-        appdir, appname, filepath = os.path.sep.join(parts[:i]), parts[i], os.path.sep.join(parts[i + 1:])
+        appdir, appname, filepath = sep.join(parts[:i]), parts[i], sep.join(parts[i + 1:])
         config = apps.app_configs.get(appname)
-        if config is not None and os.path.samefile(config.path, appdir + os.path.sep + appname):
+        if config is not None and os.path.samefile(config.path, appdir + sep + appname):
             # got it!
             return config, filepath
     # not found
