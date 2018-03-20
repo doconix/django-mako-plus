@@ -6,6 +6,7 @@ import base64
 import os, os.path
 import collections
 import zlib
+import re
 
 
 # this is populated with the dictionary of options in engine.py when
@@ -84,24 +85,15 @@ def flatten(*args):
 def split_app(path):
     '''
     Splits a path on the app, returning (app config, relative path within app).
-
-    This function uses os.path.samefile to split even if a path is specified differently.
-    The drawback is significantly reduced speed because of a double loop, so use with care.
-    ProviderRun uses this, but only during the first run of a template (cached after that).
     '''
-    from django_mako_plus.registry import get_dmp_apps
-    configs = list(get_dmp_apps())
-    def get_config(app_dir):
-        if os.path.exists(app_dir):
-            for config in configs:
-                if os.path.samefile(config.path, app_dir):
-                    return config
-        return None
-    parts = os.path.normpath(path).split(os.path.sep)
-    for i in range(len(parts), 0, -1):
-        app_config = get_config(os.path.sep.join(parts[:i]))
-        if app_config is not None:
-            return app_config, os.path.sep.join(parts[i:])
+    parts = path.split(os.path.sep)
+    for i in reversed(range(0, len(parts) - 1)):
+        appdir, appname, filepath = os.path.sep.join(parts[:i]), parts[i], os.path.sep.join(parts[i + 1:])
+        config = apps.app_configs.get(appname)
+        if config is not None and os.path.samefile(config.path, appdir + os.path.sep + appname):
+            # got it!
+            return config, filepath
+    # not found
     return None, path
 
 
