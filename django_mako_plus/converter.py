@@ -5,11 +5,12 @@ from django.core.exceptions import ImproperlyConfigured
 from django.http import HttpRequest
 
 from .exceptions import RedirectException
-from .util import DMP_OPTIONS, log
+from .util import DMP_OPTIONS, log, qualified_name
 
 import inspect, datetime, decimal, sys
 from collections import namedtuple
 from operator import attrgetter
+import logging
 
 
 ##################################################################
@@ -123,7 +124,7 @@ class BaseConverter(object):
             value:      value from request.dmp.urlparams to convert
                         The value will always be a string, even if empty '' (never None).
 
-            parameter:  an instance of ViewParameter.  See that class above for more information.
+            parameter:  an instance of ViewParameter.  See the class in router.py for more information.
 
             task:       meta-information about the current conversion task (as a named tuple):
                         module:             A reference to the module containing the view function.
@@ -146,6 +147,8 @@ class BaseConverter(object):
         '''
         # we don't convert anything without type hints
         if parameter.type is inspect.Parameter.empty:
+            if log.isEnabledFor(logging.DEBUG):
+                log.debug('skipping conversion of parameter `%s` because it has no type hint', parameter.name)
             return value
 
         # find the converter method for this type
@@ -153,6 +156,8 @@ class BaseConverter(object):
         # The list is sorted by specificity so subclasses come first
         for ci in self.converters:
             if issubclass(parameter.type, ci.convert_type):
+                if log.isEnabledFor(logging.DEBUG):
+                    log.debug('converting parameter `%s` using %s', parameter.name, qualified_name(ci.convert_func))
                 return ci.convert_func.__get__(self, self.__class__)(value, parameter, task)
 
         # we should never get here because DefaultConverter below has a converter for <object>
