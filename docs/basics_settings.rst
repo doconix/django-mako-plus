@@ -1,7 +1,38 @@
 Configuration Options
 ============================
 
-DMP is configurable with options in your ``settings.py`` file.  The following are the defaults:
+DMP is configurable with options in your ``settings.py`` file.  Normally, your settings file should contain the following:
+
+
+::
+
+    TEMPLATES = [
+        {
+            'NAME': 'django_mako_plus',
+            'BACKEND': 'django_mako_plus.MakoTemplates',
+            'OPTIONS': {
+            },
+        },
+        {
+            'NAME': 'django',
+            'BACKEND': 'django.template.backends.django.DjangoTemplates',
+            'DIRS': [],
+            'APP_DIRS': True,
+            'OPTIONS': {
+                'context_processors': [
+                    'django.template.context_processors.debug',
+                    'django.template.context_processors.request',
+                    'django.contrib.auth.context_processors.auth',
+                    'django.contrib.messages.context_processors.messages',
+                ],
+            },
+        },
+    ]
+
+
+If needed, you can customize the way DMP finds and/or renders templates.  At startup, DMP starts with the ``OPTIONS`` dictionary below and then merges any overrides from your settings file.  In other words, if your settings file contains no options (like in the settings above), it will use the defaults you see below.
+
+The following are the full list of available options.  Each option is described in detail later in this document.
 
 .. include:: ../django_mako_plus/defaults.py
    :literal:
@@ -35,17 +66,23 @@ In the following table, the default app is set to ``homepage`` and your default 
 ``APP_DISCOVERY``
 -----------------------------
 
-One of the primary purposes of DMP is to allow routing via convention instead of configuration.  At runtime, it does this by adding patterns for each of your apps to ``urls.py``.  By default, it adds patterns for each app contained in your main project directory (``BASE_DIR`` in settings).  It ignores (and doesn't route) Django's built-in apps and any third-party apps.
+One of the primary purposes of DMP is to allow routing via convention instead of configuration.  At runtime, it does this by adding patterns for each of your apps to ``urls.py``.
 
-All Your Base
-``````````````````````
 
-If you want DMP to route *all* of your apps, set this option to ``"all"``.  If you do this, be sure to ``include()`` DMP's ``urls.py`` at the end of your ``urls.py``.  If DMP were to come first, it would override all the other url patterns.
+The Default: Your Custom Apps
+```````````````````````````````````
+
+The default option, ``default``, adds patterns for each app contained in your main project directory (``BASE_DIR`` in settings).  Normally, apps that you create exist as subdirectories in your project directory.  DMP uses this convention to know which apps you've created and which apps are third-party installs.
+
+With the default setting, DMP will allow Django's built-in apps (like ``/admin/``) to be routed by the normal Django router.  This is what built-in and third-party apps expect.  Everyone plays nicely this way.
+
 
 No Discovery
 ``````````````````````
 
-Set this option to ``"none"`` to disable DMP's patterns entirely.  DMP won't route anything by default this way, so your ``urls.py`` file will be untouched.  You should then register specific apps yourself by adding the following to ``someapp/apps.py``:
+If your project contains both custom DMP apps and custom Django apps, you probably want to register the DMP apps manually.
+
+Set this option to ``none`` to disable DMP's automatic pattern registration entirely.  DMP won't route anything by default this way, so your ``urls.py`` file will be untouched.  You should then register specific apps yourself by adding the following to ``someapp/apps.py``:
 
 ::
 
@@ -58,6 +95,12 @@ Set this option to ``"none"`` to disable DMP's patterns entirely.  DMP won't rou
         def ready(self):
             # explicitly tell DMP to route this app
             register_dmp_app(self)
+
+
+All Your Base
+``````````````````````
+
+If you want DMP to route *all* of your apps, set this option to ``all``.  Normally, this is a **bad idea** because DMP shouldn't route apps that expect the standard Django router, such as those from Django's built-in ``/admin/`` administrator.  Bottom line: don't use ``all`` unless you know what you are doing.
 
 
 
@@ -123,6 +166,3 @@ This option works in connection with ``python manage.py dmp_webpack``.  See ``Bu
 -----------------------
 
 In contrast with Django, DMP templates are closely connected to their apps.  If you need to search for templates in additional locations (a.k.a. the Django way), add folder paths to this list.  Django will search ``someapp/templates/`` first and then fall back to any directories you list here.
-
-
-

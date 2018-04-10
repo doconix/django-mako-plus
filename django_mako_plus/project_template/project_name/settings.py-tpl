@@ -56,21 +56,10 @@ ROOT_URLCONF = '{{ project_name }}.urls'
 
 TEMPLATES = [
     {
-        # Note that additional options exist - see the DMP docs
         'NAME': 'django_mako_plus',
         'BACKEND': 'django_mako_plus.MakoTemplates',
         'OPTIONS': {
-            # the default app and page to render in Mako when the url is too short
-            # if None (no default app), DMP's urls.py will not capture short URLs
-            'DEFAULT_APP': 'homepage',
-            'DEFAULT_PAGE': 'index',
-
-            # imports for every template
-            'DEFAULT_TEMPLATE_IMPORTS': [
-                # the next two lines are just examples of including common imports in templates
-                # 'from datetime import datetime',
-                # 'import os, os.path, re, json',
-            ],
+            # see the DMP documentation, "configuration options" page for available options
         },
     },
     {
@@ -172,5 +161,3 @@ LOGGING = {
         },
     },
 }
-
-
