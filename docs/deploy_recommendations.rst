@@ -10,10 +10,3 @@ One other decision you'll have to make is which database use. I'm excluding the 
 In choosing databases, you'll find that many, if not most, of the Django developers use PostgreSQL. The system is likely tested best and first on PG. We started on MySQL, and we moved to PG after experiencing a few problems. Since deploying on PG, things have been amazingly smooth.
 
 Your mileage may vary with everything in this section. Do your own testing and take it all as advice only. Best of luck.
-
-Deployment Tutorials
---------------------
-
-The following links contain tutorials for deploying Django with DMP.  While it is still quite useful, note that it is targetted at DMP as of several years ago.
-
--  http://blog.tworivershosting.com/2014/11/ubuntu-server-setup-for-django-mako-plus.html

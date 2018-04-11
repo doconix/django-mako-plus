@@ -22,16 +22,18 @@ Features
 *DMP adds convention-over-configuration to Django:*
 
 - `Uses standard Python </tutorial_meet_dmp.html>`_ in templates; no more weak-sauce Django templating.
-- `Calls any view function </tutorial_views.html>`_ by convention instead of listing every. single. page. in urls.py.
+- `Calls view functions </tutorial_views.html>`_ by convention instead of listing every. single. page. in urls.py.
 - `Converts parameters </tutorial_urlparams.html>`_ in the URL and loads model objects by convention.
-- Automatically `links .js and .css </tutorial_css_js.html>`_ in your HTML documents by convention.
-- Automatically sets `context variables </tutorial_css_js.html#static-and-dynamic-javascript>`_ in the Javascript namespace.
+- Supports `bundling of static files </static_webpack.html>`_ with tools like Webpack.
+- Automatically `links .js and .css </tutorial_css_js.html>`_ in your HTML documents (if not using bundlers).
+- Automatically injects `context variables </tutorial_css_js.html#static-and-dynamic-javascript>`_ in the client-side Javascript namespace.
 - Provides `Django-style signals </topics_signals.html>`_.
+- Plays nicely with `third party apps </topics_other_syntax.html>`_.
 - Extends Django's redirecting with `exception-based redirecting </topics_redirecting.html>`_.
 - Supports `language translations </topics_translation.html>`_, `class-based views </topics_class_views.html>`_, and collection of `static files </static.html>`_.
 - Includes a comprehensive `test suite <https://github.com/doconix/django-mako-plus/tree/master/tests>`_.
 
-DMP doesn't replace Django; the standard router and template engine can be used alongside it.
+DMP doesn't replace Django; it extends Django to make you more productive.
 
 
 Quick Start
@@ -73,6 +75,7 @@ Contents
     tutorial
     basics
     static
+    deploy
     topics
 
 

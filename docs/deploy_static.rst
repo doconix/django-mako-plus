@@ -1,4 +1,4 @@
-Collecting for Deployment
+Collecting Static Files
 ============================================
 
 .. contents::
@@ -23,7 +23,7 @@ At deployment, collect static files out of these directories with the following 
 
     python3 manage.py dmp_collectstatic
 
-Since many projects contain both DMP and regular Django apps, collect static files with both commands:
+If your project contains both DMP and regular Django apps, you can collect static files with both commands:
 
 ::
 
@@ -135,4 +135,3 @@ If you have ``rcssmin`` and ``rjsmin`` installed (via pip), DMP will minify your
 ::
 
     python3 manage.py dmp_collectstatic --no-minify
-

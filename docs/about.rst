@@ -6,17 +6,6 @@ About DMP
 
 Django-Mako-Plus makes creating web sites faster through **convention-over-configuration** in the Django framework.  It integrates the Mako templating engine, which looks much more like Python than the standard templating language. Yet it still conforms to the Django API and plugs in as a standard engine.
 
-DMP boasts the following advantages:
-
-1. It uses the **Mako templating engine** rather than the weaker Django templating engine. Why would I want to learn a whole new language for templating when Mako uses my favorite language: Python?
-
-2. It enables **calling views and html pages by convention** rather than specific entries in urls.py. Any .html file on your site can be called without new entries in urls.py for every. single. new. page. Doesn't Python favor convention over configuration?
-
-3. DMP introduces the idea of URL parameters with automatic type conversion. These allow you to embed parameters in urls, Django style--meaning you can use pretty URLs like http://myserver.com/abc/def/123/ **without explicit entries in urls.py** and without the need for traditional (i.e. ulgy) ?first=abc&second=def&third=123 syntax.
-
-4. It includes CSS and JS files with the same name as the current template automatically. This means that ``mypage.css`` and ``mypage.js`` get linked in ``mypage.html`` automatically. Plus, DMP allows sending context values from your Python view code right into your Javascript namespace, without any significant hacks.
-
-5. DMP can compile your preprocessor files, such as ``.scss``, ``.less``, or even ``Transcrypt .py``.
 
 
 Frequently Asked Questions
@@ -33,7 +22,7 @@ I've been told by some that DMP has a lot in common with Rails. When I developed
 What's wrong with Django's built-in template language?
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Django comes with its own template system, but it's fairly weak (by design). Mako, on the other hand, is a fantastic template system that allows full Python code within HTML pages. 
+Django comes with its own template system, but it's fairly weak (by design). Mako, on the other hand, is a fantastic template system that allows full Python code within HTML pages.
 
 The primary reason Django doesn't allow full Python in its templates is the designers want to encourage you and I to keep template logic simple. I fully agree with this philosophy. I just don't agree with the "forced" part of this philosophy. The Python way is rather to give freedom to the developer but train in the correct way of doing things. Even though I fully like Python in my templates, I still keep them fairly simple. Views are where your logic goes.
 
@@ -49,6 +38,7 @@ Mako itself is very stable, both in terms of "lack of bugs" and in "completed fe
 The short answer is I liked Mako's approach the best. It felt the most Pythonic to me. Jinja2 may feel more like Django's built-in template system, but Mako won out because it looked more like Python--and the point of DMP is to include Python in templates.
 
 
+
 Can I use DMP with regular Django apps?
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -56,9 +46,13 @@ Yes. DMP plugs in as a regular templating engine per the standard Django API.  Y
 
 When you include DMP's ``urls.py`` module in your project, patterns for each DMP-enabled app in your project are linked to our convention-based router.  Other apps won't match these patterns, so other apps route the normal Django way. This means third-party apps work just fine with DMP.
 
-Note also that other apps likely use Django's built-in templating system rather than DMP's Mako templating system. The two templating systems work fine side by side, so other apps should render fine the normal Django way and your custom apps will render fine with Mako.
 
-Further, if you temporarily need to switch to Django templating syntax, `you can do that with ease <#using-django-and-jinja2-tags-and-syntax>`__. This allows the use of Django-style tags and syntax right within your Mako code. No new files needed.
+Can I use both Mako and Django/Jinja2 syntax?
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Yes.  Django officially supports having two or more template engines active at the same time.  Third party apps likely use Django's templating system rather than Mako. The two templating systems work fine side by side.
+
+If you temporarily need to switch to Django templating syntax (even within a Mako file), `you can do that too <#using-django-and-jinja2-tags-and-syntax>`__.
 
 
 

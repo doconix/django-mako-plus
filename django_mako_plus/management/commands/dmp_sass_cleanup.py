@@ -55,6 +55,7 @@ class Command(BaseCommand):
 
 
     def handle(self, *args, **options):
+        print('FYI, this command is deprecated and will be removed at some point.')
         # save the options for later
         self.options = options
         if self.options['verbose']:

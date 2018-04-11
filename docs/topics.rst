@@ -14,5 +14,3 @@ The following are special topics or advanced features of DMP:
     topics_signals
     topics_other_syntax
     topics_translation
-    topics_deployment
-
