@@ -40,8 +40,6 @@ Create a Django project, and specify that you want a DMP-style project layout:
 
     python3 -m django_mako_plus dmp_startproject mysite
 
-That might seem like a mouthful to type, but it's patterned after the standard Django method of creating projects.
-
 You can, of course, name your project anything you want, but in the sections below, I'll assume you called your project ``mysite``.
 
 Don't forget to migrate to synchronize your database and create a superuser:
@@ -58,7 +56,7 @@ Create a DMP-Style App
 
 Change to your project directory in the terminal/console, then create a new Django-Mako-Plus app with the following:
 
-.. code:: python
+::
 
     python3 manage.py dmp_startapp homepage
 
@@ -78,7 +76,7 @@ Load it Up!
 
 Start your web server with the following:
 
-.. code:: python
+::
 
     python3 manage.py runserver
 
