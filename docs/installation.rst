@@ -25,11 +25,7 @@ Install with the python installer:
 
     pip3 install django-mako-plus
 
-Note that on Windows machines, ``pip3`` may need to be replaced with ``pip``:
-
-::
-
-    pip install django-mako-plus
+(note that on Windows machines, ``pip3`` may need to be replaced with ``pip``)
 
 Create a Django project
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -107,12 +103,7 @@ Install with the python installer:
 
     pip3 install django-mako-plus
 
-Note that on Windows machines, ``pip3`` may need to be replaced with ``pip``:
-
-::
-
-    pip install django-mako-plus
-
+(note that on Windows machines, ``pip3`` may need to be replaced with ``pip``)
 
 If you need to add DMP to an existing Django project, you have two options:
 
