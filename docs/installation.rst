@@ -1,7 +1,7 @@
 Installation
 ==============================
 
-The easiest way to install DMP is by creating a new project.  This section shows how to install DMP with a new project as well as an existing project.
+This section shows how to install DMP with a new project as well as an existing project.
 
 What kind of project do you have?
 
@@ -17,7 +17,7 @@ Install Python and ensure you can run ``python3`` (or ``python``) at the command
 Install Django, Mako, and DMP
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-DMP 3 works with Django 1.9+ and Mako 1.0+. It will support Django 2.0 when it is released.
+DMP works with Django 1.9+, including the 2.0 releases.
 
 Install with the python installer:
 
@@ -38,9 +38,9 @@ Create a Django project, and specify that you want a DMP-style project layout:
 
 ::
 
-    python3 -m django startproject --template=http://cdn.rawgit.com/doconix/django-mako-plus/master/project_template.zip mysite
+    python3 -m django_mako_plus dmp_startproject mysite
 
-In addition to giving you the DMP project directories, this command automatically adds the required pieces to your ``settings.py`` and ``urls.py`` files.
+That might seem like a mouthful to type, but it's patterned after the standard Django method of creating projects.
 
 You can, of course, name your project anything you want, but in the sections below, I'll assume you called your project ``mysite``.
 
@@ -60,7 +60,7 @@ Change to your project directory in the terminal/console, then create a new Djan
 
 .. code:: python
 
-    python3 manage.py startapp --template=http://cdn.rawgit.com/doconix/django-mako-plus/master/app_template.zip --extension=py,htm,html homepage
+    python3 manage.py dmp_startapp homepage
 
 **After** the new ``homepage`` app is created, add your new app to the ``INSTALLED_APPS`` list in ``settings.py``:
 

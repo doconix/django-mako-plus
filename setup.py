@@ -1,11 +1,11 @@
-import os, os.path, sys, re 
+import os, os.path, sys, re
 from setuptools import setup
 
 MODULE_NAME = 'django_mako_plus'
 
 
 # I can't import the version file the normal way because it loads
-# __init__.py, which then imports the DMP engine.  
+# __init__.py, which then imports the DMP engine.
 with open('django_mako_plus/version.py') as f:
     match = re.search("__version__\s=\s'(\d+\.\d+\.\d+)'", f.read())
     if not match:
@@ -87,12 +87,15 @@ setup(
   author_email='doconix@gmail.com',
   url="http://django-mako-plus.readthedocs.io/",
   download_url="https://github.com/doconix/django-mako-plus/archive/master.zip",
-#  package_dir={ MODULE_NAME: MODULE_NAME },
   packages=packages,
   package_data = {
     MODULE_NAME: package_data_files,
   },
-#  data_files=data_files,
+  entry_points={
+    'console_scripts': [
+      'django_mako_plus = django_mako_plus.__main__:main'
+    ]
+  },
   install_requires=install_requires,
   classifiers=CLASSIFIERS,
   license='Apache 2.0',

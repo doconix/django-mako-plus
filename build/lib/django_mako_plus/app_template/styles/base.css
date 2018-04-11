@@ -1,0 +1,22 @@
+html, body {
+    margin: 0;
+    padding: 0;
+}
+
+header {
+    background-color: #147871;
+    padding: 15px 20px;
+    border-top: 4px solid #606060;
+    border-bottom: 4px solid #606060;
+}
+
+header h1 {
+    color: #FFFFFF;
+    margin: 0;
+    padding: 0;
+}
+
+main {
+    margin: 0;
+    padding: 15px;
+}
