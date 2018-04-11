@@ -99,7 +99,7 @@ If you already have an existing project that you'd like to integrate DMP into, f
 Install Django, Mako, and DMP
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-DMP 3 works with Django 1.9+ and Mako 1.0+. It will support Django 2.0 when it is released.
+DMP works with Django 1.9+, including the 2.0 releases.
 
 Install with the python installer:
 
