@@ -120,7 +120,7 @@ If you need to add DMP to an existing Django project, you have two options:
    project over to the layout of a DMP-style project.
 2. **Keep your existing Django-style structure** with minimal changes.
 
-This section describes Option 1, which gives you the full benefit of the automatic DMP router and midleware. If you need Option 2, jump to `Rending Templates the Standard Way: ``render()`` <#rending-templates-the-standard-way-render>`__.
+This section describes Option 1, which gives you the full benefit of the automatic DMP routing and midleware. If you just need to render templates using the Mako language (e.g. Option 2), jump to `Rending Templates the Standard Way: ``render()`` <#rending-templates-the-standard-way-render>`__.
 
 Edit Your ``settings.py`` File:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -175,7 +175,7 @@ Add a logger to help you debug (optional but highly recommended!):
     }
 
 Add the Django-Mako-Plus engine to the ``TEMPLATES`` list. Note that a
-standard Django project already has the ``TEMPLATES =`` line and the 'django' template backend.
+standard Django project already has the ``TEMPLATES =`` line and the 'django' template backend.  You probably just need to add the ``django_mako_plus`` dictionary below.
 
 .. code:: python
 
@@ -184,13 +184,13 @@ standard Django project already has the ``TEMPLATES =`` line and the 'django' te
             'NAME': 'django_mako_plus',
             'BACKEND': 'django_mako_plus.MakoTemplates',
             'OPTIONS': {
-                # see the options in the DMP docs if you want to customize anything
+                # see the DMP documentation, "configuration options" page for available options
             },
         },
         {
             'NAME': 'django',
             'BACKEND': 'django.template.backends.django.DjangoTemplates',
-            # ...
+            ...
         },
     ]
 
@@ -219,11 +219,15 @@ Add the Django-Mako-Plus router in your ``urls.py`` file (the default admin is a
 .. code:: python
 
     from django.conf.urls import url, include
+    from django.contrib import admin
 
     urlpatterns = [
+        # the built-in Django administrator
+        url(r'^admin/', admin.site.urls),
+
         # urls for any third-party apps go here
 
-        # adds all DMP-enabled apps
+        # the DMP router - this should normally be the last URL listed
         url('', include('django_mako_plus.urls')),
     ]
 
@@ -236,10 +240,9 @@ Change to your project directory in the terminal/console, then create a new Djan
 
 .. code:: python
 
-    python3 manage.py startapp --template=http://cdn.rawgit.com/doconix/django-mako-plus/master/app_template.zip --extension=py,htm,html homepage
+    python3 manage.py dmp_startapp homepage
 
-**After** the new ``homepage`` app is created, add your new app to the
-``INSTALLED_APPS`` list in ``settings.py``:
+**After** the new ``homepage`` app is created, add your new app to the ``INSTALLED_APPS`` list in ``settings.py``:
 
 .. code:: python
 
@@ -249,6 +252,7 @@ Change to your project directory in the terminal/console, then create a new Djan
     ]
 
 Congratulations. You're ready to go!
+
 
 Load it Up!
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
