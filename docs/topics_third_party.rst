@@ -1,9 +1,9 @@
 Third-Party Apps
 =======================================================
 
-Since most third-party apps use standard Django routing and template syntax, new users to DMP often worry about conflicts between the two engines.  Have no fear, they work together like Windows and Linux!  (just kidding, they work great together)
+Since most third-party apps use standard Django routing and template syntax, new users to DMP often worry about conflicts between the two engines.  Have no fear, they work together just like Windows and Linux!  (just kidding, they work great together)
 
-The most straightforward way to use DMP with third-party apps is to use only one template type per app.  Some of your apps can be DMP-style, and others can be Django-style.  However, you can even mix the two when needed.
+The most straightforward way to use DMP with third-party apps is to use only one template engine per app.  Some of your apps can be DMP-style, and others can be Django-style.  However, you can even mix the two when needed.
 
 ``urls.py``
 ---------------------
