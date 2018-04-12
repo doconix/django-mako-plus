@@ -48,7 +48,7 @@ class Command(DMPCommandMixIn, BaseCommand):
             kwargs['parents'] = [ current_subcommand.create_parser('', '') ]
             return CommandParser(current_subcommand, **kwargs)
         subparsers = parser.add_subparsers(
-            title='DMP subcommands: (`python manage.py dmp [subcommand] --help` for docs)',
+            title='DMP subcommands: (`python3 manage.py dmp [subcommand] --help` for docs)',
             dest=SUBCOMMAND_DEST,
             metavar='',
             parser_class=create_subparser,

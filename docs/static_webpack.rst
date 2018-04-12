@@ -34,7 +34,7 @@ The following is the recommended process for creating/using bundles:
 
 1. Create your templates and scripts normally. Templates go in ``yourapp/templates/``.  Scripts go in ``yourapp/scripts/``.
 2. If you haven't done so, update your settings file to include a ``WEBPACK_PROVIDERS`` section.  The ``dmp_webpack`` command uses this when generating the entry file.
-3. Run ``python manage.py dmp_webpack --overwrite``.  This (re)creates an ``appname/scripts/__entry__.js`` file in each of your apps.  This command should be run anytime you create or remove ``.js`` files. It's not necessary when you modify said files.
+3. Run ``python3 manage.py dmp_webpack --overwrite``.  This (re)creates an ``appname/scripts/__entry__.js`` file in each of your apps.  This command should be run anytime you create or remove ``.js`` files. It's not necessary when you modify said files.
 4. If you haven't done so, run ``npm init`` and create the package.json file.
 5. If you haven't done so, create ``webpack.config.js`` in your project root.  In this file, include an entry line for each ``__entry__.js`` file (usually one per app).
 6. If developing, run ``npm run dev``; if deploying, run ``npm run build``.  Webpack does its magic and creates ``appname/scripts/__bundle__.js``. Whenever you modify a ``.js`` file, webpack will sense a change in the force and recompile the bundle(s).
@@ -88,7 +88,7 @@ The following is an example of the settings needed when using bundles.  Note tha
                     { 'provider': 'django_mako_plus.WebpackJsCallProvider' },
                 ],
 
-                # these are using during a `python manage.py dmp_webpack` run - these are the ones you should customize (if desired)
+                # these are using during a `python3 manage.py dmp_webpack` run - these are the ones you should customize (if desired)
                 # the JS files found by these providers are the ones placed in __entry__.js
                 # the providers listed here should extend django_mako_plus.LinkProvider
                 'WEBPACK_PROVIDERS': [
@@ -102,7 +102,7 @@ The following is an example of the settings needed when using bundles.  Note tha
 WEBPACK_PROVIDERS
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-In the above settings, ``WEBPACK_PROVIDERS`` is used by ``python manage.py dmp_webpack``, where your ``__entry__.js`` files are generated.  Any providers listed here are used to discover the JS files for your templates.
+In the above settings, ``WEBPACK_PROVIDERS`` is used by ``python3 manage.py dmp_webpack``, where your ``__entry__.js`` files are generated.  Any providers listed here are used to discover the JS files for your templates.
 
 DMP searches for scripts starting with a template name.  In keeping with this pattern, the ``dmp_webpack`` management command loads each template your apps and includes its script through ``require()``.  The command creates ``app/scripts/__entry__.js`` as an entry point for webpack.  Try running the command on an app that contains several template-related .js files:
 
@@ -234,7 +234,7 @@ This section describes how to create a single monstrosity that includes the scri
 
 ::
 
-    python manage.py dmp_webpack --overwrite --single homepage/scripts/__entry__.js
+    python3 manage.py dmp_webpack --overwrite --single homepage/scripts/__entry__.js
 
 The above command will place the sitewide entry file in the homepage app, but it could be located anywhere.  Include this single entry file in ``webpack.config.js``.
 
@@ -251,8 +251,8 @@ Somewhere in between a sitewide bundle and app-specific bundles lives the multi-
 
 ::
 
-    python manage.py dmp_webpack --overwrite --single homepage/scripts/__entry_1__.js app1 app2
-    python manage.py dmp_webpack --overwrite --single homepage/scripts/__entry_2__.js app3 app4 app5
+    python3 manage.py dmp_webpack --overwrite --single homepage/scripts/__entry_1__.js app1 app2
+    python3 manage.py dmp_webpack --overwrite --single homepage/scripts/__entry_2__.js app3 app4 app5
 
 To include the ``<script>`` tag for these bundles, use something like the following function in your settings file:
 
@@ -325,7 +325,7 @@ Now create your entry file(s):
 
 ::
 
-    python manage.py dmp_webpack --overwrite
+    python3 manage.py dmp_webpack --overwrite
 
 The above command creates ``account/scripts/__entry__.js``.  In the example output below, the JS files for the ancestor templates (``base.htm``) are also present:
 

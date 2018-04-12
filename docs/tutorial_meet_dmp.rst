@@ -131,7 +131,7 @@ Then clear out the compiled templates caches:
 
 ::
 
-    python manage.py dmp_cleanup
+    python3 manage.py dmp_cleanup
 
 **DMP_CONTEXT is not defined**
 

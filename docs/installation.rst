@@ -205,7 +205,7 @@ Clean out all the cached template files. This should be done **anytime you make 
 
 ::
 
-    python manage.py dmp cleanup
+    python3 manage.py dmp cleanup
 
 Enable the Django-Mako-Plus Router
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

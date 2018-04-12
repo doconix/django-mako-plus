@@ -186,7 +186,7 @@ There may be some modules, such as ``re`` or ``decimal`` that are so useful you 
 
 Any entries in this list will be automatically included in templates throughout all apps of your site. With the above imports, you'll be able to use ``re`` and ``Decimal`` and ``os`` and ``os.path`` anywhere in any .html, .cssm, and .jsm file.
 
-    Whenever you modify the DMP settings, be sure to clean out your cached templates with ``python manage.py dmp cleanup``. This ensures your compiled templates are rebuilt with the new settings.
+    Whenever you modify the DMP settings, be sure to clean out your cached templates with ``python3 manage.py dmp cleanup``. This ensures your compiled templates are rebuilt with the new settings.
 
 
 Cleaning Up
@@ -197,10 +197,10 @@ DMP caches its compiled templates in subdirectories of each app. The default loc
 ::
 
     # see what would be be done without actually deleting any cache folders
-    python manage.py dmp cleanup --trial-run
+    python3 manage.py dmp cleanup --trial-run
 
     # really delete the folders
-    python manage.py dmp cleanup
+    python3 manage.py dmp cleanup
 
 
 With this management command, add ``--verbose`` to the command to include messages about skipped files, and add ``--quiet`` to silence all messages (except errors).
