@@ -33,6 +33,9 @@ def get_dmp_instance():
         raise ImproperlyConfigured('The Django Mako Plus template engine did not initialize correctly.  Check your logs for previous errors that may have caused initialization to fail, and check that DMP is set correctly in settings.py.')
 
 
+def get_dmp_path():
+    return os.path.dirname(os.path.abspath(__file__))
+
 
 
 ################################################################

@@ -2,40 +2,33 @@ from django.core.management.base import BaseCommand, CommandError
 from django.conf import settings
 from django_mako_plus.util import DMP_OPTIONS
 from django_mako_plus.registry import get_dmp_apps
-from ..mixins import MessageMixIn
+from django_mako_plus.management.mixins import DMPCommandMixIn
 
 import os, os.path, shutil
 
 
 
 
-class Command(MessageMixIn, BaseCommand):
-    args = ''
+class Command(DMPCommandMixIn, BaseCommand):
     help = 'Removes compiled template cache folders in your DMP-enabled app directories.'
     can_import_settings = True
 
 
     def add_arguments(self, parser):
+        super().add_arguments(parser)
+
+        parser.add_argument(
+            'appname',
+            type=str,
+            nargs='*',
+            help='The name of one or more DMP apps. If omitted, all DMP apps are processed.'
+        )
         parser.add_argument(
             '--trial-run',
             action='store_true',
             dest='trial_run',
             default=False,
             help='Display the folders that would be removed without actually removing them.'
-        )
-        parser.add_argument(
-            '--verbose',
-            action='store_true',
-            dest='verbose',
-            default=False,
-            help='Set verbosity to level 3 (see --verbosity).'
-        )
-        parser.add_argument(
-            '--quiet',
-            action='store_true',
-            dest='quiet',
-            default=False,
-            help='Set verbosity to level 0, which silences all messages (see --verbosity).'
         )
 
 
@@ -59,7 +52,7 @@ class Command(MessageMixIn, BaseCommand):
                 cache_dir = os.path.join(config.path, subdir, DMP_OPTIONS['TEMPLATES_CACHE_DIR'])
                 if os.path.exists(cache_dir):
                     self.message('Removing {}'.format(pretty_relpath(cache_dir, settings.BASE_DIR)), level=2)
-                    if not self.options['trial_run']:
+                    if not options['trial_run']:
                         shutil.rmtree(cache_dir)
                 else:
                     self.message('Skipping {} because it does not exist'.format(pretty_relpath(cache_dir, settings.BASE_DIR)), level=2)

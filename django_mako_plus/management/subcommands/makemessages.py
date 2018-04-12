@@ -1,21 +1,25 @@
 from django.core.management.commands.makemessages import Command as MakeMessagesCommand
 from django_mako_plus.registry import get_dmp_apps
 from django_mako_plus.convenience import get_template_for_path
-from ..mixins import CommandOverrideMixIn, MessageMixIn
+from django_mako_plus.management.mixins import DMPCommandMixIn
 
 import os
 import os.path
 
 
-class Command(MessageMixIn, CommandOverrideMixIn, MakeMessagesCommand):
-    help = "Makes messages for Mako templates.  The native makemessages in Django doesn't understand Mako files, so this command compiles all your templates so it can find the compiled .py versions of the templates."
+class Command(DMPCommandMixIn, MakeMessagesCommand):
+    help = (
+        "Makes messages for Mako templates.  The native makemessages in Django doesn't understand "
+        "Mako files, so this command compiles all your templates so it can find the compiled .py versions of the templates."
+    )
+
     SEARCH_DIRS = [
         os.path.join('{app_path}', 'templates')
     ]
 
     def add_arguments(self, parser):
-        # must call super because not directly subclassing BaseCommand
         super().add_arguments(parser)
+
         parser.add_argument(
             '--extra-gettext-option',
             default=[],
@@ -25,7 +29,7 @@ class Command(MessageMixIn, CommandOverrideMixIn, MakeMessagesCommand):
         )
 
 
-    def dmp_handle(self, *args, **options):
+    def handle(self, *args, **options):
         # go through each dmp_enabled app and compile its mako templates
         for app_config in get_dmp_apps():
             self.compile_mako_files(app_config)

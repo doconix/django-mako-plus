@@ -1,27 +1,26 @@
 from django.apps import apps as django_apps
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
-from mako.exceptions import MakoException
 from django_mako_plus.registry import get_dmp_apps, ensure_dmp_app
 from django_mako_plus.provider import create_mako_context
 from django_mako_plus.provider.runner import ProviderRun, create_factories
-from django_mako_plus.util import get_dmp_instance, split_app, DMP_OPTIONS
-from ..mixins import MessageMixIn
+from django_mako_plus.util import get_dmp_instance
+from django_mako_plus.management.mixins import DMPCommandMixIn
 
-import glob
-import os, os.path, shutil
-import json
+import os
+import os.path
 from collections import OrderedDict
 
 
 
-class Command(MessageMixIn, BaseCommand):
-    args = ''
+class Command(DMPCommandMixIn, BaseCommand):
     help = 'Removes compiled template cache folders in your DMP-enabled app directories.'
     can_import_settings = True
 
 
     def add_arguments(self, parser):
+        super().add_arguments(parser)
+
         parser.add_argument(
             '--overwrite',
             action='store_true',
@@ -44,6 +43,7 @@ class Command(MessageMixIn, BaseCommand):
 
 
     def handle(self, *args, **options):
+        self.options = options
         self.factories = create_factories('WEBPACK_PROVIDERS')
 
         # ensure we have a base directory
@@ -63,7 +63,7 @@ class Command(MessageMixIn, BaseCommand):
             apps = get_dmp_apps()
 
         # main runner for per-app files
-        if self.options['single'] is None:
+        if options['single'] is None:
             for app in apps:
                 self.message('Searching `{}` app...'.format(app.name))
                 filename = os.path.join(app.path, 'scripts', '__entry__.js')
@@ -75,7 +75,7 @@ class Command(MessageMixIn, BaseCommand):
             for app in apps:
                 self.message('Searching `{}` app...'.format(app.name))
                 script_map.update(self.generate_script_map(app))
-            self.create_entry_file(self.options['single'], script_map, apps)
+            self.create_entry_file(options['single'], script_map, apps)
 
 
     def create_entry_file(self, filename, script_map, apps):
@@ -134,22 +134,24 @@ class Command(MessageMixIn, BaseCommand):
         template_root = os.path.join(config.path, 'templates')
         def recurse(folder):
             subdirs = []
-            for filename in os.listdir(os.path.join(template_root, folder)):
-                if filename.startswith('__'):
-                    continue
-                filerel = os.path.join(folder, filename)
-                filepath = os.path.join(os.path.join(template_root, filerel))
-                if os.path.isdir(filepath):
-                    subdirs.append(filerel)
+            folder = os.path.join(template_root, folder)
+            if os.path.exists(folder):
+                for filename in os.listdir(folder):
+                    if filename.startswith('__'):
+                        continue
+                    filerel = os.path.join(folder, filename)
+                    filepath = os.path.join(os.path.join(template_root, filerel))
+                    if os.path.isdir(filepath):
+                        subdirs.append(filerel)
 
-                elif os.path.isfile(filepath):
-                    scripts = self.template_scripts(config, filerel)
-                    key = '{}/{}'.format(config.name, os.path.splitext(filerel)[0])
-                    if len(scripts) > 0:
-                        script_map[key] = scripts
-                        self.message('\t{}: {}'.format(key, scripts), 3)
-                    else:
-                        self.message('\t{}: none found'.format(key), 3)
+                    elif os.path.isfile(filepath):
+                        scripts = self.template_scripts(config, filerel)
+                        key = '{}/{}'.format(config.name, os.path.splitext(filerel)[0])
+                        if len(scripts) > 0:
+                            script_map[key] = scripts
+                            self.message('\t{}: {}'.format(key, scripts), 3)
+                        else:
+                            self.message('\t{}: none found'.format(key), 3)
             for subdir in subdirs:
                 recurse(subdir)
 

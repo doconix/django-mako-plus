@@ -1,9 +1,9 @@
-from django.core.management.base import BaseCommand, CommandError
+from django.core.management.base import CommandError
 from django.contrib.staticfiles.management.commands.collectstatic import Command as CollectStaticCommand
 from django.conf import settings
 from django_mako_plus.util import DMP_OPTIONS
 from django_mako_plus.registry import get_dmp_apps
-from ..mixins import CommandOverrideMixIn, MessageMixIn
+from django_mako_plus.management.mixins import DMPCommandMixIn
 
 import os, os.path, shutil, fnmatch
 
@@ -39,39 +39,16 @@ class Rule(object):
         return 0
 
 
-INITIAL_RULES = (
-    # files are included by default
-    Rule('*',                                    level=None, filetype=TYPE_FILE,      score=1),
-    # files at the app level are skipped
-    Rule('*',                                    level=0,    filetype=TYPE_FILE,      score=-2),
-    # directories are recursed by default
-    Rule('*',                                    level=None, filetype=TYPE_DIRECTORY, score=1),
-    # directories at the app level are skipped
-    Rule('*',                                    level=0,    filetype=TYPE_DIRECTORY, score=-2),
-
-    # media, scripts, styles directories are what we want to copy
-    Rule('media',                                level=0,    filetype=TYPE_DIRECTORY, score=6),
-    Rule('scripts',                              level=0,    filetype=TYPE_DIRECTORY, score=6),
-    Rule('styles',                               level=0,    filetype=TYPE_DIRECTORY, score=6),
-
-    # ignore the template cache directories
-    Rule(DMP_OPTIONS['TEMPLATES_CACHE_DIR'],     level=None, filetype=TYPE_DIRECTORY, score=-3),
-    # ignore python cache directories
-    Rule('__pycache__',                          level=None, filetype=TYPE_DIRECTORY, score=-3),
-    # ignore compiled python files
-    Rule('*.pyc',                                level=None, filetype=TYPE_FILE,      score=-3),
-)
 
 
 
-class Command(MessageMixIn, CommandOverrideMixIn, CollectStaticCommand):
-    args = ''
+class Command(DMPCommandMixIn, CollectStaticCommand):
     help = 'Collects static files, such as media, scripts, and styles, to a common directory root. This is done to prepare for deployment.'
     can_import_settings = True
 
-
     def add_arguments(self, parser):
         super().add_arguments(parser)
+
         parser.add_argument(
             '--overwrite',
             action='store_true',
@@ -111,7 +88,9 @@ class Command(MessageMixIn, CommandOverrideMixIn, CollectStaticCommand):
         )
 
 
-    def dmp_handle(self, *args, **options):
+    def handle(self, *args, **options):
+        self.options = options
+
         # ensure we have a base directory
         try:
             if not os.path.isdir(os.path.abspath(settings.BASE_DIR)):
@@ -135,8 +114,7 @@ class Command(MessageMixIn, CommandOverrideMixIn, CollectStaticCommand):
             os.makedirs(dest_root)
 
         # set up the rules
-        self.rules = list(INITIAL_RULES)
-        self.add_user_rules()
+        self.rules = self.create_rules()
 
         # go through the DMP apps and collect the static files
         for config in get_dmp_apps():
@@ -144,22 +122,46 @@ class Command(MessageMixIn, CommandOverrideMixIn, CollectStaticCommand):
             self.copy_dir(config.path, os.path.abspath(os.path.join(dest_root, config.name)))
 
 
-    def add_user_rules(self):
+    def create_rules(self):
         '''Adds rules for the command line options'''
+        # the defaultx
+        rules = (
+            # files are included by default
+            Rule('*',                                    level=None, filetype=TYPE_FILE,      score=1),
+            # files at the app level are skipped
+            Rule('*',                                    level=0,    filetype=TYPE_FILE,      score=-2),
+            # directories are recursed by default
+            Rule('*',                                    level=None, filetype=TYPE_DIRECTORY, score=1),
+            # directories at the app level are skipped
+            Rule('*',                                    level=0,    filetype=TYPE_DIRECTORY, score=-2),
+
+            # media, scripts, styles directories are what we want to copy
+            Rule('media',                                level=0,    filetype=TYPE_DIRECTORY, score=6),
+            Rule('scripts',                              level=0,    filetype=TYPE_DIRECTORY, score=6),
+            Rule('styles',                               level=0,    filetype=TYPE_DIRECTORY, score=6),
+
+            # ignore the template cache directories
+            Rule(DMP_OPTIONS['TEMPLATES_CACHE_DIR'],     level=None, filetype=TYPE_DIRECTORY, score=-3),
+            # ignore python cache directories
+            Rule('__pycache__',                          level=None, filetype=TYPE_DIRECTORY, score=-3),
+            # ignore compiled python files
+            Rule('*.pyc',                                level=None, filetype=TYPE_FILE,      score=-3),
+        )
         # include rules have score of 50 because they trump all initial rules
         for pattern in (self.options['include_dir'] or []):
             self.message('Setting rule - recurse directories: {}'.format(pattern), 1)
-            self.rules.append(Rule(pattern, level=None, filetype=TYPE_DIRECTORY, score=50))
+            rules.append(Rule(pattern, level=None, filetype=TYPE_DIRECTORY, score=50))
         for pattern in (self.options['include_file'] or []):
             self.message('Setting rule - include files: {}'.format(pattern), 1)
-            self.rules.append(Rule(pattern, level=None, filetype=TYPE_FILE, score=50))
+            rules.append(Rule(pattern, level=None, filetype=TYPE_FILE, score=50))
         # skip rules have score of 100 because they trump everything, including the includes from the command line
         for pattern in (self.options['skip_dir'] or []):
             self.message('Setting rule - skip directories: {}'.format(pattern), 1)
-            self.rules.append(Rule(pattern, level=None, filetype=TYPE_DIRECTORY, score=-100))
+            rules.append(Rule(pattern, level=None, filetype=TYPE_DIRECTORY, score=-100))
         for pattern in (self.options['skip_file'] or []):
             self.message('Setting rule - skip files: {}'.format(pattern), 1)
-            self.rules.append(Rule(pattern, level=None, filetype=TYPE_FILE, score=-100))
+            rules.append(Rule(pattern, level=None, filetype=TYPE_FILE, score=-100))
+        return rules
 
 
     def copy_dir(self, source, dest, level=0):
