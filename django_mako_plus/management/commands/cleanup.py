@@ -1,15 +1,15 @@
 from django.core.management.base import BaseCommand, CommandError
 from django.conf import settings
-
 from django_mako_plus.util import DMP_OPTIONS
 from django_mako_plus.registry import get_dmp_apps
+from ..mixins import MessageMixIn
 
 import os, os.path, shutil
 
 
 
 
-class Command(BaseCommand):
+class Command(MessageMixIn, BaseCommand):
     args = ''
     help = 'Removes compiled template cache folders in your DMP-enabled app directories.'
     can_import_settings = True
@@ -41,12 +41,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         # save the options for later
-        self.options = options
-        if self.options['verbose']:
-            self.options['verbosity'] = 3
-        if self.options['quiet']:
-            self.options['verbosity'] = 0
-        if self.options['trial_run']:
+        if options['trial_run']:
             self.message("Trial run: dmp_cleanup would have deleted the following folders:", level=1)
 
         # ensure we have a base directory
@@ -69,12 +64,6 @@ class Command(BaseCommand):
                 else:
                     self.message('Skipping {} because it does not exist'.format(pretty_relpath(cache_dir, settings.BASE_DIR)), level=2)
 
-
-    def message(self, msg, level):
-        '''Print a message to the console'''
-        # verbosity=1 is the default if not specified in the options
-        if self.options['verbosity'] >= level:
-            print(msg)
 
 
 

@@ -1,8 +1,9 @@
 from django.core.management.base import BaseCommand, CommandError
+from django.contrib.staticfiles.management.commands.collectstatic import Command as CollectStaticCommand
 from django.conf import settings
-
 from django_mako_plus.util import DMP_OPTIONS
 from django_mako_plus.registry import get_dmp_apps
+from ..mixins import CommandOverrideMixIn, MessageMixIn
 
 import os, os.path, shutil, fnmatch
 
@@ -59,40 +60,24 @@ INITIAL_RULES = (
     Rule('__pycache__',                          level=None, filetype=TYPE_DIRECTORY, score=-3),
     # ignore compiled python files
     Rule('*.pyc',                                level=None, filetype=TYPE_FILE,      score=-3),
-    # ignore all cssm and jsm files (these are rendered at runtime, so not static)
-    Rule('*.cssm',                               level=None, filetype=TYPE_FILE,      score=-3),
-    Rule('*.jsm',                                level=None, filetype=TYPE_FILE,      score=-3),
 )
 
 
 
-class Command(BaseCommand):
+class Command(MessageMixIn, CommandOverrideMixIn, CollectStaticCommand):
     args = ''
     help = 'Collects static files, such as media, scripts, and styles, to a common directory root. This is done to prepare for deployment.'
     can_import_settings = True
 
 
     def add_arguments(self, parser):
+        super().add_arguments(parser)
         parser.add_argument(
             '--overwrite',
             action='store_true',
             dest='overwrite',
             default=False,
             help='Overwrite existing files in the directory when necessary.'
-        )
-        parser.add_argument(
-            '--verbose',
-            action='store_true',
-            dest='verbose',
-            default=False,
-            help='Set verbosity to level 3 (see --verbosity).'
-        )
-        parser.add_argument(
-            '--quiet',
-            action='store_true',
-            dest='quiet',
-            default=False,
-            help='Set verbosity to level 0, which silences all messages (see --verbosity).'
         )
         parser.add_argument(
             '--no-minify',
@@ -126,14 +111,7 @@ class Command(BaseCommand):
         )
 
 
-    def handle(self, *args, **options):
-        # save the options for later
-        self.options = options
-        if self.options['verbose']:
-            self.options['verbosity'] = 3
-        if self.options['quiet']:
-            self.options['verbosity'] = 0
-
+    def dmp_handle(self, *args, **options):
         # ensure we have a base directory
         try:
             if not os.path.isdir(os.path.abspath(settings.BASE_DIR)):
@@ -164,13 +142,6 @@ class Command(BaseCommand):
         for config in get_dmp_apps():
             self.message('Processing app {}'.format(config.name), 1)
             self.copy_dir(config.path, os.path.abspath(os.path.join(dest_root, config.name)))
-
-
-    def message(self, msg, level, tab=0):
-        '''Print a message to the console'''
-        # verbosity=1 is the default if not specified in the options
-        if self.options['verbosity'] >= min(level, 3):
-            print('{}{}'.format('    ' * tab, msg))
 
 
     def add_user_rules(self):
@@ -267,4 +238,3 @@ def minify(text, minifier):
     if  abs(len(text) - len(minified)) > 50 or '\n' in text[:50]:
         return minified
     return text
-

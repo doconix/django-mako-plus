@@ -6,6 +6,7 @@ from django_mako_plus.registry import get_dmp_apps, ensure_dmp_app
 from django_mako_plus.provider import create_mako_context
 from django_mako_plus.provider.runner import ProviderRun, create_factories
 from django_mako_plus.util import get_dmp_instance, split_app, DMP_OPTIONS
+from ..mixins import MessageMixIn
 
 import glob
 import os, os.path, shutil
@@ -14,27 +15,13 @@ from collections import OrderedDict
 
 
 
-class Command(BaseCommand):
+class Command(MessageMixIn, BaseCommand):
     args = ''
     help = 'Removes compiled template cache folders in your DMP-enabled app directories.'
     can_import_settings = True
 
 
     def add_arguments(self, parser):
-        parser.add_argument(
-            '--verbose',
-            action='store_true',
-            dest='verbose',
-            default=False,
-            help='Set verbosity to level 3 (see --verbosity).'
-        )
-        parser.add_argument(
-            '--quiet',
-            action='store_true',
-            dest='quiet',
-            default=False,
-            help='Set verbosity to level 0, which silences all messages (see --verbosity).'
-        )
         parser.add_argument(
             '--overwrite',
             action='store_true',
@@ -56,20 +43,7 @@ class Command(BaseCommand):
         )
 
 
-    def message(self, msg, level=1):
-        '''Print a message to the console'''
-        # verbosity=1 is the default if not specified in the options
-        if self.options['verbosity'] >= level:
-            print(msg)
-
-
     def handle(self, *args, **options):
-        # save the options for later
-        self.options = options
-        if self.options['verbose']:
-            self.options['verbosity'] = 3
-        if self.options['quiet']:
-            self.options['verbosity'] = 0
         self.factories = create_factories('WEBPACK_PROVIDERS')
 
         # ensure we have a base directory
