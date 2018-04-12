@@ -125,7 +125,7 @@ This option sets the directory where these cached, generated files are located. 
 
 DMP and the Mako engine will read your templates using this encoding.  Those who are coding their files with something other than ``utf-8`` should understand when and why it might need to be changed.
 
-If you change this setting, be sure to run ``python manage.py dmp_cleanup`` so your cached templates get rebuilt.
+If you change this setting, be sure to run ``python manage.py dmp cleanup`` so your cached templates get rebuilt.
 
 
 ``DEFAULT_TEMPLATE_IMPORTS``
@@ -140,7 +140,7 @@ Python's standard libraries must be imported to be used within template code.  F
 
 To automatically import the ``random`` module or any other Python module (including those from your project or installed via pip), add them in the ``DEFAULT_TEMPLATE_IMPORTS`` list.  When Mako renders your templates, it will include the imports automatically so you don't have repeat yourself in every template.
 
-If you change this setting, be sure to run ``python manage.py dmp_cleanup`` so your cached templates get rebuilt.
+If you change this setting, be sure to run ``python manage.py dmp cleanup`` so your cached templates get rebuilt.
 
 
 
@@ -159,7 +159,7 @@ This is one of the primary functions of DMP.  It sets up autodiscovery of your s
 ``WEBPACK_PROVIDERS``
 ------------------------
 
-This option works in connection with ``python manage.py dmp_webpack``.  See ``Bundling <static_webpack.html>`_ for more information.
+This option works in connection with ``python manage.py dmp webpack``.  See ``Bundling <static_webpack.html>`_ for more information.
 
 
 ``TEMPLATES_DIRS``

@@ -12,14 +12,16 @@ What kind of project do you have?
 New Project
 -----------------------------
 
-Install Python and ensure you can run ``python3`` (or ``python``) at the command prompt. The framework requires Python 3.4+.
+Ensure you have Python 3.4+ installed (``python3 --version``), and check that you can run ``python3`` (or ``python``) at the command prompt.
+
+If you are using virtual environments, be sure to activate that first.
 
 Install Django, Mako, and DMP
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 DMP works with Django 1.9+, including the 2.0 releases.
 
-Install with the python installer:
+The following will install all three dependencies:
 
 ::
 
@@ -34,7 +36,7 @@ Create a Django project, and specify that you want a DMP-style project layout:
 
 ::
 
-    python3 -m django_mako_plus dmp_startproject mysite
+    python3 -m django_mako_plus dmp startproject mysite
 
 You can, of course, name your project anything you want, but in the sections below, I'll assume you called your project ``mysite``.
 
@@ -54,7 +56,7 @@ Change to your project directory in the terminal/console, then create a new Djan
 
 ::
 
-    python3 manage.py dmp_startapp homepage
+    python3 manage.py dmp startapp homepage
 
 **After** the new ``homepage`` app is created, add your new app to the ``INSTALLED_APPS`` list in ``settings.py``:
 
@@ -90,14 +92,17 @@ If everything is working, `skip ahead to the tutorial <tutorial.html>`_.
 Existing Project
 ---------------------------------
 
-If you already have an existing project that you'd like to integrate DMP into, follow the directions in this section.  First, install Python and ensure you can run ``python3`` (or ``python``) at the command prompt. The framework requires Python 3.4+.
+If you already have an existing project that you'd like to integrate DMP into, follow the directions in this section.
+
+Ensure you have Python 3.4+ installed (``python3 --version``).  If you are using virtual environments, be sure to activate that first.
+
 
 Install Django, Mako, and DMP
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 DMP works with Django 1.9+, including the 2.0 releases.
 
-Install with the python installer:
+The following will install all three dependencies:
 
 ::
 
@@ -200,7 +205,7 @@ Clean out all the cached template files. This should be done **anytime you make 
 
 ::
 
-    python manage.py dmp_cleanup
+    python manage.py dmp cleanup
 
 Enable the Django-Mako-Plus Router
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -231,7 +236,7 @@ Change to your project directory in the terminal/console, then create a new Djan
 
 .. code:: python
 
-    python3 manage.py dmp_startapp homepage
+    python3 manage.py dmp startapp homepage
 
 **After** the new ``homepage`` app is created, add your new app to the ``INSTALLED_APPS`` list in ``settings.py``:
 

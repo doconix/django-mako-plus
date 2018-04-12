@@ -17,7 +17,8 @@
     <body>
 
         <header>
-            <h1>Welcome to the your new app!<h1>
+            <img src="${ STATIC_URL }homepage/media/python.png" alt="python" />
+            <div class="title">Welcome to <br/> DMP!</div>
         </header>
 
         <main>
@@ -25,6 +26,11 @@
                 Site content goes here in sub-templates.
             </%block>
         </main>
+
+        <footer>
+            <div><a href="http://django-mako-plus.readthedocs.io/">Online Documentation</a></div>
+            <div><a href="https://github.com/doconix/django-mako-plus/">DMP on GitHub</a></div>
+        </footer>
 
     </body>
 </html>

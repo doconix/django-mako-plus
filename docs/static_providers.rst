@@ -18,7 +18,7 @@ The framework is built to be extended for custom file types.  When you call ``li
                     { 'provider': 'django_mako_plus.CompileLessProvider' },  # compiles app/styles/template.less to app/styles/template/css
                     { 'provider': 'django_mako_plus.CssLinkProvider' },      # generates links for app/styles/template.css
                     { 'provider': 'django_mako_plus.JsLinkProvider' },       # generates links for app/scripts/template.js
-                    { 'provider': 'django_mako_plus.AppJsBundleProvider' },  # generates links for app script bundles created by `python manage.py dmp_webpack`
+                    { 'provider': 'django_mako_plus.AppJsBundleProvider' },  # generates links for app script bundles created by `python manage.py dmp webpack`
                 ],
             }
         }
@@ -90,7 +90,7 @@ The following more-detailed version enumerates all the options (set to their def
                         'async': False,
                         'enabled': True,
                     },{
-                        # generates links for app script bundles created by `python manage.py dmp_webpack`
+                        # generates links for app script bundles created by `python manage.py dmp webpack`
                         'provider': 'django_mako_plus.AppJsBundleProvider',
                         'filename': '{appname}/scripts/__bundle__.js',
                         'async': False,

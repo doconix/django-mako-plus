@@ -21,14 +21,14 @@ At deployment, collect static files out of these directories with the following 
 
 ::
 
-    python3 manage.py dmp_collectstatic
+    python3 manage.py dmp collectstatic
 
 If your project contains both DMP and regular Django apps, you can collect static files with both commands:
 
 ::
 
     python3 manage.py collectstatic
-    python3 manage.py dmp_collectstatic --overwrite
+    python3 manage.py dmp collectstatic --overwrite
 
 Setup
 ---------------------------
@@ -82,12 +82,12 @@ At production/deployment, comment out ``BASE_DIR`` because it essentially makes 
     )
     STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
-When you deploy to a web server, run ``dmp_collectstatic`` to collect your static files into a separate directory (called ``/static/`` in the settings above):
+When you deploy to a web server, run ``dmp collectstatic`` to collect your static files into a separate directory (called ``/static/`` in the settings above):
 
 ::
 
     python3 manage.py collectstatic
-    python3 manage.py dmp_collectstatic --overwrite
+    python3 manage.py dmp collectstatic --overwrite
 
 Point your web server (Apache, Nginx, IIS, etc.) to serve this folder directly to browsers. For example, in Nginx, you'd set the following:
 
@@ -112,26 +112,26 @@ In Apache, you'd set the following:
 Advanced Use
 ---------------------------
 
-``dmp_collectstatic`` will refuse to overwrite an existing ``/static/`` directory. If you already have this directory (either from an earlier run or for another purpose), you can 1) delete it before collecting static files, or 2) specify the overwrite option as follows:
+``dmp collectstatic`` will refuse to overwrite an existing ``/static/`` directory. If you already have this directory (either from an earlier run or for another purpose), you can 1) delete it before collecting static files, or 2) specify the overwrite option as follows:
 
 ::
 
-    python3 manage.py dmp_collectstatic --overwrite
+    python3 manage.py dmp collectstatic --overwrite
 
 If you need to ignore certain directories or filenames, specify them with the ``--skip-dir`` and ``--skip-file`` options. These can be specified more than once, and it accepts Unix-style wildcards.
 
 ::
 
-    python3 manage.py dmp_collectstatic --skip-dir=.cached_templates --skip-file=*.txt --skip-file=*.md
+    python3 manage.py dmp collectstatic --skip-dir=.cached_templates --skip-file=*.txt --skip-file=*.md
 
 If you need to include additional directories or files, specify them with the ``--include`` option. This can be specified more than once, and it accepts Unix-style wildcards:
 
 ::
 
-    python3 manage.py dmp_collectstatic --include-dir=global-media --include-dir=global-styles --include-file=*.png
+    python3 manage.py dmp collectstatic --include-dir=global-media --include-dir=global-styles --include-file=*.png
 
 If you have ``rcssmin`` and ``rjsmin`` installed (via pip), DMP will minify your CSS and JS during the collection process.  If you are minifying with another tool (webpack, Google's minifier, etc.), disable minification with:
 
 ::
 
-    python3 manage.py dmp_collectstatic --no-minify
+    python3 manage.py dmp collectstatic --no-minify

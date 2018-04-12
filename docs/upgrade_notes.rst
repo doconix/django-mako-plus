@@ -3,6 +3,12 @@ Upgrade Notes
 
 This document contains upgrade notes for those already using DMP.  We started the document at version 4.3.
 
+5.3.1 - April, 2018
+
+The DMP management commands have been refactored.  The sass cleanup command is removed.
+
+The remaining commands are now subcommands.  If before you typed ``python3 manage.py dmp_startapp``, you show now type ``python3 manage.py dmp startapp``.
+
 5.2.1 - Late March, 2018
 
 I continued refactoring the webpack providers and workflow.  While doing this, I updated how DMP calculates the ``version_id`` on static files. It now uses the file modification time PLUS contents checksum.  This method is fast and automatic.

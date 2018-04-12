@@ -26,7 +26,7 @@ For example, suppose your view constructs a Django form, which is then sent to y
 If you call the ``render_crispy_form`` method in many templates, you may want to add the import to ``DEFAULT_TEMPLATE_IMPORTS`` in your ``settings.py`` file. Once this import exists in your settings, the function will be globally available in every template on your site.
 
     Whenever you modify the DMP settings, be sure to clean out your
-    cached templates with ``python manage.py dmp_cleanup``. This ensures
+    cached templates with ``python manage.py dmp cleanup``. This ensures
     your compiled templates are rebuilt with the new settings.
 
 However, there may be times when you need or want to call real, Django tags. For example, although `Crispy Forms' <http://django-crispy-forms.readthedocs.io/>`__ functions can be called directly, you may want to use its custom tags.
@@ -43,7 +43,7 @@ Then clear out the compiled templates caches:
 
 ::
 
-    python manage.py dmp_cleanup
+    python manage.py dmp cleanup
 
 Next, ensure the engine you are using is enabled in ``settings.py``.  For example, including Django syntax means including the following:
 
