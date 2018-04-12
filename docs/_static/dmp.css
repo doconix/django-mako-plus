@@ -5,14 +5,14 @@
 
 /* Theme colors */
 .wy-side-nav-search {
-    background-color: #147871;
+    background-color: #3771A1;
 }
 .wy-side-nav-search a,
 .wy-side-nav-search a:visited {
     color: #e2eeee;
 }
 .wy-side-nav-search > div.version {
-    color: #a6c4c4;
+    color: #88a9c3;
 }
 .wy-nav-side {
     background-color: #E4E7E7;
@@ -50,10 +50,16 @@
     border-right: solid 1px #c9c9c9;
 }
 a, a:visited {
-    color: #0A6E67;
+    color: #216AA3;
 }
 a:hover, a:focus {
-    color: #248881;
+    color: #518BBB;
+}
+
+/* Headers */
+
+.rst-content .toc-backref {
+    color: #216AA3;
 }
 
 /* TOC hide first item */
@@ -101,13 +107,14 @@ a:hover, a:focus {
     font-size: .85em;
 }
 
+
 /* Inline code */
 .wy-nav-content .rst-content code {
     border: none;
     background-color: transparent;
     font-size: .9em;
     padding: 0;
-    color: #BF1D29;
+    color: #AF591A;
 }
 
 /* Strong */

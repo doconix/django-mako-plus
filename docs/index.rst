@@ -45,9 +45,9 @@ Quick Start
     pip3 install django-mako-plus
 
     # create a new project with a 'homepage' app
-    python3 -m django startproject --template=http://cdn.rawgit.com/doconix/django-mako-plus/master/project_template.zip mysite
+    python3 -m django_mako_plus dmp startproject
     cd mysite
-    python3 manage.py startapp --template=http://cdn.rawgit.com/doconix/django-mako-plus/master/app_template.zip --extension=py,htm,html homepage
+    python3 manage.py dmp startapp homepage
 
     # open mysite/settings.py and append 'homepage' to the INSTALLED_APPS list
     INSTALLED_APPS = [
@@ -61,7 +61,7 @@ Quick Start
 
     # Open a browser to http://localhost:8000/
 
-Note that on Windows, ``python3`` is ``python`` and ``pip3`` is ``pip``. Python 3+ is required.
+Note that on Windows, ``python3`` is ``python`` and ``pip3`` is ``pip``. Python 3.4+ is required.
 
 Contents
 ------------

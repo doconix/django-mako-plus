@@ -3,13 +3,13 @@ Upgrade Notes
 
 This document contains upgrade notes for those already using DMP.  We started the document at version 4.3.
 
-5.3.1 - April, 2018
+*5.3.1 - April, 2018*
 
 The DMP management commands have been refactored.  The sass cleanup command is removed.
 
-The remaining commands are now subcommands.  If before you typed ``python3 manage.py dmp_startapp``, you show now type ``python3 manage.py dmp startapp``.
+The remaining commands are now subcommands.  If before you typed ``python3 manage.py dmp_startapp``, now type ``python3 manage.py dmp startapp``.
 
-5.2.1 - Late March, 2018
+*5.2.1 - Late March, 2018*
 
 I continued refactoring the webpack providers and workflow.  While doing this, I updated how DMP calculates the ``version_id`` on static files. It now uses the file modification time PLUS contents checksum.  This method is fast and automatic.
 
@@ -17,11 +17,11 @@ If you are explicitly setting ``version_id`` in your call to links, as in ``${ d
 
 If you really need to set this, extend the ``JsLinkProvider`` and/or ``CssLinkProvider`` classes with your custom behavior.  It's a very special-case need, so it made sense to automate this for the 99%.
 
-5.1.1 - March, 2018
+*5.1.1 - March, 2018*
 
 I refactored the webpack providers and workflow, but I doubt anyone is using them yet.  If you happen to have jumped on this in the past three weeks that 5.0 was out, be sure to read the webpack page and change your settings appropriately.
 
-5.0.1 - February, 2018
+*5.0.1 - February, 2018*
 
 1. The DMP options in settings.py has changed a little.  We recommend comparing your settings.py file against the current template (see file django_mako_plus/defaults.py on GitHub).
 
@@ -76,8 +76,7 @@ I refactored the webpack providers and workflow, but I doubt anyone is using the
 
 
 
-4.3.1 - November, 2017
------------------------------
+*4.3.1 - November, 2017*
 
 tl;dr for existing projects:
 
