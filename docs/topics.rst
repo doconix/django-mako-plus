@@ -1,7 +1,7 @@
-Topics
+Special Topics
 ==========================
 
-The following are special topics or advanced features of DMP:
+The following are special topics / advanced features of DMP:
 
 .. toctree::
     :maxdepth: 1
