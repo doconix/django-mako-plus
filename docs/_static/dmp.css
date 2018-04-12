@@ -20,8 +20,13 @@
 .wy-menu-vertical {
     margin-bottom: 36px;
 }
-.wy-menu-vertical a {
+.wy-menu-vertical a,
+.wy-menu-vertical a:visited {
     color: #333333;
+}
+.wy-menu-vertical a:hover,
+.wy-menu-vertical a:focus {
+    color: #518BBB;
 }
 .wy-menu-vertical li.current,
 .wy-menu-vertical li.current > ul {
