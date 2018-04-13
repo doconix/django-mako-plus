@@ -34,7 +34,7 @@ class Command(DMPCommandMixIn, BaseCommand):
 
     def handle(self, *args, **options):
         # save the options for later
-        if options['trial_run']:
+        if options.get('trial_run'):
             self.message("Trial run: dmp_cleanup would have deleted the following folders:", level=1)
 
         # ensure we have a base directory
@@ -52,7 +52,7 @@ class Command(DMPCommandMixIn, BaseCommand):
                 cache_dir = os.path.join(config.path, subdir, DMP_OPTIONS['TEMPLATES_CACHE_DIR'])
                 if os.path.exists(cache_dir):
                     self.message('Removing {}'.format(pretty_relpath(cache_dir, settings.BASE_DIR)), level=2)
-                    if not options['trial_run']:
+                    if not options.get('trial_run'):
                         shutil.rmtree(cache_dir)
                 else:
                     self.message('Skipping {} because it does not exist'.format(pretty_relpath(cache_dir, settings.BASE_DIR)), level=2)

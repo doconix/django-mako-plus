@@ -19,7 +19,7 @@ class Command(DMPCommandMixIn, StartAppCommand):
 
 
     def handle(self, *args, **options):
-        if options['template'] is NOT_SET:
+        if options.get('template') is NOT_SET:
             # set the template to a DMP app
             options['template'] = 'http://cdn.rawgit.com/doconix/django-mako-plus/master/app_template.zip'
             # attempt to use a local DMP install instead of the online repo as specified above
@@ -30,7 +30,7 @@ class Command(DMPCommandMixIn, StartAppCommand):
                     options['template'] = template_dir
 
         # ensure we have the extensions we need
-        options['extensions'] = list(set(options['extensions'] + [ 'py', 'htm', 'html' ]))
+        options['extensions'] = list(set(options.get('extensions') + [ 'py', 'htm', 'html' ]))
 
         # call the super
         StartAppCommand.handle(self, *args, **options)
@@ -45,4 +45,4 @@ What's next?
             '{name}',
         ]
 
-""".format(name=options['name']))
+""".format(name=options.get('name')))

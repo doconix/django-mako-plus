@@ -56,14 +56,14 @@ class Command(DMPCommandMixIn, BaseCommand):
 
         # the apps to process
         apps = []
-        for appname in options['appname']:
+        for appname in options.get('appname'):
             ensure_dmp_app(appname)
             apps.append(django_apps.get_app_config(appname))
         if len(apps) == 0:
             apps = get_dmp_apps()
 
         # main runner for per-app files
-        if options['single'] is None:
+        if options.get('single') is None:
             for app in apps:
                 self.message('Searching `{}` app...'.format(app.name))
                 filename = os.path.join(app.path, 'scripts', '__entry__.js')
@@ -75,7 +75,7 @@ class Command(DMPCommandMixIn, BaseCommand):
             for app in apps:
                 self.message('Searching `{}` app...'.format(app.name))
                 script_map.update(self.generate_script_map(app))
-            self.create_entry_file(options['single'], script_map, apps)
+            self.create_entry_file(options.get('single'), script_map, apps)
 
 
     def create_entry_file(self, filename, script_map, apps):
@@ -93,7 +93,7 @@ class Command(DMPCommandMixIn, BaseCommand):
 
         filedir = os.path.dirname(filename)
         if os.path.exists(filename):
-            if self.options['overwrite']:
+            if self.options.get('overwrite'):
                 os.remove(filename)
             else:
                 raise ValueError('Refusing to destroy existing file: {} (use --overwrite option or remove the file)'.format(filename))

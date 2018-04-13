@@ -104,7 +104,7 @@ class Command(DMPCommandMixIn, CollectStaticCommand):
         # if dest_root doesn't start with a /, it goes relative to the BASE_DIR
         try:
             dest_root = os.path.join(os.path.abspath(settings.BASE_DIR), settings.STATIC_ROOT)
-            if os.path.exists(dest_root) and not self.options['overwrite']:
+            if os.path.exists(dest_root) and not self.options.get('overwrite'):
                 raise CommandError('The destination directory for static files (%s) already exists. Please delete it or run this command with the --overwrite option.' % dest_root)
         except AttributeError:
             raise CommandError('Your settings.py file is missing the STATIC_ROOT setting. Exiting without collecting the static files.')
@@ -124,8 +124,8 @@ class Command(DMPCommandMixIn, CollectStaticCommand):
 
     def create_rules(self):
         '''Adds rules for the command line options'''
-        # the defaultx
-        rules = (
+        # the default
+        rules = [
             # files are included by default
             Rule('*',                                    level=None, filetype=TYPE_FILE,      score=1),
             # files at the app level are skipped
@@ -146,19 +146,19 @@ class Command(DMPCommandMixIn, CollectStaticCommand):
             Rule('__pycache__',                          level=None, filetype=TYPE_DIRECTORY, score=-3),
             # ignore compiled python files
             Rule('*.pyc',                                level=None, filetype=TYPE_FILE,      score=-3),
-        )
+        ]
         # include rules have score of 50 because they trump all initial rules
-        for pattern in (self.options['include_dir'] or []):
+        for pattern in (self.options.get('include_dir') or []):
             self.message('Setting rule - recurse directories: {}'.format(pattern), 1)
             rules.append(Rule(pattern, level=None, filetype=TYPE_DIRECTORY, score=50))
-        for pattern in (self.options['include_file'] or []):
+        for pattern in (self.options.get('include_file') or []):
             self.message('Setting rule - include files: {}'.format(pattern), 1)
             rules.append(Rule(pattern, level=None, filetype=TYPE_FILE, score=50))
         # skip rules have score of 100 because they trump everything, including the includes from the command line
-        for pattern in (self.options['skip_dir'] or []):
+        for pattern in (self.options.get('skip_dir') or []):
             self.message('Setting rule - skip directories: {}'.format(pattern), 1)
             rules.append(Rule(pattern, level=None, filetype=TYPE_DIRECTORY, score=-100))
-        for pattern in (self.options['skip_file'] or []):
+        for pattern in (self.options.get('skip_file') or []):
             self.message('Setting rule - skip files: {}'.format(pattern), 1)
             rules.append(Rule(pattern, level=None, filetype=TYPE_FILE, score=-100))
         return rules
@@ -205,7 +205,7 @@ class Command(DMPCommandMixIn, CollectStaticCommand):
                 self.copy_dir(source_path, dest_path, level+1)
 
             # if a regular Javscript file, run through the static file processors (scripts group)
-            elif ext == '.js' and not self.options['no_minify'] and jsmin:
+            elif ext == '.js' and not self.options.get('no_minify') and jsmin:
                 self.message('Including and minifying file with score {}: {}'.format(score, source_path), msglevel, level+1)
                 with open(source_path, encoding=encoding) as fin:
                     with open(dest_path, 'w', encoding=encoding) as fout:
@@ -214,7 +214,7 @@ class Command(DMPCommandMixIn, CollectStaticCommand):
 
 
             # if a CSS file, run through the static file processors (styles group)
-            elif ext == '.css' and not self.options['no_minify'] and cssmin:
+            elif ext == '.css' and not self.options.get('no_minify') and cssmin:
                 self.message('Including and minifying file with score {}: {}'.format(score, source_path), msglevel, level+1)
                 with open(source_path, encoding=encoding) as fin:
                     with open(dest_path, 'w', encoding=encoding) as fout:

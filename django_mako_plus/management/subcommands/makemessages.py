@@ -1,4 +1,6 @@
 from django.core.management.commands.makemessages import Command as MakeMessagesCommand
+from django.template.exceptions import TemplateSyntaxError
+
 from django_mako_plus.registry import get_dmp_apps
 from django_mako_plus.convenience import get_template_for_path
 from django_mako_plus.management.mixins import DMPCommandMixIn
@@ -27,9 +29,18 @@ class Command(DMPCommandMixIn, MakeMessagesCommand):
             action='append',
             help="Add an additional option to be passed to gettext. Ex: --extra-gettext-option='--keyword=mytrans'"
         )
+        parser.add_argument(
+            '--ignore-template-errors',
+            action='store_true',
+            dest='ignore_template_errors',
+            default=False,
+            help='Ignore any template errors raised when compiling Mako templates'
+        )
 
 
     def handle(self, *args, **options):
+        self.options = options
+
         # go through each dmp_enabled app and compile its mako templates
         for app_config in get_dmp_apps():
             self.compile_mako_files(app_config)
@@ -57,4 +68,8 @@ class Command(DMPCommandMixIn, MakeMessagesCommand):
                         # create the template object, which creates the compiled .py file
                         filepath = os.path.join(subdir, filename)
                         self.message(filepath, 2)
-                        get_template_for_path(filepath)
+                        try:
+                            get_template_for_path(filepath)
+                        except TemplateSyntaxError:
+                            if not self.options.get('ignore_template_errors'):
+                                raise

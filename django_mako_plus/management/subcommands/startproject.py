@@ -19,7 +19,7 @@ class Command(DMPCommandMixIn, StartProjectCommand):
         self.get_action_by_dest(parser, 'template').default = NOT_SET
 
     def handle(self, *args, **options):
-        if options['template'] is NOT_SET:
+        if options.get('template') is NOT_SET:
             # set the template to a DMP app
             options['template'] = 'http://cdn.rawgit.com/doconix/django-mako-plus/master/project_template.zip'
             # attempt to use a local DMP install instead of the online repo as specified above
