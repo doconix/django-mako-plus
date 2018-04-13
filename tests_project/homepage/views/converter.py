@@ -3,7 +3,7 @@ from django.http import HttpResponse
 from django.views.generic import View
 from django_mako_plus import view_function
 
-from tests.models import IceCream, MyInt
+from homepage.models import IceCream, MyInt
 
 import decimal, datetime
 

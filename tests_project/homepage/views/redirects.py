@@ -36,19 +36,16 @@ def javascript_redirect_exception(request):
 
 @view_function
 def internal_redirect_exception(request):
-    raise InternalRedirectException('tests.views.redirects', 'internal_redirect_exception2')
+    raise InternalRedirectException('homepage.views.redirects', 'internal_redirect_exception2')
 
 @view_function
 def bad_internal_redirect_exception(request):
-    # tests nonexistent module
-    raise InternalRedirectException('tests.non_existent', 'internal_redirect_exception2')
+    raise InternalRedirectException('homepage.non_existent', 'internal_redirect_exception2')
 
 @view_function
 def bad_internal_redirect_exception2(request):
-    # tests nonexistent function
-    raise InternalRedirectException('tests.views.redirects', 'nonexistent_function')
+    raise InternalRedirectException('homepage.views.redirects', 'nonexistent_function')
 
 # should not be decorated with @view_function because a target of internal redirect
 def internal_redirect_exception2(request):
     return HttpResponse('new_location2')
-

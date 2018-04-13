@@ -1,6 +1,6 @@
 [
     {
-        "model": "tests.icecream",
+        "model": "homepage.icecream",
         "pk": 1,
         "fields": {
             "name": "Mint Chocolate Chip",
@@ -8,7 +8,7 @@
         }
     },
     {
-        "model": "tests.icecream",
+        "model": "homepage.icecream",
         "pk": 2,
         "fields": {
             "name": "Burnt Almond Fudge",
@@ -16,7 +16,7 @@
         }
     },
     {
-        "model": "tests.icecream",
+        "model": "homepage.icecream",
         "pk": 3,
         "fields": {
             "name": "Cherry",
@@ -24,7 +24,7 @@
         }
     },
     {
-        "model": "tests.icecream",
+        "model": "homepage.icecream",
         "pk": 4,
         "fields": {
             "name": "Sherbet",

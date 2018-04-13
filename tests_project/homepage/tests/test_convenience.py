@@ -17,39 +17,39 @@ class Tester(TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        cls.tests_app = apps.get_app_config('tests')
+        cls.tests_app = apps.get_app_config('homepage')
 
     def test_get_template_loader(self):
         # should succeed
-        loader = get_template_loader('tests')
+        loader = get_template_loader('homepage')
         self.assertIsInstance(loader, MakoTemplateLoader)
         # should fail with LookupError
         self.assertRaises(LookupError, get_template_loader, 'nonexistent_app')
 
     def test_get_template(self):
         # should succeed
-        template = get_template('tests', 'index.basic.html')
+        template = get_template('homepage', 'index.basic.html')
         self.assertIsInstance(template, MakoTemplateAdapter)
         # these should fail
         self.assertRaises(LookupError, get_template, 'nonexistent_app', 'index.basic.html')
-        self.assertRaises(TemplateDoesNotExist, get_template, 'tests', 'nonexistent_template.html')
-        self.assertRaises(TemplateSyntaxError, get_template, 'tests', 'syntax_error.html')
+        self.assertRaises(TemplateDoesNotExist, get_template, 'homepage', 'nonexistent_template.html')
+        self.assertRaises(TemplateSyntaxError, get_template, 'homepage', 'syntax_error.html')
 
     def test_render_template(self):
         # should succeed
-        html = render_template(None, 'tests', 'index.basic.html')
+        html = render_template(None, 'homepage', 'index.basic.html')
         self.assertIsInstance(html, str)
         # these should fail
         self.assertRaises(LookupError, render_template, None, 'nonexistent_app', 'index.basic.html')
-        self.assertRaises(TemplateDoesNotExist, render_template, None, 'tests', 'nonexistent_template.html')
-        self.assertRaises(TemplateSyntaxError, render_template, None, 'tests', 'syntax_error.html')
+        self.assertRaises(TemplateDoesNotExist, render_template, None, 'homepage', 'nonexistent_template.html')
+        self.assertRaises(TemplateSyntaxError, render_template, None, 'homepage', 'syntax_error.html')
 
     def test_def_name(self):
         # test a def name
-        html = render_template(None, 'tests', 'index.basic.html', def_name='content')
+        html = render_template(None, 'homepage', 'index.basic.html', def_name='content')
         self.assertIsInstance(html, str)
         # this def doesn't exist
-        self.assertRaises(AttributeError, render_template, None, 'tests', 'index.basic.html', def_name='nonexistent_def')
+        self.assertRaises(AttributeError, render_template, None, 'homepage', 'index.basic.html', def_name='nonexistent_def')
 
     def test_get_template_loader_for_path(self):
         path = os.path.join(self.tests_app.path, 'templates')
@@ -85,4 +85,3 @@ class Tester(TestCase):
         self.assertRaises(TemplateDoesNotExist, render_template_for_path, None, bad_path, {})
         self.assertRaises(TemplateDoesNotExist, render_template_for_path, None, bad_path2, {})
         self.assertRaises(TemplateSyntaxError, render_template_for_path, None, bad_syntax_path, {})
-

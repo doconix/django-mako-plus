@@ -15,10 +15,10 @@ class Tester(TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        cls.tests_app = apps.get_app_config('tests')
+        cls.tests_app = apps.get_app_config('homepage')
 
     def test_ensure_dmp_app(self):
-        self.assertTrue(is_dmp_app('tests'))
+        self.assertTrue(is_dmp_app('homepage'))
         self.assertFalse(is_dmp_app('nonexistent_app'))
 
     def test_from_string(self):
@@ -27,12 +27,12 @@ class Tester(TestCase):
         self.assertEqual(template.render(None), "4")
 
     def test_get_template(self):
-        template = get_dmp_instance().get_template('tests/index.basic.html')
+        template = get_dmp_instance().get_template('homepage/index.basic.html')
         self.assertIsInstance(template, MakoTemplateAdapter)
-        self.assertRaises(TemplateDoesNotExist, get_dmp_instance().get_template, 'tests/nonexistent_template.html')
+        self.assertRaises(TemplateDoesNotExist, get_dmp_instance().get_template, 'homepage/nonexistent_template.html')
 
     def test_get_template_loader(self):
-        loader = get_dmp_instance().get_template_loader('tests', create=False)
+        loader = get_dmp_instance().get_template_loader('homepage', create=False)
         self.assertIsInstance(loader, MakoTemplateLoader)
         template = loader.get_template('index.basic.html')
         self.assertIsInstance(template, MakoTemplateAdapter)
