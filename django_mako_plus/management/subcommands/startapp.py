@@ -38,11 +38,12 @@ class Command(DMPCommandMixIn, StartAppCommand):
         self.message("""App {name} created successfully!
 
 What's next?
-    1. Open your settings.py file in an editor
-    2. Find INSTALLED_APPS and add your new app:
+    1. Add your new app to the list in settings.py:
         INSTALLED_APPS = [
             ...
             '{name}',
         ]
+    2. python manage.py runserver
+    3. Take a browser to http://localhost:8000/
 
 """.format(name=options.get('name')))

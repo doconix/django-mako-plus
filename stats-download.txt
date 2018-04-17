@@ -1,0 +1,19 @@
+# Download stats query for Google BigQuery:
+https://bigquery.cloud.google.com/table/the-psf:pypi.downloads
+
+
+SELECT
+    STRFTIME_UTC_USEC(timestamp, "%Y-%m") AS yyyymm,
+    COUNT(*) as download_count
+FROM
+    TABLE_DATE_RANGE (
+        [the-psf:pypi.downloads],
+        DATE_ADD(CURRENT_TIMESTAMP(), -1, "year"),
+        CURRENT_TIMESTAMP()
+    )
+WHERE
+    file.project="django-mako-plus"
+GROUP BY
+    yyyymm
+ORDER BY
+    yyyymm DESC
