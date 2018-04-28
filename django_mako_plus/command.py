@@ -8,7 +8,7 @@ from collections import namedtuple
 
 
 ################################################################
-###   Run a shell commands
+###   Run a shell command
 
 ReturnInfo = namedtuple('CommandReturn', ( 'code', 'stdout', 'stderr' ))
 
