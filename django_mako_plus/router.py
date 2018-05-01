@@ -175,8 +175,12 @@ def router_factory(module_name, function_name, fallback_app=None, fallback_templ
 ###   Router classes for single endpoints.  When a view is first accessed, one
 ###   of these "mini" routers is created for it and cached for future calls.
 
+class Router(object):
+    '''Common superclass'''
+    pass
 
-class ViewFunctionRouter(object):
+
+class ViewFunctionRouter(Router):
     '''Router for view functions and class-based methods'''
     def __init__(self, mod, func, decorator_kwargs):
         self.module = mod
@@ -257,12 +261,14 @@ class ViewFunctionRouter(object):
         return response
 
 
-    def message(self, request):
-        return 'view function {}.{}'.format(request.dmp.module, request.dmp.function)
+    def message(self, request, descriptive=True):
+        if descriptive:
+            return 'view function {}.{}'.format(request.dmp.module, request.dmp.function)
+        return '{}.{}'.format(request.dmp.module, request.dmp.function)
 
 
 
-class ClassBasedRouter(object):
+class ClassBasedRouter(Router):
     '''Router for class-based views.'''
     def __init__(self, module, instance, decorator_kwargs):
         self.instance = instance
@@ -286,12 +292,14 @@ class ClassBasedRouter(object):
         return self.instance.__class__.__qualname__
 
 
-    def message(self, request):
-        return 'class-based view function {}.{}.{}'.format(request.dmp.module, self.name, request.dmp.function)
+    def message(self, request, descriptive=True):
+        if descriptive:
+            return 'class-based view function {}.{}.{}'.format(request.dmp.module, self.name, request.dmp.function)
+        return '{}.{}.{}'.format(request.dmp.module, self.name, request.dmp.function)
 
 
 
-class TemplateViewRouter(object):
+class TemplateViewRouter(Router):
     '''Router for direct templates (used whe a view.py file doesn't exist but the .html does)'''
     def __init__(self, app_name, template_name):
         # not keeping the actual template objects because we need to get from the loader each time (Mako has its own cache)
@@ -306,12 +314,13 @@ class TemplateViewRouter(object):
         return template.render_to_response(request=request, context=kwargs)
 
 
-    def message(self, request):
-        return 'template {} (view function {}.{} not found)'.format(self.template_name, request.dmp.module, request.dmp.function)
+    def message(self, request, descriptive=True):
+        if descriptive:
+            return 'template {} (view function {}.{} not found)'.format(self.template_name, request.dmp.module, request.dmp.function)
+        return str(self.template_name)
 
 
-
-class RegistryExceptionRouter(object):
+class RegistryExceptionRouter(Router):
     '''Router for a registry exception (i.e. view not found).'''
     def __init__(self, exc):
         self.exc = exc
@@ -321,7 +330,9 @@ class RegistryExceptionRouter(object):
         raise Http404(str(self.exc))
 
 
-    def message(self, request):
+    def message(self, request, descriptive=True):
+        if descriptive:
+            return 'RegistryExceptionRouter: {}'.format(self.exc)
         return str(self.exc)
 
 
@@ -357,6 +368,3 @@ class ViewParameter(object):
             self.type.__qualname__ if self.type is not None else '<not specified>',
             self.default,
         )
-
-
-
