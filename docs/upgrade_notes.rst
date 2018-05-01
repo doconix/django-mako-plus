@@ -44,9 +44,9 @@ I refactored the webpack providers and workflow, but I doubt anyone is using the
 +--------------------------------+--------------------------------+
 | `request.urlparams`            | `request.dmp.urlparams`        |
 +--------------------------------+--------------------------------+
-| `request.dmp.render`           | `request.dmp.render`           |
+| `request.dmp_render`           | `request.dmp.render`           |
 +--------------------------------+--------------------------------+
-| `request.dmp.render_to_string` | `request.dmp.render_to_string` |
+| `request.dmp_render_to_string` | `request.dmp.render_to_string` |
 +--------------------------------+--------------------------------+
 
     *Important:* As noted in the table above, search your codebase for ``request.dmp_render`` and replace with ``request.dmp.render``.
