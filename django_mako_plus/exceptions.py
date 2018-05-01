@@ -108,24 +108,3 @@ class JavascriptRedirectException(RedirectException):
         '''Returns the redirect response for this exception.'''
         # the redirect key is already placed in the response by HttpResponseJavascriptRedirect
         return HttpResponseJavascriptRedirect(self.redirect_to, *self.args, **self.kwargs)
-
-
-
-
-################################################################
-###   Other exceptions not exposed beyond DMP
-
-class SassCompileException(Exception):
-    '''
-    DEPRECATED.  This will be removed at some point.
-
-    Raised when a .scss file won't compile
-    '''
-    def __init__(self, cmd, message):
-        self.cmd = cmd
-        self.message = message
-
-    def __str__(self):
-        return self.message
-
-

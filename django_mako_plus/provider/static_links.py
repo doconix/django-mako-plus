@@ -35,19 +35,19 @@ class LinkProvider(BaseProvider):
     })
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        filepath = self.options['filename']
-        if callable(filepath):  # if a function, call it to get the path
-            filepath = filepath(self)
-        self.filename = os.path.relpath(filepath, settings.BASE_DIR).replace('\\', '/')
+        self.filepath = self.options['filename']
+        if callable(self.filepath):  # if a function, call it to get the path
+            self.filepath = self.filepath(self)
+        self.filename = os.path.relpath(self.filepath, settings.BASE_DIR).replace('\\', '/')
         if log.isEnabledFor(logging.DEBUG):
             log.debug('[%s] %s searching for %s', self.template_file, self.__class__.__qualname__, self.filename)
         # file time and version hash
         try:
-            self.mtime = int(os.stat(filepath).st_mtime)
+            self.mtime = int(os.stat(self.filepath).st_mtime)
             if log.isEnabledFor(logging.INFO):
                 log.info('[%s] found %s', self.template_file, self.filename)
             # version_id combines current time and the CRC32 checksum of file bytes
-            self.version_id = (self.mtime << 32) | crc32(filepath)
+            self.version_id = (self.mtime << 32) | crc32(self.filepath)
             self.url = '{}?v={:x}'.format(
                 self.filename.replace('\\', '/'),
                 self.version_id,

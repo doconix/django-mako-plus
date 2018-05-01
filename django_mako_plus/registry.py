@@ -6,8 +6,10 @@ from django.apps import apps, AppConfig
 from django.core.exceptions import ImproperlyConfigured
 
 from .util import get_dmp_instance, DMP_OPTIONS
+from .signals import dmp_signal_register_app
 
 import threading
+import sys
 
 
 # lock to keep register() thread safe
@@ -76,3 +78,7 @@ def register_dmp_app(app, inject_urls=False):
         get_dmp_instance().get_template_loader(app, 'templates', create=True)
         get_dmp_instance().get_template_loader(app, 'scripts', create=True)
         get_dmp_instance().get_template_loader(app, 'styles', create=True)
+
+        # send the registration signal
+        if DMP_OPTIONS['SIGNALS']:
+            dmp_signal_register_app.send(sender=get_dmp_instance(), app_config=app)

@@ -66,3 +66,11 @@ dmp_signal_redirect_exception = Signal(providing_args=['request', 'exc'])
 #    request      :: the request object
 #    exc          :: The exception object, including exc.redirect_to (new url the router will process with).
 dmp_signal_internal_redirect_exception = Signal(providing_args=['request', 'exc'])
+
+
+#  Triggered just after the DMP template engine registers an app
+#  as a DMP app.  This happens once per app on a given server run.
+#  The `sender` argument is the DMP template engine instance.
+#
+#    app_config   :: the AppConfig object for the app
+dmp_signal_register_app = Signal(providing_args=['app_config'])
