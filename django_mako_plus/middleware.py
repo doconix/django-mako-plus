@@ -104,7 +104,12 @@ class RoutingData(object):
         # parse the urlparams
         # note that I'm not using unquote_plus because the + switches to a space *after* the question mark (in the regular parameters)
         # in the normal url, spaces should be quoted with %20.  Thanks Rosie for the tip.
-        self.urlparams = URLParamList(( unquote(s) for s in urlparams.split('/') )) if urlparams else URLParamList()
+        if isinstance(urlparams, (list, tuple)):
+            self.urlparams = URLParamList(urlparams)
+        elif urlparams:
+            self.urlparams = URLParamList(( unquote(s) for s in urlparams.split('/') ))
+        else:
+            self.urlparams = URLParamList()
 
 
     def __repr__(self):
