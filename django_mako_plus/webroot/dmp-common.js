@@ -6,7 +6,7 @@
 
         window.DMP_CONTEXT = {
 
-            __version__: '5.3.4',   // DMP version to check for mismatches
+            __version__: '5.3.5',   // DMP version to check for mismatches
             contexts: {},           // contextid -> context1
             contextsByName: {},     // app/template -> [ context1, context2, ... ]
             lastContext: null,      // last inserted context (see getAll() below)
