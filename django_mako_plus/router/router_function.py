@@ -6,7 +6,8 @@ from ..exceptions import BaseRedirectException
 from ..signals import dmp_signal_post_process_request, dmp_signal_pre_process_request
 from ..util import DMP_OPTIONS, log
 
-from .base import Router, ViewParameter
+from .base import Router
+from ..converter import ViewParameter
 
 import inspect
 import sys
