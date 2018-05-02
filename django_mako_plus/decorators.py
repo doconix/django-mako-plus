@@ -1,8 +1,8 @@
-
+from .converter import DefaultConverter
 from .util import log, DMP_OPTIONS
 
 import inspect
-from collections import defaultdict
+from collections import defaultdict, namedtuple
 
 
 ################################################################
@@ -16,7 +16,7 @@ class PassthroughDecorator(object):
     The decorate() method is called to perform the behavior of the decorator on the function.
     This class instance does not stay in the decorator call chain.  The primary use case
     of this decorator is place an attribute on the function.
-    
+
     @wraps is not used with this because it is a pass-through.  The decorator disappears
     after doing its initial work and does not stay within the call chain.
 
@@ -49,68 +49,21 @@ class PassthroughDecorator(object):
 
 
 
-###################################################################
-###  A pass-through decorator that annotates with the
-###  decorator args and kwargs.
-
-ANNOTATION_DECORATOR_KEY = '_dmp_annotation_decorator'
-
-
-class KeywordArgDecorator(PassthroughDecorator):
-    '''
-    Caches the kwargs given in annotate on the annotated function.
-    Multiple decorators of the same type can be placed on the same function.
-
-    Unless force=True, raises NotDecoratedError if cls is not decorating the function.
-    '''
-    DEFAULT_KWARGS = {}
-
-    @classmethod
-    def _get_list_for_class(cls, func, force=False):
-        func = inspect.unwrap(func, stop=lambda f: hasattr(f, ANNOTATION_DECORATOR_KEY))  # try to get the actual function
-        if not hasattr(func, ANNOTATION_DECORATOR_KEY):
-            if not force:
-                raise NotDecoratedError('The function is not decorated with decorator: {}'.format(cls.__qualname__))
-            setattr(func, ANNOTATION_DECORATOR_KEY, defaultdict(list))
-        return getattr(func, ANNOTATION_DECORATOR_KEY)[cls]
-
-    @classmethod
-    def decorate(cls, func, *args, **kwargs):
-        '''Does the work of the decorator: caches the kwargs for later retrieval.'''
-        updated_kwargs = cls.DEFAULT_KWARGS.copy()
-        updated_kwargs.update(kwargs)
-        # add the ANNOTATION_DECORATOR_KEY to the function
-        cls._get_list_for_class(func, force=True).append(updated_kwargs)
-
-    @classmethod
-    def get_kwargs(cls, func):
-        '''
-        Returns a list of cached kwargs for this decorator type on the given function.
-        It is a list because the decorator could be set more than once on a given function.
-        Raises NotDecoratedError if the decorator is not on the function.
-        The list will always have at least one element (or NotDecoratedError would have raised).
-        '''
-        return cls._get_list_for_class(func)
-
-    @classmethod
-    def is_decorated(cls, func):
-        '''Returns whether the function is decorated with this decorator type'''
-        try:
-            cls._get_list_for_class(func)
-        except NotDecoratedError:
-            return False
-        return True
-
-
-class NotDecoratedError(Exception):
-    pass
-
-
 
 ##############################################################
 ###   Decorators for view functions
 
-class view_function(KeywordArgDecorator):
+VIEW_FUNCTION_KEY = '_dmp_view_function_'
+ViewFunctionData = namedtuple('ViewFunctionData', [ 'converters' ])
+
+
+DEFAULT_CONVERTERS = [
+    DefaultConverter(),
+]
+
+
+
+class view_function(PassthroughDecorator):
     '''
     A decorator to signify which view functions are "callable" by web browsers.
 
@@ -120,9 +73,14 @@ class view_function(KeywordArgDecorator):
         function process_request(request):
             ...
 
-    Class-based views don't need to be decorated because we allow anything that extends Django's View class.
-    '''
-    DEFAULT_KWARGS = {
-        'converter': None,
-    }
+    Or:
 
+        @view_function(converters=[..., ...])
+        function process_request(request):
+            ...
+
+    '''
+    @classmethod
+    def decorate(cls, func, converters=DEFAULT_CONVERTERS):
+        '''Decorates the method'''
+        setattr(func, VIEW_FUNCTION_KEY, ViewFunctionData(converters))

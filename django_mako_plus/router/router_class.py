@@ -8,7 +8,15 @@ from .router_function import ViewFunctionRouter
 
 
 class ClassBasedRouter(Router):
-    '''Router for class-based views.'''
+    '''
+    Router for class-based views.
+
+    A class-based router can have several endpoints, such as get(),
+    post(), or put().  A ViewFunctionRouter is created for each
+    of the endpoints that exist in the given class.  So this is really
+    just a meta-router that reroutes to the appropriate ViewFunctionRouter
+    within it.
+    '''
     def __init__(self, module, instance, decorator_kwargs):
         self.instance = instance
         self.endpoints = {}

@@ -21,7 +21,14 @@ import sys
 
 
 class ViewFunctionRouter(Router):
-    '''Router for view functions and class-based methods'''
+    '''
+    Router for a view function.  This class:
+
+    1. Converts the url parameters.
+    2. Calls the endpoint (view function).  This, finally, is where DMP
+       hands control over to the project's real view function.
+    3. Calls pre and post process_request signals.
+    '''
     def __init__(self, mod, func, decorator_kwargs):
         self.module = mod
         self.function = func
@@ -46,41 +53,35 @@ class ViewFunctionRouter(Router):
         '''Converts urlparams, calls the view function, returns the response'''
         # leaving request inside *args (or kwargs) so we can convert it like anything else (and parameter indices aren't off by one)
         request = kwargs.get('request', args[0])
-        ctask = ConversionTask(request, self.module, self.function, self.decorator_kwargs)
+        ctask = ConversionTask(
+            request=request,
+            module=self.module,
+            function=self.function,
+            view_function_kwargs=self.decorator_kwargs,
+        )
         args = list(args)
         urlparam_i = 0
         # add urlparams into the arguments and convert the values
         for parameter_i, parameter in enumerate(self.parameters):
-            try:
-                # skip *args, **kwargs
-                if parameter.kind is inspect.Parameter.VAR_POSITIONAL or parameter.kind is inspect.Parameter.VAR_KEYWORD:
-                    continue
-                # value in kwargs?
-                elif parameter.name in kwargs:
-                    kwargs[parameter.name] = ctask.converter(kwargs[parameter.name], parameter, ctask)
-                # value in args?
-                elif parameter_i < len(args):
-                    args[parameter_i] = ctask.converter(args[parameter_i], parameter, ctask)
-                # urlparam value?
-                elif urlparam_i < len(request.dmp.urlparams):
-                    kwargs[parameter.name] = ctask.converter(request.dmp.urlparams[urlparam_i], parameter, ctask)
-                    urlparam_i += 1
-                # can we assign a default value?
-                elif parameter.default is not inspect.Parameter.empty:
-                    kwargs[parameter.name] = ctask.converter(parameter.default, parameter, ctask)
-                # fallback is None
-                else:
-                    kwargs[parameter.name] = ctask.converter(None, parameter, ctask)
-
-            except BaseRedirectException as e:
-                log.info('Redirect exception raised during conversion of parameter %s (%s): %s', parameter.position, parameter.name, e)
-                raise
-            except Http404 as e:
-                log.info('Raising Http404 because exception raised during conversion of parameter %s (%s): %s', parameter.position, parameter.name, e, exc_info=e)
-                raise
-            except Exception as e:
-                log.info('Raising Http404 because exception raised during conversion of parameter %s (%s): %s', parameter.position, parameter.name, e, exc_info=e)
-                raise Http404('Invalid parameter specified in the url')
+            # skip *args, **kwargs
+            if parameter.kind is inspect.Parameter.VAR_POSITIONAL or parameter.kind is inspect.Parameter.VAR_KEYWORD:
+                pass
+            # value in kwargs?
+            elif parameter.name in kwargs:
+                kwargs[parameter.name] = ctask.convert_value(kwargs[parameter.name], parameter)
+            # value in args?
+            elif parameter_i < len(args):
+                args[parameter_i] = ctask.convert_value(args[parameter_i], parameter)
+            # urlparam value?
+            elif urlparam_i < len(request.dmp.urlparams):
+                kwargs[parameter.name] = ctask.convert_value(request.dmp.urlparams[urlparam_i], parameter)
+                urlparam_i += 1
+            # can we assign a default value?
+            elif parameter.default is not inspect.Parameter.empty:
+                kwargs[parameter.name] = ctask.convert_value(parameter.default, parameter)
+            # fallback is None
+            else:
+                kwargs[parameter.name] = ctask.convert_value(None, parameter)
 
         # send the pre-signal
         if DMP_OPTIONS['SIGNALS']:

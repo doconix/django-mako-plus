@@ -38,7 +38,7 @@ class InternalRedirectException(BaseRedirectException):
 
             raise InternalRedirectException('homepage.views.someview', 'process_request')
         '''
-        super(InternalRedirectException, self).__init__()
+        super().__init__()
         self.redirect_module = redirect_module
         self.redirect_function = redirect_function
 
@@ -54,6 +54,7 @@ class RedirectException(BaseRedirectException):
     calling JS code to adjust the redirect if needed.
     '''
     def __init__(self, redirect_to, *args, **kwargs):
+        super().__init__()
         self.redirect_to = redirect_to
         self.args = args
         self.kwargs = kwargs
@@ -122,17 +123,3 @@ class JavascriptRedirectException(RedirectException):
         '''Returns the redirect response for this exception.'''
         # the redirect key is already placed in the response by HttpResponseJavascriptRedirect
         return HttpResponseJavascriptRedirect(self.redirect_to, *self.args, **self.kwargs)
-
-
-
-###########################################
-###   When converter errors occur
-
-class ConverterException(BaseException):
-    '''
-    Raised when a url parameter conversion fails.  This class
-    contains the information about what failed.
-
-    Normally, DMP catches this error and raises Http404.
-    '''
-    pass

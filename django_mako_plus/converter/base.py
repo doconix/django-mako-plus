@@ -2,6 +2,7 @@ from django.apps import apps
 
 from ..util import log, qualified_name
 from .info import ConverterInfo
+from .exceptions import ConvertException
 
 import inspect
 from operator import attrgetter
@@ -101,8 +102,24 @@ class BaseConverter(object):
             if issubclass(parameter.type, ci.convert_type):
                 if log.isEnabledFor(logging.DEBUG):
                     log.debug('converting parameter `%s` using %s', parameter.name, qualified_name(ci.convert_func))
-                return ci.convert_func.__get__(self, self.__class__)(value, parameter, task)
+
+                try:
+                    return ci.convert_func.__get__(self, self.__class__)(value, parameter, task)
+
+                except Exception as exc:
+                    raise ConvertException(
+                        message=str(exc),
+                        value=value,
+                        parameter=parameter,
+                        task=task,
+                        exc=exc,
+                    )
 
         # we should never get here because DefaultConverter below has a converter for <object>
         # (unless a project entirely swaps out the DefaultConverter for another subclass)
-        raise ValueError('No parameter converter exists for type: {}. Either remove the type hint or subclass the DMP DefaultConverter class.'.format(parameter.type))
+        raise ConvertException(
+            message='No parameter converter exists for type: {}. Either remove the type hint or subclass the DMP DefaultConverter class.'.format(parameter.type),
+            value=value,
+            parameter=parameter,
+            task=task,
+        )
