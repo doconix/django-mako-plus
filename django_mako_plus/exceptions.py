@@ -3,11 +3,21 @@ from django.http import HttpResponseRedirect, HttpResponsePermanentRedirect
 from .http import HttpResponseJavascriptRedirect, REDIRECT_HEADER_KEY
 
 
+##############################################################
+###   Base of all DMP exceptions
+
+class BaseException(Exception):
+    '''Superclass of all DMP exceptions'''
+
+
 ###############################################################
 ###   Exceptions used to direct the controller
 
 
-class BaseRedirectException(Exception):
+
+
+
+class BaseRedirectException(BaseException):
     '''
     Superclass of DMP redirect exceptions
     '''
@@ -23,6 +33,10 @@ class InternalRedirectException(BaseRedirectException):
         '''
         Indicates the new view to be called.  The view should be given relative to the project root.
         The parameters should be strings, not the actual module or function reference.
+
+        Both parameters should be strings, example:
+
+            raise InternalRedirectException('homepage.views.someview', 'process_request')
         '''
         super(InternalRedirectException, self).__init__()
         self.redirect_module = redirect_module
@@ -108,3 +122,17 @@ class JavascriptRedirectException(RedirectException):
         '''Returns the redirect response for this exception.'''
         # the redirect key is already placed in the response by HttpResponseJavascriptRedirect
         return HttpResponseJavascriptRedirect(self.redirect_to, *self.args, **self.kwargs)
+
+
+
+###########################################
+###   When converter errors occur
+
+class ConverterException(BaseException):
+    '''
+    Raised when a url parameter conversion fails.  This class
+    contains the information about what failed.
+
+    Normally, DMP catches this error and raises Http404.
+    '''
+    pass
