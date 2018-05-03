@@ -1,6 +1,5 @@
 from django.test import TestCase
 
-from django_mako_plus import DefaultConverter, set_default_converter, get_default_converter
 from django_mako_plus.util import log
 from homepage.models import IceCream, MyInt
 import datetime
@@ -9,14 +8,6 @@ import decimal
 
 class Tester(TestCase):
     fixtures = [ 'ice_cream.json' ]
-
-    @classmethod
-    def setUp(cls):
-        set_default_converter(TestingConverter)
-
-    def test_default_converter(self):
-        conv = get_default_converter()
-        self.assertIsInstance(conv, TestingConverter)
 
     def test_empty_params(self):
         resp = self.client.get('/homepage/converter/')
@@ -142,14 +133,6 @@ class Tester(TestCase):
         req = resp.wsgi_request
         self.assertIsNone(req.dmp.converted_params['d'])
 
-    def test_override_with_myint(self):
-        set_default_converter(TestingConverter2)
-        resp = self.client.get('/homepage/converter.more_testing/-/-/-/3/')
-        self.assertEqual(resp.status_code, 200)
-        req = resp.wsgi_request
-        self.assertEqual(req.dmp.converted_params['mi'], 103)
-        self.assertIsInstance(req.dmp.converted_params['mi'], MyInt)
-
     def test_custom_convert_function(self):
         resp = self.client.get('/homepage/converter.custom_convert_function/1/2/3/4/5/6/')
         self.assertEqual(resp.status_code, 200)
@@ -172,30 +155,3 @@ class Tester(TestCase):
         self.assertEquals(req.dmp.urlparams, [ '1', '2' ])
         self.assertEquals(req.dmp.converted_params['i'], 1)
         self.assertEquals(req.dmp.converted_params['f'], 2)
-
-
-
-
-##########################################################
-###   Small extension to the DefaultConverter that saves
-###   the converted arguments so we can check them after a
-###   call.
-
-class TestingConverter(DefaultConverter):
-    def __call__(self, value, parameter, task):
-        value = super().__call__(value, parameter, task)
-        if not hasattr(task.request.dmp, 'converted_params'):
-            task.request.dmp.converted_params = {}
-        task.request.dmp.converted_params[parameter.name] = value
-        return value
-
-
-# Override a type and ensure it gets called instead of regular int converter
-class TestingConverter2(TestingConverter):
-    @DefaultConverter.convert_method(MyInt)
-    def convert_myint(self, value, parameter, task):
-        try:
-            return MyInt(int(value) + 100)
-        except Exception as e:
-            log.info('Raising Http404 due to parameter conversion error: %s', e)
-            raise Http404('Invalid parameter specified in the url')
