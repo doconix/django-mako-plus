@@ -23,9 +23,7 @@ from .router import route_request
 
 
 # view_function decorator and converter classes
-from .decorators import view_function
-from .converter import DefaultConverter, set_default_converter, get_default_converter
-
+from .converter.decorators import view_function
 
 # the middleware and template
 # the template engine

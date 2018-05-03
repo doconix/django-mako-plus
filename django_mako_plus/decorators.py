@@ -1,86 +1,51 @@
-from .converter import DefaultConverter
-from .util import log, DMP_OPTIONS
-
-import inspect
-from collections import defaultdict, namedtuple
+import functools
 
 
-################################################################
-###  An abstract pass-through decorator.
-
-_UNDEFINED_FUNCTION = object()
-
-class PassthroughDecorator(object):
+class OptionsDecoratorMeta(type):
     '''
-    A pass-through decorator that can be called with @decorator or @decorator(a=1, b=2).
-    The decorate() method is called to perform the behavior of the decorator on the function.
-    This class instance does not stay in the decorator call chain.  The primary use case
-    of this decorator is place an attribute on the function.
-
-    @wraps is not used with this because it is a pass-through.  The decorator disappears
-    after doing its initial work and does not stay within the call chain.
-
-    Note that it is not possible to use this decorator with the first argument being a callable
-    because Python will take it as the decorated function.
+    Metaclass that allows ourdecorator to be called
+    with or without optional arguments.
     '''
-    def __new__(cls, func=_UNDEFINED_FUNCTION, *args, **kwargs):
-        # if we have a function, it was called without arguments: @decorator
-        # annotate and return the function (an instance never gets created)
-        if func is not _UNDEFINED_FUNCTION and callable(func) and len(args) == 0 and len(kwargs) == 0:
-            cls.decorate(func)
-            return func
+    def __call__(self, *args, **kwargs):
+        # if args has a single function, we'll assume it is the function we're decorating.
+        # that means the syntax was `@decorator` or `@decorator()` -- no arguments
+        # we need to return normally
+        if len(args) == 1 and callable(args[0]):
+            instance = super(OptionsDecoratorMeta, self).__call__(*args, **kwargs)
+            functools.update_wrapper(instance, args[0])
+            return instanceF
 
-        # if we don't have a function, it was specified with arguments: @decorator(a=1, b=2)
-        # we need to make an object, let __init__ run, and let python call __call__.
-        return super().__new__(cls)
+        # ensure we don't have any args: @decorator(someval) is not allowed
+        # because it's too close to @decorator(func), which would have been above
+        if len(args) > 0:
+            raise ValueError('Positional arguments are not supported with this decorator (please use keyword arguments)')
 
-    def __init__(self, func=None, *args, **kwargs):
-        self.args = (func, ) + args
-        self.kwargs = kwargs
-
-    def __call__(self, func):
-        self.decorate(func, *self.args, **self.kwargs)
-        return func
-
-    @classmethod
-    def decorate(cls, func, *args, **kwargs):
-        '''Subclasses should override this method to make the annotation'''
-        raise NotImplementedError('The `annotate` method must be implemented by subclasses.')
-
+        # if we get here, the syntax was `@decorator(a=1, b=2)` -- with arguments
+        # python hasn't yet "called" the decorator.  we'll return a factory
+        # for python to call with the function
+        def factory(func):
+            instance = super(OptionsDecoratorMeta, self).__call__(func, *args, **kwargs)
+            functools.update_wrapper(instance, func)
+            return instance
+        return factory
 
 
-
-##############################################################
-###   Decorators for view functions
-
-VIEW_FUNCTION_KEY = '_dmp_view_function_'
-ViewFunctionData = namedtuple('ViewFunctionData', [ 'converters' ])
-
-
-DEFAULT_CONVERTERS = [
-    DefaultConverter(),
-]
-
-
-
-class view_function(PassthroughDecorator):
+class OptionsDecorator(object, metaclass=OptionsDecoratorMeta):
     '''
-    A decorator to signify which view functions are "callable" by web browsers.
+    A class-based decorator that can be called with or without options (kwargs):
 
-    Any endpoint function, such as process_request, must be decorated to be callable:
+        @decorator
+        @decorator()
+        @decorator(option1=value1, option2=value2)
 
-        @view_function
-        function process_request(request):
-            ...
-
-    Or:
-
-        @view_function(converters=[..., ...])
-        function process_request(request):
-            ...
-
+    Override the __call__() method for custom behavior.
     '''
-    @classmethod
-    def decorate(cls, func, converters=DEFAULT_CONVERTERS):
-        '''Decorates the method'''
-        setattr(func, VIEW_FUNCTION_KEY, ViewFunctionData(converters))
+    def __init__(self, decorated_function, **options):
+        '''Create a new wrapper around the decorated function'''
+        self.decorated_function = decorated_function
+        self.options = options
+
+
+    def __call__(self, *args, **kwargs):
+        '''Subclasses should override this method'''
+        return self.decorated_function(*args, **kwargs)
