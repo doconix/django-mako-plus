@@ -133,25 +133,10 @@ class Tester(TestCase):
         req = resp.wsgi_request
         self.assertIsNone(req.dmp.converted_params['d'])
 
-    def test_custom_convert_function(self):
-        resp = self.client.get('/homepage/converter.custom_convert_function/1/2/3/4/5/6/')
+    def test_geo_location_endpoint(self):
+        resp = self.client.get('/homepage/converter.geo_location_endpoint/144.4,-24.6/')
         self.assertEqual(resp.status_code, 200)
-        # this hard coded value comes from the convert function, which is also testing
-        # the decorator kwargs
-        self.assertEqual(resp.content, 'h1h2-h1h2-h1h2'.encode())
-
-    def test_class_based(self):
-        # GET
-        resp = self.client.get('/homepage/converter.class_based/1/2/')
-        self.assertEqual(resp.status_code, 200)
+        # hasattr is easier than importing the type
         req = resp.wsgi_request
-        self.assertEquals(req.dmp.urlparams, [ '1', '2' ])
-        self.assertEquals(req.dmp.converted_params['i'], 1)
-        self.assertEquals(req.dmp.converted_params['f'], 2)
-        # POST
-        resp = self.client.post('/homepage/converter.class_based/1/2/')
-        self.assertEqual(resp.status_code, 200)
-        req = resp.wsgi_request
-        self.assertEquals(req.dmp.urlparams, [ '1', '2' ])
-        self.assertEquals(req.dmp.converted_params['i'], 1)
-        self.assertEquals(req.dmp.converted_params['f'], 2)
+        self.assertTrue(hasattr(req.dmp.converted_params['loc'], 'latitude'))
+        self.assertTrue(hasattr(req.dmp.converted_params['loc'], 'longitude'))

@@ -12,8 +12,9 @@ import decimal, datetime
 
 
 class recording_view_function(view_function):
-    def convert_parameters(self, value, parameter, request):
-        args, kwargs = super().convert_parameters(value, parameter, request)
+    def convert_parameters(self, *args, **kwargs):
+        request = args[0]
+        args, kwargs = super().convert_parameters(*args, **kwargs)
         request.dmp.converted_params = kwargs
         return args, kwargs
 
@@ -29,7 +30,7 @@ def more_testing(request, d:decimal.Decimal=None, dt:datetime.date=None, dttm:da
     return HttpResponse('more parameter conversion tests')
 
 
-###  Custom converter endpoint  ###
+###  Custom converter function  ###
 
 class GeoLocation(object):
     def __init__(self, latitude, longitude):
@@ -46,6 +47,6 @@ def convert_geo_location(value, parameter):
     return GeoLocation(float(parts[0]), float(parts[1]))
 
 
-@view_function
+@recording_view_function
 def geo_location_endpoint(request, loc:GeoLocation):
     return HttpResponse('{}, {}'.format(loc.latitude, loc.longitude))

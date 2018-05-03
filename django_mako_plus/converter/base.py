@@ -125,7 +125,7 @@ class view_function(OptionsDecorator):
         See the docs for this class on customizing this method.
         '''
         # convert the urlparams
-        args, kwargs = self.convert_parameters(args, kwargs)
+        args, kwargs = self.convert_parameters(*args, **kwargs)
 
         # call the decorated view function!
         return self.decorated_function(*args, **kwargs)
