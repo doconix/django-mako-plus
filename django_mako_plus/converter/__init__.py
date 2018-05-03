@@ -1,5 +1,5 @@
 
 # public items in this package
 from .parameter import ViewParameter
-from .info import ConverterInfo
 from .base import view_function
+from .converters import parameter_converter

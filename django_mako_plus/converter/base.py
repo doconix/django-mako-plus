@@ -1,31 +1,15 @@
-from django.apps import apps
-from django.db.models import Model
-from django.conf import settings
-from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
-from django.http import HttpResponse, StreamingHttpResponse, Http404
+from django.http import Http404
+from django.core.exceptions import ImproperlyConfigured
 
 from ..decorators import OptionsDecorator
-from ..signals import dmp_signal_post_process_request, dmp_signal_pre_process_request
-from ..util import DMP_OPTIONS, log, qualified_name
-from .info import ConverterInfo
+from ..util import log
 from .parameter import ViewParameter
+from .info import ConverterFunctionInfo
 
-import inspect
-from operator import attrgetter
 import logging
-import datetime
-import decimal
-from collections import defaultdict, namedtuple
-import sys
-
-
-
-
-def parameter_converter(object):
-    '''
-    Decorator that Denotes a function as a url parameter converter.
-    '''
-
+import inspect
+from collections import namedtuple
+from operator import attrgetter
 
 
 
@@ -46,8 +30,45 @@ class view_function(OptionsDecorator):
         function process_request(request):
             ...
 
+    PARAMETER CONVERSION:
+
+    The other purpose of this decorator is to convert URL parameters.
+    See the convert_value() function docs below for more info on this.
+
+    CUSTOMIZING THE DECORATOR:
+
+    This decorator is programmed as a class-based decorator so you can
+    subclass it with custom behavior.  You can customize how view functions are
+    called and how parameters are converted.
+
+        __init__(): you probably don't need to customize this method because it
+        already takes any kwargs and sets them as the self.options dictionary.
+        If you override __init__, do NOT add positional parameters.  Use only
+        keyword parameters.  Positional parameters may mess up the ability
+        of the decorator to be call with/without arguments.
+
+        __call__(): this is triggered on each request.  It iterates the parameters
+        (for conversion) and then calls the endpoint.  Override this method if
+        you want to add or modify the endpoint calling process.
+
+    Customizing Parameter Conversion:
+
+    The primary way to customize conversion is to create new @parameter_converter
+    functions in your codebase.  This allows you to add new type converters.
+    You can even create functions for types already handled by the built-in
+    converters.  Your functions will override the built-in ones.
+
+    If you need to customize more than just a few types, override:
+
+        convert_value(): where individual parameters are converted.
+
+        __call__(): the controller that iterates the parameter values
+        and calls convert_value().
     '''
     DECORATED_KEY = '_dmp_view_function_'
+    # the list of converters (populated by the @converter_function decorator)
+    converters = []
+    convert_sorting_enabled = False
 
     def __init__(self, decorated_function, **options):
         '''Create a new wrapper around the decorated function'''
@@ -72,21 +93,54 @@ class view_function(OptionsDecorator):
 
 
     @classmethod
-    def is_decorated(cls, f):
+    def _is_decorated(cls, f):
         '''Returns True if the given function is decorated with @view_function'''
         return hasattr(f, cls.DECORATED_KEY)
 
 
+    @classmethod
+    def _register_converter(cls, conv_func, conv_type):
+        '''Triggered by the @converter_function decorator'''
+        cls.converters.append(ConverterFunctionInfo(conv_func, conv_type, len(cls.converters)))
+        cls._sort_converters()
+
+
+    @classmethod
+    def _sort_converters(cls, convert_sorting_enabled=False):
+        '''Sorts the converter functions'''
+        # convert_sorting_enabled is triggered in DMP's AppConfig.ready()
+        # we can't sort before then because models aren't ready
+        cls.convert_sorting_enabled = cls.convert_sorting_enabled or convert_sorting_enabled
+        if cls.convert_sorting_enabled:
+            for converter in cls.converters:
+                converter.prepare_sort_key()
+            cls.converters.sort(key=attrgetter('sort_key'))
+
+
     def __call__(self, *args, **kwargs):
         '''
-        Trigger the decorated function.
+        Called for every request.  This method runs the converters and then
+        calls the actual site view function.
 
-        Subclasses should override convert_value if needed.
+        See the docs for this class on customizing this method.
         '''
-        # leaving request inside *args above (or kwargs) so we can convert it like anything else (and parameter indices aren't off by one)
-        request = kwargs.get('request', args[0])
+        # convert the urlparams
+        args, kwargs = self.convert_parameters(args, kwargs)
 
-        # convert each of the parameters
+        # call the decorated view function!
+        return self.decorated_function(*args, **kwargs)
+
+
+    def convert_parameters(self, *args, **kwargs):
+        '''
+        Iterates the urlparams and converts them according to the
+        type hints in the current view function.
+
+        Note that args[0] is the request object.  We leave it in args
+        so it can convert like everything else (and so parameter
+        indices aren't off by one).
+        '''
+        request = kwargs.get('request', args[0])
         args = list(args)
         urlparam_i = 0
         # add urlparams into the arguments and convert the values
@@ -110,25 +164,56 @@ class view_function(OptionsDecorator):
             # fallback is None
             else:
                 kwargs[parameter.name] = self.convert_value(None, parameter, request)
-
-        # call the decorated view function!
-        return self.decorated_function(*args, **kwargs)
+        return args, kwargs
 
 
     def convert_value(self, value, parameter, request):
         '''
-        Converts the given value using the converter list.
+        Converts a parameter value in the view function call.
 
-        If the value cannot be converted, raise an exception.
-        The DMP router processes several exceptions in useful ways:
-            ValueError: the converter returns an Http404 response
+            value:      value from request.dmp.urlparams to convert
+                        The value will always be a string, even if empty '' (never None).
+
+            parameter:  an instance of django_mako_plus.ViewParameter that holds this parameter's
+                        name, type, position, etc.
+
+            request:    the current request object.
+
+        "converter functions" register with this class using the @parameter_converter
+        decorator.  See converters.py for the built-in converters.
+
+        This function goes through the list of registered converter functions,
+        selects the most-specific one that matches the parameter.type, and
+        calls it to convert the value.
+
+        If the converter function raises a ValueError, it is caught and
+        switched to an Http404 to tell the browser that the requested URL
+        doesn't resolve to a page.
+
+        Other useful exceptions that converter functions can raise are:
+
             RedirectException: redirects the browser (see DMP docs)
             InternalRedirectException: redirects processing internally (see DMP docs)
-            Http404: returns an Http404 response
-
+            Http404: returns a Django Http404 response
         '''
         try:
-            return converter(value, parameter)
+            # we don't convert anything without type hints
+            if parameter.type is inspect.Parameter.empty:
+                if log.isEnabledFor(logging.DEBUG):
+                    log.debug('skipping conversion of parameter `%s` because it has no type hint', parameter.name)
+                return value
+
+            # find the converter method for this type
+            # I'm iterating through the list to find the most specific match first
+            # The list is sorted by specificity so subclasses come before their superclasses
+            for ci in self.converters:
+                if issubclass(parameter.type, ci.convert_type):
+                    if log.isEnabledFor(logging.DEBUG):
+                        log.debug('converting parameter `%s` using %s', parameter.name, ci.convert_func)
+                    return ci.convert_func(value, parameter)
+
+            # if we get here, there wasn't a converter or this type
+            raise ImproperlyConfigured(message='No parameter converter exists for type: {}. Do you need to add an @parameter_converter function for the type?'.format(parameter.type))
 
         except ValueError as e:
             log.info('ValueError raised during conversion of parameter %s (%s): %s', parameter.position, parameter.name, e)
@@ -140,227 +225,7 @@ class view_function(OptionsDecorator):
 
 
 
-    # def _delayed_init(self):
-    #     '''
-    #     Populates the registry of types to converters for this Converter object.  This method is
-    #     called each time a request is processed, so if overridden, be sure to short circuit as needed.
-    #     This implementation short circuits until all apps are ready.
-    #     '''
-    #     # This is called by _check_converter() below, and it is delayed (instead of using __init__)
-    #     # because model class strings can't be switched to models until the app registry is populated.
-    #     # This could be called once from DMP's AppConfig.ready(), but since each view function can have
-    #     # a separate converters, and since the default converter can be changed at any time, I'm doing
-    #     # it when a ConversionTask object is created (part of DMP request processing).
-    #     if self._delayed_init_run or not apps.ready:
-    #         return
-    #     self._delayed_init_run = True
-
-    #     # converter methods within this class (subclass) were tagged earlier by the decorator
-    #     # with the CONVERT_TYPES_KEY.  go through all methods in this class (subclass) and
-    #     # gather the ConverterInfo objects into a big list
-    #     for name, method in inspect.getmembers(self, inspect.ismethod):
-    #         self.converters.extend(getattr(method, ConverterInfo.CONVERT_TYPES_KEY, ()))
-
-    #     # allow each ConverterInfo to init, such as convert any model string "auth.User" to real class type
-    #     for ci in self.converters:
-    #         ci._delayed_init()
-
-    #     # sort the most specialized types to be first.  this allows subclass types to match instead
-    #     # of their superclasses (if both are in the list).
-    #     self.converters.sort(key=attrgetter('sort_key'))
-
-
-    def __call__(self, value, parameter):
-        '''
-        Converts the given value to the type expected by the view function.
-
-            value:      value from request.dmp.urlparams to convert
-                        The value will always be a string, even if empty '' (never None).
-
-            parameter:  an instance of ViewParameter.  See the class in router.py for more information.
-
-            router:     the ViewFunctionRouter router for this endpoint.  Useful fields:
-                        module:     A reference to the module containing the view function
-                        function:   A reference to the view function
-                        signature:  The view function signature object (see inspect module)
-                        parameters: List of ViewParameter objects for the view function
-
-            request:    The current request object.
-
-        This method should do one of three following:
-
-            1. Return the converted value (desired type is in parameter.type).
-
-            2. Raise a ConversionError, which signals the router to try the next
-               converter in the list of converters for the current view function.
-
-            3. Raise any other exception, which stops the conversion process and
-               sends processing back to the DMP router.  Some useful exceptions to raise:
-                    - DMP's RedirectException, which sends a redirect to the browser
-                    - DMP's InternalRedirectException, which calls a new endpoint function immediately
-                    - Django's Http404 exception, which goes back to the browser
-
-        '''
-        # we don't convert anything without type hints
-        if parameter.type is inspect.Parameter.empty:
-            if log.isEnabledFor(logging.DEBUG):
-                log.debug('skipping conversion of parameter `%s` because it has no type hint', parameter.name)
-            return value
-
-        # find the converter method for this type
-        # I'm iterating through the list to find the most specific match first
-        # The list is sorted by specificity so subclasses come first
-        for ci in self.converters:
-            if issubclass(parameter.type, ci.convert_type):
-                if log.isEnabledFor(logging.DEBUG):
-                    log.debug('converting parameter `%s` using %s', parameter.name, qualified_name(ci.convert_func))
-                return ci.convert_func.__get__(self, self.__class__)(value, parameter)
-
-        # if we get here, there wasn't a converter or this type
-        raise ConversionError(message='No parameter converter exists for type: {}. Either remove the type hint or subclass the DMP DefaultConverter class.'.format(parameter.type))
-
-
-
-
-
-    ###   Functions for various converters  ###
-
-    def _check_default(self, value, parameter, default_chars):
-        '''Returns the default if the value is "empty"'''
-        # not using a set here because it fails when value is unhashable
-        if value in default_chars:
-            if parameter.default is inspect.Parameter.empty:
-                raise ValueError('Value was empty, but no default value is given in view function for parameter: {} ({})'.format(parameter.position, parameter.name))
-            return parameter.default
-        return value
-
-
-    @BaseConverter.convert_method(HttpRequest)
-    def convert_http_request(self, value, parameter):
-        '''
-        Pass through for the request object (first parameter in every view call).
-        The request is run through the conversion process for consistency in parameter handling,
-        but I can't see a reason it would ever need to be "converted" outside of middleware.
-        '''
-        return value
-
-
-    @BaseConverter.convert_method(object)
-    def convert_object(self, value, parameter):
-        '''
-        Fallback converter when nothing else matches:
-            '', None convert to parameter default
-            Anything else is returned as-is
-        '''
-        return self._check_default(value, parameter, ( '', None ))
-
-
-    @BaseConverter.convert_method(str)
-    def convert_str(self, value, parameter):
-        '''
-        Converts to string:
-            '', None convert to parameter default
-            Anything else is returned as-is (url params are already strings)
-        '''
-        return self._check_default(value, parameter, ( '', None ))
-
-
-    @BaseConverter.convert_method(int, float)
-    def convert_number(self, value, parameter):
-        '''
-        Converts to int or float:
-            '', '-', None convert to parameter default
-            Anything else uses int() or float() constructor
-        '''
-        value = self._check_default(value, parameter, ( '', '-', None ))
-        if value is None or isinstance(value, (int, float)):
-            return value
-        try:
-            return parameter.type(value)  # int() or float()
-        except Exception as e:
-            raise ValueError(str(e))
-
-
-    @BaseConverter.convert_method(decimal.Decimal)
-    def convert_decimal(self, value, parameter):
-        '''
-        Converts to decimal.Decimal:
-            '', '-', None convert to parameter default
-            Anything else uses Decimal constructor
-        '''
-        value = self._check_default(value, parameter, ( '', '-', None ))
-        if value is None or isinstance(value, decimal.Decimal):
-            return value
-        try:
-            return decimal.Decimal(value)
-        except Exception as e:
-            raise ValueError(str(e))
-
-
-
-    @BaseConverter.convert_method(bool)
-    def convert_boolean(self, value, parameter, default=False):
-        '''
-        Converts to boolean (only the first char of the value is used):
-            '', '-', None convert to parameter default
-            'f', 'F', '0', False always convert to False
-            Anything else converts to True.
-        '''
-        value = self._check_default(value, parameter, ( '', '-', None ))
-        if isinstance(value, bool):
-            return value
-        if isinstance(value, str) and len(value) > 0:
-            value = value[0]
-        return value not in ( 'f', 'F', '0', False, None )
-
-
-    @BaseConverter.convert_method(datetime.datetime)
-    def convert_datetime(self, value, parameter):
-        '''
-        Converts to datetime.datetime:
-            '', '-', None convert to parameter default
-            The first matching format in settings.DATETIME_INPUT_FORMATS converts to datetime
-        '''
-        value = self._check_default(value, parameter, ( '', '-', None ))
-        if value is None or isinstance(value, datetime.datetime):
-            return value
-        for fmt in settings.DATETIME_INPUT_FORMATS:
-            try:
-                return datetime.datetime.strptime(value, fmt)
-            except (ValueError, TypeError):
-                continue
-        raise ValueError("`{}` does not match a format in settings.DATETIME_INPUT_FORMATS".format(value))
-
-
-    @BaseConverter.convert_method(datetime.date)
-    def convert_date(self, value, parameter):
-        '''
-        Converts to datetime.date:
-            '', '-', None convert to parameter default
-            The first matching format in settings.DATE_INPUT_FORMATS converts to datetime
-        '''
-        value = self._check_default(value, parameter, ( '', '-', None ))
-        if value is None or isinstance(value, datetime.date):
-            return value
-        for fmt in settings.DATE_INPUT_FORMATS:
-            try:
-                return datetime.datetime.strptime(value, fmt).date()
-            except (ValueError, TypeError):
-                continue
-        raise ValueError("`{}` does not match a format in settings.DATE_INPUT_FORMATS".format(value))
-
-
-    @BaseConverter.convert_method(Model)  # django models.Model
-    def convert_id_to_model(self, value, parameter):
-        '''
-        Converts to a Model object.
-            '', '-', '0', None convert to parameter default
-            Anything else is assumed an object id and sent to `.get(id=value)`.
-        '''
-        value = self._check_default(value, parameter, ( '', '-', '0', None ))
-        if isinstance(value, (int, str)):  # only convert if we have the id
-            try:
-                return parameter.type.objects.get(id=value)
-            except (MultipleObjectsReturned, ObjectDoesNotExist) as e:
-                raise Http404(str(e))
-        return value
+# import the default converters
+# this must come at the end of the file so view_function above is loaded
+# it doesn't matter what's imported -- the file just needs to load
+from .converters import __name__ as _

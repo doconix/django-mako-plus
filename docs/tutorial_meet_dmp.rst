@@ -114,10 +114,12 @@ Pay special attention to the ``<%block name="content">`` section, which is overr
 
 The purpose of the inheritance from ``base.htm`` is to get a consistent look, menu, etc. across all pages of your site. When you create additional pages, simply override the ``content`` block, similar to the way ``index.html`` does it.
 
-    Don't erase anything in the base.htm file. In particular, ``django_mako_plus.links()`` and the ``dmp-common.min.js`` script are important.
-    As much as you probably want to clean up the mess, try your best to leave these alone.
+Possible Errors
+-----------------------
 
-**'Undefined' object has no attribute 'get\_static':**
+First, don't erase anything in the base.htm file. In particular, ``django_mako_plus.links()`` and the ``dmp-common.min.js`` script are important. As much as you probably want to clean up the mess, try your best to leave these alone.
+
+**'Undefined' object has no attribute 'get\_static'**
 
 If you get this error, you might need to update a setting in ``settings.py``. Ensure that DMP is imported in the ``DEFAULT_TEMPLATE_IMPORTS`` list:
 

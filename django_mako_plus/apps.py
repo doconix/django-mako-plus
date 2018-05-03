@@ -16,5 +16,6 @@ class Config(AppConfig):
         # See the creation of EngineHandler.default_name in django.templates.util for this.
         engines['django_mako_plus']
 
-
-
+        # trigger sorting of the converters now that the models are available
+        from .converter.base import view_function
+        view_function._sort_converters(convert_sorting_enabled=True)

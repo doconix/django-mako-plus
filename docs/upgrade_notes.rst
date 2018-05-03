@@ -3,11 +3,19 @@ Upgrade Notes
 
 This document contains upgrade notes for those already using DMP.  We started the document at version 4.3.
 
+*5.4.1 - May, 2018*
+
+The converters and ``view_function`` decorator were refactored.  If you're just using the standard DMP system, these changes won't affect you.
+
+If you were using custom converters and/or a custom view_function decorator, see the docs on parameter conversion.
+
+
 *5.3.1 - April, 2018*
 
 The DMP management commands have been refactored.  The sass cleanup command is removed.
 
 The remaining commands are now subcommands.  If before you typed ``python3 manage.py dmp_startapp``, now type ``python3 manage.py dmp startapp``.
+
 
 *5.2.1 - Late March, 2018*
 

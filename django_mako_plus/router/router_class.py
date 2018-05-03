@@ -17,13 +17,13 @@ class ClassBasedRouter(Router):
     just a meta-router that reroutes to the appropriate ViewFunctionRouter
     within it.
     '''
-    def __init__(self, module, instance, decorator_kwargs):
+    def __init__(self, module, instance):
         self.instance = instance
         self.endpoints = {}
         for mthd_name in instance.http_method_names:  # get parameters from the first http-based method (get, post, etc.)
             func = getattr(instance, mthd_name, None)
             if func is not None:
-                self.endpoints[mthd_name] = ViewFunctionRouter(module, func, decorator_kwargs)
+                self.endpoints[mthd_name] = ViewFunctionRouter(module, func)
 
 
     def get_response(self, request, *args, **kwargs):

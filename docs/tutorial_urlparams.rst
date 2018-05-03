@@ -88,13 +88,82 @@ This first example shows how DMP sends URL parts into view functions.  It separa
 
     If you are using multiple decorators on your endpoints, you can save a lot of trouble by checking that your decorators `are wrapping correctly <topics_converters.html>`_.
 
+Automatic Type Converters
+----------------------------
+
+DMP can also typecast the values in the URL.  The following table shows the built-in types to DMP:
+
++-------------------------------+-------------------------------------------------------------------------------+---------------------------------------+-------------------------------------------+
+|  Type                         | Example view.py functions                                                     | Example URLs                          | Notes                                     |
++===============================+===============================================================================+=======================================+===========================================+
+| String (default type)         | | def process_request(request, foo):                                          | /homepage/index/hello+world/          | No preset empty values on strings;        |
+|                               | |                                                                             |                                       | default is only used when parameter is    |
+|                               | | def process_request(request, foo="bar"):                                    |                                       | missing (e.g. /homepage/index/)           |
+|                               | |                                                                             |                                       |                                           |
+|                               | | def process_request(request, foo:str):                                      |                                       |                                           |
+|                               | |                                                                             |                                       |                                           |
+|                               | | def process_request(request, foo:str="bar"):                                |                                       |                                           |
++-------------------------------+-------------------------------------------------------------------------------+---------------------------------------+-------------------------------------------+
+| Integer                       | | def process_request(request, foo:int):                                      | /homepage/index/42/                   | "empty" values are '', '-' (uses default) |
+|                               | |                                                                             |                                       |                                           |
+|                               | | def process_request(request, foo:int=13):                                   |                                       |                                           |
+|                               | |                                                                             |                                       |                                           |
+|                               | | def process_request(request, foo:int="13"):                                 |                                       |                                           |
++-------------------------------+-------------------------------------------------------------------------------+---------------------------------------+-------------------------------------------+
+| Float                         | | def process_request(request, foo:float):                                    | /homepage/index/32.275/               | "empty" values are '', '-' (uses default) |
+|                               | |                                                                             |                                       |                                           |
+|                               | | def process_request(request, foo:float=3.14):                               |                                       |                                           |
+|                               | |                                                                             |                                       |                                           |
+|                               | | def process_request(request, foo:float="3.14"):                             |                                       |                                           |
++-------------------------------+-------------------------------------------------------------------------------+---------------------------------------+-------------------------------------------+
+| Boolean                       | | def process_request(request, foo:bool):                                     | /homepage/index/1/                    | False values are 'f', 'F', '0';           |
+|                               | |                                                                             |                                       | "empty" values are '', '-' (uses default);|
+|                               | | def process_request(request, foo:bool=True)                                 |                                       | True is anything else                     |
+|                               | |                                                                             |                                       |                                           |
+|                               | | def process_request(request, foo:bool='t')                                  |                                       |                                           |
++-------------------------------+-------------------------------------------------------------------------------+---------------------------------------+-------------------------------------------+
+| Decimal                       | | from decimal import Decimal                                                 | /homepage/index/32.275/               | "empty" values are '', '-' (uses default) |
+|                               | | def process_request(request, foo:Decimal):                                  |                                       |                                           |
+|                               | |                                                                             |                                       |                                           |
+|                               | | from decimal import Decimal                                                 |                                       |                                           |
+|                               | | def process_request(request, foo:Decimal=Decimal('3.14')):                  |                                       |                                           |
+|                               | |                                                                             |                                       |                                           |
+|                               | | from decimal import Decimal                                                 |                                       |                                           |
+|                               | | def process_request(request, foo:Decimal='3.14'):                           |                                       |                                           |
++-------------------------------+-------------------------------------------------------------------------------+---------------------------------------+-------------------------------------------+
+| DateTime                      | | from datetime import datetime                                               | /homepage/index/1993-04-30+06:00:00/  | Uses formats listed in                    |
+|                               | | def process_request(request, foo:datetime):                                 |                                       | DATETIME_INPUT_FORMATS from settings.py;  |
+|                               | |                                                                             |                                       | "empty" values are '', '-' (uses default) |
+|                               | | from datetime import datetime                                               |                                       |                                           |
+|                               | | def process_request(request, foo:datetime=datetime(1993, 04, 30, 6, 0, 0)): |                                       |                                           |
+|                               | |                                                                             |                                       |                                           |
+|                               | | from datetime import datetime                                               |                                       |                                           |
+|                               | | def process_request(request, foo:datetime='1993-04-30+06:00:00'):           |                                       |                                           |
++-------------------------------+-------------------------------------------------------------------------------+---------------------------------------+-------------------------------------------+
+| Date                          | | from datetime import date                                                   | /homepage/index/1983-01-01/           | Uses formats listed in                    |
+|                               | | def process_request(request, foo:date):                                     |                                       | DATE_INPUT_FORMATS from settings.py       |
+|                               | |                                                                             |                                       | "empty" values are '', '-' (uses default) |
+|                               | | from datetime import date                                                   |                                       |                                           |
+|                               | | def process_request(request, foo:date=date(1983, 1, 1)):                    |                                       |                                           |
+|                               | |                                                                             |                                       |                                           |
+|                               | | from datetime import date                                                   |                                       |                                           |
+|                               | | def process_request(request, foo:date='1983-01-01'):                        |                                       |                                           |
++-------------------------------+-------------------------------------------------------------------------------+---------------------------------------+-------------------------------------------+
+| All model.Model subclasses    | | from django.contrib.auth.models import User                                 | /homepage/index/5/                    | Value is the id of the model object;      |
+| (see below)                   | | def process_request(request, user:User):                                    |                                       | Http404 raised if not found;              |
+|                               | |                                                                             |                                       | "empty" values are '', '-', '0'           |
+|                               | | from polls.models import Question                                           |                                       | (uses default)                            |
+|                               | | def process_request(request, question:Question):                            |                                       |                                           |
+|                               | |                                                                             |                                       |                                           |
+|                               | | from polls.models import Choice                                             |                                       |                                           |
+|                               | | def process_request(request, choice:Choice=None):                           |                                       |                                           |
++-------------------------------+-------------------------------------------------------------------------------+---------------------------------------+-------------------------------------------+
+
 
 Adding Type Hints
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-But what if you need integers, booleans, or even Model instances, such as a User object, Purchase object, or Question object?  By adding type hints (yes, they're in the standard Python langauge), we can have them converted to the right type automatically.
-
-Add the following type hints to your ``process_request`` function, and remove the typecasting calls:
+In your example code, add the following type hints to your ``process_request`` function, and remove the typecasting calls:
 
 .. code:: python
 
@@ -115,6 +184,7 @@ Add the following type hints to your ``process_request`` function, and remove th
         return request.dmp.render('index.html', context)
 
 DMP casts the parameters by inspecting the method signature of ``process_request`` which specifies the parameter name, a color, and the type.  If a conversion error occurs, the default converter raises Http404.  All of this is configurable and extensible (read on).
+
 
 
 Automatic Model Conversion
@@ -141,4 +211,4 @@ In the above code, one of two outcomes will occur:
 For More Information
 ----------------------------
 
-The `advanced topic on conversion <topics_converters.html>`_ expands the topics above.  Come back later if you want to continue the discussion on parameter conversion.
+The `topic on conversion <topics_converters.html>`_ describes how DMP handles "empty" values and conversion errors and how to customize the process.

@@ -37,7 +37,7 @@ class ViewFunctionRouter(Router):
                     return ret_response
 
         # call the view (which is really the view_function decorator, which converts and then calls the view)
-        response = self.function(*args, **kwargs)
+        response = self.function(request, *args, **kwargs)
 
         # send the post-signal
         if DMP_OPTIONS['SIGNALS']:

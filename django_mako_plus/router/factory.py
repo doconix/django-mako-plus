@@ -8,7 +8,7 @@ from .router_exception import RegistryExceptionRouter
 from .router_function import ViewFunctionRouter
 from .router_template import TemplateViewRouter
 
-from ..decorators import view_function
+from ..converter import view_function
 
 import inspect
 import threading
@@ -84,12 +84,12 @@ def router_factory(module_name, function_name, fallback_app=None, fallback_templ
         # class-based view?
         if inspect.isclass(func) and issubclass(func, View):
             # must do func() to instantiate because func is class (not a function)
-            return ClassBasedRouter(module, func(), view_function.get_converters(func))
+            return ClassBasedRouter(module, func())
 
         # a view function?
-        if verify_decorator and not view_function.is_decorated(func):
+        if verify_decorator and not view_function._is_decorated(func):
             raise ViewDoesNotExist("View {}.{} was found successfully, but it must be decorated with @view_function or be a subclass of django.views.generic.View.".format(module_name, function_name))
-        return ViewFunctionRouter(module, func, view_function.get_converters(func))
+        return ViewFunctionRouter(module, func)
 
     except ViewDoesNotExist as vdne:
         return RegistryExceptionRouter(vdne)

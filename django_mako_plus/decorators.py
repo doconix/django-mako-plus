@@ -13,12 +13,7 @@ class OptionsDecoratorMeta(type):
         if len(args) == 1 and callable(args[0]):
             instance = super(OptionsDecoratorMeta, self).__call__(*args, **kwargs)
             functools.update_wrapper(instance, args[0])
-            return instanceF
-
-        # ensure we don't have any args: @decorator(someval) is not allowed
-        # because it's too close to @decorator(func), which would have been above
-        if len(args) > 0:
-            raise ValueError('Positional arguments are not supported with this decorator (please use keyword arguments)')
+            return instance
 
         # if we get here, the syntax was `@decorator(a=1, b=2)` -- with arguments
         # python hasn't yet "called" the decorator.  we'll return a factory
