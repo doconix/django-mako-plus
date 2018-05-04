@@ -53,7 +53,9 @@ The above code customizes the conversion of individual parameters.  To customize
 Using Keyword Arguments
 =============================
 
-Although we normally specify ``@view_function`` without any arguments, it can take an arbitrary number of keyword arguments.  These arguments are placed in the ``self.options`` dictionary.  They can be useful in directing DMP in function-specific ways.
+Although we normally specify ``@view_function`` without any arguments, it can take an arbitrary number of keyword arguments.  Any extra arguments are placed in the ``self.options`` dictionary.
+
+    In the code below, I don't really need to override ``__init__.py`` because the super makes ``.options``.  However, I'm creating ``__init__`` just for code readability.
 
 For this example, lets check user groups in the view function decorator.
 
@@ -66,13 +68,16 @@ Override the ``__call__`` method, which runs just before your endpoint:
     from django_mako_plus import view_parameter
 
     class site_endpoint(view_function):
-        '''Customized view function decorator'''
+        '''Customized view unction decorator'''
+
+        def __init__(self, f, require_role=None, **options):
+            super().__init__(self, f, **options)
+            self.require_role = require_role
 
         def __call__(self, request, *args, **kwargs):
-            # any kwargs used with the decorator are placed in self.options
-            require_role = self.options.get('require_role')
-            if require_role:
-                if request.user.is_anonymous or request.user.groups.filter(name=require_role).count() == 0:
+            # check roles
+            if self.require_role:
+                if request.user.is_anonymous or request.user.groups.filter(name=self.require_role).count() == 0:
                     return HttpResponseRedirect('/login/')
 
             # call the super
