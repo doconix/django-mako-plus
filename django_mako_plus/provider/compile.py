@@ -1,3 +1,5 @@
+from django.conf import settings
+
 from ..command import run_command
 from ..util import merge_dicts, flatten
 from .base import BaseProvider
@@ -54,12 +56,17 @@ class CompileScssProvider(CompileProvider):
     '''Specialized CompileProvider that contains settings for *.scss files.'''
     @property
     def source(self):
-        # this inner
-        return os.path.join(*flatten(self.app_config.path, 'styles', self.subdir_parts[1:], self.template_name + '.scss'))
+        if settings.DEBUG:
+            return os.path.join(*flatten(self.app_config.path, 'styles', self.subdir_parts[1:], self.template_name + '.scss'))
+        else:
+            return os.path.join(*flatten(settings.STATIC_ROOT, self.app_config.name, 'styles', self.subdir_parts[1:], self.template_name + '.scss'))
 
     @property
     def target(self):
-        return os.path.join(*flatten(self.app_config.path, 'styles', self.subdir_parts[1:], self.template_name + '.css'))
+        if settings.DEBUG:
+            return os.path.join(*flatten(self.app_config.path, 'styles', self.subdir_parts[1:], self.template_name + '.css'))
+        else:
+            return os.path.join(*flatten(settings.STATIC_ROOT, self.app_config.name, 'styles', self.subdir_parts[1:], self.template_name + '.css'))
 
     def build_command(self):
         return (
@@ -75,11 +82,17 @@ class CompileLessProvider(CompileProvider):
     '''Specialized CompileProvider that contains settings for *.less files.'''
     @property
     def source(self):
-        return os.path.join(*flatten(self.app_config.path, 'styles', self.subdir_parts[1:], self.template_name + '.less'))
+        if settings.DEBUG:
+            return os.path.join(*flatten(self.app_config.path, 'styles', self.subdir_parts[1:], self.template_name + '.less'))
+        else:
+            return os.path.join(*flatten(settings.STATIC_ROOT, self.app_config.name, 'styles', self.subdir_parts[1:], self.template_name + '.less'))
 
     @property
     def target(self):
-        return os.path.join(*flatten(self.app_config.path, 'styles', self.subdir_parts[1:], self.template_name + '.css'))
+        if settings.DEBUG:
+            return os.path.join(*flatten(self.app_config.path, 'styles', self.subdir_parts[1:], self.template_name + '.css'))
+        else:
+            return os.path.join(*flatten(settings.STATIC_ROOT, self.app_config.name, 'styles', self.subdir_parts[1:], self.template_name + '.css'))
 
     def build_command(self):
         return (
@@ -88,5 +101,3 @@ class CompileLessProvider(CompileProvider):
             self.source,
             self.target,
          )
-
-
