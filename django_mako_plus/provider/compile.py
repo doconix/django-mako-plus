@@ -70,9 +70,8 @@ class CompileScssProvider(CompileProvider):
 
     def build_command(self):
         return (
-            shutil.which('scss'),
+            shutil.which('sass'),
             '--load-path=.',
-            '--unix-newlines',
             self.source,
             self.target,
          )
