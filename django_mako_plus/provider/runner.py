@@ -4,12 +4,13 @@ from django.utils.module_loading import import_string
 
 from .base import BaseProvider
 from ..template import template_inheritance
-from ..util import DMP_OPTIONS, split_app, merge_dicts
+from ..util import DMP_OPTIONS, split_app, merge_dicts, log
 from ..uid import wuid
 
 import io
 from collections import namedtuple
 import warnings
+import logging
 
 
 ##################################################
@@ -117,6 +118,8 @@ class ProviderRun(object):
         # provide() on the all provider lists in the chain
         for providers in self.template_providers:
             for provider, data in zip(providers, self.column_data):
+                if log.isEnabledFor(logging.DEBUG):
+                    log.debug('[%s] %s running', provider.template_file, provider.__class__.__qualname__)
                 provider.provide(self, data)
         # finish() on tself (the last template in the list)
         for providers in self.template_providers[-1:]:
