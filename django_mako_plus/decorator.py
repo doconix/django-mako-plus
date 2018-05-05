@@ -24,14 +24,14 @@ class BaseDecoratorMeta(type):
     '''
     def __call__(self, *args, **kwargs):
         # if args has a single function, we'll assume it is the function we're decorating.
-        # that means the syntax was `@decorator` or `@decorator()` -- no arguments
-        # we need to return normally
+        # that means the syntax was `@decorator` -- no arguments, so
+        # we need to return normally.
         if len(args) == 1 and callable(args[0]):
             instance = super(BaseDecoratorMeta, self).__call__(*args, **kwargs)
             functools.update_wrapper(instance, args[0])
             return instance
 
-        # if we get here, the syntax was `@decorator(a=1, b=2)` -- with arguments
+        # if we get here, the syntax was `@decorator(...)` -- with arguments.
         # python hasn't yet "called" the decorator.  we'll return a factory
         # for python to call with the decorated function
         def factory(func):
