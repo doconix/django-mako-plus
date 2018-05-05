@@ -1,21 +1,40 @@
 
 import functools
 
-
 ##########################################################
 ###   An extensible decorator superclass that supports:
-###       - Calling without any arguments
-###       - Calling with empty args
-###       - Calling with args and keyword args
-###       - Decorating regular functions
-###       - Decorating class methods
+###       1. @mydecorator
+###       2. @mydecorator()
+###       3. @mydecorator(1, 2, 3)
+###       4. @mydecorator(a=1, b=2)
+###       5. @mydecorator(1, 2, 3, a=1, b=2)
+###
+###       AND
+###
+###       A. It works on regular functions.
+###       B. It works on unbound class methods.
+###       C. It works on bound class methods.
 ###
 ###   Author: Conan Albrecht <doconix@gmail.com>
 ###   Date: 2018-05-05
 ###
 ###   See the examples at the end of this file.
 ###
-
+###   The reason I argue for a metaclass approach:
+###
+###   When a decorator is hit by python, it either 1) needs to call the decorator function with the
+###   other function, or 2) if arguments, run the decorator pre-function, which returns the real decorator,
+###   and then #1 with that.
+###
+###   So in other words, the decorator needs to act like two entirely separate things.  Since a metaclass’
+###   job is to create the object, it seems a clean approach to have the metaclass create the right kind
+###   of thing needed.
+###
+###   Since this decision is being made *before* the decorator is created, the decorator class itself
+###   can act as just one type of object: a decorator.  The decorator’s `__init__` constructor is super
+###   clean because it doesn’t have to check whether we’re in pre-decorator or regular decorator mode.
+###   If the decorator constructor is running, it *is decorating* a function.
+###
 
 class BaseDecoratorMeta(type):
     '''
