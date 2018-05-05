@@ -45,7 +45,7 @@ class BaseDecoratorMeta(type):
         # if args has a single function, we'll assume it is the function we're decorating.
         # that means the syntax was `@decorator` -- no arguments, so
         # we need to return normally.
-        if len(args) == 1 and callable(args[0]):
+        if len(args) == 1 and callable(args[0]) and len(kwargs) == 0:
             instance = super(BaseDecoratorMeta, self).__call__(*args, **kwargs)
             functools.update_wrapper(instance, args[0])
             return instance
@@ -86,94 +86,161 @@ class BaseDecorator(object, metaclass=BaseDecoratorMeta):
 #######################################################
 ###   Examples and Simple Testing
 
+if __name__ == '__main__':
 
-def __test__():
+    import unittest
+
+    ###  Our Decorator  ###
 
     class my_decorator(BaseDecorator):
         def __call__(self, *args, **kwargs):
-            # do something useful here
-            print('--')
-            print('func:  ', self.decorator_function.__name__, '({})'.format(self.decorator_function))
-            print('args:  ', self.decorator_args)
-            print('kwargs:', self.decorator_kwargs)
+            # do something useful here (the purpose of the decorator)
 
-            # finally, call the decorated function
-            return self.decorator_function(*args, **kwargs)
+            # call the decorated function
+            result = self.decorator_function(*args, **kwargs)
+
+            # return some things to be tested
+            return self, result
 
 
-    ###  Decorating Functions  ###
+    ###  Examples and Tests of Regular Function Decorating  ###
+
     @my_decorator
     def without_args():
-        print('without_args() called')
+        return 'without_args called'
 
     @my_decorator()
     def with_empty_args():
-        print('with_empty_args() called')
+        return 'with_empty_args called'
 
     @my_decorator(1, 2, 3)
     def with_args():
-        print('with_args() called')
+        return 'with_args called'
 
     @my_decorator(option1='value1', option2=4)
     def with_kwargs():
-        print('with_kwargs() called')
+        return 'with_kwargs called'
 
     @my_decorator(1, 2, 3, option1='value1', option2=4)
     def with_args_and_kwargs():
-        print('with_args_and_kwargs() called')
+        return 'with_args_and_kwargs called'
 
-    print('\n\nRegular Functions:\n')
-    without_args()
-    with_empty_args()
-    with_args()
-    with_kwargs()
-    with_args_and_kwargs()
+    class TestFunctionDecorating(unittest.TestCase):
+        def test_without_args(self):
+            '''Decorating without any arguments or parenthasis'''
+            dec, result = without_args()
+            self.assertEqual(result, 'without_args called')
+            self.assertEqual(dec.decorator_args, ())
+            self.assertEqual(dec.decorator_kwargs, {})
+
+        def test_with_empty_args(self):
+            '''Decorating with empty arguments'''
+            dec, result = with_empty_args()
+            self.assertEqual(result, 'with_empty_args called')
+            self.assertEqual(dec.decorator_args, ())
+            self.assertEqual(dec.decorator_kwargs, {})
+
+        def test_with_args(self):
+            '''Decorating with positional arguments'''
+            dec, result = with_args()
+            self.assertEqual(result, 'with_args called')
+            self.assertEqual(dec.decorator_args, (1, 2, 3))
+            self.assertEqual(dec.decorator_kwargs, {})
+
+        def test_with_kwargs(self):
+            '''Decorating with positional arguments'''
+            dec, result = with_kwargs()
+            self.assertEqual(result, 'with_kwargs called')
+            self.assertEqual(dec.decorator_args, ())
+            self.assertEqual(dec.decorator_kwargs, { 'option1':'value1', 'option2':4 })
+
+        def test_with_args_and_kwargs(self):
+            '''Decorating with positional arguments'''
+            dec, result = with_args_and_kwargs()
+            self.assertEqual(result, 'with_args_and_kwargs called')
+            self.assertEqual(dec.decorator_args, (1, 2, 3))
+            self.assertEqual(dec.decorator_kwargs, { 'option1':'value1', 'option2':4 })
 
 
-    ###  Decorating Class Methods  ###
-    class MyClass(object):
+    ###  Examples and Tests of Method Decorating  ###
+
+    class MyTestClass(object):
         @my_decorator
         def without_args(self):
-            print('class method without_args() called')
+            return 'without_args called'
 
         @my_decorator()
         def with_empty_args(self):
-            print('class method with_empty_args() called')
+            return 'with_empty_args called'
 
         @my_decorator(1, 2, 3)
         def with_args(self):
-            print('class method with_args() called')
+            return 'with_args called'
 
         @my_decorator(option1='value1', option2=4)
         def with_kwargs(self):
-            print('class method with_kwargs() called')
+            return 'with_kwargs called'
 
         @my_decorator(1, 2, 3, option1='value1', option2=4)
         def with_args_and_kwargs(self):
-            print('class method with_args_and_kwargs() called')
+            return 'with_args_and_kwargs called'
 
-    print('\n\nClass Methods:\n')
-    my_class = MyClass()
-    my_class.without_args()
-    my_class.with_empty_args()
-    my_class.with_args()
-    my_class.with_kwargs()
-    my_class.with_args_and_kwargs()
+    class TestMethodDecorating(unittest.TestCase):
+
+        def setUp(self):
+            self.my_test_class = MyTestClass()
+
+        def test_without_args(self):
+            '''Decorating without any arguments or parenthasis'''
+            dec, result = self.my_test_class.without_args()
+            self.assertEqual(result, 'without_args called')
+            self.assertEqual(dec.decorator_args, ())
+            self.assertEqual(dec.decorator_kwargs, {})
+
+        def test_with_empty_args(self):
+            '''Decorating with empty arguments'''
+            dec, result = self.my_test_class.with_empty_args()
+            self.assertEqual(result, 'with_empty_args called')
+            self.assertEqual(dec.decorator_args, ())
+            self.assertEqual(dec.decorator_kwargs, {})
+
+        def test_with_args(self):
+            '''Decorating with positional arguments'''
+            dec, result = self.my_test_class.with_args()
+            self.assertEqual(result, 'with_args called')
+            self.assertEqual(dec.decorator_args, (1, 2, 3))
+            self.assertEqual(dec.decorator_kwargs, {})
+
+        def test_with_kwargs(self):
+            '''Decorating with positional arguments'''
+            dec, result = self.my_test_class.with_kwargs()
+            self.assertEqual(result, 'with_kwargs called')
+            self.assertEqual(dec.decorator_args, ())
+            self.assertEqual(dec.decorator_kwargs, { 'option1':'value1', 'option2':4 })
+
+        def test_with_args_and_kwargs(self):
+            '''Decorating with positional arguments'''
+            dec, result = self.my_test_class.with_args_and_kwargs()
+            self.assertEqual(result, 'with_args_and_kwargs called')
+            self.assertEqual(dec.decorator_args, (1, 2, 3))
+            self.assertEqual(dec.decorator_kwargs, { 'option1':'value1', 'option2':4 })
 
 
-    ###  Invalid  ###
-    # the only decorator syntax not supported is a single function value
-    # because python thinks it's the decorated function when it's actually meant
-    # to be the pre-decorator call.
-    print('\n\nInvalid:\n')
-    try:
-        @my_decorator(sum)
-        def with_single_callable():
-            print('with_single_callable() called')
-    except Exception as e:
-        print("Invalid syntax: can't determine whether to decorate the `sum` function or the `with_single_callable` function")
 
+    class TestInvalidSyntax(unittest.TestCase):
 
+        def test_invalid_syntax(self):
+            '''
+            Invalid: the only decorator syntax not supported is a single function value
+            because python thinks it's the decorated function when it's actually meant
+            to be the pre-decorator call.
+            '''
+            with self.assertRaises(TypeError):
+                # we can't tell wether to decorate `sum` or `with_single_callable` here:
+                @my_decorator(sum)
+                def with_single_callable():
+                    print('with_single_callable() called')
+                with_single_callable()
 
-if __name__ == '__main__':
-    __test__()
+    # trigger the testing
+    unittest.main()
