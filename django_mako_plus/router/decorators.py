@@ -1,59 +1,7 @@
-
+from ..decorator import BaseDecorator
 from ..converter.base import ParameterConverter
-
 import inspect
-import functools
 
-
-##########################################
-###   Base decorator classes
-
-class BaseDecoratorMeta(type):
-    '''
-    Metaclass that allows ourdecorator to be called
-    with or without optional arguments.
-    '''
-    def __call__(self, *args, **kwargs):
-        # if args has a single function, we'll assume it is the function we're decorating.
-        # that means the syntax was `@decorator` or `@decorator()` -- no arguments
-        # we need to return normally
-        if len(args) == 1 and callable(args[0]):
-            instance = super(BaseDecoratorMeta, self).__call__(*args, **kwargs)
-            functools.update_wrapper(instance, args[0])
-            return instance
-
-        # if we get here, the syntax was `@decorator(a=1, b=2)` -- with arguments
-        # python hasn't yet "called" the decorator.  we'll return a factory
-        # for python to call with the decorated function
-        def factory(func):
-            instance = super(BaseDecoratorMeta, self).__call__(func, *args, **kwargs)
-            functools.update_wrapper(instance, func)
-            return instance
-        return factory
-
-
-class BaseDecorator(object, metaclass=BaseDecoratorMeta):
-    '''
-    A decorator that can be called with or without kwargs:
-
-        @decorator
-        @decorator()
-        @decorator(option1=value1, option2=value2)
-
-    '''
-    def __init__(self, decorator_function, **decorator_kwargs):
-        self.decorator_function = decorator_function
-        # not using name `options` because Django's View class already
-        # has an options() method (and this decorates that class).
-        self.decorator_kwargs = decorator_kwargs
-
-    def __get__(self, instance, type=None):
-        # Called when used on a (unbound) class method - descriptor protocol
-        return functools.partial(self, instance)
-
-    def __call__(self, *args, **kwargs):
-        '''Subclasses should override this method'''
-        return self.decorator_function(*args, **kwargs)
 
 
 
@@ -85,9 +33,9 @@ class view_function(BaseDecorator):
     # the converter class to use (subclasses can override this)
     converter_class = ParameterConverter
 
-    def __init__(self, decorator_function, **kwargs):
+    def __init__(self, decorator_function, *args, **kwargs):
         '''Create a new wrapper around the decorated function'''
-        super().__init__(decorator_function, **kwargs)
+        super().__init__(decorator_function, *args, **kwargs)
         self.converter = self.converter_class(decorator_function)
 
         # flag the function as an endpoint. doing it on the actual function because

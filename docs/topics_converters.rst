@@ -34,42 +34,25 @@ When this occurs, the default behavior of DMP is to raise an Http404 exception, 
 If you want a different resolution to conversion errors, such as a redirect, the sections below explain how to customize the conversion process.
 
 
-Adding a New Converter
-==========================
 
-It's easy to add new type converters to DMP.  Suppose we want to use geographic locations in the format "20.4,-162.0".  We'd first need a type and view function:
+Adding a Custom Converter
+====================================================
+
+Suppose we want to use geographic locations in the format "20.4,-162.0".  The URL might looks something like this:
+
+``http://localhost:8000/homepage/index/20.4,-162.0/``
+
+
+Let's place our new class and converter function in ``homepage/__init__.py`` (you can actually place these in any file that loads with Django). Decorate the function with ``@parameter_converter``, with the type(s) as arguments.
 
 .. code:: python
+
+    from django_mako_plus import parameter_converter
 
     class GeoLocation(object):
         def __init__(self, latitude, longitude):
             self.latitude = latitude
             self.longitude = longitude
-
-.. code:: python
-
-    @view_function
-    def process_request(request, loc:GeoLocation):
-        print(loc.latitude)
-        print(loc.longitude)
-
-
-The converter should be placed in a file that loads with Django, such as ``homepage/apps.py`` or ``homepage/__init__.py``.  Decorate the function with ``@parameter_converter``, with the type(s) as arguments.
-
-When called, your function must:
-
-* Return the converted type.
-* Raise an exception, such as:
-    * a ValueError, which causes DMP to return not found (Http404) to the browser.
-    * Raise DMP's RedirectException, which redirects the browser user.
-    * Raise DMP's InternalRedirectException, which immediately calls a different view function (without changing the browser url).
-    * Raise Django's Http404 with a custom message.
-
-The completed function:
-
-.. code:: python
-
-    from django_mako_plus import parameter_converter
 
     @parameter_converter(GeoLocation)
     def convert_geo_location(value, parameter):
@@ -79,8 +62,27 @@ The completed function:
         # the float constructor will raise ValueError if invalid
         return GeoLocation(float(parts[0]), float(parts[1]))
 
+When called, your function must do one of the following:
 
-When the request occurs, DMP will read the signature on ``process_request`` and call your conversion function.
+1. Return the converted type.
+2. Raise an exception, such as:
+
+    * a ValueError, which causes DMP to return not found (Http404) to the browser.
+    * Raise DMP's RedirectException, which redirects the browser url.
+    * Raise DMP's InternalRedirectException, which immediately calls a different view function (without changing the browser url).
+    * Raise Django's Http404 with a custom message.
+
+Now in ``homepage/views/index.py``, use our custom ``GeoLocation`` class as the type hint in the index file.
+
+.. code:: python
+
+    @view_function
+    def process_request(request, loc:GeoLocation):
+        print(loc.latitude)
+        print(loc.longitude)
+        return request.dmp.render('index.html', {})
+
+When a request occurs, DMP will read the signature on ``process_request``, look up the ``GeoLocation`` type, and use your function to convert the string to a GeoLocation object.
 
 
 Special Considerations for Models
