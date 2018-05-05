@@ -83,7 +83,6 @@ def __test__():
 
 
     ###  Decorating Functions  ###
-
     @my_decorator
     def without_args():
         print('without_args() called')
@@ -113,7 +112,6 @@ def __test__():
 
 
     ###  Decorating Class Methods  ###
-
     class MyClass(object):
         @my_decorator
         def without_args(self):
@@ -145,8 +143,7 @@ def __test__():
 
 
     ###  Invalid  ###
-
-    # the only decorator syntax not supported is a single function value becaus
+    # the only decorator syntax not supported is a single function value
     # because python thinks it's the decorated function when it's actually meant
     # to be the pre-decorator call.
     print('\n\nInvalid:\n')
