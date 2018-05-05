@@ -24,7 +24,7 @@ class BaseDecoratorMeta(type):
 
         # if we get here, the syntax was `@decorator(a=1, b=2)` -- with arguments
         # python hasn't yet "called" the decorator.  we'll return a factory
-        # for python to call with the function
+        # for python to call with the decorated function
         def factory(func):
             instance = super(BaseDecoratorMeta, self).__call__(func, *args, **kwargs)
             functools.update_wrapper(instance, func)
@@ -34,24 +34,26 @@ class BaseDecoratorMeta(type):
 
 class BaseDecorator(object, metaclass=BaseDecoratorMeta):
     '''
-    A class-based decorator that can be called with or without kwargs:
+    A decorator that can be called with or without kwargs:
 
         @decorator
         @decorator()
         @decorator(option1=value1, option2=value2)
 
     '''
-    def __init__(self, decorated_function, **kwargs):
-        '''Create a new wrapper around the decorated function'''
-        self.decorated_function = decorated_function
+    def __init__(self, decorator_function, **decorator_kwargs):
+        self.decorator_function = decorator_function
         # not using name `options` because Django's View class already
         # has an options() method (and this decorates that class).
-        self.kwargs = kwargs
+        self.decorator_kwargs = decorator_kwargs
 
+    def __get__(self, instance, type=None):
+        # Called when used on a (unbound) class method - descriptor protocol
+        return functools.partial(self, instance)
 
     def __call__(self, *args, **kwargs):
         '''Subclasses should override this method'''
-        return self.decorated_function(*args, **kwargs)
+        return self.decorator_function(*args, **kwargs)
 
 
 
@@ -80,18 +82,20 @@ class view_function(BaseDecorator):
     '''
     # singleton set of decorated functions
     DECORATED_FUNCTIONS = set()
+    # the converter class to use (subclasses can override this)
+    converter_class = ParameterConverter
 
-    def __init__(self, decorated_function, **kwargs):
+    def __init__(self, decorator_function, **kwargs):
         '''Create a new wrapper around the decorated function'''
-        super().__init__(decorated_function, **kwargs)
-        self.converter = ParameterConverter(decorated_function)
+        super().__init__(decorator_function, **kwargs)
+        self.converter = self.converter_class(decorator_function)
 
         # flag the function as an endpoint. doing it on the actual function because
         # we don't know the order of decorators on the function. order only matters if
         # the other decorators don't use @wraps correctly .in that case, @view_function
         # will put DECORATED_KEY on the decorator function rather than the real function.
         # but even that is fine *as long as @view_function is listed first*.
-        real_func = inspect.unwrap(decorated_function)
+        real_func = inspect.unwrap(decorator_function)
         self.DECORATED_FUNCTIONS.add(real_func)
 
 
@@ -115,4 +119,4 @@ class view_function(BaseDecorator):
         args, kwargs = self.converter.convert_parameters(*args, **kwargs)
 
         # call the decorated view function!
-        return self.decorated_function(*args, **kwargs)
+        return self.decorator_function(*args, **kwargs)

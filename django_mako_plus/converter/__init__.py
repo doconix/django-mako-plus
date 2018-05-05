@@ -2,6 +2,7 @@
 # public items in this package
 from .parameter import ViewParameter
 from .decorators import parameter_converter
+from .base import ParameterConverter
 
 
 # import the default converters

@@ -22,7 +22,7 @@ from .middleware import RequestInitMiddleware
 from .router import route_request, view_function
 
 
-# parameter converter decorator
+# converter decorator
 from .converter import parameter_converter
 
 

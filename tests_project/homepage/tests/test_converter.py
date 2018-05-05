@@ -140,3 +140,29 @@ class Tester(TestCase):
         req = resp.wsgi_request
         self.assertTrue(hasattr(req.dmp.converted_params['loc'], 'latitude'))
         self.assertTrue(hasattr(req.dmp.converted_params['loc'], 'longitude'))
+
+    def test_class_based(self):
+        resp = self.client.get('/homepage/converter.class_based/mystr/3/4/1/2/')
+        self.assertEqual(resp.status_code, 200)
+        req = resp.wsgi_request
+        # can't test individual params because not decorated with the recording decorator
+
+    def test_class_based_decorated(self):
+        resp = self.client.get('/homepage/converter.class_based_decorated/mystr/3/4/1/2/')
+        self.assertEqual(resp.status_code, 200)
+        req = resp.wsgi_request
+        self.assertEqual(req.dmp.converted_params['s'], 'mystr')
+        self.assertEqual(req.dmp.converted_params['i'], 3)
+        self.assertEqual(req.dmp.converted_params['f'], 4.0)
+        self.assertTrue(req.dmp.converted_params['b'])
+        self.assertEqual(req.dmp.converted_params['ic'], IceCream.objects.get(pk=2))
+
+    def test_class_based_argdecorated(self):
+        resp = self.client.get('/homepage/converter.class_based_argdecorated/mystr/3/4/1/2/')
+        self.assertEqual(resp.status_code, 200)
+        req = resp.wsgi_request
+        self.assertEqual(req.dmp.converted_params['s'], 'mystr')
+        self.assertEqual(req.dmp.converted_params['i'], 3)
+        self.assertEqual(req.dmp.converted_params['f'], 4.0)
+        self.assertTrue(req.dmp.converted_params['b'])
+        self.assertEqual(req.dmp.converted_params['ic'], IceCream.objects.get(pk=2))
