@@ -38,8 +38,8 @@ import functools
 
 class BaseDecoratorMeta(type):
     '''
-    Metaclass that allows ourdecorator to be called
-    with or without optional arguments.
+    Metaclass that either creates the decorator object or creates a
+    factory to create the decorator object.
     '''
     def __call__(self, *args, **kwargs):
         # if args has a single function, we'll assume it is the function we're decorating.
@@ -62,8 +62,8 @@ class BaseDecoratorMeta(type):
 
 class BaseDecorator(object, metaclass=BaseDecoratorMeta):
     '''
-    A decorator that can be called with an arbitrary number of
-    arguments and keyword arguments.
+    A decorator base class that can be called with an arbitrary number of
+    arguments and keyword arguments, or with none at all.
     '''
     def __init__(self, decorator_function, *decorator_args, **decorator_kwargs):
         self.decorator_function = decorator_function
