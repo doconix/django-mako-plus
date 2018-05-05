@@ -8,7 +8,7 @@ from .router_exception import RegistryExceptionRouter
 from .router_function import ViewFunctionRouter
 from .router_template import TemplateViewRouter
 
-from ..converter import view_function
+from .decorators import view_function
 
 import inspect
 import threading
@@ -16,17 +16,13 @@ from importlib import import_module
 from importlib.util import find_spec
 
 
-# lock to keep get_router() thread safe
-rlock = threading.RLock()
-
-# the cache of mini-routers
-CACHED_ROUTERS = {}
-
-
 
 
 ########################################################
-###   Cache of mini routers
+###   Cached routers
+
+CACHED_ROUTERS = {}
+rlock = threading.RLock()
 
 def get_router(module_name, function_name, fallback_app=None, fallback_template=None, verify_decorator=True):
     '''
@@ -51,6 +47,12 @@ def get_router(module_name, function_name, fallback_app=None, fallback_template=
     # the code should never be able to get here
     raise Exception("Django-Mako-Plus error: registry.get_router() should not have been able to get to this point.  Please notify the owner of the DMP project.  Thanks.")
 
+
+
+############################################################
+###   Creates the appropriate router for a
+###   view function, class-based view function,
+###   template, or error.
 
 def router_factory(module_name, function_name, fallback_app=None, fallback_template=None, verify_decorator=True):
     '''

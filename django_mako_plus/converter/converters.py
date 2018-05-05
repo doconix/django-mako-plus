@@ -1,27 +1,14 @@
 from django.db.models import Model
 from django.conf import settings
 from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
-from django.http import HttpRequest, Http404
+from django.http import HttpRequest
 
-from .base import view_function
+from .decorators import parameter_converter
 
 import inspect
 import datetime
 import decimal
 
-
-
-###  Decorator that denotes a converter function  ###
-
-def parameter_converter(*convert_types):
-    '''
-    Decorator that denotes a function as a url parameter converter.
-    '''
-    def inner(func):
-        for ct in convert_types:
-            view_function._register_converter(func, ct)
-        return func
-    return inner
 
 
 ###  request object (a passthrough)  ###

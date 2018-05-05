@@ -1,9 +1,9 @@
 from django.http import HttpResponseNotAllowed
+
 from ..util import log
 from .base import Router
+from .decorators import view_function
 from .router_function import ViewFunctionRouter
-
-
 
 
 
@@ -23,6 +23,15 @@ class ClassBasedRouter(Router):
         for mthd_name in instance.http_method_names:  # get parameters from the first http-based method (get, post, etc.)
             func = getattr(instance, mthd_name, None)
             if func is not None:
+                print('>>>> class endpoint:', func)
+                print('is decorated:', view_function._is_decorated(func))
+                # class-based methods don't explicitly have to be decorated with @view_function.
+                # they don't need that security because, by subclassing View, we know they are endpoints.
+                # but we still need the view_function decorator for the parameter conversion, so we wrap
+                # if needed.
+                if not view_function._is_decorated(func):
+                    func = view_function(func)
+                print('is decorated2 :', view_function._is_decorated(func))
                 self.endpoints[mthd_name] = ViewFunctionRouter(module, func)
 
 

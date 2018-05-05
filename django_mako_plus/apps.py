@@ -17,5 +17,5 @@ class Config(AppConfig):
         engines['django_mako_plus']
 
         # trigger sorting of the converters now that the models are available
-        from .converter.base import view_function
-        view_function._sort_converters(convert_sorting_enabled=True)
+        from .converter.base import ParameterConverter
+        ParameterConverter._sort_converters(app_ready=True)

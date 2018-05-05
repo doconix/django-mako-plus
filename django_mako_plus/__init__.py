@@ -17,13 +17,12 @@ from .version import __version__
 from .apps import Config
 from .registry import register_dmp_app
 
-# the router and middleware
+# the router, middleware, and view function decorator
 from .middleware import RequestInitMiddleware
-from .router import route_request
+from .router import route_request, view_function
 
 
-# view_function decorator and converter classes
-from .converter import view_function
+# parameter converter decorator
 from .converter import parameter_converter
 
 

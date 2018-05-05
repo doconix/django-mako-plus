@@ -1,51 +1,29 @@
 from django.http import Http404
 from django.core.exceptions import ImproperlyConfigured
 
-from ..decorators import OptionsDecorator
 from ..util import log
 from .parameter import ViewParameter
 from .info import ConverterFunctionInfo
 
 import logging
 import inspect
-from collections import namedtuple
 from operator import attrgetter
 
 
 
-class view_function(OptionsDecorator):
+class ParameterConverter(object):
     '''
-    A decorator to signify which view functions are "callable" by web browsers.
-    and to convert parameters using type hints, if provided.
+    Converts parameters using functions registered to types they convert.
 
-    All endpoint functions, such as process_request, must be decorated as:
-
-        @view_function
-        function process_request(request):
-            ...
-
-    Or:
-
-        @view_function(...)
-        function process_request(request):
-            ...
-
-    PARAMETER CONVERSION:
-
-    The other purpose of this decorator is to convert URL parameters.
-    See the convert_value() function docs below for more info on this.
-
-    CUSTOMIZING THE DECORATOR:
+    To create a converter for a new type, simply create a function
+    that is decorated with @parameter_converter
 
     This decorator is programmed as a class-based decorator so you can
     subclass it with custom behavior.  You can customize how view functions are
     called and how parameters are converted.
 
-        __init__(): you probably don't need to customize this method because it
-        already takes any kwargs and sets them as the self.options dictionary.
-        If you override __init__, do NOT add positional parameters.  Use only
-        keyword parameters.  Positional parameters may mess up the ability
-        of the decorator to be call with/without arguments.
+        __init__(): already takes an arbitrary number of keyword arguments.
+        Any kwargs passed into the constructor are set in the `self.kwargs` dictionary.
 
         __call__(): this is triggered on each request.  It iterates the parameters
         (for conversion) and then calls the endpoint.  Override this method if
@@ -65,21 +43,19 @@ class view_function(OptionsDecorator):
         __call__(): the controller that iterates the parameter values
         and calls convert_value().
     '''
-    DECORATED_KEY = '_dmp_view_function_'
-    # the list of converters (populated by the @converter_function decorator)
+
+    # the registry of converters (populated by the @converter_function decorator)
     converters = []
-    convert_sorting_enabled = False
+    # this variable prevents sorting until Django is ready (because during sorting
+    # we switch "myapp.MyModel" to the actual model instance)
+    _sorting_enabled = False
 
-    def __init__(self, decorated_function, **options):
+    def __init__(self, func):
         '''Create a new wrapper around the decorated function'''
-        super().__init__(decorated_function, **options)
-
-        # flag the function as an endpoint
-        setattr(self.decorated_function, self.DECORATED_KEY, self)
-
         # inspect the parameters on the function
-        self.signature = inspect.signature(self.decorated_function)
-        param_types = getattr(self.decorated_function, '__annotations__', {})  # not using typing.get_type_hints because it adds Optional() to None defaults, and we don't need to follow mro here
+        self.signature = inspect.signature(func)
+        # not using typing.get_type_hints because it adds Optional() to None defaults, and we don't need to follow mro here
+        param_types = getattr(func, '__annotations__', {})
         params = []
         for i, p in enumerate(self.signature.parameters.values()):
             params.append(ViewParameter(
@@ -93,12 +69,6 @@ class view_function(OptionsDecorator):
 
 
     @classmethod
-    def _is_decorated(cls, f):
-        '''Returns True if the given function is decorated with @view_function'''
-        return hasattr(f, cls.DECORATED_KEY)
-
-
-    @classmethod
     def _register_converter(cls, conv_func, conv_type):
         '''Triggered by the @converter_function decorator'''
         cls.converters.append(ConverterFunctionInfo(conv_func, conv_type, len(cls.converters)))
@@ -106,34 +76,21 @@ class view_function(OptionsDecorator):
 
 
     @classmethod
-    def _sort_converters(cls, convert_sorting_enabled=False):
+    def _sort_converters(cls, app_ready=False):
         '''Sorts the converter functions'''
-        # convert_sorting_enabled is triggered in DMP's AppConfig.ready()
+        # app_ready is True when called from DMP's AppConfig.ready()
         # we can't sort before then because models aren't ready
-        cls.convert_sorting_enabled = cls.convert_sorting_enabled or convert_sorting_enabled
-        if cls.convert_sorting_enabled:
+        cls._sorting_enabled = cls._sorting_enabled or app_ready
+        if cls._sorting_enabled:
             for converter in cls.converters:
                 converter.prepare_sort_key()
             cls.converters.sort(key=attrgetter('sort_key'))
 
 
-    def __call__(self, *args, **kwargs):
-        '''
-        Called for every request.  This method runs the converters and then
-        calls the actual site view function.
-
-        See the docs for this class on customizing this method.
-        '''
-        # convert the urlparams
-        args, kwargs = self.convert_parameters(*args, **kwargs)
-
-        # call the decorated view function!
-        return self.decorated_function(*args, **kwargs)
-
-
     def convert_parameters(self, *args, **kwargs):
         '''
-        Iterates the urlparams and converts them according to the
+        The primary method of the class.  This is called from the view_function
+        decorator. It iterates the urlparams and converts them according to the
         type hints in the current view function.
 
         Note that args[0] is the request object.  We leave it in args
@@ -222,10 +179,3 @@ class view_function(OptionsDecorator):
         except Exception as e:
             log.info('Exception raised during conversion of parameter %s (%s): %s', parameter.position, parameter.name, e)
             raise
-
-
-
-# import the default converters
-# this must come at the end of the file so view_function above is loaded
-# it doesn't matter what's imported -- the file just needs to load
-from .converters import __name__ as _
