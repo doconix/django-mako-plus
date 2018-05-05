@@ -113,3 +113,9 @@ DMP uses the same solution as Django when referencing models: use "app.Model" sy
         ...
 
 Using string-based types only works with models (not with other types).
+
+
+Replacing or Disabling the Converter
+=========================================
+
+If you need to fully replace or disable the converter, see `the @view_function page </topics_view_function.html#replacing-the-converter>`_.

@@ -36,7 +36,7 @@ class view_function(BaseDecorator):
     def __init__(self, decorator_function, *args, **kwargs):
         '''Create a new wrapper around the decorated function'''
         super().__init__(decorator_function, *args, **kwargs)
-        self.converter = self.converter_class(decorator_function)
+        self.converter = self.converter_class(decorator_function) if self.converter_class is not None else None
 
         # flag the function as an endpoint. doing it on the actual function because
         # we don't know the order of decorators on the function. order only matters if
@@ -64,7 +64,8 @@ class view_function(BaseDecorator):
         things being off by one.
         '''
         # convert the urlparams
-        args, kwargs = self.converter.convert_parameters(*args, **kwargs)
+        if self.converter is not None:
+            args, kwargs = self.converter.convert_parameters(*args, **kwargs)
 
         # call the decorated view function!
         return self.decorator_function(*args, **kwargs)

@@ -13,6 +13,7 @@ With DMP, your class-based view will be discovered via request url, so you have 
     from datetime import datetime
 
     class process_request(View):
+
         def get(self, request):
             context = {
                 'now': datetime.now().strftime(request.dmp.urlparams[0] if request.dmp.urlparams[0] else '%H:%M'),
@@ -20,6 +21,7 @@ With DMP, your class-based view will be discovered via request url, so you have 
             return request.dmp.render('index.html', context)
 
     class discovery_section(View):
+
         def get(self, request):
             return HttpResponse('Get was called.')
 
@@ -28,12 +30,25 @@ With DMP, your class-based view will be discovered via request url, so you have 
 
 In the above ``index.py`` file, two class-based views are defined. The first is called with the url ``/homepage/index/``. The second is called with the url ``/homepage/index.discovery_section/``.
 
+
+Hey! Where's @view_function?
+-----------------------------
+
 In contrast with normal function-based routing, class-based views do not require the ``@view_function`` decorator, which provides security on which functions are web-accessible. Since class-based views must extend django.views.generic.View, the security provided by the decorator is already provided. DMP assumes that **any extension of View will be accessible**.
 
-    Python programmers usually use TitleCaseClassName (capitalized
-    words) for class names. In the above classes, I'm instead using all
-    lowercase (which is the style for function and variable names) so my
-    URL doesn't have uppercase characters in it. If you'd rather use
-    TitleCaseClassName, such as ``class DiscoverySection``, be sure your
-    URL matches it, such as
-    ``http://yourserver.com/homepage/index.DiscoverySection/``.
+One case where you might want to decorate your class-based endpoints is when using `keyword arguments <topics_view_function.html>`_.  Here's an example of what that might look like:
+
+.. code:: python
+
+    from django.views.generic import View
+
+    class process_request(View):
+
+        @view_function(vogon="Poetry", answer=42)
+        def get(self, request):
+            return request.dmp.render('index.html', {})
+
+
+Naming Conventions
+-------------------------
+Python programmers usually use TitleCaseClassName (capitalized words) for class names. In the above classes, I'm instead using all lowercase (which is the style for function and  ariable names) so my URL doesn't have uppercase characters in it. If you'd rather use TitleCaseClassName, such as ``class DiscoverySection``, be sure your URL matches it, such as ``http://yourserver.com/homepage/index.DiscoverySection/``.
