@@ -27,6 +27,10 @@ class LinkProvider(BaseProvider):
     default_options = merge_dicts(BaseProvider.default_options, {
         # subclasses should override the group
         'group': 'scripts',
+        # string for the absolute path to search during devevelopment (settings.DEBUG = True)
+        'dev_filepath': 'app/subdir/template.ext',
+        # string for the absolute path to search during production (settings.DEBUG = False)
+        'prod_filepath': 'app/subdir/template.ext',
         # how to process duplicate urls found across this request
         'skip_duplicates': False,
     })
