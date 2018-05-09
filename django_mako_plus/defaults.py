@@ -47,10 +47,10 @@ DEFAULT_OPTIONS = {
     # static file providers
     'CONTENT_PROVIDERS': [
         { 'provider': 'django_mako_plus.JsContextProvider' },     # adds JS context - this should normally be listed first
-        { 'provider': 'django_mako_plus.CssLinkProvider' },       # generates links for app/styles/template.css
-        { 'provider': 'django_mako_plus.JsLinkProvider' },        # generates links for app/scripts/template.js
         # { 'provider': 'django_mako_plus.CompileScssProvider' },   # autocompiles Scss files
         # { 'provider': 'django_mako_plus.CompileLessProvider' },   # autocompiles Less files
+        { 'provider': 'django_mako_plus.CssLinkProvider' },       # generates links for app/styles/template.css
+        { 'provider': 'django_mako_plus.JsLinkProvider' },        # generates links for app/scripts/template.js
     ],
 
     # webpack providers

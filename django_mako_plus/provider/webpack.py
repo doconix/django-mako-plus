@@ -1,6 +1,5 @@
-from django.conf import settings
 
-from ..util import merge_dicts, flatten
+from ..util import merge_dicts
 from .static_links import CssLinkProvider, JsLinkProvider
 from .base import BaseProvider
 
@@ -15,16 +14,11 @@ class WebpackCssLinkProvider(CssLinkProvider):
     Generates a CSS <link> tag for the sitewide or app-level CSS bundle file, if it exists.
     '''
     default_options = merge_dicts(JsLinkProvider.default_options, {
-        'group': 'scripts',
-        'skip_duplicates': True,
+        # the filename to search for (resolves to a single file, if it exists)
+        # if it does not start with a slash, it is relative to the app directory.
+        # if it starts with a slash, it is an absolute path.
+        'filepath': os.path.join('styles', '__bundle__.css'),
     })
-
-    @property
-    def filepath(self):
-        if settings.DEBUG:
-            return os.path.join(*flatten(self.app_config.path, 'styles', '__bundle__.css'))
-        else:
-            return os.path.join(*flatten(settings.STATIC_ROOT, self.app_config.name, 'styles', '__bundle__.css'))
 
 
 
@@ -34,17 +28,11 @@ class WebpackJsLinkProvider(JsLinkProvider):
     In settings, this provider should be defined *before* WebpackJsCallProvider is defined.
     '''
     default_options = merge_dicts(JsLinkProvider.default_options, {
-        'group': 'scripts',
-        'async': False,
-        'skip_duplicates': True,
+        # the filename to search for (resolves to a single file, if it exists)
+        # if it does not start with a slash, it is relative to the app directory.
+        # if it starts with a slash, it is an absolute path.
+        'filepath': os.path.join('scripts', '__bundle__.js'),
     })
-
-    @property
-    def filepath(self):
-        if settings.DEBUG:
-            return os.path.join(*flatten(self.app_config.path, 'scripts', '__bundle__.js'))
-        else:
-            return os.path.join(*flatten(settings.STATIC_ROOT, self.app_config.name, 'scripts', '__bundle__.js'))
 
 
 
@@ -60,13 +48,13 @@ class WebpackJsCallProvider(BaseProvider):
 
 
     def start(self, provider_run, data):
-        data['templates'] = []
+        data['funcs_to_run'] = []
 
 
     def provide(self, provider_run, data):
         # instead of adding a script tag for each template (like the JsLinkProider does),
         # we just need to trigger the function for this page from the function
-        data['templates'].append(posixpath.join(*flatten(self.app_config.name, self.subdir_parts[1:], self.template_name)))
+        data['funcs_to_run'].append(posixpath.join(self.app_config.name, self.template))
 
 
     def finish(self, provider_run, data):
@@ -77,7 +65,7 @@ class WebpackJsCallProvider(BaseProvider):
         provider_run.write('<script data-context="{contextid}">'.format(
             contextid=provider_run.uid,
         ))
-        for template in data['templates']:
+        for template in data['funcs_to_run']:
             provider_run.write('if (DMP_CONTEXT.appBundles["%s"]) { DMP_CONTEXT.appBundles["%s"]() };' % (
                 template,
                 template

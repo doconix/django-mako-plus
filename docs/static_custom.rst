@@ -1,6 +1,5 @@
-Custom Providers
+Creating a Provider
 ==========================
-
 
 Suppose you need custom preprocessing of static files or custom template content.  Your future may include creating a new provider class. Fortunately, these are pretty simple classes. Once you create the class, simply reference it in your settings.py file.
 
@@ -40,3 +39,8 @@ Your provider will be instantitated once for each template in the system. When a
 Wherever possible, move code to the constructor so the calls to ``start``, ``provide``, and ``finish`` can be as fast as possible.  In particular, ``provide`` is called for the template **and** every supertemplate.
 
     During development (``DEBUG = True``), providers are instantiated **every** time the template is rendered.  In effect, each render of a template is treated as if it were the "first time".  This allows template/script/css changes to be seen without a server restart.
+
+For More Information
+--------------------------
+
+See the ``provider/`` directory of the `DMP source code <https://github.com/doconix/django-mako-plus>`_.

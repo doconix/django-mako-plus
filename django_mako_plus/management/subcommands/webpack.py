@@ -7,10 +7,11 @@ from django_mako_plus.provider.runner import ProviderRun, create_factories
 from django_mako_plus.util import get_dmp_instance
 from django_mako_plus.management.mixins import DMPCommandMixIn
 
+import sys
 import os
 import os.path
 from collections import OrderedDict
-
+from datetime import datetime
 
 
 class Command(DMPCommandMixIn, BaseCommand):
@@ -95,20 +96,31 @@ class Command(DMPCommandMixIn, BaseCommand):
             if self.options.get('overwrite'):
                 os.remove(filename)
             else:
-                raise ValueError('Refusing to destroy existing file: {} (use --overwrite option or remove the file)'.format(filename))
+                raise CommandError('Refusing to destroy existing file: {} (use --overwrite option or remove the file)'.format(filename))
+
         # create the lines of the entry file
         lines = []
         for page, scripts in script_map.items():
             require = []
-            for s in scripts:
-                if in_apps(os.path.abspath(s)):
-                    require.append('require("./{}")'.format(os.path.relpath(s, filedir)))
+            for script_path in scripts:
+                if in_apps(script_path):
+                    require.append('require("./{}")'.format(os.path.relpath(script_path, filedir)))
             if len(require) > 0:
                 lines.append('DMP_CONTEXT.appBundles["{}"] = () => {{ \n        {};\n    }};'.format(page, ';\n        '.join(require)))
-        # if we created at least one line, write the entry file
+
+        # if we had at least one line, write the entry file
         if len(lines) > 0:
             self.message('Creating {}'.format(os.path.relpath(filename, settings.BASE_DIR)))
             with open(filename, 'w') as fout:
+                fout.write('// Generated on {} by `{}`\n'.format(
+                    datetime.now().strftime('%Y-%m-%d %H:%M'),
+                    ' '.join(sys.argv),
+                ))
+                fout.write('// Contains links for app{}: {}\n'.format(
+                    's' if len(apps) > 1 else '',
+                    ', '.join(sorted([ app.name for app in apps ])),
+                ))
+                fout.write('\n')
                 fout.write('(context => {\n')
                 for line in lines:
                     fout.write('    {}\n'.format(line))
@@ -122,8 +134,8 @@ class Command(DMPCommandMixIn, BaseCommand):
         dictionary with paths relative to BASE_DIR:
 
         {
-            'app/template1': [ 'scripts/template1.js', 'scripts/supertemplate1.js' ],
-            'app/template2': [ 'scripts/template2.js', 'scripts/supertemplate2.js', 'scripts/supersuper2.js' ],
+            'app/template1': [ '/abs/path/to/scripts/template1.js', '/abs/path/to/scripts/supertemplate1.js' ],
+            'app/template2': [ '/abs/path/to/scripts/template2.js', '/abs/path/to/scripts/supertemplate2.js', '/abs/path/to/scripts/supersuper2.js' ],
             ...
         }
 
@@ -133,7 +145,6 @@ class Command(DMPCommandMixIn, BaseCommand):
         template_root = os.path.join(os.path.relpath(config.path, settings.BASE_DIR), 'templates')
         def recurse(folder):
             subdirs = []
-            folder = os.path.join(template_root, folder)
             if os.path.exists(folder):
                 for filename in os.listdir(folder):
                     if filename.startswith('__'):
@@ -154,7 +165,7 @@ class Command(DMPCommandMixIn, BaseCommand):
             for subdir in subdirs:
                 recurse(subdir)
 
-        recurse('')
+        recurse(template_root)
         return script_map
 
 
@@ -175,8 +186,7 @@ class Command(DMPCommandMixIn, BaseCommand):
         inner_run.run()
         scripts = []
         for data in inner_run.column_data:
-            for provider in data.get('enabled', []):
-                filepath = getattr(provider, 'filepath', None)
-                if filepath is not None:
-                    scripts.append(os.path.relpath(filepath, settings.BASE_DIR))
+            for provider in data.get('enabled', []):    # if file doesn't exist, the provider won't be enabled
+                if hasattr(provider, 'filepath'):       # providers used to collect for webpack must have a .filepath property
+                    scripts.append(provider.filepath)   # the absolute path to the file (see providers/static_links.py)
         return scripts
