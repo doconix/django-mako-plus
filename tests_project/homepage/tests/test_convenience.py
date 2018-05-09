@@ -18,6 +18,7 @@ class Tester(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.tests_app = apps.get_app_config('homepage')
+        cls.errors_app = apps.get_app_config('errorsapp')
 
     def test_get_template_loader(self):
         # should succeed
@@ -32,8 +33,8 @@ class Tester(TestCase):
         self.assertIsInstance(template, MakoTemplateAdapter)
         # these should fail
         self.assertRaises(LookupError, get_template, 'nonexistent_app', 'index.basic.html')
-        self.assertRaises(TemplateDoesNotExist, get_template, 'homepage', 'nonexistent_template.html')
-        self.assertRaises(TemplateSyntaxError, get_template, 'homepage', 'syntax_error.html')
+        self.assertRaises(TemplateDoesNotExist, get_template, 'errorsapp', 'nonexistent_template.html')
+        self.assertRaises(TemplateSyntaxError, get_template, 'errorsapp', 'syntax_error.html')
 
     def test_render_template(self):
         # should succeed
@@ -41,8 +42,8 @@ class Tester(TestCase):
         self.assertIsInstance(html, str)
         # these should fail
         self.assertRaises(LookupError, render_template, None, 'nonexistent_app', 'index.basic.html')
-        self.assertRaises(TemplateDoesNotExist, render_template, None, 'homepage', 'nonexistent_template.html')
-        self.assertRaises(TemplateSyntaxError, render_template, None, 'homepage', 'syntax_error.html')
+        self.assertRaises(TemplateDoesNotExist, render_template, None, 'errorsapp', 'nonexistent_template.html')
+        self.assertRaises(TemplateSyntaxError, render_template, None, 'errorsapp', 'syntax_error.html')
 
     def test_def_name(self):
         # test a def name
@@ -73,9 +74,9 @@ class Tester(TestCase):
 
     def test_render_template_for_path(self):
         path = os.path.join(self.tests_app.path, 'templates', 'index.basic.html')
-        bad_path = os.path.join(self.tests_app.path, 'templates', 'nonexistent_template.html')
-        bad_path2 = os.path.join(self.tests_app.path, 'nonexistent_dir', 'index.basic.html')
-        bad_syntax_path = os.path.join(self.tests_app.path, 'templates', 'syntax_error.html')
+        bad_path = os.path.join(self.errors_app.path, 'templates', 'nonexistent_template.html')
+        bad_path2 = os.path.join(self.errors_app.path, 'nonexistent_dir', 'index.basic.html')
+        bad_syntax_path = os.path.join(self.errors_app.path, 'templates', 'syntax_error.html')
         # should succeed
         html = render_template_for_path(None, path, use_cache=False)
         self.assertIsInstance(html, str)
