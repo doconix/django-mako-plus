@@ -49,17 +49,31 @@ Preprocessors (Scss and Less)
 
 If you are using preprocessors for your CSS or JS, DMP can automatically compile files.  While this could alternatively be done with an editor plugin or with a 'watcher' process, letting DMP compile for you keeps the responsibility within your project settings (rather than per-programmer-dependent setups).
 
-Suppose your template ``index.html`` contains the typical code:
-
-.. code:: html
-
-    <head>
-        ${ django_mako_plus.links(self) }
-    </head>
-
-When enabled, DMP looks for ``app_folder/styles/index.scss``.  If it exists, DMP checks the timestamp of the compiled version, ``app_folder/styles/index.css``, to see if if recompilation is needed.  If needed, it runs ``scss`` before generating ``<link type="text/css" />`` for the file.
+When this feature is enabled, DMP looks for ``app_folder/styles/index.scss``.  If it exists, DMP checks the timestamp of the compiled version, ``app_folder/styles/index.css``, to see if if recompilation is needed.  If needed, it runs ``scss`` before generating ``<link type="text/css" />`` for the file.
 
 During development, this check is done every time the template is rendered.  During production, this check is done only once -- the first time the template is rendered.
+
+To enable automatic compiling, uncomment the appropriate provider to your settings.py.  The following setting adds Scss compiling to the normal JS Context, JS, and CSS providers:
+
+::
+
+    TEMPLATES = [
+    {
+        'NAME': 'django_mako_plus',
+        'BACKEND': 'django_mako_plus.MakoTemplates',
+        'OPTIONS': {
+            'CONTENT_PROVIDERS': [
+                { 'provider': 'django_mako_plus.JsContextProvider' },     # adds JS context - this should normally be listed first
+                { 'provider': 'django_mako_plus.CssLinkProvider' },       # generates links for app/styles/template.css
+                { 'provider': 'django_mako_plus.JsLinkProvider' },        # generates links for app/scripts/template.js
+                { 'provider': 'django_mako_plus.CompileScssProvider' },   # autocompiles Scss files
+                # { 'provider': 'django_mako_plus.CompileLessProvider' },   # autocompiles Less files
+            ],
+        },
+    },
+]
+
+
 
 Rendering Other Pages
 ------------------------------
@@ -83,5 +97,3 @@ Rendering Nonexistent Pages
 This special case is for times when you need the CSS and JS autorendered, but don't need a template for HTML.  The ``force`` parameter allows you to force the rendering of CSS and JS files, even if DMP can't find the HTML file.   Since ``force`` defaults True, the calls just above will render even if the template isn't found.
 
 In other words, this behavior already happens; just use the calls above.  Even if ``otherpage.html`` doesn't exist, you'll get ``otherpage.css`` and ``otherpage.js`` in the current page content.
-
-

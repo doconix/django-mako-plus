@@ -50,20 +50,22 @@ Before we begin, be sure ``Node.js`` and ``npm`` are installed and runnable from
 
 The following is an example ``package.json`` file for Webpack 4:
 
-{
-  "name": "myproject",
-  "version": "1.0.0",
-  "scripts": {
-    "dev": "webpack --mode development --watch",
-    "build": "webpack --mode production"
-  }
-}
+::
+
+    {
+    "name": "myproject",
+    "version": "1.0.0",
+    "scripts": {
+        "dev": "webpack --mode development --watch",
+        "build": "webpack --mode production"
+    }
+    }
 
 
 settings.py
 ~~~~~~~~~~~~~~~~~~
 
-The following is an example of the settings needed when using bundles.  Note that the example is limited to the bundle-related providers -- you'll likely have additional providers for things like CSS files.
+The following is an example of the settings needed when using bundles:
 
 ::
 
@@ -73,36 +75,32 @@ The following is an example of the settings needed when using bundles.  Note tha
             'BACKEND': 'django_mako_plus.MakoTemplates',
             'APP_DIRS': True,
             'OPTIONS': {
-                # these define how page scripts are run by browsers
-                'CONTENT_PROVIDERS': [
-                    # injects jscontext-tagged context variables into JS
-                    { 'provider': 'django_mako_plus.JsContextProvider' },
 
-                    # <script> tags for the JS bundle file(s); filename can be a function (like below) or a string
-                    # if your base template hard codes a link to the bundle(s), you don't need this
-                    { 'provider': 'django_mako_plus.WebpackJsLinkProvider',
-                        'filename': lambda pr: os.path.join(pr.app_config.path, 'scripts', '__bundle__.js')
-                    },
-
-                    # calls the appropriate bundle functions for the current page
-                    { 'provider': 'django_mako_plus.WebpackJsCallProvider' },
-                ],
-
-                # these are using during a `python3 manage.py dmp_webpack` run - these are the ones you should customize (if desired)
-                # the JS files found by these providers are the ones placed in __entry__.js
-                # the providers listed here should extend django_mako_plus.LinkProvider
+                # webpack providers - these create the entry files for webpack
                 'WEBPACK_PROVIDERS': [
-                    { 'provider': 'django_mako_plus.JsLinkProvider' },
+                    { 'provider': 'django_mako_plus.CssLinkProvider' },                              # app/styles/*.css
+                    { 'provider': 'django_mako_plus.JsLinkProvider' },                               # app/scripts/*.js
                 ],
+
+                # providers - these provide the <link> and <script> tags that the webpack providers make
+                'CONTENT_PROVIDERS': [
+                    { 'provider': 'django_mako_plus.JsContextProvider' },           # adds the JS context
+                    { 'provider': 'django_mako_plus.WebpackCssLinkProvider' },      # <link> tags for CSS bundle
+                    { 'provider': 'django_mako_plus.WebpackJsLinkProvider' },       # <script> tags for JS bundle(s)
+                    { 'provider': 'django_mako_plus.WebpackJsCallProvider' },       # call the bundle function for the current page
+                ],
+
             }
         }
     ]
+
+Two groups of providers exist above.  ``WEBPACK_PROVIDERS`` is used at development time: it makes the input (entry) files for webpack.  ``CONTENT_PROVIDERS`` is used during the request - it runs at production to create the links in the html.
 
 
 WEBPACK_PROVIDERS
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-In the above settings, ``WEBPACK_PROVIDERS`` is used by ``python3 manage.py dmp_webpack``, where your ``__entry__.js`` files are generated.  Any providers listed here are used to discover the JS files for your templates.
+In the above settings, ``WEBPACK_PROVIDERS`` is used by ``python3 manage.py dmp webpack``, where your ``__entry__.js`` files are generated.  Any providers listed here are used to discover the JS files for your templates.
 
 DMP searches for scripts starting with a template name.  In keeping with this pattern, the ``dmp_webpack`` management command loads each template your apps and includes its script through ``require()``.  The command creates ``app/scripts/__entry__.js`` as an entry point for webpack.  Try running the command on an app that contains several template-related .js files:
 
@@ -116,11 +114,24 @@ The ``--overwrite`` option tells the command to overwrite any existing entry scr
 ::
 
     (context => {
-        DMP_CONTEXT.appBundles["learn/index"] = () => { require("./../../homepage/scripts/base.js"); require("./index.js"); };
-        DMP_CONTEXT.appBundles["learn/support"] = () => { require("./../../homepage/scripts/base.js"); };
-        DMP_CONTEXT.appBundles["learn/resource"] = () => { require("./../../homepage/scripts/base.js"); require("./resource.js"); };
-        DMP_CONTEXT.appBundles["learn/course"] = () => { require("./../../homepage/scripts/base.js"); require("./course.js"); };
-        DMP_CONTEXT.appBundles["learn/base_learn"] = () => { require("./../../homepage/scripts/base.js"); };
+        DMP_CONTEXT.appBundles["learn/index"] = () => {
+            require("./../../homepage/scripts/base.js");
+            require("./index.js");
+        };
+        DMP_CONTEXT.appBundles["learn/support"] = () => {
+            require("./../../homepage/scripts/base.js");
+        };
+        DMP_CONTEXT.appBundles["learn/resource"] = () => {
+            require("./../../homepage/scripts/base.js");
+            require("./resource.js");
+        };
+        DMP_CONTEXT.appBundles["learn/course"] = () => {
+            require("./../../homepage/scripts/base.js");
+            require("./course.js");
+        };
+        DMP_CONTEXT.appBundles["learn/base_learn"] = () => {
+            require("./../../homepage/scripts/base.js");
+        };
     })(DMP_CONTEXT.get());
 
 In the above file, the ``learn/index`` page needs two JS files run: ``index.js`` and ``base.js`` (which comes from the homepage app).  Note that even though ``base.js`` is listed many times, webpack will only include it once in the bundle.
@@ -171,7 +182,7 @@ During development time, likely want to run webpack in watch mode so it recompil
 Including Bundles in your Pages
 ----------------------------------
 
-Now that the bundles are created, we need to 1) include them with ``<script>`` tags, and 2) call the appropriate function(s) within the bundles (based on the template being shown).  This is where ``CONTENT_PROVIDERS`` comes in.  Refer back to the ``settings.py`` example in the section above as your read this section.
+Now that the bundles are created, we need to 1) include them with ``<script>`` and ``<link>`` tags, and 2) call the appropriate function(s) within the bundles (based on the template being shown).  This is where ``CONTENT_PROVIDERS`` comes in.
 
 The Link Provider
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -180,26 +191,11 @@ The ``WebpackJsLinkProvider`` searches for a file matching ``appname/scripts/__b
 
     Alternatively, you can skip automatic bundle discovery altogether and add ``<script>`` tags to the templates yourself.  This may make sense in some situations, especially if you place these manually-created tags in your base template.
 
-If you need to customize the location, the ``filename`` can be specified as a string OR as a function/lambda.  The following is an example:
-
-::
-
-    def get_bundle_filename(pr):
-        return os.path.join(settings.BASE_DIR, pr.app_config.name, 'bundle path and filename')
-
-The ``pr`` parameter is a subclass of ``django_mako_plus.provider.base.BaseProvider``. It contains information that can be useful in constructing the filename:
-
-* ``pr.app_config``: The AppConfig for the current template's app.
-* ``pr.template_file``: The current template's filename.
-* ``pr.subdir``: The current template's directory.
-* ``pr.template_name``: The name of the current template (filename sans the extension).
-* ``pr.options``: The options dictionary from settings for this provider (plus any default options not specified in settings).
-
 
 The Function Caller
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-The second webpack-related provider listed in the ``settings.py`` file above is ``WebpackJsCallProvider``.  This provider runs the appropriate part of the bundle for the current page.  You'll likely want to use this provider whether you auto-discover or manually code the script tags.
+The second webpack-related provider listed in the ``settings.py`` file above is ``WebpackJsCallProvider``.  This provider runs the appropriate part of the bundle for the current page.  You'll likely want to use this provider even if you do manually include the link tags.
 
 Remember that the bundles contain functions -- one for each page in your app.  These functions *don't* execute when the bundle file is loaded into the browser.  If they did, the JS for every page in your app would run!  Instead, the code for each page is wrapped in a function so it *can* be called when needed.
 
@@ -211,6 +207,7 @@ An example should make this more clear.  Suppose you have a login template with 
 2. ``WebpackJsCallProvider`` adds three script calls -- one for each template in the inheritance.
 
 ::
+
     <script data-context="..." src="/static/homepage/scripts/__bundle__.js"></script>
     <script data-context="..." src="/static/account/scripts/__bundle__.js"></script>
     <script data-context="...">
@@ -254,27 +251,6 @@ Somewhere in between a sitewide bundle and app-specific bundles lives the multi-
     python3 manage.py dmp_webpack --overwrite --single homepage/scripts/__entry_1__.js app1 app2
     python3 manage.py dmp_webpack --overwrite --single homepage/scripts/__entry_2__.js app3 app4 app5
 
-To include the ``<script>`` tag for these bundles, use something like the following function in your settings file:
-
-::
-
-    def get_bundle_filename(provider):
-        if provider.app_config.name in ( 'app1', 'app2' ):
-            return '/path/to/__bundle_1_.js'
-        return '/path/to/__bundle_2_.js'
-
-    TEMPLATES = [
-        {
-            'BACKEND': 'django_mako_plus.MakoTemplates',
-            'OPTIONS': {
-                'CONTENT_PROVIDERS': [
-                    { 'provider': 'django_mako_plus.WebpackJsLinkProvider', 'filename': get_bundle_filename },
-                    { 'provider': 'django_mako_plus.WebpackJsCallProvider' },
-            }
-        }
-    ]
-
-Note that the function is run once per template -- the first time a template is accessed.  During production, the filename is memoized after the first render of a template.  This means slow functions are fine here, but it also means you can't return something different on each render.
 
 
 CoffeeScript Example
@@ -301,25 +277,28 @@ I'll assume you've installed the npm dependencies with commands like the followi
 * Create the ``package.json`` file as described above.
 * Create the ``webpack.config.js`` file as described above.
 
+Create a Custom Coffee Provider
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Create a provider to find the ``*.coffee`` files in your app directories.  Refer to `custom file locations </static_custom.html>`_ on creating this file.
+
+We'll assume your provider is at ``homepage.lib.providers.WebpackCoffeeProvider``.  It should search for wherever you have your coffee files, such as ``appname/scripts/template.cofee``.
+
+
 Create the Entry File
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-The project settings file should contain the following for DMP's webpack providers:
+Once your custom coffee provider is alive, add it to your project settings:
 
 ::
 
     'WEBPACK_PROVIDERS': [
-        # app/scripts/*.js (regular JS)
-        { 'provider': 'django_mako_plus.JsLinkProvider' },
+        { 'provider': 'django_mako_plus.CssLinkProvider' },             # app/styles/*.css
+        { 'provider': 'django_mako_plus.JsLinkProvider' },              # app/scripts/*.js
+        { 'provider': 'homepage.lib.providers.WebpackCoffeeProvider' }, # app/scripts/*.coffee
+    ],
 
-        # app/scripts/*.coffee (CoffeeScript files)
-        { 'provider': 'django_mako_plus.JsLinkProvider',
-            'filename': lambda pr: os.path.join(*flatten(pr.app_config.path, 'scripts', pr.subdir_parts[1:], pr.template_name + '.coffee'))
-        },
-
-The above specifies that two providers be used when creating the entry file: one looks for regular JS files, and the other looks for Coffee files.
-
-    With this setup, it's valid to have both ``index.coffee`` and ``index.js`` in the scripts directory.  DMP would run both file functions when ``index.html`` displays.
+With this setup, it's valid to have both ``index.coffee`` and ``index.js`` in the scripts directory.  DMP would run both file functions on ``index.html``.
 
 Now create your entry file(s):
 
@@ -332,7 +311,10 @@ The above command creates ``account/scripts/__entry__.js``.  In the example outp
 ::
 
     (context => {
-        DMP_CONTEXT.appBundles["account/index"] = () => { require("./../../homepage/scripts/base.js"); require("./index.coffee"); };
+        DMP_CONTEXT.appBundles["account/index"] = () => {
+            require("./../../homepage/scripts/base.js");
+            require("./index.coffee");
+        };
     })(DMP_CONTEXT.get());
 
 
@@ -376,14 +358,4 @@ During the bundling process, webpack converts the .coffee file to Javascript.  O
 Link the Bundle
 ~~~~~~~~~~~~~~~~~~~~~
 
-Finally, tell DMP to add the bundle script and function calls to templates as they render.  In DMP's settings:
-
-::
-
-    'CONTENT_PROVIDERS': [
-        { 'provider': 'django_mako_plus.JsContextProvider' },           # adds the JS context
-        { 'provider': 'django_mako_plus.WebpackJsLinkProvider' },       # <script> tags for JS bundle(s)
-        { 'provider': 'django_mako_plus.WebpackJsCallProvider' },       # call the bundle function(s) for the current page
-    ],
-
-This process should work for most webpack scripts you are bundling.
+By production time, webpack has done its work, and the coffee files have been transpiled to JS.  Thereofre, the ``'CONTENT_PROVIDERS'`` listed at the top of this file will work. Just ensure you have them in your settings.

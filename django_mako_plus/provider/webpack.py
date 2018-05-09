@@ -42,9 +42,9 @@ class WebpackJsLinkProvider(JsLinkProvider):
     @property
     def filepath(self):
         if settings.DEBUG:
-            return os.path.join(*flatten(self.app_config.path, 'styles', '__bundle__.js'))
+            return os.path.join(*flatten(self.app_config.path, 'scripts', '__bundle__.js'))
         else:
-            return os.path.join(*flatten(settings.STATIC_ROOT, self.app_config.name, 'styles', '__bundle__.js'))
+            return os.path.join(*flatten(settings.STATIC_ROOT, self.app_config.name, 'scripts', '__bundle__.js'))
 
 
 

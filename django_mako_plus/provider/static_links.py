@@ -49,12 +49,15 @@ class LinkProvider(BaseProvider):
 
     @property
     def filepath(self):
-        '''The path to the file on disk.  Subclasses may want to override this.'''
-        return '/path/to/file'
+        '''
+        The path to the file on disk.
+        Note that this path is usually different during development and production.
+        '''
+        return '/var/myproject/path/to/file'
 
 
     def create_link(self, provider_run, url):
-        return '<link rel="stylesheet" type="text/css" href="/static/path/to/file" />'
+        return '<link rel="stylesheet" type="text/css" href="/path/to/file" />'
 
 
     def start(self, provider_run, data):
@@ -70,7 +73,7 @@ class LinkProvider(BaseProvider):
 
 
     def provide(self, provider_run, data):
-        path = self.filepath
+        filepath = self.filepath
         # delaying printing of tag to finish() because the JsContextProvider delays and this must go after it
 
         # short circuit if the file for this provider doesn't exist
@@ -78,9 +81,9 @@ class LinkProvider(BaseProvider):
             return
         # short circut if we're skipping duplicates and we've already seen this one
         if self.options['skip_duplicates']:
-            if path in data['seen']:
+            if filepath in data['seen']:
                 return
-            data['seen'].add(path)
+            data['seen'].add(filepath)
         # if we get here, this provider is enabled, so add it to the list
         data['enabled'].append(self)
 

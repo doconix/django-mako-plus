@@ -51,7 +51,6 @@ class Command(DMPCommandMixIn, BaseCommand):
             if not os.path.isdir(os.path.abspath(settings.BASE_DIR)):
                 raise CommandError('Your settings.py BASE_DIR setting is not a valid directory.  Please check your settings.py file for the BASE_DIR variable.')
         except AttributeError as e:
-            print(e)
             raise CommandError('Your settings.py file is missing the BASE_DIR setting.')
 
         # the apps to process
@@ -105,7 +104,7 @@ class Command(DMPCommandMixIn, BaseCommand):
                 if in_apps(os.path.abspath(s)):
                     require.append('require("./{}")'.format(os.path.relpath(s, filedir)))
             if len(require) > 0:
-                lines.append('DMP_CONTEXT.appBundles["{}"] = () => {{ {}; }};'.format(page, '; '.join(require)))
+                lines.append('DMP_CONTEXT.appBundles["{}"] = () => {{ \n        {};\n    }};'.format(page, ';\n        '.join(require)))
         # if we created at least one line, write the entry file
         if len(lines) > 0:
             self.message('Creating {}'.format(os.path.relpath(filename, settings.BASE_DIR)))
@@ -131,7 +130,7 @@ class Command(DMPCommandMixIn, BaseCommand):
         Any files or subdirectories starting with double-underscores (e.g. __dmpcache__) are skipped.
         '''
         script_map = OrderedDict()
-        template_root = os.path.join(config.path, 'templates')
+        template_root = os.path.join(os.path.relpath(config.path, settings.BASE_DIR), 'templates')
         def recurse(folder):
             subdirs = []
             folder = os.path.join(template_root, folder)
@@ -140,13 +139,13 @@ class Command(DMPCommandMixIn, BaseCommand):
                     if filename.startswith('__'):
                         continue
                     filerel = os.path.join(folder, filename)
-                    filepath = os.path.join(os.path.join(template_root, filerel))
-                    if os.path.isdir(filepath):
+                    if os.path.isdir(filerel):
                         subdirs.append(filerel)
 
-                    elif os.path.isfile(filepath):
-                        scripts = self.template_scripts(config, filerel)
-                        key = '{}/{}'.format(config.name, os.path.splitext(filerel)[0])
+                    elif os.path.isfile(filerel):
+                        template_name = os.path.relpath(filerel, template_root)
+                        scripts = self.template_scripts(config, template_name)
+                        key = '{}/{}'.format(config.name, os.path.splitext(template_name)[0])
                         if len(scripts) > 0:
                             script_map[key] = scripts
                             self.message('\t{}: {}'.format(key, scripts), 3)
@@ -177,7 +176,7 @@ class Command(DMPCommandMixIn, BaseCommand):
         scripts = []
         for data in inner_run.column_data:
             for provider in data.get('enabled', []):
-                if getattr(provider, 'url') is not None:
-                    url = provider.url.split('?', 1)[0]
-                    scripts.append(os.path.relpath(url, settings.BASE_DIR))
+                filepath = getattr(provider, 'filepath', None)
+                if filepath is not None:
+                    scripts.append(os.path.relpath(filepath, settings.BASE_DIR))
         return scripts
