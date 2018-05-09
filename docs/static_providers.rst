@@ -6,7 +6,7 @@ The framework is built to be extended for custom file types.  When you call ``li
 
 Here's a basic version:
 
-::
+.. code:: python
 
     TEMPLATES = [
         {
@@ -32,7 +32,7 @@ Setting Options
 
 Each provider has an options dictionary that allows you to adjust its behavior.  For example, link providers like ``JsLinkProvider`` allow custom search paths:
 
-::
+.. code:: python
 
     {
         'provider': 'django_mako_plus.JsContextProvider',
@@ -42,7 +42,7 @@ Each provider has an options dictionary that allows you to adjust its behavior. 
 
 The following lists the complete options for all providers that come with DMP:
 
-::
+.. code:: python
 
     {
         # adds JS context - this should normally be listed first
@@ -239,7 +239,7 @@ Transpiling is usually done with a bundler like ``webpack``.  However, there may
 1. A ``CompileProvider`` to run the transpiler when the source file changes.
 2. A ``JsLinkProvider`` to link the generated javascript (transcrypt places the generated files in a subdirectory).
 
-::
+.. code:: python
 
     {
         'provider': 'django_mako_plus.CompileProvider',
