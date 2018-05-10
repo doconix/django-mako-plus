@@ -42,21 +42,26 @@ class BaseDecoratorMeta(type):
     factory to create the decorator object.
     '''
     def __call__(self, *args, **kwargs):
-        # if args has a single function, we'll assume it is the function we're decorating.
-        # that means the syntax was `@decorator` -- no arguments, so
-        # we need to return normally.
-        if len(args) == 1 and callable(args[0]) and len(kwargs) == 0:
-            instance = super(BaseDecoratorMeta, self).__call__(*args, **kwargs)
-            functools.update_wrapper(instance, args[0])
-            return instance
-
-        # if we get here, the syntax was `@decorator(...)` -- with arguments.
-        # python hasn't yet "called" the decorator.  we'll return a factory
-        # for python to call with the decorated function
+        # delegate the creation of instances to a factory
         def factory(func):
             instance = super(BaseDecoratorMeta, self).__call__(func, *args, **kwargs)
-            functools.update_wrapper(instance, func)
+            # using custom updated=() because functools updates __dict__.  This replaces
+            # instance.decorator_function with the real function--making it point
+            # directly at the final function rather than at the next decorator in line
+            # (if we have multiple decorators chained together).
+            functools.update_wrapper(instance, func, updated=())
             return instance
+
+        # if args has a single callable and kwargs is empty, we'll assume
+        # python is calling the decorator: args[0] is the function being decorated.
+        # this means the syntax was `@decorator` with no arguments.
+        if len(args) == 1 and callable(args[0]) and len(kwargs) == 0:
+            func, args = args[0], ()
+            return factory(func)
+
+        # if we get here, the syntax was `@decorator(...)` -- with arguments.
+        # python hasn't yet called the decorator.  we'll return the factory
+        # function so python can call it
         return factory
 
 
@@ -72,7 +77,7 @@ class BaseDecorator(object, metaclass=BaseDecoratorMeta):
 
     def __get__(self, instance, type=None):
         # If we get here, the decorator was placed on a class method.  In this case,
-        # decorated_function is actually an unbound function not yet a bound method.
+        # decorator_function is actually an unbound function not yet a bound method.
         # Python calls this descriptor when the method is called.
         # When it does so, we need to set the self variable so it gets "bound".
         return functools.partial(self, instance)
@@ -80,6 +85,7 @@ class BaseDecorator(object, metaclass=BaseDecoratorMeta):
     def __call__(self, *args, **kwargs):
         '''Subclasses should override this method'''
         return self.decorator_function(*args, **kwargs)
+
 
 
 

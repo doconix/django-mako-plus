@@ -50,12 +50,17 @@ class ParameterConverter(object):
     # we switch "myapp.MyModel" to the actual model instance)
     _sorting_enabled = False
 
-    def __init__(self, func):
-        '''Create a new wrapper around the decorated function'''
+    def __init__(self, decorator):
+        '''
+        Create a new wrapper around the function decorated by the given decorator.
+        The function is available as decorator.decorator_function.
+        '''
+        self.decorator = decorator
+
         # inspect the parameters on the function
-        self.signature = inspect.signature(func)
+        self.signature = inspect.signature(self.decorator.decorator_function)
         # not using typing.get_type_hints because it adds Optional() to None defaults, and we don't need to follow mro here
-        param_types = getattr(func, '__annotations__', {})
+        param_types = getattr(self.decorator.decorator_function, '__annotations__', {})
         params = []
         for i, p in enumerate(self.signature.parameters.values()):
             params.append(ViewParameter(

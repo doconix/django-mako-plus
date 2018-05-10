@@ -1,4 +1,4 @@
-from ..decorator import BaseDecorator
+from ..decorators import BaseDecorator
 from ..converter.base import ParameterConverter
 import inspect
 
@@ -36,7 +36,7 @@ class view_function(BaseDecorator):
     def __init__(self, decorator_function, *args, **kwargs):
         '''Create a new wrapper around the decorated function'''
         super().__init__(decorator_function, *args, **kwargs)
-        self.converter = self.converter_class(decorator_function) if self.converter_class is not None else None
+        self.converter = self.converter_class(self) if self.converter_class is not None else None
 
         # flag the function as an endpoint. doing it on the actual function because
         # we don't know the order of decorators on the function. order only matters if
@@ -68,4 +68,4 @@ class view_function(BaseDecorator):
             args, kwargs = self.converter.convert_parameters(*args, **kwargs)
 
         # call the decorated view function!
-        return self.decorator_function(*args, **kwargs)
+        return super().__call__(*args, **kwargs)

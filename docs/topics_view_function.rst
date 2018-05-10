@@ -56,7 +56,7 @@ In the above example, overriding ``__init__`` isn't technically necessary.  Any 
 
 
 
-Replacing the Converter
+Subclassing the Converter
 ====================================
 
 The standard method of parameter conversion, `adding a conversion function </topics_converters.html#adding-a-new-converter>`_, should work for most situations.  However, we can customize or fully replace the parameter converter if needed.
