@@ -11,18 +11,6 @@ import decimal
 
 
 
-###  request object (a passthrough)  ###
-
-@parameter_converter(HttpRequest)
-def convert_http_request(value, parameter):
-    '''
-    Pass through for the request object (first parameter in every view call).
-    The request is run through the conversion process for consistency in parameter handling,
-    but I can't see a reason it would ever need to be "converted" outside of middleware.
-    '''
-    return value
-
-
 ###   object (fallback if nothing else matches)  ###
 
 @parameter_converter(object)

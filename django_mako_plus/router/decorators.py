@@ -54,18 +54,23 @@ class view_function(BaseDecorator):
         return real_func in cls.DECORATED_FUNCTIONS
 
 
-    def __call__(self, *args, **kwargs):
+    def __call__(self, request, *args, **kwargs):
         '''
         Called for every request.
         See the docs for this class on customizing this method.
-
-        Note that args[0] is the request object.  We leave it in the args list
-        so the convert_parameters method can index the list without
-        things being off by one.
         '''
         # convert the urlparams
-        if self.converter is not None:
-            args, kwargs = self.converter.convert_parameters(*args, **kwargs)
+        args, kwargs = self.convert_parameters(request, *args, **kwargs)
 
         # call the decorated view function!
-        return super().__call__(*args, **kwargs)
+        return super().__call__(request, *args, **kwargs)
+
+
+    def convert_parameters(self, request, *args, **kwargs):
+        '''
+        Converts the parameters in the url using the current converter.
+        It must return (args, kwargs).
+        '''
+        if self.converter is not None:
+            args, kwargs = self.converter.convert_parameters(request, *args, **kwargs)
+        return args, kwargs

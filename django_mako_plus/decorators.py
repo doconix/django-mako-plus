@@ -69,6 +69,25 @@ class BaseDecorator(object, metaclass=BaseDecoratorMeta):
     '''
     A decorator base class that can be called with an arbitrary number of
     arguments and keyword arguments, or with none at all.
+
+        decorator_function: Reference to the next decorator in the chain, or
+            to the final function if this is the only/last decorator
+        decorator_args: Positional arguments the decorator was called with (if any)
+        decorator_kwargs: Named arguments the decorator was called with (if any)
+
+    Get a reference to the real function at the end of the decorator chain with:
+        import inspect
+        f = inspect.unwrap(self.decorator_function)
+
+        # when there is only one decorator in place, self.decorator_function and
+        # inspect.unwrap(self.decorator_function) are the same: the real function.
+
+    If you need to override __init__, follow this pattern:
+        class MyDecorator(BaseDecorator):
+            def __init__(self, decorator_function, p1, p2=None, *args, **kwargs):
+                super().__init__(decorator_function, *args, **kwargs)
+                self.p1 = p1
+                self.p2 = p2
     '''
     def __init__(self, decorator_function, *decorator_args, **decorator_kwargs):
         self.decorator_function = decorator_function

@@ -92,30 +92,28 @@ class ParameterConverter(object):
             cls.converters.sort(key=attrgetter('sort_key'))
 
 
-    def convert_parameters(self, *args, **kwargs):
+    def convert_parameters(self, request, *args, **kwargs):
         '''
         The primary method of the class.  This is called from the view_function
         decorator. It iterates the urlparams and converts them according to the
         type hints in the current view function.
-
-        Note that args[0] is the request object.  We leave it in args
-        so it can convert like everything else (and so parameter
-        indices aren't off by one).
         '''
-        request = kwargs.get('request', args[0])
         args = list(args)
+        print('>>> urlparams', request.dmp.urlparams)
+        print('>>> args', args)
+        print('>>> kwargs', kwargs)
         urlparam_i = 0
         # add urlparams into the arguments and convert the values
         for parameter_i, parameter in enumerate(self.parameters):
-            # skip *args, **kwargs
-            if parameter.kind is inspect.Parameter.VAR_POSITIONAL or parameter.kind is inspect.Parameter.VAR_KEYWORD:
+            # skip request object, *args, **kwargs
+            if parameter_i == 0 or parameter.kind is inspect.Parameter.VAR_POSITIONAL or parameter.kind is inspect.Parameter.VAR_KEYWORD:
                 pass
             # value in kwargs?
             elif parameter.name in kwargs:
                 kwargs[parameter.name] = self.convert_value(kwargs[parameter.name], parameter, request)
             # value in args?
-            elif parameter_i < len(args):
-                args[parameter_i] = self.convert_value(args[parameter_i], parameter, request)
+            elif parameter_i < len(args) - 1:
+                args[parameter_i - 1] = self.convert_value(args[parameter_i - 1], parameter, request)
             # urlparam value?
             elif urlparam_i < len(request.dmp.urlparams):
                 kwargs[parameter.name] = self.convert_value(request.dmp.urlparams[urlparam_i], parameter, request)
