@@ -7,6 +7,8 @@ import os, os.path
 import collections
 import zlib
 import re
+from importlib import import_module
+
 
 
 # this is populated with the dictionary of options in engine.py when
@@ -63,6 +65,23 @@ class URLParamList(list):
 
 ##########################################
 ###   Utilities
+
+def import_qualified(name):
+    '''
+    Imports a fully-qualified name from a module:
+
+        cls = import_qualified('homepage.views.index.MyForm')
+
+    Raises an ImportError if it can't be ipmorted.
+    '''
+    parts = name.rsplit('.', 1)
+    if len(parts) != 2:
+        raise ImportError('Invalid fully-qualified name: {}'.format(name))
+    try:
+        return getattr(import_module(parts[0]), parts[1])
+    except AttributeError:
+        raise ImportError('Name not found in module: {}'.format(name))
+
 
 def merge_dicts(*dicts):
     '''

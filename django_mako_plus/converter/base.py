@@ -18,17 +18,6 @@ class ParameterConverter(object):
     To create a converter for a new type, simply create a function
     that is decorated with @parameter_converter
 
-    This decorator is programmed as a class-based decorator so you can
-    subclass it with custom behavior.  You can customize how view functions are
-    called and how parameters are converted.
-
-        __init__(): already takes an arbitrary number of keyword arguments.
-        Any kwargs passed into the constructor are set in the `self.kwargs` dictionary.
-
-        __call__(): this is triggered on each request.  It iterates the parameters
-        (for conversion) and then calls the endpoint.  Override this method if
-        you want to add or modify the endpoint calling process.
-
     Customizing Parameter Conversion:
 
     The primary way to customize conversion is to create new @parameter_converter
@@ -50,17 +39,13 @@ class ParameterConverter(object):
     # we switch "myapp.MyModel" to the actual model instance)
     _sorting_enabled = False
 
-    def __init__(self, decorator):
-        '''
-        Create a new wrapper around the function decorated by the given decorator.
-        The function is available as decorator.decorator_function.
-        '''
-        self.decorator = decorator
+    def __init__(self, view_function):
+        self.view_function = view_function
 
         # inspect the parameters on the function
-        self.signature = inspect.signature(inspect.unwrap(self.decorator.decorator_function))
+        self.signature = inspect.signature(inspect.unwrap(self.view_function))
         # not using typing.get_type_hints because it adds Optional() to None defaults, and we don't need to follow mro here
-        param_types = getattr(self.decorator.decorator_function, '__annotations__', {})
+        param_types = getattr(self.view_function, '__annotations__', {})
         params = []
         for i, p in enumerate(self.signature.parameters.values()):
             params.append(ViewParameter(
@@ -94,11 +79,10 @@ class ParameterConverter(object):
 
     def convert_parameters(self, request, *args, **kwargs):
         '''
-        The primary method of the class.  This is called from the view_function
-        decorator. It iterates the urlparams and converts them according to the
-        type hints in the current view function.
+        Iterates the urlparams and converts them according to the
+        type hints in the current view function.  This is the primary
+        function of the class.
         '''
-        f = inspect.unwrap(self.decorator.decorator_function)
         args = list(args)
         urlparam_i = 0
         # add urlparams into the arguments and convert the values

@@ -125,9 +125,6 @@ class RoutingData(object):
         else:
             self.urlparams = URLParamList()
 
-        # convert the parameters in the function signature
-
-
 
     def _set_function_obj(self, request, function_obj):
         '''Sets the function object, with alterations if class-based routing'''

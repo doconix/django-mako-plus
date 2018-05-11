@@ -40,6 +40,10 @@ DEFAULT_OPTIONS = {
         # 'import os, os.path, re, json',
     ],
 
+    # the converter class to use for parameter conversion
+    # this should be ParameterConverter or a subclass of it
+    'PARAMETER_CONVERTER': 'django_mako_plus.converter.ParameterConverter',
+
     # whether to send the custom DMP signals -- set to False for a slight speed-up in router processing
     # determines whether DMP will send its custom signals during the process
     'SIGNALS': False,

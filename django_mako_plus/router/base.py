@@ -3,4 +3,6 @@
 
 class Router(object):
     '''Common superclass of routers'''
-    pass
+
+    def get_response(self, request, *args, **kwargs):
+        raise NotImplementedError()

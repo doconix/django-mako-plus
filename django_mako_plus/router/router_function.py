@@ -25,10 +25,13 @@ class ViewFunctionRouter(Router):
     def __init__(self, mod, func):
         self.module = mod
         self.function = func
+        self.converter = DMP_OPTIONS['RUMTIME_PARAMETER_CONVERTER'](self.function)
 
 
     def get_response(self, request, *args, **kwargs):
         '''Converts urlparams, calls the view function, returns the response'''
+        # convert the parameters
+        args, kwargs = self.converter.convert_parameters(request, *args, **kwargs)
 
         # send the pre-signal
         if DMP_OPTIONS['SIGNALS']:
