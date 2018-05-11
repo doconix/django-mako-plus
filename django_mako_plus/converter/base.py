@@ -43,7 +43,8 @@ class ParameterConverter(object):
         self.view_function = view_function
 
         # inspect the parameters on the function
-        self.signature = inspect.signature(inspect.unwrap(self.view_function))
+        # import pdb; pdb.set_trace()
+        self.signature = inspect.signature(self.view_function)
         # not using typing.get_type_hints because it adds Optional() to None defaults, and we don't need to follow mro here
         param_types = getattr(self.view_function, '__annotations__', {})
         params = []
@@ -52,7 +53,7 @@ class ParameterConverter(object):
                 name=p.name,
                 position=i,
                 kind=p.kind,
-                type=param_types.get(p.name) or inspect.Parameter.empty,
+                type=p.annotation, #param_types.get(p.name) or inspect.Parameter.empty,
                 default=p.default,
             ))
         self.parameters = tuple(params)

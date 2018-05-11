@@ -11,8 +11,3 @@ class RecordingConverter(ParameterConverter):
         args, kwargs = super().convert_parameters(*args, **kwargs)
         request.dmp.converted_params = kwargs
         return args, kwargs
-
-
-class recording_view_function(view_function):
-    '''View function decorator that uses the recording converter'''
-    converter_class = RecordingConverter

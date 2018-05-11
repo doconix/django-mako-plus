@@ -43,6 +43,7 @@ TEMPLATES = [
                 'import os, os.path, re, json',
                 'from django_mako_plus import django_syntax, jinja2_syntax, alternate_syntax',
             ],
+            'PARAMETER_CONVERTER': 'homepage.views.RecordingConverter',
         },
     },
     {

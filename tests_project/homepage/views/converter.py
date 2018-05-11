@@ -5,18 +5,18 @@ from django_mako_plus import view_function, parameter_converter
 
 from homepage.models import IceCream, MyInt
 
-from . import recording_view_function
+from . import view_function
 
 import decimal, datetime
 
 
 ###  View function endpoints  ###
 
-@recording_view_function
+@view_function
 def process_request(request, s:str='', i:int=1, f:float=2, b:bool=False, ic:IceCream=None):
     return HttpResponse('parameter conversion tests')
 
-@recording_view_function
+@view_function
 def more_testing(request, d:decimal.Decimal=None, dt:datetime.date=None, dttm:datetime.datetime=None, mi:MyInt=None):
     return HttpResponse('more parameter conversion tests')
 
@@ -38,7 +38,7 @@ def convert_geo_location(value, parameter):
     return GeoLocation(float(parts[0]), float(parts[1]))
 
 
-@recording_view_function
+@view_function
 def geo_location_endpoint(request, loc:GeoLocation):
     return HttpResponse('{}, {}'.format(loc.latitude, loc.longitude))
 
@@ -52,13 +52,13 @@ class class_based(View):
 
 class class_based_decorated(View):
     # decorated
-    @recording_view_function
+    @view_function
     def get(self, request, s:str='', i:int=1, f:float=2, b:bool=False, ic:IceCream=None):
         return HttpResponse('Get was called.')
 
 
 class class_based_argdecorated(View):
     # decorated with arguments
-    @recording_view_function(a=1, b=2)
+    @view_function(a=1, b=2)
     def get(self, request, s:str='', i:int=1, f:float=2, b:bool=False, ic:IceCream=None):
         return HttpResponse('Get was called.')
