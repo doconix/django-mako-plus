@@ -89,7 +89,7 @@ def router_factory(module_name, function_name, fallback_app=None, fallback_templ
             return ClassBasedRouter(module, func())
 
         # a view function?
-        if verify_decorator and not view_function._is_decorated(func):
+        if verify_decorator and not view_function.is_decorated(func):
             raise ViewDoesNotExist("View {}.{} was found successfully, but it must be decorated with @view_function or be a subclass of django.views.generic.View.".format(module_name, function_name))
         return ViewFunctionRouter(module, func)
 

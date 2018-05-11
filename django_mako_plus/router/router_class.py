@@ -27,7 +27,7 @@ class ClassBasedRouter(Router):
                 # they don't need that security because, by subclassing View, we know they are endpoints.
                 # but we still need the view_function decorator for the parameter conversion, so we wrap
                 # if needed.
-                if not view_function._is_decorated(func):
+                if not view_function.is_decorated(func):
                     func = view_function(func)
                 self.endpoints[mthd_name] = ViewFunctionRouter(module, func)
 

@@ -39,10 +39,8 @@ def route_request(request, *args, **kwargs):
             log.info(request.dmp.function_obj.message(request))
             return request.dmp.function_obj.get_response(request, *args, **kwargs)
 
-        # log the view
+        # call the function
         log.info('calling %s', request.dmp.function_obj.message(request))
-
-        # call view function with any args and any remaining kwargs
         response = request.dmp.function_obj.get_response(request, *args, **kwargs)
 
         # if we didn't get a correct response back, send a 500
@@ -126,6 +124,9 @@ class RoutingData(object):
             self.urlparams = URLParamList(( unquote(s) for s in urlparams.split('/') ))
         else:
             self.urlparams = URLParamList()
+
+        # convert the parameters in the function signature
+
 
 
     def _set_function_obj(self, request, function_obj):

@@ -58,7 +58,7 @@ class ParameterConverter(object):
         self.decorator = decorator
 
         # inspect the parameters on the function
-        self.signature = inspect.signature(self.decorator.decorator_function)
+        self.signature = inspect.signature(inspect.unwrap(self.decorator.decorator_function))
         # not using typing.get_type_hints because it adds Optional() to None defaults, and we don't need to follow mro here
         param_types = getattr(self.decorator.decorator_function, '__annotations__', {})
         params = []
@@ -98,10 +98,8 @@ class ParameterConverter(object):
         decorator. It iterates the urlparams and converts them according to the
         type hints in the current view function.
         '''
+        f = inspect.unwrap(self.decorator.decorator_function)
         args = list(args)
-        print('>>> urlparams', request.dmp.urlparams)
-        print('>>> args', args)
-        print('>>> kwargs', kwargs)
         urlparam_i = 0
         # add urlparams into the arguments and convert the values
         for parameter_i, parameter in enumerate(self.parameters):
@@ -112,7 +110,7 @@ class ParameterConverter(object):
             elif parameter.name in kwargs:
                 kwargs[parameter.name] = self.convert_value(kwargs[parameter.name], parameter, request)
             # value in args?
-            elif parameter_i < len(args) - 1:
+            elif parameter_i - 1 < len(args):
                 args[parameter_i - 1] = self.convert_value(args[parameter_i - 1], parameter, request)
             # urlparam value?
             elif urlparam_i < len(request.dmp.urlparams):

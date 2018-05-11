@@ -24,19 +24,13 @@ class view_function(BaseDecorator):
         @view_function(...)
         function process_request(request):
             ...
-
-    This class also converts parameters through the `converter` attribute,
-    which is a django_mako_plus.converter.base.ParameterConverter object.
     '''
     # singleton set of decorated functions
     DECORATED_FUNCTIONS = set()
-    # the converter class to use (subclasses can override this)
-    converter_class = ParameterConverter
 
     def __init__(self, decorator_function, *args, **kwargs):
         '''Create a new wrapper around the decorated function'''
         super().__init__(decorator_function, *args, **kwargs)
-        self.converter = self.converter_class(self) if self.converter_class is not None else None
 
         # flag the function as an endpoint. doing it on the actual function because
         # we don't know the order of decorators on the function. order only matters if
@@ -48,29 +42,7 @@ class view_function(BaseDecorator):
 
 
     @classmethod
-    def _is_decorated(cls, f):
+    def is_decorated(cls, f):
         '''Returns True if the given function is decorated with @view_function'''
         real_func = inspect.unwrap(f)
         return real_func in cls.DECORATED_FUNCTIONS
-
-
-    def __call__(self, request, *args, **kwargs):
-        '''
-        Called for every request.
-        See the docs for this class on customizing this method.
-        '''
-        # convert the urlparams
-        args, kwargs = self.convert_parameters(request, *args, **kwargs)
-
-        # call the decorated view function!
-        return super().__call__(request, *args, **kwargs)
-
-
-    def convert_parameters(self, request, *args, **kwargs):
-        '''
-        Converts the parameters in the url using the current converter.
-        It must return (args, kwargs).
-        '''
-        if self.converter is not None:
-            args, kwargs = self.converter.convert_parameters(request, *args, **kwargs)
-        return args, kwargs
