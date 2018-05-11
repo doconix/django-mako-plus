@@ -80,7 +80,7 @@ def import_qualified(name):
     try:
         return getattr(import_module(parts[0]), parts[1])
     except AttributeError:
-        raise ImportError('Name not found in module: {}'.format(name))
+        raise ImportError('{} not found in module {}'.format(parts[1], parts[0]))
 
 
 def merge_dicts(*dicts):

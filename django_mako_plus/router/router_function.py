@@ -1,7 +1,8 @@
 from django.http import HttpResponse, StreamingHttpResponse
+from django.core.exceptions import ImproperlyConfigured
 
 from ..signals import dmp_signal_post_process_request, dmp_signal_pre_process_request
-from ..util import DMP_OPTIONS, log
+from ..util import DMP_OPTIONS, log, import_qualified
 
 from .base import Router
 from ..converter import ViewParameter
@@ -25,13 +26,20 @@ class ViewFunctionRouter(Router):
     def __init__(self, mod, func):
         self.module = mod
         self.function = func
-        self.converter = DMP_OPTIONS['RUMTIME_PARAMETER_CONVERTER'](self.function)
+        # create a parameter converter object specific to this function
+        self.converter = None
+        if DMP_OPTIONS['PARAMETER_CONVERTER'] is not None:
+            try:
+                self.converter = import_qualified(DMP_OPTIONS['PARAMETER_CONVERTER'])(self.function)
+            except ImportError as e:
+                raise ImproperlyConfigured('Cannot find PARAMETER_CONVERTER: {}'.format(str(e)))
 
 
     def get_response(self, request, *args, **kwargs):
         '''Converts urlparams, calls the view function, returns the response'''
         # convert the parameters
-        args, kwargs = self.converter.convert_parameters(request, *args, **kwargs)
+        if self.converter is not None:
+            args, kwargs = self.converter.convert_parameters(request, *args, **kwargs)
 
         # send the pre-signal
         if DMP_OPTIONS['SIGNALS']:

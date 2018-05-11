@@ -9,7 +9,7 @@ from .defaults import DEFAULT_OPTIONS
 from .template import MakoTemplateLoader, MakoTemplateAdapter
 from .registry import register_dmp_app, ensure_dmp_app, is_dmp_app
 from .provider.runner import init_providers
-from .util import DMP_INSTANCE_KEY, DMP_OPTIONS, import_qualified
+from .util import DMP_INSTANCE_KEY, DMP_OPTIONS
 
 from mako.template import Template
 
@@ -76,12 +76,6 @@ class MakoTemplates(BaseEngine):
 
         # set up the static file providers
         init_providers()
-
-        # set up the parameter converter
-        try:
-            DMP_OPTIONS['RUMTIME_PARAMETER_CONVERTER'] = import_qualified(DMP_OPTIONS['PARAMETER_CONVERTER'])
-        except ImportError as e:
-            raise ImproperlyConfigured('Cannot find PARAMETER_CONVERTER: {}'.format(str(e)))
 
         # add a template renderer for each app in the project directory
         if DMP_OPTIONS['APP_DISCOVERY'] != 'none' and DMP_OPTIONS['APP_DISCOVERY'] is not False:
