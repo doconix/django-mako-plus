@@ -1,102 +1,131 @@
-import os, os.path, sys, re
-from setuptools import setup
+import os
+import sys
+from distutils.sysconfig import get_python_lib
 
-MODULE_NAME = 'django_mako_plus'
+from setuptools import find_packages, setup
+
+CURRENT_PYTHON = sys.version_info[:2]
+REQUIRED_PYTHON = (3, 5)
+
+# This check and everything above must remain compatible with Python 2.7.
+if CURRENT_PYTHON < REQUIRED_PYTHON:
+    sys.stderr.write("""
+==========================
+Unsupported Python version
+==========================
+
+This version of Django requires Python {}.{}, but you're trying to
+install it on Python {}.{}.
+
+This may be because you are using a version of pip that doesn't
+understand the python_requires classifier. Make sure you
+have pip >= 9.0 and setuptools >= 24.2, then try again:
+
+    $ python -m pip install --upgrade pip setuptools
+    $ python -m pip install django
+
+This will install the latest version of Django which works on your
+version of Python. If you can't upgrade your pip (or Python), request
+an older version of Django:
+
+    $ python -m pip install "django<2"
+""".format(*(REQUIRED_PYTHON + CURRENT_PYTHON)))
+    sys.exit(1)
 
 
-# I can't import the version file the normal way because it loads
-# __init__.py, which then imports the DMP engine.
-with open('django_mako_plus/version.py') as f:
-    match = re.search("__version__\s=\s'(\d+\.\d+\.\d+)'", f.read())
-    if not match:
-        print('Cannot determine the DMP version. Aborting setup.py.')
-        sys.exit(1)
-    VERSION = match.group(1)
+# Warn if we are installing over top of an existing installation. This can
+# cause issues where files that were deleted from a more recent Django are
+# still present in site-packages. See #18115.
+overlay_warning = False
+if "install" in sys.argv:
+    lib_paths = [get_python_lib()]
+    if lib_paths[0].startswith("/usr/lib/"):
+        # We have to try also with an explicit prefix of /usr/local in order to
+        # catch Debian's custom user site-packages directory.
+        lib_paths.append(get_python_lib(prefix="/usr/local"))
+    for lib_path in lib_paths:
+        existing_path = os.path.abspath(os.path.join(lib_path, "django"))
+        if os.path.exists(existing_path):
+            # We note the need for the warning here, but present it after the
+            # command is run, so it's more likely to be seen.
+            overlay_warning = True
+            break
 
 
-CLASSIFIERS = [
-    'Development Status :: 5 - Production/Stable',
-    'Programming Language :: Python :: 3 :: Only',
-    'Framework :: Django',
-    'Framework :: Django :: 1.11',
-    'Framework :: Django :: 1.10',
-    'Framework :: Django :: 1.9',
-    'Intended Audience :: Developers',
-    'License :: OSI Approved :: Apache Software License',
-    'Operating System :: OS Independent',
-    'Topic :: Software Development',
-]
-install_requires = [
-    'django >= 1.9.0',
-    'mako >= 1.0.0',
-]
+EXCLUDE_FROM_PACKAGES = ['django.conf.project_template',
+                         'django.conf.app_template',
+                         'django.bin']
 
 
-if len(sys.argv) >= 2 and sys.argv[1] == 'sdist':
-    # remove the __pycache__ directories since the ones in project_template seems to stick around
-    os.system('find . -name "__pycache__" -type d -exec rm -r "{}" \; > /dev/null')
+# Dynamically calculate the version based on django.VERSION.
+version = __import__('django').get_version()
 
-# Compile the list of packages available
-packages = []
-def walk(root):
-  for fname in os.listdir(root):
-    fpath = os.path.join(root, fname)
-    # skip hidden/cache files
-    if fname.startswith('.') or fname.endswith('.pyc') or fname in ( '__pycache__', 'app_template', 'project_template' ):
-      continue
-    # if a directory, walk it
-    elif os.path.isdir(fpath):
-      walk(fpath)
-    # if an __init__.py file, add the directory to the packages
-    elif fname == '__init__.py':
-      packages.append(os.path.dirname(fpath))
-walk(MODULE_NAME)
 
-data_files = []
-# add the readme/license
-data_files.extend([
-    ('', [ 'readme.md' ]),
-    ('', [ 'readme.txt' ]),
-    ('', [ 'license.txt' ]),
-])
+def read(fname):
+    with open(os.path.join(os.path.dirname(__file__), fname)) as f:
+        return f.read()
 
-# add the extra directories
-# empty directories within app_template/ will cause problems with distutils, so be sure each directory has at least one file
-package_data_files = []
-for template_dir in ( 'app_template', 'project_template', 'webroot' ):
-    for root, dirs, files in os.walk(os.path.join(MODULE_NAME, template_dir)):
-      dirs[:] = [ d for d in dirs if not d.startswith('.') and not d in ( '__pycache__', ) ] # skip hidden and __pycache__ directories
-      for fname in files:
-        if fname.startswith('.') or fname.endswith('.pyc'): # skip hidden/cache files
-          continue
-        package_data_files.append(os.path.join(root[len(MODULE_NAME)+1:], fname))
 
-# read the long description if sdist
-description = 'Django+Mako: Routing by Convention, Python-Centric Template Language'
-long_description = description
-if len(sys.argv) > 1 and sys.argv[1] == 'sdist':
-  long_description = open('readme.txt').read()
-
-# run the setup
 setup(
-  name='django-mako-plus',
-  description=description,
-  long_description=long_description,
-  version=VERSION,
-  author='Conan Albrecht',
-  author_email='doconix@gmail.com',
-  url="http://django-mako-plus.readthedocs.io/",
-  download_url="https://github.com/doconix/django-mako-plus/archive/master.zip",
-  packages=packages,
-  package_data = {
-    MODULE_NAME: package_data_files,
-  },
-  entry_points={
-    'console_scripts': [
-      'django_mako_plus = django_mako_plus.__main__:main'
-    ]
-  },
-  install_requires=install_requires,
-  classifiers=CLASSIFIERS,
-  license='Apache 2.0',
+    name='Django',
+    version=version,
+    python_requires='>={}.{}'.format(*REQUIRED_PYTHON),
+    url='https://www.djangoproject.com/',
+    author='Django Software Foundation',
+    author_email='foundation@djangoproject.com',
+    description=('A high-level Python Web framework that encourages '
+                 'rapid development and clean, pragmatic design.'),
+    long_description=read('README.rst'),
+    license='BSD',
+    packages=find_packages(exclude=EXCLUDE_FROM_PACKAGES),
+    include_package_data=True,
+    scripts=['django/bin/django-admin.py'],
+    entry_points={'console_scripts': [
+        'django-admin = django.core.management:execute_from_command_line',
+    ]},
+    install_requires=['pytz'],
+    extras_require={
+        "bcrypt": ["bcrypt"],
+        "argon2": ["argon2-cffi >= 16.1.0"],
+    },
+    zip_safe=False,
+    classifiers=[
+        'Development Status :: 2 - Pre-Alpha',
+        'Environment :: Web Environment',
+        'Framework :: Django',
+        'Intended Audience :: Developers',
+        'License :: OSI Approved :: BSD License',
+        'Operating System :: OS Independent',
+        'Programming Language :: Python',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3 :: Only',
+        'Topic :: Internet :: WWW/HTTP',
+        'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
+        'Topic :: Internet :: WWW/HTTP :: WSGI',
+        'Topic :: Software Development :: Libraries :: Application Frameworks',
+        'Topic :: Software Development :: Libraries :: Python Modules',
+    ],
 )
+
+
+if overlay_warning:
+    sys.stderr.write("""
+
+========
+WARNING!
+========
+
+You have just installed Django over top of an existing
+installation, without removing it first. Because of this,
+your install may now include extraneous files from a
+previous version that have since been removed from
+Django. This is known to cause a variety of problems. You
+should manually remove the
+
+%(existing_path)s
+
+directory and re-install Django.
+
+""" % {"existing_path": existing_path})
