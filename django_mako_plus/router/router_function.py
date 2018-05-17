@@ -1,15 +1,11 @@
 from django.http import HttpResponse, StreamingHttpResponse
-from django.core.exceptions import ImproperlyConfigured
 
 from ..signals import dmp_signal_post_process_request, dmp_signal_pre_process_request
-from ..util import DMP_OPTIONS, log, import_qualified
+from ..util import DMP_OPTIONS
 
 from .base import Router
-from ..converter import ViewParameter
 
-import inspect
 import sys
-import logging
 
 
 
@@ -26,21 +22,10 @@ class ViewFunctionRouter(Router):
     def __init__(self, mod, func):
         self.module = mod
         self.function = func
-        # create a parameter converter object specific to this function
-        self.converter = None
-        if DMP_OPTIONS['PARAMETER_CONVERTER'] is not None:
-            try:
-                self.converter = import_qualified(DMP_OPTIONS['PARAMETER_CONVERTER'])(self.function)
-            except ImportError as e:
-                raise ImproperlyConfigured('Cannot find PARAMETER_CONVERTER: {}'.format(str(e)))
 
 
     def get_response(self, request, *args, **kwargs):
-        '''Converts urlparams, calls the view function, returns the response'''
-        # convert the parameters
-        if self.converter is not None:
-            args, kwargs = self.converter.convert_parameters(request, *args, **kwargs)
-
+        '''Calls the view function and returns the response'''
         # send the pre-signal
         if DMP_OPTIONS['SIGNALS']:
             for receiver, ret_response in dmp_signal_pre_process_request.send(sender=sys.modules[__name__], request=request, view_args=args, view_kwargs=kwargs):

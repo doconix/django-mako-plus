@@ -1,5 +1,6 @@
 from .base import Router
-from .router import route_request, RoutingData
+from .routing_data import RoutingData
+from .router import route_request
 from .factory import get_router
 from .router_class import ClassBasedRouter
 from .router_exception import RegistryExceptionRouter

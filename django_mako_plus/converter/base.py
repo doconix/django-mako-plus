@@ -86,6 +86,7 @@ class ParameterConverter(object):
         '''
         args = list(args)
         urlparam_i = 0
+
         # add urlparams into the arguments and convert the values
         for parameter_i, parameter in enumerate(self.parameters):
             # skip request object, *args, **kwargs
@@ -107,6 +108,7 @@ class ParameterConverter(object):
             # fallback is None
             else:
                 kwargs[parameter.name] = self.convert_value(None, parameter, request)
+
         return args, kwargs
 
 
