@@ -1,13 +1,7 @@
 from django.http import HttpResponseRedirect, HttpResponsePermanentRedirect
+from django.http import Http404
 
 from .http import HttpResponseJavascriptRedirect, REDIRECT_HEADER_KEY
-
-
-##############################################################
-###   Base of all DMP exceptions
-
-class BaseException(Exception):
-    '''Superclass of all DMP exceptions'''
 
 
 ###############################################################
@@ -15,9 +9,7 @@ class BaseException(Exception):
 
 
 
-
-
-class BaseRedirectException(BaseException):
+class BaseRedirectException(Exception):
     '''
     Superclass of DMP redirect exceptions
     '''
@@ -123,3 +115,31 @@ class JavascriptRedirectException(RedirectException):
         '''Returns the redirect response for this exception.'''
         # the redirect key is already placed in the response by HttpResponseJavascriptRedirect
         return HttpResponseJavascriptRedirect(self.redirect_to, *self.args, **self.kwargs)
+
+
+
+
+
+###############################################
+###  Exceptions for the conversion process
+
+
+class ConverterHttp404(Http404):
+    '''
+    Customization of Django's Http404 for parameter conversion errors.
+    This is raised when a converter function for a type raises a ValueError.
+    '''
+    def __init__(self, value, parameter, *args, **kwargs):
+        self.value = value
+        self.parameter = parameter
+        super().__init__(*args, **kwargs)
+
+
+class ConverterException(Exception):
+    '''
+    Raised when an unknown converter exception occurs.
+    '''
+    def __init__(self, value, parameter, *args, **kwargs):
+        self.value = value
+        self.parameter = parameter
+        super().__init__(*args, **kwargs)

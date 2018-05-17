@@ -52,12 +52,9 @@ class view_function(BaseDecorator):
 
 
     def __call__(self, request, *args, **kwargs):
-        '''Converts parameters before calling the view function'''
+        '''Main method of the decorator, run per request'''
         if self.converter is not None:
-            # note that convert_parameters short circuits if we call this twice;
-            # this can happen if two @view_function decorators are on a view function
             args, kwargs = self.converter.convert_parameters(request, *args, **kwargs)
-
         return super().__call__(request, *args, **kwargs)
 
 

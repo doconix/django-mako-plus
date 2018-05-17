@@ -28,7 +28,7 @@ class Tester(TestCase):
             execute_from_command_line([ 'manage.py', 'dmp' ] + list(argv))
         except CommandError as e:
             raise AssertionError('CommandError ocurred: {}'.format(e))
-        except BaseException as e:
+        except Exception as e:
             raise AssertionError("Error calling command: {}".format(e)).with_traceback(sys.exc_info()[2])
         finally:
             sys.stdout = orig_stdout

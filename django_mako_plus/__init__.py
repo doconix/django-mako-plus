@@ -37,6 +37,8 @@ from .exceptions import RedirectException
 from .exceptions import PermanentRedirectException
 from .exceptions import JavascriptRedirectException
 from .exceptions import InternalRedirectException
+from .exceptions import ConverterHttp404
+from .exceptions import ConverterException
 
 
 # filters and tags

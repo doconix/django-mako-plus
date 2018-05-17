@@ -1,7 +1,7 @@
-from django.http import Http404
 from django.core.exceptions import ImproperlyConfigured
 
 from ..util import log
+from ..exceptions import ConverterHttp404, ConverterException
 from .parameter import ViewParameter
 from .info import ConverterFunctionInfo
 
@@ -162,8 +162,8 @@ class ParameterConverter(object):
 
         except ValueError as e:
             log.info('ValueError raised during conversion of parameter %s (%s): %s', parameter.position, parameter.name, e)
-            raise Http404('Parameter could not be converted')
+            raise ConverterHttp404(value, parameter, 'Parameter could not be converted') from e
 
         except Exception as e:
             log.info('Exception raised during conversion of parameter %s (%s): %s', parameter.position, parameter.name, e)
-            raise
+            raise ConverterException(value, parameter, 'Parameter could not be converted') from e
