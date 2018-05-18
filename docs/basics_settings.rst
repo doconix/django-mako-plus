@@ -1,7 +1,12 @@
 ``settings.py``
 ============================
 
-DMP is configurable with options in your ``settings.py`` file.  Normally, your settings file should contain the following:
+DMP is configurable with options in your ``settings.py`` file.
+
+Typical Settings
+---------------------------
+
+Normally, your settings file should contain the following:
 
 
 ::
@@ -30,7 +35,8 @@ DMP is configurable with options in your ``settings.py`` file.  Normally, your s
     ]
 
 
-If needed, you can customize the way DMP finds and/or renders templates.  At startup, DMP starts with the ``OPTIONS`` dictionary below and then merges any overrides from your settings file.  In other words, if your settings file contains no options (like in the settings above), it will use the defaults you see below.
+All Available Settings
+-------------------------
 
 The following are the full list of available options.  Each option is described in detail later in this document.
 
