@@ -292,7 +292,7 @@ Transpiling is usually done with a bundler like ``webpack``.  However, there may
     },
     {
         'provider': 'django_mako_plus.JsLinkProvider',
-        'filepath': os.path.join('scripts', '__javascript__' '{template}.js'),
+        'filepath': os.path.join('scripts', '__javascript__', '{template}.js'),
     },
 
 
