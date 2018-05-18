@@ -280,8 +280,8 @@ Transpiling is usually done with a bundler like ``webpack``.  However, there may
     {
         'provider': 'django_mako_plus.CompileProvider',
         'group': 'scripts',
-        'sourcepath': os.path.join('scripts', '{template}.py'),
-        'targetpath': os.path.join('scripts', '__javascript__', '{template}.js'),
+        'sourcepath': os.path.join('scripts', '{template_subdir}', '{template_name}.py'),
+        'targetpath': os.path.join('scripts', '{template_subdir}', '__javascript__', '{template_name}.js'),
         'command': [
             shutil.which('transcrypt'),
             '--map',
@@ -292,7 +292,7 @@ Transpiling is usually done with a bundler like ``webpack``.  However, there may
     },
     {
         'provider': 'django_mako_plus.JsLinkProvider',
-        'filepath': os.path.join('scripts', '__javascript__', '{template}.js'),
+        'filepath': os.path.join('scripts', '{template_subdir}', '__javascript__', '{template_name}.js'),
     },
 
 

@@ -53,7 +53,7 @@ class CompileProvider(BaseProvider):
             production:  settings.STATIC_ROOT/app name/ during production.
         '''
         if settings.DEBUG:
-            return os.path.join(
+            return os.path.normpath(os.path.join(
                 self.app_config.path,
                 self.options['sourcepath'].format(
                     basedir=settings.BASE_DIR,
@@ -63,9 +63,9 @@ class CompileProvider(BaseProvider):
                     template_file=self.template_file,
                     template_subdir=self.template_subdir,
                 ),
-            )
+            ))
         else:
-            return os.path.join(
+            return os.path.normpath(os.path.join(
                 settings.STATIC_ROOT,
                 self.app_config.name,
                 self.options['sourcepath'].format(
@@ -76,12 +76,12 @@ class CompileProvider(BaseProvider):
                     template_file=self.template_file,
                     template_subdir=self.template_subdir,
                 ),
-            )
+            ))
 
     @property
     def target(self):
         if settings.DEBUG:
-            return os.path.join(
+            return os.path.normpath(os.path.join(
                 self.app_config.path,
                 self.options['targetpath'].format(
                     basedir=settings.BASE_DIR,
@@ -92,9 +92,9 @@ class CompileProvider(BaseProvider):
                     template_subdir=self.template_subdir,
                     sourcepath=self.source,
                 ),
-            )
+            ))
         else:
-            return os.path.join(
+            return os.path.normpath(os.path.join(
                 settings.STATIC_ROOT,
                 self.app_config.name,
                 self.options['targetpath'].format(
@@ -106,7 +106,7 @@ class CompileProvider(BaseProvider):
                     template_subdir=self.template_subdir,
                     sourcepath=self.source,
                 ),
-            )
+            ))
 
     def build_command(self):
         '''Returns the command to run, as a list/tuple (see subprocess module)'''

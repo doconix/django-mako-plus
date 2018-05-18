@@ -1,7 +1,7 @@
 from django.utils.encoding import force_text
 from django.conf import settings
 
-from ..util import merge_dicts, flatten
+from ..util import merge_dicts
 
 import os
 import os.path
@@ -38,25 +38,30 @@ class BaseProvider(object):
             self.app_config:            AppConfig for "homepage"
             self.app_config.path:       "/absolute/path/to/homepage/"
             self.template_file:         "index.html"
-            self.template_subdir_parts: [ "templates" ]                  # subdir parts within the app
+            self.template_subdir:       ""
             self.template_name:         "index"
             self.template_ext:          ".html"
             self.template:              "index"                          # name within "homepage/templates/"
 
-        Subdir location: /homepage/templates/mail/welcome.mail
+        Subdir location: /homepage/templates/mail/signup/welcome.txt
             self.app_config:            AppConfig for "homepage"
             self.app_config.path:       "/absolute/path/to/homepage/"
-            self.template_file:         "welcome.mail"
-            self.template_subdir_parts: [ "templates", "mail" ]          # subdir parts within the app
+            self.template_file:         "welcome.txt"
+            self.template_subdir:       "mail/signup"
             self.template_name:         "welcome"
-            self.template_ext:          ".mail"
-            self.template:              "mail/welcome"                   # name within "homepage/templates/"
+            self.template_ext:          ".txt"
+            self.template:              "mail/signup/welcome"            # name within "homepage/templates/"
         '''
         self.app_config = app_config
-        self.template_subdir, self.template_file = os.path.split(template_file)
+        subdir, self.template_file = os.path.split(template_file)
         self.template_name, self.template_ext = os.path.splitext(self.template_file)
-        template_subdir_parts = os.path.normpath(self.template_subdir).split(os.path.sep)
-        self.template = os.path.join(*flatten(template_subdir_parts[1:], self.template_name))
+        subdir_parts = os.path.normpath(subdir).split(os.path.sep)
+        if len(subdir_parts) > 1:
+            self.template_subdir = os.path.join(*subdir_parts[1:])
+            self.template = os.path.join(self.template_subdir, self.template_name)
+        else:
+            self.template_subdir = ""
+            self.template = self.template_name
         self.options = merge_dicts(self.default_options, options)     # combined options dictionary
 
     @property

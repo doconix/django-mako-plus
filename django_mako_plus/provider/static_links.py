@@ -56,7 +56,7 @@ class LinkProvider(BaseProvider):
             production:  settings.STATIC_ROOT/app name/ during production.
         '''
         if settings.DEBUG:
-            return os.path.join(
+            return os.path.normpath(os.path.join(
                 self.app_config.path,
                 self.options['filepath'].format(
                     basedir=settings.BASE_DIR,
@@ -66,9 +66,9 @@ class LinkProvider(BaseProvider):
                     template_file=self.template_file,
                     template_subdir=self.template_subdir,
                 ),
-            )
+            ))
         else:
-            return os.path.join(
+            return os.path.normpath(os.path.join(
                 settings.STATIC_ROOT,
                 self.app_config.name,
                 self.options['filepath'].format(
@@ -79,7 +79,7 @@ class LinkProvider(BaseProvider):
                     template_file=self.template_file,
                     template_subdir=self.template_subdir,
                 ),
-            )
+            ))
 
 
     def create_link(self, provider_run):
