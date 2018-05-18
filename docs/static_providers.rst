@@ -259,8 +259,10 @@ Assuming you aren't bundling with something like webpack, there are at least two
         'sourcepath': os.path.join('styles', '{template}.scss'),
         'targetpath': os.path.join('styles', '{template}.scss.css'),
     },
-    # the normal link provider works because we're in the same directory with the expected extension of ``.css``:
-    { 'provider': 'django_mako_plus.CssLinkProvider' },
+    {
+        'provider': 'django_mako_plus.CssLinkProvider',
+        'filepath': os.path.join('styles', '{template}.scss.css'),
+    },
 
 
 Example: Running a Transpiler
