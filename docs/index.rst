@@ -75,8 +75,8 @@ Contents
     tutorial
     basics
     static
-    deploy
     topics
+    deploy
 
 
 
