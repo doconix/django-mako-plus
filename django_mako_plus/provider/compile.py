@@ -46,40 +46,24 @@ class CompileProvider(BaseProvider):
 
     @property
     def source(self):
-        '''
-        The absolute path to the file on disk.  This default implementation uses:
-
-            development: /app path/
-            production:  settings.STATIC_ROOT/app name/ during production.
-        '''
-        if settings.DEBUG:
-            return os.path.normpath(os.path.join(
-                self.app_config.path,
-                self.options['sourcepath'].format(
-                    basedir=settings.BASE_DIR,
-                    app=self.app_config.name,
-                    template=self.template,
-                    template_name=self.template_name,
-                    template_file=self.template_file,
-                    template_subdir=self.template_subdir,
-                ),
-            ))
-        else:
-            return os.path.normpath(os.path.join(
-                settings.STATIC_ROOT,
-                self.app_config.name,
-                self.options['sourcepath'].format(
-                    basedir=settings.BASE_DIR,
-                    app=self.app_config.name,
-                    template=self.template,
-                    template_name=self.template_name,
-                    template_file=self.template_file,
-                    template_subdir=self.template_subdir,
-                ),
-            ))
+        # we look for source files in the project directory
+        # during both dev and prod
+        return os.path.normpath(os.path.join(
+            self.app_config.path,
+            self.options['sourcepath'].format(
+                basedir=settings.BASE_DIR,
+                app=self.app_config.name,
+                template=self.template,
+                template_name=self.template_name,
+                template_file=self.template_file,
+                template_subdir=self.template_subdir,
+            ),
+        ))
 
     @property
     def target(self):
+        # we output the target file to the project directory
+        # during dev and to the static directory during prod
         if settings.DEBUG:
             return os.path.normpath(os.path.join(
                 self.app_config.path,
