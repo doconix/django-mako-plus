@@ -68,15 +68,15 @@ The following lists the complete options for all providers that come with DMP:
         # the source filename to search for
         # if it does not start with a slash, it is relative to the app directory.
         # if it starts with a slash, it is an absolute path.
-        # codes: {app}, {template}, {template_name}, {template_file}, {template_subdir}
+        # codes: {basedir}, {app}, {template}, {template_name}, {template_file}, {template_subdir}
         'sourcepath': os.path.join('styles', '{template}.scss'),
         # the destination filename to search for
         # if it does not start with a slash, it is relative to the app directory.
         # if it starts with a slash, it is an absolute path.
-        # codes: {app}, {template}, {template_name}, {template_file}, {template_subdir}, {sourcepath}
+        # codes: {basedir}, {app}, {template}, {template_name}, {template_file}, {template_subdir}, {sourcepath}
         'targetpath': os.path.join('styles', '{template}.css'),
         # the command to be run, as a list (see subprocess module)
-        # codes: {app}, {template}, {template_name}, {template_file}, {template_subdir}, {sourcepath}, {targetpath}
+        # codes: {basedir}, {app}, {template}, {template_name}, {template_file}, {template_subdir}, {sourcepath}, {targetpath}
         'command': [
             shutil.which('sass'),
             '--load-path=.',
@@ -97,15 +97,15 @@ The following lists the complete options for all providers that come with DMP:
         # the source filename to search for
         # if it does not start with a slash, it is relative to the app directory.
         # if it starts with a slash, it is an absolute path.
-        # codes: {app}, {template}, {template_name}, {template_file}, {template_subdir}
+        # codes: {basedir}, {app}, {template}, {template_name}, {template_file}, {template_subdir}
         'sourcepath': os.path.join('styles', '{template}.less'),
         # the destination filename to search for
         # if it does not start with a slash, it is relative to the app directory.
         # if it starts with a slash, it is an absolute path.
-        # codes: {app}, {template}, {template_name}, {template_file}, {template_subdir}, {sourcepath}
+        # codes: {basedir}, {app}, {template}, {template_name}, {template_file}, {template_subdir}, {sourcepath}
         'targetpath': os.path.join('styles', '{template}.css'),
         # the command to be run, as a list (see subprocess module)
-        # codes: {app}, {template}, {template_name}, {template_file}, {template_subdir}, {sourcepath}, {targetpath}
+        # codes: {basedir}, {app}, {template}, {template_name}, {template_file}, {template_subdir}, {sourcepath}, {targetpath}
         'command': [
             shutil.which('lessc'),
             '--source-map',
@@ -125,6 +125,7 @@ The following lists the complete options for all providers that come with DMP:
         # the filename to search for (resolves to a single file, if it exists)
         # if it does not start with a slash, it is relative to the app directory.
         # if it starts with a slash, it is an absolute path.
+        # codes: {basedir}, {app}, {template}, {template_name}, {template_file}, {template_subdir}
         'filepath': os.path.join('styles', '{template}.css'),
         # if a template is rendered more than once in a request, we usually don't
         # need to include the css again.
@@ -142,7 +143,7 @@ The following lists the complete options for all providers that come with DMP:
         # the filename to search for (resolves to a single file, if it exists)
         # if it does not start with a slash, it is relative to the app directory.
         # if it starts with a slash, it is an absolute path.
-        # codes: {app}, {template}, {template_name}, {template_file}, {template_subdir}
+        # codes: {basedir}, {app}, {template}, {template_name}, {template_file}, {template_subdir}
         'filepath': os.path.join('scripts', '{template}.js'),
         # if a template is rendered more than once in a request, we should link each one
         # so the script runs again each time the template runs
@@ -162,7 +163,7 @@ The following lists the complete options for all providers that come with DMP:
         # the filename to search for (resolves to a single file, if it exists)
         # if it does not start with a slash, it is relative to the app directory.
         # if it starts with a slash, it is an absolute path.
-        # codes: {app}, {template}, {template_name}, {template_file}, {template_subdir}
+        # codes: {basedir}, {app}, {template}, {template_name}, {template_file}, {template_subdir}
         'filepath': os.path.join('styles', '__bundle__.css'),
         # if a template is rendered more than once in a request, we usually don't
         # need to include the css again.
@@ -180,7 +181,7 @@ The following lists the complete options for all providers that come with DMP:
         # the filename to search for (resolves to a single file, if it exists)
         # if it does not start with a slash, it is relative to the app directory.
         # if it starts with a slash, it is an absolute path.
-        # codes: {app}, {template}, {template_name}, {template_file}, {template_subdir}
+        # codes: {basedir}, {app}, {template}, {template_name}, {template_file}, {template_subdir}
         'filepath': os.path.join('scripts', '__bundle__.js'),
         # if a template is rendered more than once in a request, we should link each one
         # so the script runs again each time the template runs
@@ -228,8 +229,41 @@ Every provider has an ``enabled`` boolean option that sets whether it should be 
     }
 
 
+Example: Sass Filenames
+----------------------------------------
 
-Running a Transpiler
+Sass normally compiles ``[name].scss`` to ``[name].css``.  The output file is placed in the same directory as the source file.  This can make it hard to differentiate the generated `*.css` files from normal non-sass css files.  It also makes it difficult to add a pattern for the generated files in ``.gitignore``.
+
+Assuming you aren't bundling with something like webpack, there are at least two possibilities.
+
+**Option 1: Place generated files in a top-level ``dist/`` folder in your project.**
+
+.. code:: python
+
+    {
+        'provider': 'django_mako_plus.CompileScssProvider',
+        'sourcepath': os.path.join('styles', '{template}.scss'),
+        'targetpath': os.path.join('{basedir}', 'dist', '{app}', 'styles', '{template}.css'),
+    },
+    {
+        'provider': 'django_mako_plus.CssLinkProvider',
+        'filepath': os.path.join('{basedir}', 'dist', '{app}', 'styles', '{template}.css'),
+    },
+
+**Option 2: Use a custom extension for generated files, such as `[name].scss.css``.**
+
+.. code:: python
+
+    {
+        'provider': 'django_mako_plus.CompileScssProvider',
+        'sourcepath': os.path.join('styles', '{template}.scss'),
+        'targetpath': os.path.join('styles', '{template}.scss.css'),
+    },
+    # the normal link provider works because we're in the same directory with the expected extension of ``.css``:
+    { 'provider': 'django_mako_plus.CssLinkProvider' },
+
+
+Example: Running a Transpiler
 -------------------------------
 
 Transpiling is usually done with a bundler like ``webpack``.  However, there may be situations when you want DMP to trigger the transpiler.  Since the process is essentially the same as compiling Sass or Less, we just need to adjust the options to match our transpiler.
@@ -256,7 +290,6 @@ Transpiling is usually done with a bundler like ``webpack``.  However, there may
     },
     {
         'provider': 'django_mako_plus.JsLinkProvider',
-        'group': 'scripts',
         'filepath': os.path.join('scripts', '__javascript__' '{template}.js'),
     },
 

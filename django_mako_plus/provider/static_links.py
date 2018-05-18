@@ -25,7 +25,7 @@ class LinkProvider(BaseProvider):
         # the filename to search for (resolves to a single file, if it exists)
         # if it does not start with a slash, it is relative to the app directory.
         # if it starts with a slash, it is an absolute path.
-        # codes: {app}, {template}, {template_name}, {template_file}, {template_subdir}
+        # codes: {basedir}, {app}, {template}, {template_name}, {template_file}, {template_subdir}
         'filepath': os.path.join('scripts', '{template}.js'),
         # if a template is rendered more than once in a request, should we link more than once?
         'skip_duplicates': False,
@@ -59,6 +59,7 @@ class LinkProvider(BaseProvider):
             return os.path.join(
                 self.app_config.path,
                 self.options['filepath'].format(
+                    basedir=settings.BASE_DIR,
                     app=self.app_config.name,
                     template=self.template,
                     template_name=self.template_name,
@@ -71,6 +72,7 @@ class LinkProvider(BaseProvider):
                 settings.STATIC_ROOT,
                 self.app_config.name,
                 self.options['filepath'].format(
+                    basedir=settings.BASE_DIR,
                     app=self.app_config.name,
                     template=self.template,
                     template_name=self.template_name,

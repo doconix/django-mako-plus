@@ -25,15 +25,15 @@ class CompileProvider(BaseProvider):
         # the source filename to search for
         # if it does not start with a slash, it is relative to the app directory.
         # if it starts with a slash, it is an absolute path.
-        # codes: {app}, {template}, {template_name}, {template_file}, {template_subdir}
+        # codes: {basedir}, {app}, {template}, {template_name}, {template_file}, {template_subdir}
         'sourcepath': os.path.join('styles', '{template}.scss'),
         # the destination filename to search for
         # if it does not start with a slash, it is relative to the app directory.
         # if it starts with a slash, it is an absolute path.
-        # codes: {app}, {template}, {template_name}, {template_file}, {template_subdir}, {sourcepath}
+        # codes: {basedir}, {app}, {template}, {template_name}, {template_file}, {template_subdir}, {sourcepath}
         'targetpath': os.path.join('styles', '{template}.css'),
         # the command to be run, as a list (see subprocess module)
-        # codes: {app}, {template}, {template_name}, {template_file}, {template_subdir}, {sourcepath}, {targetpath}
+        # codes: {basedir}, {app}, {template}, {template_name}, {template_file}, {template_subdir}, {sourcepath}, {targetpath}
         'command': [ 'echo', 'Subclasses should override this option' ],
     })
 
@@ -56,6 +56,7 @@ class CompileProvider(BaseProvider):
             return os.path.join(
                 self.app_config.path,
                 self.options['sourcepath'].format(
+                    basedir=settings.BASE_DIR,
                     app=self.app_config.name,
                     template=self.template,
                     template_name=self.template_name,
@@ -68,6 +69,7 @@ class CompileProvider(BaseProvider):
                 settings.STATIC_ROOT,
                 self.app_config.name,
                 self.options['sourcepath'].format(
+                    basedir=settings.BASE_DIR,
                     app=self.app_config.name,
                     template=self.template,
                     template_name=self.template_name,
@@ -82,6 +84,7 @@ class CompileProvider(BaseProvider):
             return os.path.join(
                 self.app_config.path,
                 self.options['targetpath'].format(
+                    basedir=settings.BASE_DIR,
                     app=self.app_config.name,
                     template=self.template,
                     template_name=self.template_name,
@@ -95,6 +98,7 @@ class CompileProvider(BaseProvider):
                 settings.STATIC_ROOT,
                 self.app_config.name,
                 self.options['targetpath'].format(
+                    basedir=settings.BASE_DIR,
                     app=self.app_config.name,
                     template=self.template,
                     template_name=self.template_name,
@@ -110,6 +114,7 @@ class CompileProvider(BaseProvider):
             raise ImproperlyConfigured('The `command` option on a compile provider must be a list')
         return [
             str(arg).format(
+                basedir=settings.BASE_DIR,
                 app=self.app_config.name,
                 template=self.template,
                 template_name=self.template_name,
@@ -158,6 +163,13 @@ class CompileScssProvider(CompileProvider):
             '{targetpath}',
         ],
     })
+
+    def build_command(self):
+        # sass seems to need the target directory to exist
+        targetdir = os.path.dirname(self.target)
+        if not os.path.exists(targetdir):
+            os.makedirs(targetdir)
+        return super().build_command()
 
 
 
