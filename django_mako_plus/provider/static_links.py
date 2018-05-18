@@ -38,8 +38,8 @@ class LinkProvider(BaseProvider):
         # file time and version hash
         try:
             self.mtime = int(os.stat(path).st_mtime)
-            if log.isEnabledFor(logging.INFO):
-                log.info('[%s] found %s', self.template_file, path)
+            if log.isEnabledFor(logging.DEBUG):
+                log.debug('[%s] found %s', self.template_file, path)
             # version_id combines current time and the CRC32 checksum of file bytes
             self.version_id = (self.mtime << 32) | crc32(path)
         except FileNotFoundError:
