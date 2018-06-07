@@ -162,7 +162,7 @@ When a request occurs, DMP will read the signature on ``process_request``, look 
 
 
 Special Considerations for Models
---------------------------------
+--------------------------------------
 
 Since Python usually parses converter functions **before** your models are ready, you can't reference them by type.  This issue is `described in the Django documentation <https://docs.djangoproject.com/en/dev/ref/models/fields/#module-django.db.models.fields.related>`_.
 

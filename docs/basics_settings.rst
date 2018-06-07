@@ -168,7 +168,7 @@ This is one of the primary functions of DMP.  It sets up autodiscovery of your s
 ``WEBPACK_PROVIDERS``
 ------------------------
 
-This option works in connection with ``python3 manage.py dmp webpack``.  See ``Bundling <static_webpack.html>`_ for more information.
+This option works in connection with ``python3 manage.py dmp webpack``.  See `Bundling <static_webpack.html>`_ for more information.
 
 
 ``TEMPLATES_DIRS``

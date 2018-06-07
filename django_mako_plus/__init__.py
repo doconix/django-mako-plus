@@ -19,7 +19,7 @@ from .registry import register_dmp_app
 
 # the router, middleware, and view function decorator
 from .middleware import RequestInitMiddleware
-from .router import route_request, view_function
+from .router import view_function, dmp_path
 
 
 # converter decorator

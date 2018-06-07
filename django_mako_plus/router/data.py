@@ -1,25 +1,24 @@
 
-from .factory import get_router
-from .router_class import ClassBasedRouter
-
+from ..decorators import BaseDecorator
 from ..registry import ensure_dmp_app
 from ..util import URLParamList, get_dmp_instance
-
+from .discover import get_view_function
 
 from urllib.parse import unquote
 
 
 class RoutingData(object):
     '''
-    A default object is set at the beginning of the request.
-    Then after the url pattern is matched, an object with the
-    match data is created.
+    The routing information for a request.  This is basically an enhanced ResolverMatch,
+    but since Django creates its own ResolverMatch object during resolution (throwing ours
+    away), this is stored in a per-request decorator on the actual view function.
 
-    This is attached to the request as `request.dmp`.
+    During view middleware, this object is also attached to the request as `request.dmp`.
     '''
-    def __init__(self, request=None, app=None, page=None, function=None, urlparams=None):
+    def __init__(self, app=None, page=None, function=None, urlparams=None):
         '''These variables are set by the process_view method above'''
-        self.request = request
+        # the request object is set later by the middleware so the render methods work
+        self.request = None
 
         # period and dash cannot be in python names, but we allow dash in app, dash in page, and dash/period in function
         self.app = app.replace('-', '_') if app is not None else None
@@ -35,11 +34,11 @@ class RoutingData(object):
         # the return of get_router_function might be a function, a class-based view, or a template
         if self.app is not None and self.page is not None:
             self.module = '.'.join([ self.app, 'views', self.page ])
-            self._set_function_obj(self.request, get_router(self.module, self.function, self.app, fallback_template))
+            self.callable = get_view_function(self.module, self.function, self.app, fallback_template)
         else:
             self.module = None
-            self.class_obj = None
-            self.function_obj = None
+            self.callable = None
+        self.view_type = self.callable.view_type if self.callable is not None else None
 
         # parse the urlparams
         # note that I'm not using unquote_plus because the + switches to a space *after* the question mark (in the regular parameters)
@@ -52,23 +51,16 @@ class RoutingData(object):
             self.urlparams = URLParamList()
 
 
-    def _set_function_obj(self, request, function_obj):
-        '''Sets the function object, with alterations if class-based routing'''
-        self.class_obj = None
-        self.function_obj = function_obj
-        if isinstance(self.function_obj, ClassBasedRouter):
-            self.class_obj = self.function_obj
-            self.function = request.method.lower()
-
-
     def __repr__(self):
-        return 'RoutingData: app={}, page={}, module={}, function={}, urlparams={}'.format(
+        return '<RoutingData app={}, page={}, module={}, function={}, view_type={}, urlparams={}>'.format(
              self.app,
              self.page,
-             self.module if self.class_obj is None else (self.module + '.' + self.class_obj.name),
+             self.module,
              self.function,
+             self.view_type,
              self.urlparams,
         )
+
 
     def _debug(self):
         return 'django_mako_plus RoutingData:' + \
@@ -77,14 +69,16 @@ class RoutingData(object):
                 ( 'page', self.page ),
                 ( 'module', self.module ),
                 ( 'function', self.function ),
-                ( 'class_obj', self.class_obj ),
-                ( 'function_obj', self.function_obj ),
+                ( 'callable', self.callable ),
+                ( 'view_type', self.view_type ),
                 ( 'urlparams', self.urlparams ),
             )))
 
 
     def render(self, template, context=None, def_name=None, subdir='templates', content_type=None, status=None, charset=None):
         '''App-specific render function that renders templates in the *current app*, attached to the request for convenience'''
+        if self.request is None:
+            raise ValueError("RoutingData.render() can only be called after the view middleware is run.")
         ensure_dmp_app(self.app)
         template_loader = get_dmp_instance().get_template_loader(self.app, subdir)
         template_adapter = template_loader.get_template(template)
@@ -93,6 +87,8 @@ class RoutingData(object):
 
     def render_to_string(self, template, context=None, def_name=None, subdir='templates'):
         '''App-specific render function that renders templates in the *current app*, attached to the request for convenience'''
+        if self.request is None:
+            raise ValueError("RoutingData.render() can only be called after the view middleware is run.")
         ensure_dmp_app(self.app)
         template_loader = get_dmp_instance().get_template_loader(self.app, subdir)
         template_adapter = template_loader.get_template(template)

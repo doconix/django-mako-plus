@@ -1,8 +1,5 @@
 from django.test import TestCase
 
-from django_mako_plus.router import ViewFunctionRouter
-
-
 
 class Tester(TestCase):
 
@@ -15,12 +12,10 @@ class Tester(TestCase):
         self.assertEqual(req.dmp.page, 'index')
         self.assertEqual(req.dmp.function, 'basic')
         self.assertEqual(req.dmp.module, 'homepage.views.index')
-        self.assertEqual(req.dmp.class_obj, None)
         self.assertEqual(req.dmp.urlparams, [ '1', '2', '3' ])
         from homepage.views import index
-        self.assertIsInstance(req.dmp.function_obj, ViewFunctionRouter)
-        self.assertEqual(req.dmp.function_obj.module, index)
-        self.assertEqual(req.dmp.function_obj.function, index.basic)
+        self.assertEqual(req.dmp.view_type, 'function')
+        self.assertEqual(req.dmp.callable, index.basic)
 
     # /app/page/urlparams
     def test_app_page(self):
@@ -31,12 +26,10 @@ class Tester(TestCase):
         self.assertEqual(req.dmp.page, 'index')
         self.assertEqual(req.dmp.function, 'process_request')
         self.assertEqual(req.dmp.module, 'homepage.views.index')
-        self.assertEqual(req.dmp.class_obj, None)
         self.assertEqual(req.dmp.urlparams, [ '1', '2', '3' ])
         from homepage.views import index
-        self.assertIsInstance(req.dmp.function_obj, ViewFunctionRouter)
-        self.assertEqual(req.dmp.function_obj.module, index)
-        self.assertEqual(req.dmp.function_obj.function, index.process_request)
+        self.assertEqual(req.dmp.view_type, 'function')
+        self.assertEqual(req.dmp.callable, index.process_request)
 
     # /app
     def test_app(self):
@@ -47,12 +40,10 @@ class Tester(TestCase):
         self.assertEqual(req.dmp.page, 'index')
         self.assertEqual(req.dmp.function, 'process_request')
         self.assertEqual(req.dmp.module, 'homepage.views.index')
-        self.assertEqual(req.dmp.class_obj, None)
         self.assertEqual(req.dmp.urlparams, [])
         from homepage.views import index
-        self.assertIsInstance(req.dmp.function_obj, ViewFunctionRouter)
-        self.assertEqual(req.dmp.function_obj.module, index)
-        self.assertEqual(req.dmp.function_obj.function, index.process_request)
+        self.assertEqual(req.dmp.view_type, 'function')
+        self.assertEqual(req.dmp.callable, index.process_request)
 
     # /page.function/urlparams
     def test_page_function(self):
@@ -63,12 +54,10 @@ class Tester(TestCase):
         self.assertEqual(req.dmp.page, 'index')
         self.assertEqual(req.dmp.function, 'basic')
         self.assertEqual(req.dmp.module, 'homepage.views.index')
-        self.assertEqual(req.dmp.class_obj, None)
         self.assertEqual(req.dmp.urlparams, [ '1', '2', '3' ])
         from homepage.views import index
-        self.assertIsInstance(req.dmp.function_obj, ViewFunctionRouter)
-        self.assertEqual(req.dmp.function_obj.module, index)
-        self.assertEqual(req.dmp.function_obj.function, index.basic)
+        self.assertEqual(req.dmp.view_type, 'function')
+        self.assertEqual(req.dmp.callable, index.basic)
 
     # /page/urlparams
     def test_page(self):
@@ -79,12 +68,10 @@ class Tester(TestCase):
         self.assertEqual(req.dmp.page, 'index')
         self.assertEqual(req.dmp.function, 'process_request')
         self.assertEqual(req.dmp.module, 'homepage.views.index')
-        self.assertEqual(req.dmp.class_obj, None)
         self.assertEqual(req.dmp.urlparams, [ '1', '2', '3' ])
         from homepage.views import index
-        self.assertIsInstance(req.dmp.function_obj, ViewFunctionRouter)
-        self.assertEqual(req.dmp.function_obj.module, index)
-        self.assertEqual(req.dmp.function_obj.function, index.process_request)
+        self.assertEqual(req.dmp.view_type, 'function')
+        self.assertEqual(req.dmp.callable, index.process_request)
 
     # / with nothing else
     def test_nothing_else(self):
@@ -95,9 +82,7 @@ class Tester(TestCase):
         self.assertEqual(req.dmp.page, 'index')
         self.assertEqual(req.dmp.function, 'process_request')
         self.assertEqual(req.dmp.module, 'homepage.views.index')
-        self.assertEqual(req.dmp.class_obj, None)
         self.assertEqual(req.dmp.urlparams, [])
         from homepage.views import index
-        self.assertIsInstance(req.dmp.function_obj, ViewFunctionRouter)
-        self.assertEqual(req.dmp.function_obj.module, index)
-        self.assertEqual(req.dmp.function_obj.function, index.process_request)
+        self.assertEqual(req.dmp.view_type, 'function')
+        self.assertEqual(req.dmp.callable, index.process_request)

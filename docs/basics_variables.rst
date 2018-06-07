@@ -35,9 +35,12 @@ At the beginning of each request (as part of its middleware), DMP adds a routing
 
 |
 
--  ``request.dmp.class_obj``: The name of the class if the router
-   sees that the "function" is actually a class-based view. None
-   otherwise.
+-  ``request.dmp.callable``: A reference to the view function.
+
+|
+
+-  ``request.dmp.view_type``: The type of view: function (regular view function),
+    class (class-based view), or template (direct template render).
 
 |
 

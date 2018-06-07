@@ -8,7 +8,7 @@ from .info import ConverterFunctionInfo
 import logging
 import inspect
 from operator import attrgetter
-
+import functools
 
 
 class ParameterConverter(object):
@@ -42,21 +42,40 @@ class ParameterConverter(object):
     def __init__(self, view_function):
         self.view_function = view_function
 
-        # inspect the parameters on the function
-        # import pdb; pdb.set_trace()
-        self.signature = inspect.signature(self.view_function)
-        # not using typing.get_type_hints because it adds Optional() to None defaults, and we don't need to follow mro here
-        param_types = getattr(self.view_function, '__annotations__', {})
+        # inspect the parameters on the function (or functions if a class-based view)
+        self.view_parameters = {}
+        view_class = getattr(self.view_function, 'view_class', None)
+        if view_class is None:  # regular view function
+            self.view_parameters[None] = self._collect_parameters(self.view_function)
+
+        else:  # class-based view
+            for http_mthd in view_class.http_method_names:
+                func = getattr(view_class, http_mthd, None)
+                if func is not None:
+                    self.view_parameters[http_mthd] = self._collect_parameters(func, True)
+            # Django's View class aliases head to get using this logic
+            if 'get' in self.view_parameters and 'head' not in self.view_parameters:
+                self.view_parameters['head'] = self.view_parameters['get']
+
+
+    def _collect_parameters(self, func, class_based=False):
+        func_parameters = list(inspect.signature(func).parameters.values())
+        # when using class-based views, methods that have decorators might be partials,
+        # which makes it difficult to know whether the `self` parameter is present.
+        # this heuristic is the best way I can figure out to skip the self parameter if there.
+        if class_based and len(func_parameters) > 0 and func_parameters[0].name == 'self':
+            func_parameters = func_parameters[1:]
+
         params = []
-        for i, p in enumerate(self.signature.parameters.values()):
+        for i, p in enumerate(func_parameters):
             params.append(ViewParameter(
                 name=p.name,
                 position=i,
                 kind=p.kind,
-                type=p.annotation, #param_types.get(p.name) or inspect.Parameter.empty,
+                type=p.annotation,
                 default=p.default,
             ))
-        self.parameters = tuple(params)
+        return tuple(params)
 
 
     @classmethod
@@ -87,27 +106,29 @@ class ParameterConverter(object):
         args = list(args)
         urlparam_i = 0
 
-        # add urlparams into the arguments and convert the values
-        for parameter_i, parameter in enumerate(self.parameters):
-            # skip request object, *args, **kwargs
-            if parameter_i == 0 or parameter.kind is inspect.Parameter.VAR_POSITIONAL or parameter.kind is inspect.Parameter.VAR_KEYWORD:
-                pass
-            # value in kwargs?
-            elif parameter.name in kwargs:
-                kwargs[parameter.name] = self.convert_value(kwargs[parameter.name], parameter, request)
-            # value in args?
-            elif parameter_i - 1 < len(args):
-                args[parameter_i - 1] = self.convert_value(args[parameter_i - 1], parameter, request)
-            # urlparam value?
-            elif urlparam_i < len(request.dmp.urlparams):
-                kwargs[parameter.name] = self.convert_value(request.dmp.urlparams[urlparam_i], parameter, request)
-                urlparam_i += 1
-            # can we assign a default value?
-            elif parameter.default is not inspect.Parameter.empty:
-                kwargs[parameter.name] = self.convert_value(parameter.default, parameter, request)
-            # fallback is None
-            else:
-                kwargs[parameter.name] = self.convert_value(None, parameter, request)
+        parameters = self.view_parameters.get(request.method.lower()) or self.view_parameters.get(None)
+        if parameters is not None:
+            # add urlparams into the arguments and convert the values
+            for parameter_i, parameter in enumerate(parameters):
+                # skip request object, *args, **kwargs
+                if parameter_i == 0 or parameter.kind is inspect.Parameter.VAR_POSITIONAL or parameter.kind is inspect.Parameter.VAR_KEYWORD:
+                    pass
+                # value in kwargs?
+                elif parameter.name in kwargs:
+                    kwargs[parameter.name] = self.convert_value(kwargs[parameter.name], parameter, request)
+                # value in args?
+                elif parameter_i - 1 < len(args):
+                    args[parameter_i - 1] = self.convert_value(args[parameter_i - 1], parameter, request)
+                # urlparam value?
+                elif urlparam_i < len(request.dmp.urlparams):
+                    kwargs[parameter.name] = self.convert_value(request.dmp.urlparams[urlparam_i], parameter, request)
+                    urlparam_i += 1
+                # can we assign a default value?
+                elif parameter.default is not inspect.Parameter.empty:
+                    kwargs[parameter.name] = self.convert_value(parameter.default, parameter, request)
+                # fallback is None
+                else:
+                    kwargs[parameter.name] = self.convert_value(None, parameter, request)
 
         return args, kwargs
 

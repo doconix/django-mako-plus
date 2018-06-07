@@ -24,8 +24,8 @@ class ViewParameter(object):
         self.type = type
         self.default = default
 
-    def __str__(self):
-        return 'ViewParameter: name={}, type={}, default={}'.format(
+    def __repr__(self):
+        return '<ViewParameter name={}, type={}, default={}>'.format(
             self.name,
             self.type.__qualname__ if self.type is not None else '<not specified>',
             self.default,
