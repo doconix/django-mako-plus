@@ -1,0 +1,40 @@
+Installation
+==============================
+
+This section shows how to install DMP in a new project as well as an existing project.
+
+What kind of project do you have?
+
+.. toctree::
+    :maxdepth: 1
+
+    install_new
+    install_existing
+
+
+Minimal DMP
+-------------------------------------
+
+A common question from users is how to do a minimal installation with just one feature.  For example, you might need to use DMP to render Mako templates in an otherwise vanilla Django project.  Or you might only need DMP's routing-by-convention.
+
+This section shows how to go cafeteria-style with DMP.
+
+.. toctree::
+    :maxdepth: 1
+
+    install_as_renderer
+    install_as_router
+    install_app_specific
+
+
+Integration
+-----------------------------------
+
+DMP plays nicely with the other kids on the playground.  The following pages discuss how to integrate it with other engines, libraries, and apps:
+
+.. toctree::
+    :maxdepth: 1
+
+    install_subdirectory
+    install_third_party
+    install_other_syntax

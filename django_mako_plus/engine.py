@@ -47,6 +47,12 @@ class MakoTemplates(BaseEngine):
     '''
     def __init__(self, params):
         '''Constructor'''
+        # ensure DMP is listed as an app (common install error)
+        try:
+            apps.get_app_config('django_mako_plus')
+        except LookupError:
+            raise ImproperlyConfigured("`django_mako_plus` must be listed in INSTALLED_APPS before it can be used")
+
         # start with the default options
         DMP_OPTIONS.update(DEFAULT_OPTIONS)
 
@@ -78,7 +84,7 @@ class MakoTemplates(BaseEngine):
         init_providers()
 
         # add a template renderer for each app in the project directory
-        if DMP_OPTIONS['APP_DISCOVERY'] != 'none' and DMP_OPTIONS['APP_DISCOVERY'] is not False:
+        if DMP_OPTIONS['APP_DISCOVERY'] != 'none' and DMP_OPTIONS['APP_DISCOVERY']:
             for config in apps.get_app_configs():
                 if DMP_OPTIONS['APP_DISCOVERY'] == 'all' or os.path.samefile(os.path.dirname(config.path), settings.BASE_DIR):
                     register_dmp_app(config)

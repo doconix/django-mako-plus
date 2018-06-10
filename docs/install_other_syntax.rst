@@ -1,4 +1,4 @@
-Django Syntax and Tags
+Django/Jinja2 within Mako Templates
 =======================================================
 
 Django officially supports multiple template engines, even within the same project/app.  Simply list the engines you want to use, such as Django, Jinja2, and DMP, in your settings.py file.

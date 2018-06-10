@@ -71,7 +71,7 @@ Contents
 
     about
     upgrade_notes
-    installation
+    install
     tutorial
     basics
     static

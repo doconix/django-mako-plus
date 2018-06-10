@@ -23,7 +23,7 @@ This page contains more advanced conversion topics.
 Raw Parameter Values
 -------------------------
 
-In its view middleware, DMP populates the ``request.dmp.urlparams[ ]`` list with all URL parts *after* the first two parts (``/homepage/index/``), up to the ``?`` (query string).  For example, the URL ``/homepage/index/144/A58UX/`` has two urlparams: ``144`` and ``A58UX``.  These can be accessed as ``request.dmp.urlparams[0]`` and ``request.dmp.urlparams[1]`` throughout your view function.
+During URL resolution, DMP populates the ``request.dmp.urlparams[ ]`` list with all URL parts *after* the first two parts (``/homepage/index/``), up to the ``?`` (query string).  For example, the URL ``/homepage/index/144/A58UX/`` has two urlparams: ``144`` and ``A58UX``.  These can be accessed as ``request.dmp.urlparams[0]`` and ``request.dmp.urlparams[1]`` throughout your view function.
 
 Empty parameters and trailing slashes are handled in a specific way.  The following table gives examples:
 
@@ -53,8 +53,9 @@ Because of these difficulties, the urlparams list is programmed to never return 
 For this reason, the default converters for booleans and Models objects equate the empty string *and* dash '-' as the token for False and None, respectively.  The single dash is especially useful because it provides a character in the URL (so your web server doesn't compact that position) and explicitly states the value.  Your custom converters can override this behavior, but be sure to check for the empty string in ``request.dmp.urlparams`` instead of ``None``.
 
 
+
 Conversion Errors
-^^^^^^^^^^^^^^^^^^^^^^^^
+--------------------------------
 
 Suppose we use a url of ``/homepage/index/Homer/a/t/`` to the example above.  The integer converter will fail because ``a`` is not a valid integer.  A ValueError is raised.
 
@@ -62,52 +63,6 @@ When this occurs, the default behavior of DMP is to raise an Http404 exception, 
 
 If you want a different resolution to conversion errors, such as a redirect, the sections below explain how to customize the conversion process.
 
-
-Non-Wrapping Decorators
---------------------------------
-
-Automatic conversion is done using ``inspect.signature``, which comes standard with Python.  This function reads your ``process_request`` source code signature and gives DMP the parameter hints.  As we saw in the `tutorial <tutorial_urlparams.html#adding-type-hints>`_, your code specifies these hints with something like the following:
-
-.. code:: python
-
-    @view_function
-    def process_request(request, hrs:int, mins:int, forward:bool=True):
-        ...
-
-The trigger for DMP to read parameter hints is the ``@view_function`` decorator, which signals a callable endpoint to DMP.  When it sees this decorator, DMP goes to the wrapped function, ``process_request``, and inspects the hints.
-
-Normally, this process works without issues.  But it can fail when certain decorators are chained together.  Consider the following code:
-
-.. code:: python
-
-    @view_function
-    @other_decorator   # this might mess up the type hints!
-    def process_request(request, hrs:int, mins:int, forward:bool=True):
-        ...
-
-If the developer of ``@other_decorator`` didn't "wrap" it correctly, DMP will **read the signature from the wrong function**: ``def other_decorator(...)`` instead of ``def process_request(...)``!  This issue is well known in the Python community -- Google "fix your python decorators" to read many blog posts about it.
-
-Debugging when this occurs can be fubar and hazardous to your health.  Unwrapped decorators are essentially just function calls, and there is no way for DMP to differentiate them from your endpoints (without using hacks like reading your source code). You'll know something is wrong because DMP will ignore your parameters, sent them the wrong values, or throw unexpected exceptions during conversion.  If you are using multiple decorators on your endpoints, check the wrapping before you debug too much (next paragraph).
-
-You can avoid/fix this issue by ensuring each decorator you are using is wrapped correctly, per the Python decorator pattern.  When coding ``other_decorator``, be sure to include the ``@wraps(func)`` line.  You can read more about this in the `Standard Python Documentation <https://docs.python.org/3/library/functools.html#functools.wraps>`_.  The pattern looks something like the following:
-
-.. code:: python
-
-    from functools import wraps
-
-    def other_decorator(func):
-        @wraps(func)
-        def wrapper(request, *args, **kwargs):
-            # decorator work here goes here
-            # ...
-            # call the endpoint
-            return func(request, *args, **kwargs)
-        # outer function return
-        return wrapper
-
-When your inner function is decorated with ``@wraps``, DMP is able to "unwrap" the decorator chain to the real endpoint function.
-
-    If your decorator comes from third-party code that you can't control, one solution is to create a new decorator (following the pattern above) that calls the third-party function as its "work". Then decorate functions with your own decorator rather than the third-party decorator.
 
 
 Adding a Custom Converter
@@ -223,6 +178,54 @@ We'll assume you placed the class in ``myproject/lib/converters.py``.  Activate 
     }
 
 All parameters in the system will now use your customization rather than the standard DMP converter.
+
+
+
+Non-Wrapping Decorators
+--------------------------------
+
+Automatic conversion is done using ``inspect.signature``, which comes standard with Python.  This function reads your ``process_request`` source code signature and gives DMP the parameter hints.  As we saw in the `tutorial <tutorial_urlparams.html#adding-type-hints>`_, your code specifies these hints with something like the following:
+
+.. code:: python
+
+    @view_function
+    def process_request(request, hrs:int, mins:int, forward:bool=True):
+        ...
+
+The trigger for DMP to read parameter hints is the ``@view_function`` decorator, which signals a callable endpoint to DMP.  When it sees this decorator, DMP goes to the wrapped function, ``process_request``, and inspects the hints.
+
+Normally, this process works without issues.  But it can fail when certain decorators are chained together.  Consider the following code:
+
+.. code:: python
+
+    @view_function
+    @other_decorator   # this might mess up the type hints!
+    def process_request(request, hrs:int, mins:int, forward:bool=True):
+        ...
+
+If the developer of ``@other_decorator`` didn't "wrap" it correctly, DMP will **read the signature from the wrong function**: ``def other_decorator(...)`` instead of ``def process_request(...)``!  This issue is well known in the Python community -- Google "fix your python decorators" to read many blog posts about it.
+
+Debugging when this occurs can be fubar and hazardous to your health.  Unwrapped decorators are essentially just function calls, and there is no way for DMP to differentiate them from your endpoints (without using hacks like reading your source code). You'll know something is wrong because DMP will ignore your parameters, sent them the wrong values, or throw unexpected exceptions during conversion.  If you are using multiple decorators on your endpoints, check the wrapping before you debug too much (next paragraph).
+
+You can avoid/fix this issue by ensuring each decorator you are using is wrapped correctly, per the Python decorator pattern.  When coding ``other_decorator``, be sure to include the ``@wraps(func)`` line.  You can read more about this in the `Standard Python Documentation <https://docs.python.org/3/library/functools.html#functools.wraps>`_.  The pattern looks something like the following:
+
+.. code:: python
+
+    from functools import wraps
+
+    def other_decorator(func):
+        @wraps(func)
+        def wrapper(request, *args, **kwargs):
+            # decorator work here goes here
+            # ...
+            # call the endpoint
+            return func(request, *args, **kwargs)
+        # outer function return
+        return wrapper
+
+When your inner function is decorated with ``@wraps``, DMP is able to "unwrap" the decorator chain to the real endpoint function.
+
+    If your decorator comes from third-party code that you can't control, one solution is to create a new decorator (following the pattern above) that calls the third-party function as its "work". Then decorate functions with your own decorator rather than the third-party decorator.
 
 
 Disabling the Converter

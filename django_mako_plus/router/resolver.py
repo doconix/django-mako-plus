@@ -37,6 +37,10 @@ class DMPPattern(URLPattern):
         # This method can be removed when Django 1.x support is dropped.
         return self._regex
 
+    def check(self):
+        # TODO add custom checks for DMP, such as ensuring the dmp_app, dmp_page, etc. variables are in the regex
+        return []
+
     def __repr__(self):
         return '<{} {}{}>'.format(
             self.__class__.__name__,

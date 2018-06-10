@@ -62,9 +62,8 @@ def register_dmp_app(app, inject_urls=False):
     '''
     # this can only be done *before* django processes through urls.py
     if apps.ready:
-        raise ImproperlyConfigured("App registration attempted too late in the startup process. "
-                                   "Apps can no longer be registered with DMP because Django has already set up. "
-                                   "Please call register_dmp_app() earlier in the process (ideally during AppConfig.ready() in yourapp/apps.py).")
+        raise ImproperlyConfigured("App registration attempted after urls.py has already been processed. "
+                                   "Hint: If you set APP_DISCOVERY=None (manual registration), call register_dmp_app() earlier in the process (ideally during AppConfig.ready() in yourapp/apps.py).")
 
     # since this only runs at startup, this lock doesn't affect performance
     if isinstance(app, str):

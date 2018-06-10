@@ -2,6 +2,7 @@ from django.conf import settings
 from django.core.exceptions import ViewDoesNotExist, ImproperlyConfigured
 from django.template import TemplateDoesNotExist
 from django.views.generic import View
+from django.urls.exceptions import Resolver404
 
 from .decorators import view_function, CONVERTER_ATTRIBUTE_NAME
 from ..util import DMP_OPTIONS, get_dmp_instance, import_qualified, log
@@ -40,7 +41,11 @@ def get_view_function(module_name, function_name, fallback_app=None, fallback_te
                     func = find_view_function(module_name, function_name, fallback_app, fallback_template, verify_decorator)
                 except ViewDoesNotExist as vdne:
                     func = None
-                    log.info(str(vdne))
+                    raise Resolver404({
+                        'tried': [ ,
+                        'path': key,
+                    })
+                    #log.debug(str(vdne))
                 # cache in production mode
                 if not settings.DEBUG:
                     CACHED_VIEW_FUNCTIONS[key] = func
