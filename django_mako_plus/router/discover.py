@@ -1,8 +1,7 @@
 from django.conf import settings
-from django.core.exceptions import ViewDoesNotExist, ImproperlyConfigured
+from django.core.exceptions import ImproperlyConfigured, ViewDoesNotExist
 from django.template import TemplateDoesNotExist
 from django.views.generic import View
-from django.urls.exceptions import Resolver404
 
 from .decorators import view_function, CONVERTER_ATTRIBUTE_NAME
 from ..util import DMP_OPTIONS, get_dmp_instance, import_qualified, log
@@ -24,7 +23,7 @@ rlock = threading.RLock()
 def get_view_function(module_name, function_name, fallback_app=None, fallback_template=None, verify_decorator=True):
     '''
     Retrieves a view function from the cache, finding it if the first time.
-    This is called by resolver.py.
+    Raises ViewDoesNotExist if not found.  This is called by resolver.py.
     '''
     # first check the cache (without doing locks)
     key = ( module_name, function_name )
@@ -37,15 +36,7 @@ def get_view_function(module_name, function_name, fallback_app=None, fallback_te
                 return CACHED_VIEW_FUNCTIONS[key]
             except KeyError:
                 # if we get here, we need to load the view function
-                try:
-                    func = find_view_function(module_name, function_name, fallback_app, fallback_template, verify_decorator)
-                except ViewDoesNotExist as vdne:
-                    func = None
-                    raise Resolver404({
-                        'tried': [ ,
-                        'path': key,
-                    })
-                    #log.debug(str(vdne))
+                func = find_view_function(module_name, function_name, fallback_app, fallback_template, verify_decorator)
                 # cache in production mode
                 if not settings.DEBUG:
                     CACHED_VIEW_FUNCTIONS[key] = func

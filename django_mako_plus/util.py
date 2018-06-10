@@ -2,6 +2,8 @@ from django.apps import apps
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 
+from .defaults import DEFAULT_OPTIONS
+
 import base64
 import os, os.path
 import collections
@@ -14,6 +16,7 @@ from importlib import import_module
 # this is populated with the dictionary of options in engine.py when
 # Django initializes the template engine
 DMP_OPTIONS = {}
+DMP_OPTIONS.update(DEFAULT_OPTIONS)
 
 # the key for the DMP singleton engine instance (stored in DMP_OPTIONS by engine.py)
 DMP_INSTANCE_KEY = 'django_mako_plus_instance'

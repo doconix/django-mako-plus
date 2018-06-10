@@ -3,7 +3,7 @@ from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
 from django_mako_plus.registry import get_dmp_apps, ensure_dmp_app
 from django_mako_plus.provider import create_mako_context
-from django_mako_plus.provider.runner import ProviderRun, create_factories
+from django_mako_plus.provider.runner import ProviderRun, init_provider_factories
 from django_mako_plus.util import get_dmp_instance
 from django_mako_plus.management.mixins import DMPCommandMixIn
 
@@ -45,7 +45,7 @@ class Command(DMPCommandMixIn, BaseCommand):
 
     def handle(self, *args, **options):
         self.options = options
-        self.factories = create_factories('WEBPACK_PROVIDERS')
+        self.factories = init_provider_factories('WEBPACK_PROVIDERS')
 
         # ensure we have a base directory
         try:

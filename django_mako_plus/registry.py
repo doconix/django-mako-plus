@@ -50,21 +50,11 @@ def ensure_dmp_app(app):
 
 
 
-def register_dmp_app(app, inject_urls=False):
+def register_dmp_app(app):
     '''
     Registers an app as a "DMP-enabled" app.  Normally, DMP does this
-    automatically during system startup.
-
-    If auto-discovery is disabled, call this method to register
-    an app as DMP-enabled.  This should be done in the app's
-    AppConfig.ready() method so registration happens *before* Django
-    processes through urls.py.
+    automatically when included in urls.py.
     '''
-    # this can only be done *before* django processes through urls.py
-    if apps.ready:
-        raise ImproperlyConfigured("App registration attempted after urls.py has already been processed. "
-                                   "Hint: If you set APP_DISCOVERY=None (manual registration), call register_dmp_app() earlier in the process (ideally during AppConfig.ready() in yourapp/apps.py).")
-
     # since this only runs at startup, this lock doesn't affect performance
     if isinstance(app, str):
         app = apps.get_app_config(app)

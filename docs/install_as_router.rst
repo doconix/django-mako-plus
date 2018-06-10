@@ -67,13 +67,15 @@ Create an Endpoint
 .. code:: python
 
     from django.shortcuts import render
+    from django_mako_plus import view_function
     from datetime import datetime
 
+    @view_function
     def process_request(request):
         context = {
             'now': datetime.now(),
         }
-        return render(request, 'templates/polls/index.html', context)
+        return render(request, 'polls/index.html', context)
 
 Note in the code above that the function is named ``process_request``.  This is the default function that DMP looks for within the view file.
 

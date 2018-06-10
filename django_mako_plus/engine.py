@@ -5,11 +5,8 @@ from django.template import TemplateDoesNotExist
 from django.template.backends.base import BaseEngine
 from django.utils.module_loading import import_string
 
-from .defaults import DEFAULT_OPTIONS
 from .template import MakoTemplateLoader, MakoTemplateAdapter
 from .registry import register_dmp_app, ensure_dmp_app, is_dmp_app
-from .provider.runner import init_providers
-from .util import DMP_INSTANCE_KEY, DMP_OPTIONS
 
 from mako.template import Template
 
@@ -17,16 +14,10 @@ import itertools
 import os
 import os.path
 import re
-try:
-    # python 3.4+
-    pass
-except ImportError:
-    # python <= 3.4
-    pass
 
 
 # Following Django's lead, hard coding the CSRF processor
-_builtin_context_processors = (
+BUILTIN_CONTEXT_PROCESSORS = (
     'django_mako_plus.context_processors.csrf',
 )
 
@@ -47,48 +38,18 @@ class MakoTemplates(BaseEngine):
     '''
     def __init__(self, params):
         '''Constructor'''
+        # # we have additional options that
+        # params.pop('OPTIONS', None)
+        self.template_loaders = {}
+
         # ensure DMP is listed as an app (common install error)
         try:
-            apps.get_app_config('django_mako_plus')
+            self.dmp = apps.get_app_config('django_mako_plus')
         except LookupError:
             raise ImproperlyConfigured("`django_mako_plus` must be listed in INSTALLED_APPS before it can be used")
 
-        # start with the default options
-        DMP_OPTIONS.update(DEFAULT_OPTIONS)
-
-        # pop the settings.py options into the DMP optionsRUNTIME_TEMPLATE_IMPORTS
-        try:
-            DMP_OPTIONS.update(params.pop('OPTIONS'))
-        except KeyError:
-            raise ImproperlyConfigured('The Django Mako Plus template OPTIONS were not set up correctly in settings.py.  Please ensure the OPTIONS is set in the template setup.')
-
-        # django_mako_plus is always available in templates
-        DMP_OPTIONS['RUNTIME_TEMPLATE_IMPORTS'] = [ 'import django_mako_plus' ]
-        DMP_OPTIONS['RUNTIME_TEMPLATE_IMPORTS'].extend(DMP_OPTIONS['DEFAULT_TEMPLATE_IMPORTS'])
-
-        # cache our instance in the util module for get_dmp_instance
-        # this is a bit of a hack, but it makes calling utility methods possible and efficient
-        DMP_OPTIONS[DMP_INSTANCE_KEY] = self
-        self.template_loaders = {}
-
         # super constructor
         super(MakoTemplates, self).__init__(params)
-
-        # set up the context processors
-        context_processors = []
-        for processor in itertools.chain(_builtin_context_processors, DMP_OPTIONS['CONTEXT_PROCESSORS']):
-            context_processors.append(import_string(processor))
-        self.template_context_processors = tuple(context_processors)
-
-        # set up the static file providers
-        init_providers()
-
-        # add a template renderer for each app in the project directory
-        if DMP_OPTIONS['APP_DISCOVERY'] != 'none' and DMP_OPTIONS['APP_DISCOVERY']:
-            for config in apps.get_app_configs():
-                if DMP_OPTIONS['APP_DISCOVERY'] == 'all' or os.path.samefile(os.path.dirname(config.path), settings.BASE_DIR):
-                    register_dmp_app(config)
-
 
 
     def from_string(self, template_code):
@@ -96,7 +57,8 @@ class MakoTemplates(BaseEngine):
         Compiles a template from the given string.
         This is one of the required methods of Django template engines.
         '''
-        mako_template = Template(template_code, imports=DMP_OPTIONS['RUNTIME_TEMPLATE_IMPORTS'], input_encoding=DMP_OPTIONS['DEFAULT_TEMPLATE_ENCODING'])
+        dmp = apps.get_app_config('django_mako_plus')
+        mako_template = Template(template_code, imports=dmp.default_template_imports, input_encoding=dmp.options['DEFAULT_TEMPLATE_ENCODING'])
         return MakoTemplateAdapter(mako_template)
 
 

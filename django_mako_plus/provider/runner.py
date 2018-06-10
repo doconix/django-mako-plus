@@ -1,10 +1,11 @@
+from django.apps import apps
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.utils.module_loading import import_string
 
 from .base import BaseProvider
 from ..template import template_inheritance
-from ..util import DMP_OPTIONS, split_app, merge_dicts, log
+from ..util import split_app, merge_dicts, log
 from ..uid import wuid
 
 import io
@@ -17,15 +18,11 @@ import logging
 ###   Static File Provider Factory
 
 
-def init_providers():
-    '''Called when the DMP template engine is created by Django'''
-    DMP_OPTIONS['RUNTIME_PROVIDER_FACTS'] = create_factories()
-
-
-def create_factories(key='CONTENT_PROVIDERS'):
+def init_provider_factories(key='CONTENT_PROVIDERS'):
     '''Called from here as well as dmp_webpack.py'''
     factories = []
-    for index, provider_def in enumerate(DMP_OPTIONS[key]):
+    dmp = apps.get_app_config('django_mako_plus')
+    for index, provider_def in enumerate(dmp.options.get(key, [])):
         fac = ProviderFactory(provider_def, '_django_mako_plus_providers_{}_{}_'.format(key, index))
         if fac.options['enabled']:  # providers can be disabled globally in settings (to run on debug or prod only, for example)
             factories.append(fac)
