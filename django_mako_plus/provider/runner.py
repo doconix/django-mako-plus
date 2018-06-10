@@ -92,7 +92,7 @@ class ProviderRun(object):
         #     index.html,    [ JsLinkProvider3, CssLinkProvider3, ... ]
         factories = [
             pf
-            for pf in (factories if factories is not None else dmp.self.provider_factories)
+            for pf in (factories if factories is not None else dmp.provider_factories)
             if group is None or group == pf.options['group']
         ]
         self.template_providers = [

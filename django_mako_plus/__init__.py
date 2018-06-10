@@ -6,7 +6,7 @@
 
 # pointer to our app config
 # Django looks for this exact variable name
-default_app_config = 'django_mako_plus.Config'
+default_app_config = 'django_mako_plus.apps.Config'
 
 
 # the version

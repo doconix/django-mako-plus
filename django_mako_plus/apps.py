@@ -2,14 +2,11 @@ from django.apps import apps, AppConfig
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.template import engines
-from django.utils.module_loading import import_string
 
 from .defaults import DEFAULT_OPTIONS
-from .engine import BUILTIN_CONTEXT_PROCESSORS
 from .provider.runner import init_provider_factories
 from .signals import dmp_signal_register_app
 
-import itertools
 import threading
 
 
@@ -40,12 +37,6 @@ class Config(AppConfig):
 
         # set up the static file providers
         self.provider_factories = init_provider_factories()
-
-        # set up the context processors
-        context_processors = []
-        for processor in itertools.chain(BUILTIN_CONTEXT_PROCESSORS, self.options['CONTEXT_PROCESSORS']):
-            context_processors.append(import_string(processor))
-        self.template_context_processors = tuple(context_processors)
 
         # set up the parameter converters (can't import until apps are set up)
         from .converter.base import ParameterConverter

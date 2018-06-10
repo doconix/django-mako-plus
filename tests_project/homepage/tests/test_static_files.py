@@ -1,3 +1,4 @@
+from django.apps import apps
 from django.test import TestCase
 from django.test.utils import override_settings
 

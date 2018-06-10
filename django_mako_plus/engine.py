@@ -2,11 +2,12 @@ from django.apps import apps, AppConfig
 from django.core.exceptions import ImproperlyConfigured
 from django.template import TemplateDoesNotExist
 from django.template.backends.base import BaseEngine
+from django.utils.module_loading import import_string
+from mako.template import Template
 
 from .template import MakoTemplateLoader, MakoTemplateAdapter
 
-from mako.template import Template
-
+import itertools
 import os
 import os.path
 import re
@@ -34,17 +35,23 @@ class MakoTemplates(BaseEngine):
     '''
     def __init__(self, params):
         '''Constructor'''
-        # # we have additional options that
-        # params.pop('OPTIONS', None)
-        self.template_loaders = {}
-
         # ensure DMP is listed as an app (common install error)
         try:
             self.dmp = apps.get_app_config('django_mako_plus')
         except LookupError:
             raise ImproperlyConfigured("`django_mako_plus` must be listed in INSTALLED_APPS before it can be used")
 
+        # cache for our template loaders
+        self.template_loaders = {}
+
+        # set up the context processors
+        context_processors = []
+        for processor in itertools.chain(BUILTIN_CONTEXT_PROCESSORS, self.dmp.options['CONTEXT_PROCESSORS']):
+            context_processors.append(import_string(processor))
+        self.template_context_processors = tuple(context_processors)
+
         # super constructor
+        params.pop('OPTIONS', None)   # the super doesn't like OPTIONS in there
         super(MakoTemplates, self).__init__(params)
 
 

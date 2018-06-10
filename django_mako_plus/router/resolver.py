@@ -22,16 +22,16 @@ from contextlib import contextmanager
 
 def dmp_path(app_name, kwargs=None, name=None, patterns=None):
     '''
+    Main function that should be called from urls.py.
     Adds a DMP convention-style URL resolver for an app.
-    This should be called from urls.py.
     '''
     # register this app as a DMP app
     dmp = apps.get_app_config('django_mako_plus')
+    if
     dmp.register_app(app_name)
 
     # create a resolver for this app
     return AppResolver(app_name, default_args=kwargs, name=name, patterns=patterns)
-
 
 
 #########################################################
@@ -47,39 +47,6 @@ class AppPattern(URLPattern):
 
 #########################################################
 ###  Resolver for an app
-
-DEFAULT_PATTERNS = (
-    # /app/page.function/urlparams
-    (
-        r'^{app_name}/(?P<dmp_page>[_a-zA-Z0-9\-]+)\.(?P<dmp_function>[_a-zA-Z0-9\.\-]+)/(?P<dmp_urlparams>.*?)/?$',
-        { 'dmp_app': '{app_name}' },
-        'DMP /app/page.function/urlparams',
-    ),
-    # /app/page.function
-    (
-        r'^{app_name}/(?P<dmp_page>[_a-zA-Z0-9\-]+)\.(?P<dmp_function>[_a-zA-Z0-9\.\-]+)/?$',
-        { 'dmp_app': '{app_name}' },
-        'DMP /app/page.function',
-    ),
-    # /app/page/urlparams
-    (
-        r'^{app_name}/(?P<dmp_page>[_a-zA-Z0-9\-]+)/(?P<dmp_urlparams>.*?)/?$',
-        { 'dmp_app': '{app_name}' },
-        'DMP /app/page/urlparams',
-    ),
-    # /app/page
-    (
-        r'^{app_name}/(?P<dmp_page>[_a-zA-Z0-9\-]+)/?$',
-        { 'dmp_app': '{app_name}' },
-        'DMP /app/page',
-    ),
-    # /app
-    (
-        r'^{app_name}/?$',
-        { 'dmp_app': '{app_name}' },
-        'DMP /app',
-    ),
-)
 
 
 class AppResolverPattern(RegexPattern):
@@ -105,6 +72,38 @@ class AppResolver(URLResolver):
     Convention-based url resolver that implements DMP's app-aware view function finder.
     This is created when `dmp_path()` is called in urls.py.
     '''
+    DEFAULT_PATTERNS = (
+        # /app/page.function/urlparams
+        (
+            r'^{app_name}/(?P<dmp_page>[_a-zA-Z0-9\-]+)\.(?P<dmp_function>[_a-zA-Z0-9\.\-]+)/(?P<dmp_urlparams>.*?)/?$',
+            { 'dmp_app': '{app_name}' },
+            'DMP /app/page.function/urlparams',
+        ),
+        # /app/page.function
+        (
+            r'^{app_name}/(?P<dmp_page>[_a-zA-Z0-9\-]+)\.(?P<dmp_function>[_a-zA-Z0-9\.\-]+)/?$',
+            { 'dmp_app': '{app_name}' },
+            'DMP /app/page.function',
+        ),
+        # /app/page/urlparams
+        (
+            r'^{app_name}/(?P<dmp_page>[_a-zA-Z0-9\-]+)/(?P<dmp_urlparams>.*?)/?$',
+            { 'dmp_app': '{app_name}' },
+            'DMP /app/page/urlparams',
+        ),
+        # /app/page
+        (
+            r'^{app_name}/(?P<dmp_page>[_a-zA-Z0-9\-]+)/?$',
+            { 'dmp_app': '{app_name}' },
+            'DMP /app/page',
+        ),
+        # /app
+        (
+            r'^{app_name}/?$',
+            { 'dmp_app': '{app_name}' },
+            'DMP /app',
+        ),
+    )
 
     def __init__(self, app_name, default_args=None, name=None, patterns=None):
         self.dmp = apps.get_app_config('django_mako_plus')
@@ -115,11 +114,11 @@ class AppResolver(URLResolver):
                 default_args={ k: v.format(app_name=app_name) for k, v in kwargs.items() },
                 name=name.format(app_name=app_name),
             )
-            for regex, kwargs, name in DEFAULT_PATTERNS
+            for regex, kwargs, name in self.DEFAULT_PATTERNS
         ]
         self.app_name = app_name
         # call the super
-        super().__init__(AppResolverPattern(self), app_name, default_kwargs=default_args, app_name=app_name)
+        super().__init__(AppResolverPattern(self), app_name, default_kwargs=default_args, app_name=app_name, namespace=app_name)
 
 
     @property
@@ -173,8 +172,8 @@ class AppResolver(URLResolver):
                         # the regex matched, so we are done matching our subpatterns
                         # now translate the subpattern args into a view function
                         routing_data = RoutingData(
-                            match.kwargs.pop('dmp_app', None) or self.dmp['DEFAULT_APP'],
-                            match.kwargs.pop('dmp_page', None) or self.dmp['DEFAULT_PAGE'],
+                            match.kwargs.pop('dmp_app', None) or self.dmp.options['DEFAULT_APP'],
+                            match.kwargs.pop('dmp_page', None) or self.dmp.options['DEFAULT_PAGE'],
                             match.kwargs.pop('dmp_function', None),
                             match.kwargs.pop('dmp_urlparams', '').strip(),
                         )
@@ -185,7 +184,9 @@ class AppResolver(URLResolver):
                             pat.name,
                             [],
                         )
-        except ViewDoesNotExist:
-            # the view function couldn't be found using the named args in the matched pattern,
-            # so notify the parent resolver that there's no match here
+        except ViewDoesNotExist as vdne:
+            # if we get here, we had a pattern match, but something went
+            # wrong when getting a reference to the view function.
+            # logging this case because the programmer needs info on what's wrong.
+            log.debug(str(vdne))
             raise Resolver404({ 'path': path })

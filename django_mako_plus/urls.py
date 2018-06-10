@@ -24,11 +24,15 @@ urlpatterns = [
 ]
 
 
-# add a resolver for each app in the project directory
+# add a DMP-style resolver for each app in the project directory
 for config in apps.get_app_configs():
     if os.path.samefile(os.path.dirname(config.path), settings.BASE_DIR):
         urlpatterns.append(dmp_path(config.name))
 
+# add a DMP-style resolver for the default app (i.e. when app isn't specified in the url)
+# dmp = apps.get_app_config('django_mako_plus')
+# if dmp.options['DEFAULT_APP']:
+#     urlpatterns.append(dmp_path('', kwargs={ 'dmp_app': dmp.options['DEFAULT_APP'] }))
 
 # app-specific patterns for each DMP-enabled app
 # for config in get_registered_apps():

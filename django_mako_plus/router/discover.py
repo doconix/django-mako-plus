@@ -90,9 +90,9 @@ def find_view_function(module_name, function_name, fallback_app=None, fallback_t
         raise ViewDoesNotExist("View {}.{} was found successfully, but it must be decorated with @view_function or be a subclass of django.views.generic.View.".format(module_name, function_name))
 
     # attach a converter to the view function
-    if dmp['PARAMETER_CONVERTER'] is not None:
+    if dmp.options['PARAMETER_CONVERTER'] is not None:
         try:
-            converter = import_qualified(dmp['PARAMETER_CONVERTER'])(func)
+            converter = import_qualified(dmp.options['PARAMETER_CONVERTER'])(func)
             setattr(func, CONVERTER_ATTRIBUTE_NAME, converter)
         except ImportError as e:
             raise ImproperlyConfigured('Cannot find PARAMETER_CONVERTER: {}'.format(str(e)))
