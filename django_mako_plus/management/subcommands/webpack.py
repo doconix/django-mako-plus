@@ -1,10 +1,8 @@
 from django.apps import apps as django_apps
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
-from django_mako_plus.registry import get_dmp_apps, ensure_dmp_app
 from django_mako_plus.provider import create_mako_context
 from django_mako_plus.provider.runner import ProviderRun, init_provider_factories
-from django_mako_plus.util import get_dmp_instance
 from django_mako_plus.management.mixins import DMPCommandMixIn
 
 import sys
@@ -44,6 +42,7 @@ class Command(DMPCommandMixIn, BaseCommand):
 
 
     def handle(self, *args, **options):
+        dmp = django_apps.get_app_config('django_mako_plus')
         self.options = options
         self.factories = init_provider_factories('WEBPACK_PROVIDERS')
 
@@ -57,10 +56,10 @@ class Command(DMPCommandMixIn, BaseCommand):
         # the apps to process
         apps = []
         for appname in options.get('appname'):
-            ensure_dmp_app(appname)
+            dmp.ensure_registered_app(appname)
             apps.append(django_apps.get_app_config(appname))
         if len(apps) == 0:
-            apps = get_dmp_apps()
+            apps = dmp.get_registered_apps()
 
         # main runner for per-app files
         if options.get('single') is None:
@@ -180,7 +179,8 @@ class Command(DMPCommandMixIn, BaseCommand):
         because that class creates the 'enabled' list of provider instances, and each
         provider instance has a url.
         '''
-        template_obj = get_dmp_instance().get_template_loader(config, create=True).get_mako_template(template_name, force=True)
+        dmp = django_apps.get_app_config('django_mako_plus')
+        template_obj = dmp.engine.get_template_loader(config, create=True).get_mako_template(template_name, force=True)
         mako_context = create_mako_context(template_obj)
         inner_run = ProviderRun(mako_context['self'], factories=self.factories)
         inner_run.run()

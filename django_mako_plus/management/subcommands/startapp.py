@@ -1,6 +1,6 @@
+from django.apps import apps
 from django.core.management.commands.startapp import Command as StartAppCommand
 from django_mako_plus.management.mixins import DMPCommandMixIn
-from django_mako_plus.util import get_dmp_path
 
 import os, os.path
 
@@ -19,11 +19,12 @@ class Command(DMPCommandMixIn, StartAppCommand):
 
 
     def handle(self, *args, **options):
+        dmp = apps.get_app_config('django_mako_plus')
         if options.get('template') is NOT_SET:
             # set the template to a DMP app
             options['template'] = 'http://cdn.rawgit.com/doconix/django-mako-plus/master/app_template.zip'
             # attempt to use a local DMP install instead of the online repo as specified above
-            dmp_dir = get_dmp_path()
+            dmp_dir = dmp.path
             if dmp_dir:
                 template_dir = os.path.join(dmp_dir, 'app_template')
                 if os.path.exists(template_dir):

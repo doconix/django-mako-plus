@@ -3,7 +3,6 @@ from django.template import Context
 
 from .runner import ProviderRun
 from ..template import create_mako_context
-from ..util import get_dmp_instance
 
 import io
 
@@ -30,7 +29,8 @@ def template_links(request, app, template_name, context=None, version_id=None, g
         app = apps.get_app_config(app)
     if context is None:
         context = {}
-    template_obj = get_dmp_instance().get_template_loader(app, create=True).get_mako_template(template_name, force=force)
+    dmp = apps.get_app_config('django_mako_plus')
+    template_obj = dmp.engine.get_template_loader(app, create=True).get_mako_template(template_name, force=force)
     return template_obj_links(request, template_obj, context, version_id, group)
 
 

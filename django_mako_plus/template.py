@@ -1,3 +1,4 @@
+from django.apps import apps
 from django.conf import settings
 from django.http import HttpResponse
 from django.template import TemplateDoesNotExist, TemplateSyntaxError, Context, RequestContext
@@ -9,7 +10,7 @@ import mako.runtime
 
 from .exceptions import RedirectException
 from .signals import dmp_signal_pre_render_template, dmp_signal_post_render_template, dmp_signal_redirect_exception
-from .util import get_dmp_instance, log, DMP_OPTIONS
+from .util import log
 
 import io
 import logging
@@ -39,26 +40,29 @@ class MakoTemplateLoader(object):
         get_template_loader_for_path().
         '''
         self.app_path = app_path
+        dmp = apps.get_app_config('django_mako_plus')
+
         # calculate the template directory and check that it exists
         if template_subdir is None:  # None skips adding the template_subdir
             self.template_dir = os.path.abspath(app_path)
         else:
             self.template_dir = os.path.abspath(os.path.join(app_path, template_subdir))
+
         # I used to check for the existence of the template dir here, but it caused error
         # checking at engine load time (too soon).  I now wait until get_template() is called,
         # which fails with a TemplateDoesNotExist exception if the template_dir doesn't exist.
 
         # calculate the cache root and template search directories
-        self.cache_root = os.path.join(self.template_dir, DMP_OPTIONS['TEMPLATES_CACHE_DIR'])
+        self.cache_root = os.path.join(self.template_dir, dmp.options['TEMPLATES_CACHE_DIR'])
         self.template_search_dirs = [ self.template_dir ]
-        self.template_search_dirs.extend(DMP_OPTIONS['TEMPLATES_DIRS'])
+        self.template_search_dirs.extend(dmp.options['TEMPLATES_DIRS'])
         # Mako doesn't allow parent directory inheritance, such as <%inherit file="../../otherapp/templates/base.html"/>
         # including the project base directory allows this through "absolute" like <%inherit file="/otherapp/templates/base.html"/>
         # (note the leading slash, which means BASE_DIR)
         self.template_search_dirs.append(settings.BASE_DIR)
 
         # create the actual Mako TemplateLookup, which does the actual work
-        self.tlookup = DMPTemplateLookup(self, directories=self.template_search_dirs, imports=DMP_OPTIONS['RUNTIME_TEMPLATE_IMPORTS'], module_directory=self.cache_root, collection_size=2000, filesystem_checks=settings.DEBUG, input_encoding=DMP_OPTIONS['DEFAULT_TEMPLATE_ENCODING'])
+        self.tlookup = DMPTemplateLookup(self, directories=self.template_search_dirs, imports=dmp.template_imports, module_directory=self.cache_root, collection_size=2000, filesystem_checks=settings.DEBUG, input_encoding=dmp.options['DEFAULT_TEMPLATE_ENCODING'])
 
 
     def get_template(self, template, def_name=None):
@@ -122,7 +126,8 @@ class MakoTemplateAdapter(object):
     @property
     def engine(self):
         '''Returns the DMP engine (method required by Django specs)'''
-        return get_dmp_instance()
+        dmp = apps.get_app_config('django_mako_plus')
+        return dmp.engine
 
 
     def render(self, context=None, request=None, def_name=None):
@@ -147,6 +152,7 @@ class MakoTemplateAdapter(object):
             2. dmp_signal_post_render_template: you can (optionally) return a string to replace the string from the normal
                template object render.
         '''
+        dmp = apps.get_app_config('django_mako_plus')
         # set up the context dictionary, which is the variables available throughout the template
         context_dict = {}
         # if request is None, add some default items because the context processors won't happen
@@ -162,7 +168,7 @@ class MakoTemplateAdapter(object):
         context_dict.pop('self', None)  # some contexts have self in them, and it messes up render_unicode below because we get two selfs
 
         # send the pre-render signal
-        if DMP_OPTIONS['SIGNALS'] and request is not None:
+        if dmp.options['SIGNALS'] and request is not None:
             for receiver, ret_template_obj in dmp_signal_pre_render_template.send(sender=self, request=request, context=context, template=self.mako_template):
                 if ret_template_obj is not None:
                     if isinstance(ret_template_obj, MakoTemplateAdapter):
@@ -193,7 +199,7 @@ class MakoTemplateAdapter(object):
             content = render_obj.render_unicode(**context_dict)
 
         # send the post-render signal
-        if DMP_OPTIONS['SIGNALS'] and request is not None:
+        if dmp.options['SIGNALS'] and request is not None:
             for receiver, ret_content in dmp_signal_post_render_template.send(sender=self, request=request, context=context, template=self.mako_template, content=content):
                 if ret_content is not None:
                     content = ret_content  # sets it to the last non-None return in the signal receiver chain
@@ -248,7 +254,8 @@ class MakoTemplateAdapter(object):
             else:
                 log.info('view function %s.%s redirected processing to %s', request.dmp.module, request.dmp.function, e.redirect_to)
             # send the signal
-            if DMP_OPTIONS['SIGNALS']:
+            dmp = apps.get_app_config('django_mako_plus')
+            if dmp.options['SIGNALS']:
                 dmp_signal_redirect_exception.send(sender=sys.modules[__name__], request=request, exc=e)
             # send the browser the redirect command
             return e.get_response(request)

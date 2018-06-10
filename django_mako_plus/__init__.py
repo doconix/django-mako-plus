@@ -13,10 +13,6 @@ default_app_config = 'django_mako_plus.Config'
 from .version import __version__
 
 
-# the app config and registry
-from .apps import Config
-from .registry import register_dmp_app
-
 # the router, middleware, and view function decorator
 from .middleware import RequestInitMiddleware
 from .router import view_function, dmp_path
@@ -64,7 +60,6 @@ from .convenience import get_template_loader_for_path
 
 
 # the utilities
-from .util import get_dmp_instance
 from .util import merge_dicts
 
 

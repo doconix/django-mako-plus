@@ -93,14 +93,14 @@ Set this option to ``none`` to disable DMP's automatic pattern registration enti
 ::
 
     from django.apps import AppConfig
-    from django_mako_plus import register_dmp_app
+    from django_mako_plus import register_app
 
     class SomeAppConfig(AppConfig):
         name = 'someapp'
 
         def ready(self):
             # explicitly tell DMP to route this app
-            register_dmp_app(self)
+            register_app(self)
 
 
 All Your Base

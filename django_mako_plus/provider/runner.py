@@ -76,6 +76,7 @@ class ProviderRun(object):
         group:      provider group to include (defaults to all groups if None)
         factories:  list of provider factories to run on each template (defaults to settings.py if None)
         '''
+        dmp = apps.get_app_config('django_mako_plus')
         self.uid = wuid()           # a unique id for this run
         self.request = tself.context.get('request')
         self.context = tself.context
@@ -91,7 +92,7 @@ class ProviderRun(object):
         #     index.html,    [ JsLinkProvider3, CssLinkProvider3, ... ]
         factories = [
             pf
-            for pf in (factories if factories is not None else DMP_OPTIONS['RUNTIME_PROVIDER_FACTS'])
+            for pf in (factories if factories is not None else dmp.self.provider_factories)
             if group is None or group == pf.options['group']
         ]
         self.template_providers = [

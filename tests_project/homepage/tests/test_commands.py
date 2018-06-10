@@ -1,3 +1,4 @@
+from django.apps import apps
 from django.conf import settings
 from django.apps import apps
 from django.core.management import execute_from_command_line
@@ -6,7 +7,6 @@ from django.test import TestCase
 from django.template import TemplateDoesNotExist, TemplateSyntaxError
 
 from django_mako_plus import get_template
-from django_mako_plus.util import DMP_OPTIONS
 
 from io import StringIO
 import os, os.path, sys
@@ -36,7 +36,8 @@ class Tester(TestCase):
 
 
     def test_cleanup(self):
-        cache_dir = os.path.join(settings.BASE_DIR, 'homepage', 'templates', DMP_OPTIONS['TEMPLATES_CACHE_DIR'])
+        dmp = apps.get_app_config('django_mako_plus')
+        cache_dir = os.path.join(settings.BASE_DIR, 'homepage', 'templates', dmp.options['TEMPLATES_CACHE_DIR'])
         # compile a template
         template = get_template('homepage', 'index.basic.html')
         self.assertTrue(os.path.exists(cache_dir))

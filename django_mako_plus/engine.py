@@ -1,16 +1,12 @@
 from django.apps import apps, AppConfig
-from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.template import TemplateDoesNotExist
 from django.template.backends.base import BaseEngine
-from django.utils.module_loading import import_string
 
 from .template import MakoTemplateLoader, MakoTemplateAdapter
-from .registry import register_dmp_app, ensure_dmp_app, is_dmp_app
 
 from mako.template import Template
 
-import itertools
 import os
 import os.path
 import re
@@ -58,7 +54,7 @@ class MakoTemplates(BaseEngine):
         This is one of the required methods of Django template engines.
         '''
         dmp = apps.get_app_config('django_mako_plus')
-        mako_template = Template(template_code, imports=dmp.default_template_imports, input_encoding=dmp.options['DEFAULT_TEMPLATE_ENCODING'])
+        mako_template = Template(template_code, imports=dmp.template_imports, input_encoding=dmp.options['DEFAULT_TEMPLATE_ENCODING'])
         return MakoTemplateAdapter(mako_template)
 
 
@@ -75,10 +71,11 @@ class MakoTemplates(BaseEngine):
         Template rendering can be limited to a specific def/block within the template
         by specifying `#def_name`, e.g. `myapp/mytemplate.html#myblockname`.
         '''
+        dmp = apps.get_app_config('django_mako_plus')
         match = RE_TEMPLATE_NAME.match(template_name)
         if match is None or match.group(1) is None or match.group(3) is None:
             raise TemplateDoesNotExist('Invalid template_name format for a DMP template.  This method requires that the template name be in app_name/template.html format (separated by slash).')
-        if not is_dmp_app(match.group(1)):
+        if not dmp.is_registered_app(match.group(1)):
             raise TemplateDoesNotExist('Not a DMP app, so deferring to other template engines for this template')
         return self.get_template_loader(match.group(1)).get_template(match.group(3), def_name=match.group(5))
 
@@ -117,7 +114,8 @@ class MakoTemplates(BaseEngine):
 
         # if create=False, the loader must already exist in the cache
         if not create:
-            ensure_dmp_app(app)
+            dmp = apps.get_app_config('django_mako_plus')
+            dmp.ensure_registered_app(app)
 
         # return the template by path
         return self.get_template_loader_for_path(path, use_cache=True)

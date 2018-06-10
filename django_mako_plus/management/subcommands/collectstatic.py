@@ -1,8 +1,7 @@
+from django.apps import apps
 from django.core.management.base import CommandError
 from django.contrib.staticfiles.management.commands.collectstatic import Command as CollectStaticCommand
 from django.conf import settings
-from django_mako_plus.util import DMP_OPTIONS
-from django_mako_plus.registry import get_dmp_apps
 from django_mako_plus.management.mixins import DMPCommandMixIn
 
 import os, os.path, shutil, fnmatch
@@ -89,6 +88,7 @@ class Command(DMPCommandMixIn, CollectStaticCommand):
 
 
     def handle(self, *args, **options):
+        dmp = apps.get_app_config('django_mako_plus')
         self.options = options
 
         # ensure we have a base directory
@@ -117,13 +117,14 @@ class Command(DMPCommandMixIn, CollectStaticCommand):
         self.rules = self.create_rules()
 
         # go through the DMP apps and collect the static files
-        for config in get_dmp_apps():
+        for config in dmp.get_registered_apps():
             self.message('Processing app {}'.format(config.name), 1)
             self.copy_dir(config.path, os.path.abspath(os.path.join(dest_root, config.name)))
 
 
     def create_rules(self):
         '''Adds rules for the command line options'''
+        dmp = apps.get_app_config('django_mako_plus')
         # the default
         rules = [
             # files are included by default
@@ -141,7 +142,7 @@ class Command(DMPCommandMixIn, CollectStaticCommand):
             Rule('styles',                               level=0,    filetype=TYPE_DIRECTORY, score=6),
 
             # ignore the template cache directories
-            Rule(DMP_OPTIONS['TEMPLATES_CACHE_DIR'],     level=None, filetype=TYPE_DIRECTORY, score=-3),
+            Rule(dmp.options['TEMPLATES_CACHE_DIR'],     level=None, filetype=TYPE_DIRECTORY, score=-3),
             # ignore python cache directories
             Rule('__pycache__',                          level=None, filetype=TYPE_DIRECTORY, score=-3),
             # ignore compiled python files

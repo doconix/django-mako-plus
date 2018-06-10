@@ -1,9 +1,10 @@
+from django.apps import apps
 from django.core.exceptions import ImproperlyConfigured, ViewDoesNotExist
 from django.http import HttpResponse, StreamingHttpResponse, Http404, HttpResponseServerError
 
 from ..decorators import BaseDecorator
 from ..signals import dmp_signal_post_process_request, dmp_signal_pre_process_request, dmp_signal_internal_redirect_exception, dmp_signal_redirect_exception
-from ..util import DMP_OPTIONS, import_qualified, log
+from ..util import import_qualified, log
 from ..exceptions import InternalRedirectException, RedirectException
 
 import inspect
@@ -89,6 +90,7 @@ class RequestViewWrapper(object):
 
     def __call__(self, request, *args, **kwargs):
         log.info('%s', self.routing_data)
+        dmp = apps.get_app_config('django_mako_plus')
 
         # the only purpose of the middleware is to attach the RoutingData object.
         # let's attach it here again, just in case the project didn't use our middleware.
@@ -103,7 +105,7 @@ class RequestViewWrapper(object):
                 args, kwargs = converter.convert_parameters(request, *args, **kwargs)
 
             # send the pre-signal
-            if DMP_OPTIONS['SIGNALS']:
+            if dmp.options['SIGNALS']:
                 for receiver, ret_response in dmp_signal_pre_process_request.send(sender=sys.modules[__name__], request=request, view_args=args, view_kwargs=kwargs):
                     if isinstance(ret_response, (HttpResponse, StreamingHttpResponse)):
                         return ret_response
@@ -115,7 +117,7 @@ class RequestViewWrapper(object):
                 return HttpResponseServerError('Invalid response received from server.')
 
             # send the post-signal
-            if DMP_OPTIONS['SIGNALS']:
+            if dmp.options['SIGNALS']:
                 for receiver, ret_response in dmp_signal_post_process_request.send(sender=sys.modules[__name__], request=request, response=response, view_args=args, view_kwargs=kwargs):
                     if ret_response is not None:
                         response = ret_response # sets it to the last non-None in the signal receiver chain
@@ -124,7 +126,7 @@ class RequestViewWrapper(object):
 
         except InternalRedirectException as ivr:
             # send the signal
-            if DMP_OPTIONS['SIGNALS']:
+            if dmp.options['SIGNALS']:
                 dmp_signal_internal_redirect_exception.send(sender=sys.modules[__name__], request=request, exc=ivr)
             # update the RoutingData object
             request.dmp.module = ivr.redirect_module
@@ -141,7 +143,7 @@ class RequestViewWrapper(object):
         except RedirectException as e: # redirect to another page
             log.info('view %s.%s redirected processing to %s', request.dmp.module, request.dmp.function, e.redirect_to)
             # send the signal
-            if DMP_OPTIONS['SIGNALS']:
+            if dmp.options['SIGNALS']:
                 dmp_signal_redirect_exception.send(sender=sys.modules[__name__], request=request, exc=e)
             # send the browser the redirect command
             return e.get_response(request)

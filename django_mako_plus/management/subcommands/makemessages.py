@@ -1,7 +1,7 @@
+from django.apps import apps
 from django.core.management.commands.makemessages import Command as MakeMessagesCommand
 from django.template.exceptions import TemplateSyntaxError
 
-from django_mako_plus.registry import get_dmp_apps
 from django_mako_plus.convenience import get_template_for_path
 from django_mako_plus.management.mixins import DMPCommandMixIn
 
@@ -39,10 +39,11 @@ class Command(DMPCommandMixIn, MakeMessagesCommand):
 
 
     def handle(self, *args, **options):
+        dmp = apps.get_app_config('django_mako_plus')
         self.options = options
 
         # go through each dmp_enabled app and compile its mako templates
-        for app_config in get_dmp_apps():
+        for app_config in dmp.get_registered_apps():
             self.compile_mako_files(app_config)
 
         # add any extra xgettext_options (the regular makemessages doesn't do this, and I need to include other aliases like _(), _z(), etc.

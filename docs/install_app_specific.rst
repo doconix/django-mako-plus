@@ -23,14 +23,14 @@ Then explicitly register specific apps in your project with DMP.  For example, t
 ::
 
     from django.apps import AppConfig
-    from django_mako_plus import register_dmp_app
+    from django_mako_plus import register_app
 
     class SomeAppConfig(AppConfig):
         name = 'someapp'
 
         def ready(self):
             # explicitly tell DMP to control this app
-            register_dmp_app(self)
+            register_app(self)
 
 Read more at `APP_DISCOVERY </basics_settings.html#app-discovery>`_.
 

@@ -1,10 +1,11 @@
+from django.apps import apps
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured, ViewDoesNotExist
 from django.template import TemplateDoesNotExist
 from django.views.generic import View
 
 from .decorators import view_function, CONVERTER_ATTRIBUTE_NAME
-from ..util import DMP_OPTIONS, get_dmp_instance, import_qualified, log
+from ..util import import_qualified, log
 
 import inspect
 import threading
@@ -53,6 +54,8 @@ def find_view_function(module_name, function_name, fallback_app=None, fallback_t
     Finds a view function, class-based view, or template view.
     Raises ViewDoesNotExist if not found.
     '''
+    dmp = apps.get_app_config('django_mako_plus')
+
     # I'm first calling find_spec first here beacuse I don't want import_module in
     # a try/except -- there are lots of reasons that importing can fail, and I just want to
     # know whether the file actually exists.  find_spec raises AttributeError if not found.
@@ -87,9 +90,9 @@ def find_view_function(module_name, function_name, fallback_app=None, fallback_t
         raise ViewDoesNotExist("View {}.{} was found successfully, but it must be decorated with @view_function or be a subclass of django.views.generic.View.".format(module_name, function_name))
 
     # attach a converter to the view function
-    if DMP_OPTIONS['PARAMETER_CONVERTER'] is not None:
+    if dmp['PARAMETER_CONVERTER'] is not None:
         try:
-            converter = import_qualified(DMP_OPTIONS['PARAMETER_CONVERTER'])(func)
+            converter = import_qualified(dmp['PARAMETER_CONVERTER'])(func)
             setattr(func, CONVERTER_ATTRIBUTE_NAME, converter)
         except ImportError as e:
             raise ImproperlyConfigured('Cannot find PARAMETER_CONVERTER: {}'.format(str(e)))
@@ -105,11 +108,12 @@ def create_view_for_template(app_name, template_name):
     Raises TemplateDoesNotExist if the template doesn't exist.
     '''
     # ensure the template exists
-    get_dmp_instance().get_template_loader(app_name).get_template(template_name)
+    apps.get_app_config('django_mako_plus').engine.get_template_loader(app_name).get_template(template_name)
     # create the view function
     def template_view(request, *args, **kwargs):
         # not caching the template object (getting it each time) because Mako has its own cache
-        template = get_dmp_instance().get_template_loader(app_name).get_template(template_name)
+        dmp = apps.get_app_config('django_mako_plus')
+        template = dmp.engine.get_template_loader(app_name).get_template(template_name)
         return template.render_to_response(request=request, context=kwargs)
     template_view.view_type = 'template'
     return template_view

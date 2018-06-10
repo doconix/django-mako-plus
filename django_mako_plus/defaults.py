@@ -7,7 +7,7 @@ DEFAULT_OPTIONS = {
 
     # how to discover and register apps
     # 'default': register all apps that are subfolders of BASE_DIR - e.g. your custom apps
-    # 'none': no auto-registration; instead, register apps with `django_mako_plus.register_dmp_app()`
+    # 'none': no auto-registration; instead, register apps with `django_mako_plus.register_app()`
     # 'all': register all apps, even when pip-installed or django apps
     #     Note that 'all' should not normally be used because it makes DMP route *every* app
     #     in your system, including third party apps.  For example, DMP will route /admin/,

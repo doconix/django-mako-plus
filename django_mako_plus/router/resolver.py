@@ -12,8 +12,7 @@ from django.urls.resolvers import RegexPattern
 #     from django.urls import RegexURLPattern as URLPattern         # django 1.x
 from django.utils.functional import cached_property
 
-from ..registry import register_dmp_app
-from ..util import DMP_OPTIONS, log
+from ..util import log
 from .data import RoutingData
 from .decorators import RequestViewWrapper
 
@@ -27,7 +26,8 @@ def dmp_path(app_name, kwargs=None, name=None, patterns=None):
     This should be called from urls.py.
     '''
     # register this app as a DMP app
-    register_dmp_app(app_name)
+    dmp = apps.get_app_config('django_mako_plus')
+    dmp.register_app(app_name)
 
     # create a resolver for this app
     return AppResolver(app_name, default_args=kwargs, name=name, patterns=patterns)
@@ -107,6 +107,7 @@ class AppResolver(URLResolver):
     '''
 
     def __init__(self, app_name, default_args=None, name=None, patterns=None):
+        self.dmp = apps.get_app_config('django_mako_plus')
         # initialize the patterns for this app
         self.patterns = patterns if patterns is not None else [
             AppPattern(
@@ -172,8 +173,8 @@ class AppResolver(URLResolver):
                         # the regex matched, so we are done matching our subpatterns
                         # now translate the subpattern args into a view function
                         routing_data = RoutingData(
-                            match.kwargs.pop('dmp_app', None) or DMP_OPTIONS['DEFAULT_APP'],
-                            match.kwargs.pop('dmp_page', None) or DMP_OPTIONS['DEFAULT_PAGE'],
+                            match.kwargs.pop('dmp_app', None) or self.dmp['DEFAULT_APP'],
+                            match.kwargs.pop('dmp_page', None) or self.dmp['DEFAULT_PAGE'],
                             match.kwargs.pop('dmp_function', None),
                             match.kwargs.pop('dmp_urlparams', '').strip(),
                         )

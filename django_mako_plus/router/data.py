@@ -1,7 +1,7 @@
+from django.apps import apps
 
 from ..decorators import BaseDecorator
-from ..registry import ensure_dmp_app
-from ..util import URLParamList, get_dmp_instance
+from ..util import URLParamList
 from .discover import get_view_function
 
 from urllib.parse import unquote
@@ -79,8 +79,9 @@ class RoutingData(object):
         '''App-specific render function that renders templates in the *current app*, attached to the request for convenience'''
         if self.request is None:
             raise ValueError("RoutingData.render() can only be called after the view middleware is run.")
-        ensure_dmp_app(self.app)
-        template_loader = get_dmp_instance().get_template_loader(self.app, subdir)
+        dmp = apps.get_app_config('django_mako_plus')
+        dmp.ensure_registered_app(self.app)
+        template_loader = dmp.engine.get_template_loader(self.app, subdir)
         template_adapter = template_loader.get_template(template)
         return getattr(template_adapter, 'render_to_response')(context=context, request=self.request, def_name=def_name, content_type=content_type, status=status, charset=charset)
 
@@ -89,7 +90,8 @@ class RoutingData(object):
         '''App-specific render function that renders templates in the *current app*, attached to the request for convenience'''
         if self.request is None:
             raise ValueError("RoutingData.render() can only be called after the view middleware is run.")
-        ensure_dmp_app(self.app)
-        template_loader = get_dmp_instance().get_template_loader(self.app, subdir)
+        dmp = apps.get_app_config('django_mako_plus')
+        dmp.ensure_registered_app(self.app)
+        template_loader = dmp.engine.get_template_loader(self.app, subdir)
         template_adapter = template_loader.get_template(template)
         return getattr(template_adapter, 'render')(context=context, request=self.request, def_name=def_name)

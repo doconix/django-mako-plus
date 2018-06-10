@@ -1,6 +1,6 @@
+from django.apps import apps
 from django.core.management import BaseCommand
 from django.core.management.base import CommandParser
-from django_mako_plus.util import get_dmp_path
 from django_mako_plus.management.mixins import DMPCommandMixIn
 
 from importlib import import_module
@@ -77,6 +77,7 @@ class Command(DMPCommandMixIn, BaseCommand):
 
 def find_subcommands():
     # this is ripped from django.core.management.__init__.py and switched to our subcommand dir
-    command_dir = os.path.join(get_dmp_path(), 'management', 'subcommands')
+    dmp = apps.get_app_config('django_mako_plus')
+    command_dir = os.path.join(dmp.path, 'management', 'subcommands')
     return [name for _, name, is_pkg in pkgutil.iter_modules([command_dir])
             if not is_pkg and not name.startswith('_')]

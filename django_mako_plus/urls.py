@@ -6,8 +6,6 @@ except ImportError:
     from django.conf.urls import url as re_path  # Django 1.x
 from django.views.static import serve
 from .router import dmp_path
-from .registry import get_dmp_apps
-from .util import DMP_OPTIONS
 import os, os.path
 
 
@@ -33,7 +31,7 @@ for config in apps.get_app_configs():
 
 
 # app-specific patterns for each DMP-enabled app
-# for config in get_dmp_apps():
+# for config in get_registered_apps():
     # # these are in order of specificity, with the most specific ones at the top
     # urlpatterns.extend([
     #     # /app/page.function/urlparams
