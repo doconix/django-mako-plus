@@ -1,12 +1,20 @@
 Custom URL Patterns
 ===========================
 
-Suppose your project requires a different URL pattern than the normal ``/app/page/param1/param2/...``. For example, you might need the user id in between the app and page: ``/app/userid/page/param1/param1...``. This is supported in two different ways.
+Suppose your project requires a different URL pattern than the normal ``/app/page/param1/param2/...``. For example, you might need the user id in between the app and page: ``/app/userid/page/param1/param1...``.
 
-Custom URL Patterns: Take 1
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Overriding the Default Patterns
+-----------------------------------
 
-The first method is done with named parameters, and it is the "normal" way to customize the url pattern. Instead of including the default\ ``django_mako_plus.urls`` module in your ``urls.py`` file, you can instead create the patterns manually. Start with the `patterns in the DMP source <http://github.com/doconix/django-mako-plus/blob/master/django_mako_plus/urls.py>`__ and modify them as needed.
+When you include DMP's URL file in your project, DMP adds a custom resolver for each app using ``dmp_app()``.  In turn, each resolver adds a number of patterns for its app using ``dmp_path()``.  See these `methods and _generate_patterns() in the source <http://github.com/doconix/django-mako-plus/blob/master/django_mako_plus/router/resolver.py>`_.
+
+You can override the creation of default patterns in the call to ``dmp_app()``.  The following ``urls.py`` file adds the user id between the app and the page:
+
+.. code:: python
+
+
+
+
 
 The following is one of the URL patterns, modified to include the ``userid`` parameter in between the app and page:
 
@@ -53,14 +61,3 @@ The following URL pattern can be used to embed an object ID parameter (named 'id
 ::
 
     url(r'^(?P<dmp_app>[_a-zA-Z0-9\-]+)/(?P<id>\d+)/(?P<dmp_page>[_a-zA-Z0-9\-]+)\.?(?P<dmp_function>[_a-zA-Z0-9\-]+)?/?(?P<urlparams>.*)$', route_request, name='/app/id/page(.function)(/urlparams)'),
-
-Custom URL Patterns: Take 2
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-The second method is done by directly modifying the variables created in the middleware. This can be done through a custom middleware view function that runs after ``django_mako_plus.RequestInitMiddleware`` (or alternatively, you could create an extension to this class and replace the class in the ``MIDDLEWARE`` list).
-
-Once ``RequestInitMiddleware.process_view`` creates the variables, your custom middleware can modify them in any way. As view middleware, your function will run *after* the DMP middleware by *before* routing takes place in ``route_request``.
-
-This method of modifying the URL pattern allows total freedom since you can use python code directly. However, it would probably be done in an exceptional rather than typical case.
-
-
