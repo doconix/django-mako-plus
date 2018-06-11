@@ -80,7 +80,6 @@ class RoutingData(object):
         if self.request is None:
             raise ValueError("RoutingData.render() can only be called after the view middleware is run.")
         dmp = apps.get_app_config('django_mako_plus')
-        dmp.ensure_registered_app(self.app)
         template_loader = dmp.engine.get_template_loader(self.app, subdir)
         template_adapter = template_loader.get_template(template)
         return getattr(template_adapter, 'render_to_response')(context=context, request=self.request, def_name=def_name, content_type=content_type, status=status, charset=charset)
@@ -91,7 +90,6 @@ class RoutingData(object):
         if self.request is None:
             raise ValueError("RoutingData.render() can only be called after the view middleware is run.")
         dmp = apps.get_app_config('django_mako_plus')
-        dmp.ensure_registered_app(self.app)
         template_loader = dmp.engine.get_template_loader(self.app, subdir)
         template_adapter = template_loader.get_template(template)
         return getattr(template_adapter, 'render')(context=context, request=self.request, def_name=def_name)

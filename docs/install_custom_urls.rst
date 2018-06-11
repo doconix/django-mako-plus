@@ -3,14 +3,14 @@ Custom URL Patterns
 
 Suppose your project requires a different URL pattern than the normal ``/app/page/param1/param2/...``. For example, you might need the user id in between the app and page: ``/app/userid/page/param1/param1...``.
 
+
 Overriding the Default Patterns
 -----------------------------------
 
-When you include DMP's URL file in your project, DMP adds a custom resolver for each app using ``dmp_app()``.  In turn, each resolver adds a number of patterns for its app using ``dmp_path()``.  See these `methods and _generate_patterns() in the source <http://github.com/doconix/django-mako-plus/blob/master/django_mako_plus/router/resolver.py>`_.
+DMP's default patterns are added when you include DMP's URL file in your project. DMP iterates your local apps, and it adds a custom resolver for each one using ``dmp_app()``.  In turn, each resolver adds a number of patterns for its app using ``dmp_path()``.  See these `methods and _generate_patterns() in the source <http://github.com/doconix/django-mako-plus/blob/master/django_mako_plus/router/resolver.py>`_.
 
-You can override the creation of default patterns in the call to ``dmp_app()``.  The following ``urls.py`` file adds the user id between the app and the page:
+You can disable the default patterns in DMP by removing the ``include('', 'django_mako_plus')`` line from ``urls.py``.  Then register the specific apps you want using ``dmp_app()``.
 
-.. code:: python
 
 
 

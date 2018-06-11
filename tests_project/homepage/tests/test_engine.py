@@ -15,11 +15,6 @@ class Tester(TestCase):
     def setUpTestData(cls):
         cls.tests_app = apps.get_app_config('homepage')
 
-    def test_ensure_registered_app(self):
-        dmp = apps.get_app_config('django_mako_plus')
-        self.assertTrue(dmp.is_registered_app('homepage'))
-        self.assertFalse(dmp.is_registered_app('nonexistent_app'))
-
     def test_from_string(self):
         dmp = apps.get_app_config('django_mako_plus')
         template = dmp.engine.from_string('${ 2 + 2 }')

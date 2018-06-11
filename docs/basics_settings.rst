@@ -69,49 +69,6 @@ In the following table, the default app is set to ``homepage`` and your default 
 
 
 
-``APP_DISCOVERY``
------------------------------
-
-One of the primary purposes of DMP is to allow routing via convention instead of configuration.  At runtime, it does this by adding patterns for each of your apps to ``urls.py``.
-
-
-The Default: Your Custom Apps
-```````````````````````````````````
-
-The default option, ``default``, adds patterns for each app contained in your main project directory (``BASE_DIR`` in settings).  Normally, apps that you create exist as subdirectories in your project directory.  DMP uses this convention to know which apps you've created and which apps are third-party installs.
-
-With the default setting, DMP will allow Django's built-in apps (like ``/admin/``) to be routed by the normal Django router.  This is what built-in and third-party apps expect.  Everyone plays nicely this way.
-
-
-No Discovery
-``````````````````````
-
-If your project contains both custom DMP apps and custom Django apps, you probably want to register the DMP apps manually.
-
-Set this option to ``none`` to disable DMP's automatic pattern registration entirely.  DMP won't route anything by default this way, so your ``urls.py`` file will be untouched.  You should then register specific apps yourself by adding the following to ``someapp/apps.py``:
-
-::
-
-    from django.apps import AppConfig
-    from django_mako_plus import register_app
-
-    class SomeAppConfig(AppConfig):
-        name = 'someapp'
-
-        def ready(self):
-            # explicitly tell DMP to route this app
-            register_app(self)
-
-
-All Your Base
-``````````````````````
-
-If you want DMP to route *all* of your apps, set this option to ``all``.  Normally, this is a **bad idea** because DMP shouldn't route apps that expect the standard Django router, such as those from Django's built-in ``/admin/`` administrator.  Bottom line: don't use ``all`` unless you know what you are doing.
-
-(see also `Which apps has DMP </topics_third_party.html#which-apps-haz-dmp>`_)
-
-
-
 
 ``CONTEXT_PROCESSORS``
 ----------------------------

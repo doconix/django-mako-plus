@@ -23,7 +23,7 @@ dmp = apps.get_app_config('django_mako_plus')
 # there is no "if debug mode" statement here because the web server will serve the file at production before urls.py happens,
 # but if this deployment step isn't done right, it will still work through this link
 urlpatterns = [
-    # re_path(r'^django_mako_plus/(?P<path>[^/]+)', serve, { 'document_root': os.path.join(apps.get_app_config('django_mako_plus').path, 'webroot') }, name='DMP webroot (for devel)'),
+    re_path(r'^django_mako_plus/(?P<path>[^/]+)', serve, { 'document_root': os.path.join(apps.get_app_config('django_mako_plus').path, 'webroot') }, name='DMP webroot (for devel)'),
 ]
 
 

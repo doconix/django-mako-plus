@@ -78,12 +78,3 @@ class Config(AppConfig):
         if isinstance(app, AppConfig):
             app = app.name
         return app in self.registered_apps
-
-
-    def ensure_registered_app(self, app):
-        '''Raises an AssertionException with a help mesage if the given app is not registered as a DMP app'''
-        if not self.is_registered_app(app):
-            raise ImproperlyConfigured('''DMP's app-specific render functions were not placed on the request object. Likely reasons:
-    1) A template was rendered before the middleware's process_view() method was called (move after middleware call or use DMP's render_template() function which can be used anytime).
-    2) This app is not registered as a Django app (ensure the app is listed in `INSTALLED_APPS` in settings file).
-    3) This app is not registered as a DMP-enabled app (check `APP_DISCOVERY` in settings file or see DMP docs).''')

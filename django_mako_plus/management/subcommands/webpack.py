@@ -56,7 +56,6 @@ class Command(DMPCommandMixIn, BaseCommand):
         # the apps to process
         apps = []
         for appname in options.get('appname'):
-            dmp.ensure_registered_app(appname)
             apps.append(django_apps.get_app_config(appname))
         if len(apps) == 0:
             apps = dmp.get_registered_apps()

@@ -1,4 +1,4 @@
-Integrating Third-Party Apps
+Integrating DMP with Third-Party Apps
 =======================================================
 
 Since most third-party apps use standard Django routing and template syntax, new users to DMP often worry about conflicts between the two engines.  Have no fear, they work together just like Windows and Linux!  (just kidding, they work great together)

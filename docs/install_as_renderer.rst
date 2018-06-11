@@ -1,4 +1,4 @@
-DMP as a Mako Template Renderer
+Using DMP to Render Mako Templates
 =======================================
 
 The following shows how to use DMP to render Mako templates only -- without any of DMP's other features.  It uses DMP as a normal template engine within a vanilla Django project.

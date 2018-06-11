@@ -22,7 +22,7 @@ from collections import namedtuple
 
 
 
-def dmp_app(app_name=None, kwargs=None, name=None, patterns=None):
+def dmp_app(app_name=None, kwargs=None, name=None, add_patterns=True):
     '''
     Registers the given app_name with DMP and adds a convention-based
     url resolver for it.
@@ -30,13 +30,7 @@ def dmp_app(app_name=None, kwargs=None, name=None, patterns=None):
     This function should be used in urls.py in the same way that url()
     and re_path() are used.
     '''
-    # register this app as a DMP app
-    if app_name is not None:
-        dmp = apps.get_app_config('django_mako_plus')
-        dmp.register_app(app_name)
-
-    # create a resolver for this app
-    return AppResolver(app_name, default_args=kwargs, name=name, patterns=patterns)
+    return AppResolver(app_name, default_args=kwargs, name=name, add_patterns=add_patterns)
 
 
 def dmp_path(regex, kwargs, name):
@@ -64,18 +58,21 @@ def dmp_path(regex, kwargs, name):
 class AppResolver(URLResolver):
     '''
     Convention-based url resolver that implements DMP's app-aware view function finder.
-    Do not use this class directly -- use dmp_app() instead.
+    Do not use this class directly -- use dmp_app() above instead.
     '''
-    def __init__(self, app_name=None, default_args=None, name=None, patterns=None):
+    def __init__(self, app_name=None, default_args=None, name=None, add_patterns=True):
         self.dmp = apps.get_app_config('django_mako_plus')
+        if app_name is None:
+            if not self.dmp.options['DEFAULT_APP']:
+                raise ImproperlyConfigured('An app_name is required because DEFAULT_APP is empty - please use a '
+                                           'valid app name or set the DMP default app in settings')
+        else:
+            self.dmp.register_app(app_name)
         self.app_name = app_name
-        if app_name is None and not self.dmp.options['DEFAULT_APP']:
-            raise ImproperlyConfigured('An app_name is required because DEFAULT_APP is empty - please use a '
-                                       'valid app name or set the DMP default app in settings')
 
         # the subpatterns for this app (dynamically create a urls.py module with patterns)
         urlconf_mod = ModuleType('urlconf')
-        urlconf_mod.urlpatterns = patterns if patterns is not None else self._generate_patterns()
+        urlconf_mod.urlpatterns = self._generate_patterns() if add_patterns else []
 
         # call the super
         pat = RegexPattern(r'^{}/?'.format(app_name or ''), 'DMP /app for {}'.format(self.pretty_app_name), is_endpoint=False)

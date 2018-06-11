@@ -27,14 +27,15 @@ This section shows how to go cafeteria-style with DMP.
     install_app_specific
 
 
-Integration
+Installation Needs
 -----------------------------------
 
-DMP plays nicely with the other kids on the playground.  The following pages discuss how to integrate it with other engines, libraries, and apps:
+The following pages discuss special installation needs some users may have:
 
 .. toctree::
     :maxdepth: 1
 
+    install_custom_urls
     install_subdirectory
     install_third_party
     install_other_syntax

@@ -122,7 +122,8 @@ class MakoTemplates(BaseEngine):
         # if create=False, the loader must already exist in the cache
         if not create:
             dmp = apps.get_app_config('django_mako_plus')
-            dmp.ensure_registered_app(app)
+            if not dmp.is_registered_app(app):
+                raise ValueError('App {} is not registered with DMP via dmp_app(). Did you remember to include `django_mako_plus.urls` in urls.py?'.format(app))
 
         # return the template by path
         return self.get_template_loader_for_path(path, use_cache=True)
