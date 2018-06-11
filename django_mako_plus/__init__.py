@@ -15,7 +15,7 @@ from .version import __version__
 
 # the router, middleware, and view function decorator
 from .middleware import RequestInitMiddleware
-from .router import view_function, dmp_path
+from .router import view_function, dmp_app
 
 
 # converter decorator

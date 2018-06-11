@@ -66,7 +66,7 @@ Run the project and go to `http://localhost:8000/ <http://localhost:8000/>`_.  N
 Enable the DMP Template Engine
 ----------------------------------
 
-Add DMP to your installed apps in ``mysite/settings.py``, and add DMP to your template engine.
+1. Add DMP to your installed apps in ``settings.py``.
 
 .. code:: python
 
@@ -75,6 +75,10 @@ Add DMP to your installed apps in ``mysite/settings.py``, and add DMP to your te
         'django_mako_plus',
         'polls',
     ]
+
+2. Add the DMP template engine in ``settings.py``.
+
+.. code:: python
 
     TEMPLATES = [
         {
@@ -97,6 +101,33 @@ Add DMP to your installed apps in ``mysite/settings.py``, and add DMP to your te
     ]
 
 Note that we won't be using DMP to render templates.  But as a Django template engine, DMP initializes by being listed in ``TEMPLATES``.  We've listed DMP *after* the Django template renderer so Django can match and render templates first.
+
+3. Enable a logger in ``settings.py`` to see DMP routing information and other messages:
+
+.. code:: python
+
+    LOGGING = {
+        'version': 1,
+        'disable_existing_loggers': True,
+        'loggers': {
+            'django_mako_plus': {
+                'handlers': ['console_handler'],
+                'level': DEBUG and 'DEBUG' or 'WARNING',
+                'propagate': False,
+            },
+            'django': {
+                'handlers': ['console_handler'],
+                'level': 'INFO',
+                'propagate': False,
+            },
+        },
+        'handlers': {
+            'console_handler': {
+                'level': 'DEBUG',
+                'class': 'logging.StreamHandler',
+            },
+        },
+}
 
 
 Create a View with Mako Syntax

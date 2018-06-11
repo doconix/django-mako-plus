@@ -47,7 +47,34 @@ Create a Vanilla Django Project
         'polls',
     ]
 
-4. Add DMP's router to ``urls.py``:
+4. Enable a logger in ``settings.py``. Routing problems can be solved much easier with DMP's debug messages:
+
+.. code:: python
+
+    LOGGING = {
+        'version': 1,
+        'disable_existing_loggers': True,
+        'loggers': {
+            'django_mako_plus': {
+                'handlers': ['console_handler'],
+                'level': DEBUG and 'DEBUG' or 'WARNING',
+                'propagate': False,
+            },
+            'django': {
+                'handlers': ['console_handler'],
+                'level': 'INFO',
+                'propagate': False,
+            },
+        },
+        'handlers': {
+            'console_handler': {
+                'level': 'DEBUG',
+                'class': 'logging.StreamHandler',
+            },
+        },
+}
+
+5. Add DMP's router to ``urls.py``:
 
 .. code:: python
 
@@ -77,7 +104,11 @@ Create an Endpoint
         }
         return render(request, 'polls/index.html', context)
 
-Note in the code above that the function is named ``process_request``.  This is the default function that DMP looks for within the view file.
+|
+
+    Note the function is named ``process_request`` -- this is the default function that DMP looks for within the view file.
+
+    Note also the ``@view_function`` decorator -- this security measure is required on every view function routed by DMP.
 
 
 2. Create a template in ``polls/templates/polls/index.html``:
