@@ -32,7 +32,7 @@ class RoutingData(object):
         # period and dash cannot be in python names, but we allow dash in app, dash in page, and dash/period in function
         self.app = app.replace('-', '_') if app is not None else None
         self.page = page.replace('-', '_') if page is not None else None
-        if function:
+        if function and function != 'process_request':
             self.function = function.replace('.', '_').replace('-', '_')
             fallback_template = '{}.{}.html'.format(page, function)
         else:

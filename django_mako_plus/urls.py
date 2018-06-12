@@ -15,6 +15,7 @@ import os, os.path
 ###   FYI, even though the valid python identifier is [_A-Za-z][_a-zA-Z0-9]*,
 ###   I'm simplifying it to [_a-zA-Z0-9]+ because it works for our purposes
 
+app_name = 'django_mako_plus'
 dmp = apps.get_app_config('django_mako_plus')
 urlpatterns = []
 
