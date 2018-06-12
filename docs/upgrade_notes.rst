@@ -24,8 +24,9 @@ A new variable, ``request.dmp.view_type`` gives information about the type of vi
 
 2. If you are using DMP's built-in ``urls.py`` file --``url('', include('django_mako_plus.urls')),`` -- no other changes are necessary.
 
-If you have custom URLs, you need to change ``re_path`` to ``dmp_path`` in your urls.  See DMP's ``urls.py`` file on GitHub for an example.
+If you have custom URLs, you need to change ``re_path`` to ``dmp_path`` in your urls.  See DMP's ``urls.py`` file on GitHub as well as the rewritten Installation section of the docs for an example.
 
+3. Some functions were moved from the template engine to the django_mako_plus app config.  What used to be ``engine.is_dmp_app`` is not ``apps.get_app_config('django_mako_plus').is_registered_app``.
 
 
 5.4 - May, 2018
