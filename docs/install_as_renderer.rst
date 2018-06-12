@@ -127,7 +127,7 @@ Note that we won't be using DMP to render templates.  But as a Django template e
                 'class': 'logging.StreamHandler',
             },
         },
-}
+    }
 
 
 Create a View with Mako Syntax

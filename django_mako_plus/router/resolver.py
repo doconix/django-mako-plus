@@ -1,192 +1,209 @@
 from django.apps import apps
 from django.conf import settings
-from django.core.exceptions import ImproperlyConfigured, ViewDoesNotExist
-from django.core.checks.urls import check_resolver
+from django.core.exceptions import ViewDoesNotExist
 from django.http import Http404
-from django.urls import ResolverMatch, NoReverseMatch, Resolver404
-from django.urls import URLResolver, URLPattern, re_path
+from django.urls import ResolverMatch
+from django.urls import URLPattern, include, re_path
 from django.urls.resolvers import RegexPattern
-# try:
-#     from django.urls import URLPattern                             # django 2.x
-# except ImportError:
-#     from django.urls import RegexURLPattern as URLPattern         # django 1.x
-from django.utils.functional import cached_property
+from django.urls.exceptions import NoReverseMatch, Resolver404
+try:
+    from django.urls import re_path              # Django 2.x
+except ImportError:
+    from django.conf.urls import url as re_path  # Django 1.x
 
-from ..util import log
+from ..util import merge_dicts, log
 from .data import RoutingData
 from .decorators import RequestViewWrapper
 
-from contextlib import contextmanager
-from types import ModuleType
+import logging
 from collections import namedtuple
 
+##################################################
+###  DMP-style resolver for an app
 
 
-def dmp_app(app_name=None, kwargs=None, name=None, add_patterns=True):
+def app_resolver(app_name=None, pattern_kwargs=None, name=None):
     '''
-    Registers the given app_name with DMP and adds a convention-based
-    url resolver for it.
+    Registers the given app_name with DMP and adds convention-based
+    url patterns for it.
 
-    This function should be used in urls.py in the same way that url()
-    and re_path() are used.
+    This function is meant to be called in a project's urls.py.
     '''
-    return AppResolver(app_name, default_args=kwargs, name=name, add_patterns=add_patterns)
+    urlconf = URLConf(app_name, pattern_kwargs)
+    return re_path(
+        '^{}/?'.format(app_name) if app_name is not None else '',
+        include(urlconf),
+        name=urlconf.app_name,
+    )
 
 
-def dmp_path(regex, kwargs, name):
+class URLConf(object):
     '''
-    Creates a URL pattern for sending into dmp_app().  This function is
-    automatically called by DMP to register the various convention-based
-    patterns needed for DMP routing.  The only reason to use this function
-    directly is to create a list of custom patterns that will be sent as
-    a parameter to dmp_app().
+    Mimics a urls.py module for an app by holding a list of url patterns.
+    This is run through Django's include() function to create a resolver.
+
+    Call `app_resolver()` to instantiate this class.  Do not create it directly.
     '''
-    # this is a bit of a hack, but I'm trying to stay with Django's resolver/pattern
-    # relationship and with Django's built-in functions as much as possibile.
-    # Since Django's re_path() function requires a view, we need to create a no-op
-    # even though DMP's AppResolver ignores it.
-    def no_op_view(request):
-        raise Http404()
-    return re_path(regex, no_op_view, kwargs, name)
+    def __init__(self, app_name=None, pattern_kwargs=None):
+        self._app_name = app_name
+        dmp = apps.get_app_config('django_mako_plus')
+        dmp.register_app(self._app_name)
+        self.urlpatterns = dmp_paths_for_app(self._app_name, pattern_kwargs, self.app_name)
+
+    @property
+    def app_name(self):
+        return self._app_name or '<default app>'
 
 
 
-#################################################
-###   The DMP Resolver
+def dmp_paths_for_app(app_name, pattern_kwargs=None, pretty_app_name=None):
+    '''Utility function that creates the default patterns for an app'''
+    dmp = apps.get_app_config('django_mako_plus')
 
+    # Because these patterns are subpatterns within the app's resolver,
+    # we don't include the /app/ in the pattern -- it's already been
+    # handled by the app's resolver.
+    #
+    # Also note how the each pattern below defines the four kwargs--
+    # either as 1) a regex named group or 2) in kwargs.
 
-class AppResolver(URLResolver):
-    '''
-    Convention-based url resolver that implements DMP's app-aware view function finder.
-    Do not use this class directly -- use dmp_app() above instead.
-    '''
-    def __init__(self, app_name=None, default_args=None, name=None, add_patterns=True):
-        self.dmp = apps.get_app_config('django_mako_plus')
-        if app_name is None:
-            if not self.dmp.options['DEFAULT_APP']:
-                raise ImproperlyConfigured('An app_name is required because DEFAULT_APP is empty - please use a '
-                                           'valid app name or set the DMP default app in settings')
-        else:
-            self.dmp.register_app(app_name)
-        self.app_name = app_name
+    return [
+        # page.function/urlparams
+        dmp_path(
+            r'^(?P<dmp_page>[_a-zA-Z0-9\-]+)\.(?P<dmp_function>[_a-zA-Z0-9\.\-]+)/(?P<dmp_urlparams>.+?)/?$',
+            merge_dicts({
+                'dmp_app': app_name or dmp.options['DEFAULT_APP'],
+            }, pattern_kwargs),
+            'DMP /app/page.function/urlparams for {}'.format(pretty_app_name),
+        ),
 
-        # the subpatterns for this app (dynamically create a urls.py module with patterns)
-        urlconf_mod = ModuleType('urlconf')
-        urlconf_mod.urlpatterns = self._generate_patterns() if add_patterns else []
-
-        # call the super
-        pat = RegexPattern(r'^{}/?'.format(app_name or ''), 'DMP /app for {}'.format(self.pretty_app_name), is_endpoint=False)
-        kwargs = { 'dmp_app': app_name or self.dmp.options['DEFAULT_APP'] }
-        if default_args:
-            kwargs.update(default_args)
-        super().__init__(pat, urlconf_mod, kwargs, app_name)
-
-
-    def _generate_patterns(self):
-        '''Creates the default patterns for an app'''
-        patterns = []
-        # /app/page.function/urlparams
-        patterns.append(dmp_path(
-            r'^(?P<dmp_page>[_a-zA-Z0-9\-]+)\.(?P<dmp_function>[_a-zA-Z0-9\.\-]+)/(?P<dmp_urlparams>.*?)/?$',
-            {},
-            'DMP /app/page.function/urlparams for {}'.format(self.pretty_app_name),
-        ))
-        # /app/page.function
-        patterns.append(dmp_path(
+        # page.function
+        dmp_path(
             r'^(?P<dmp_page>[_a-zA-Z0-9\-]+)\.(?P<dmp_function>[_a-zA-Z0-9\.\-]+)/?$',
-            {},
-            'DMP /app/page.function for {}'.format(self.pretty_app_name),
-        ))
-        # /app/page/urlparams
-        patterns.append(dmp_path(
-            r'^(?P<dmp_page>[_a-zA-Z0-9\-]+)/(?P<dmp_urlparams>.*?)/?$',
-            {},
-            'DMP /app/page/urlparams for {}'.format(self.pretty_app_name),
-        ))
-        # /app/page
-        patterns.append(dmp_path(
+            merge_dicts({
+                'dmp_app': app_name or dmp.options['DEFAULT_APP'],
+                'dmp_urlparams': '',
+            }, pattern_kwargs),
+            'DMP /app/page.function for {}'.format(pretty_app_name),
+        ),
+
+        # page/urlparams
+        dmp_path(
+            r'^(?P<dmp_page>[_a-zA-Z0-9\-]+)/(?P<dmp_urlparams>.+?)/?$',
+            merge_dicts({
+                'dmp_app': app_name or dmp.options['DEFAULT_APP'],
+                'dmp_function': 'process_request',
+            }, pattern_kwargs),
+            'DMP /app/page/urlparams for {}'.format(pretty_app_name),
+        ),
+
+        # page
+        dmp_path(
             r'^(?P<dmp_page>[_a-zA-Z0-9\-]+)/?$',
-            {},
-            'DMP /app/page for {}'.format(self.pretty_app_name),
-        ))
-        # /app
-        patterns.append(dmp_path(
+            merge_dicts({
+                'dmp_app': app_name or dmp.options['DEFAULT_APP'],
+                'dmp_function': 'process_request',
+                'dmp_urlparams': '',
+            }, pattern_kwargs),
+            'DMP /app/page for {}'.format(pretty_app_name),
+        ),
+
+        # empty
+        dmp_path(
             r'^$',
-            { 'dmp_page': self.dmp.options['DEFAULT_PAGE'] } if self.dmp.options['DEFAULT_PAGE'] else {},
-            'DMP /app for {}'.format(self.pretty_app_name),
-        ))
-        return patterns
+            merge_dicts({
+                'dmp_app': app_name or dmp.options['DEFAULT_APP'],
+                'dmp_function': 'process_request',
+                'dmp_urlparams': '',
+                'dmp_page': dmp.options['DEFAULT_PAGE'],
+            }, pattern_kwargs),
+            'DMP /app for {}'.format(pretty_app_name),
+        ),
+    ]
 
 
-    @property
-    def name(self):
-        return self.pattern.name
 
 
-    @property
-    def pretty_app_name(self):
-        return self.app_name or '<default app>'
+#############################################
+###  DMP-style pattern
+
+
+def dmp_path(regex, kwargs=None, name=None, app_name=None):
+    '''
+    Creates a DMP-style, convention-based pattern that resolves
+    to various view functions based on the 'dmp_page' value.
+
+    The following should exist as 1) regex named groups or
+    2) items in the kwargs dict:
+        dmp_app         Should resolve to a name in INSTALLED_APPS.
+                        If missing, defaults to DEFAULT_APP.
+        dmp_page        The page name, which should resolve to a module:
+                        project_dir/{dmp_app}/views/{dmp_page}.py
+                        If missing, defaults to DEFAULT_PAGE.
+        dmp_function    The function name (or View class name) within the module.
+                        If missing, defaults to 'process_request'
+        dmp_urlparams   The urlparams string to parse.
+                        If missing, defaults to ''.
+
+    The reason for this convenience function is to be similar to
+    Django functions like url(), re_path(), and path().
+    '''
+    return PagePattern(regex, kwargs, name)
+
+
+class PagePattern(URLPattern):
+    '''
+    Creates a DMP-style, convention-based pattern that resolves
+    to various view functions based on the 'dmp_page' value.
+    '''
+    def __init__(self, regex, default_args=None, name=None, app_name=None):
+        self.dmp = apps.get_app_config('django_mako_plus')
+        if app_name or self.dmp.options['DEFAULT_APP']:
+            self.dmp.register_app(app_name)
+            default_args = merge_dicts(default_args, { 'dmp_app': app_name })
+        if isinstance(regex, str):
+            regex = RegexPattern(regex, name=name, is_endpoint=True)
+        # this is a bit of a hack, but the super constructor needs
+        # a view function. Our resolve() function ignores this view function
+        # so we'll just creeate a no-op placeholder so super is happy.
+        def no_op_view(request):
+            raise Http404()
+        super().__init__(regex, no_op_view, default_args, name=name)
 
 
     def resolve(self, path):
-        path = str(path)  # path may be a reverse_lazy object
-        tried = []
-
-        # see if we have an /app match
+        '''
+        Different from Django, this method matches by /app/page/ convention
+        using its pattern.  The pattern should create keyword arguments for
+        dmp_app, dmp_page.
+        '''
         match = self.pattern.match(path)
-        if not match:
-            raise Resolver404({'path': path})
-
-        # now check the subpatterns for page and urlparams
-        new_path, args, kwargs = match
-        for pattern in self.url_patterns:
+        if match:
+            _, args, kwargs = match
+            kwargs = merge_dicts(self.default_args, kwargs)
             try:
-                sub_match = pattern.resolve(new_path)
-            except Resolver404 as e:
-                sub_tried = e.args[0].get('tried')
-                if sub_tried is not None:
-                    tried.extend([pattern] + t for t in sub_tried)
-                else:
-                    tried.append([pattern])
-                continue
-            if not sub_match:
-                tried.append([pattern])
-                continue
-
-            # we have a match!
-            try:
-                # Merge captured arguments in match with submatch
-                sub_match_dict = dict(kwargs, **self.default_kwargs)
-                # Update the sub_match_dict with the kwargs from the sub_match.
-                sub_match_dict.update(sub_match.kwargs)
-                # If there are *any* named groups, ignore all non-named groups.
-                # Otherwise, pass all non-named arguments as positional arguments.
-                sub_match_args = sub_match.args
-                if not sub_match_dict:
-                    sub_match_args = args + sub_match.args
-                # now translate the subpattern args into a view function
                 routing_data = RoutingData(
-                    sub_match_dict.pop('dmp_app', None) or self.dmp.options['DEFAULT_APP'],
-                    sub_match_dict.pop('dmp_page', None) or self.dmp.options['DEFAULT_PAGE'],
-                    sub_match_dict.pop('dmp_function', None),
-                    sub_match_dict.pop('dmp_urlparams', '').strip(),
+                    kwargs.pop('dmp_app', None) or self.dmp.options['DEFAULT_APP'],
+                    kwargs.pop('dmp_page', None) or self.dmp.options['DEFAULT_PAGE'],
+                    kwargs.pop('dmp_function', None) or 'process_request',
+                    kwargs.pop('dmp_urlparams', '').strip(),
                 )
-                # we got this!
                 return ResolverMatch(
                     RequestViewWrapper(routing_data),
-                    sub_match_args,
-                    sub_match_dict,
-                    sub_match.url_name,
-                    [self.app_name] + sub_match.app_names,
-                    [self.namespace] + sub_match.namespaces,
+                    args,
+                    kwargs,
+                    self.pattern.name,
                 )
             except ViewDoesNotExist as vdne:
-                # we had a pattern match, but something went
-                # wrong when getting a reference to the view function.
-                # logging this case because the programmer needs info on what's wrong.
-                log.debug('{}: {}'.format(pattern, vdne))
-                tried.append([pattern])
-                raise Resolver404({'tried': tried, 'path': new_path})
+                # we had a pattern match, but we couldn't get a callable using kwargs from the pattern
+                # create a "pattern" so the programmer can see what happened
+                # this is a hack, but the resolver error page doesn't give other options.
+                raise Resolver404({
+                    'tried': [[ PatternStub(self.pattern.name, '[pattern matched but discovery failed: {}]'.format(vdne)) ]],
+                    'path': path,
+                })
 
-        # if we get here, no patterns matched
-        raise Resolver404({'tried': tried, 'path': new_path})
+
+
+from collections import namedtuple
+PatternStub = namedtuple('PatternStub', [ 'name', 'pattern' ])

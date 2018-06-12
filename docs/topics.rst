@@ -9,7 +9,6 @@ The following are special topics / advanced features of DMP:
     topics_converters
     topics_view_function
     topics_partial_templates
-    topics_third_party
     topics_class_views
     topics_signals
     topics_translation

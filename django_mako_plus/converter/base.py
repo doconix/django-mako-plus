@@ -183,8 +183,8 @@ class ParameterConverter(object):
 
         except ValueError as e:
             log.info('ValueError raised during conversion of parameter %s (%s): %s', parameter.position, parameter.name, e)
-            raise ConverterHttp404(value, parameter, 'Parameter could not be converted') from e
+            raise ConverterHttp404(value, parameter, 'A parameter could not be converted - see the logs for more detail') from e
 
         except Exception as e:
             log.info('Exception raised during conversion of parameter %s (%s): %s', parameter.position, parameter.name, e)
-            raise ConverterException(value, parameter, 'Parameter could not be converted') from e
+            raise ConverterException(value, parameter, 'A parameter could not be converted - see the logs for more detail') from e

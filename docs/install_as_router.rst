@@ -72,7 +72,7 @@ Create a Vanilla Django Project
                 'class': 'logging.StreamHandler',
             },
         },
-}
+    }
 
 5. Add DMP's router to ``urls.py``:
 

@@ -1,63 +1,115 @@
 Custom URL Patterns
 ===========================
 
-Suppose your project requires a different URL pattern than the normal ``/app/page/param1/param2/...``. For example, you might need the user id in between the app and page: ``/app/userid/page/param1/param1...``.
+Suppose your project requires a different URL convention than the normal ``/app/page/``. For example, you might need the user id in between the app and page: e.g. ``/app/userid/page/``.
 
 
-Overriding the Default Patterns
------------------------------------
+DMP's default patterns are added when you include DMP's ``urls.py`` in your project. DMP iterates your local apps, and it adds a custom resolver for each one using ``app_resolver()``.  In turn, each resolver adds a number of patterns using ``dmp_path()``.  See these `methods and _dmp_paths_for_app() in the source <http://github.com/doconix/django-mako-plus/blob/master/django_mako_plus/router/resolver.py>`_.
 
-DMP's default patterns are added when you include DMP's URL file in your project. DMP iterates your local apps, and it adds a custom resolver for each one using ``dmp_app()``.  In turn, each resolver adds a number of patterns for its app using ``dmp_path()``.  See these `methods and _generate_patterns() in the source <http://github.com/doconix/django-mako-plus/blob/master/django_mako_plus/router/resolver.py>`_.
+You can disable the automatic registration of apps with DMP by removing the ``include('', 'django_mako_plus')`` line from ``urls.py``.  With this line removed, DMP won't inject any convention-based patterns into your project.
 
-You can disable the default patterns in DMP by removing the ``include('', 'django_mako_plus')`` line from ``urls.py``.  Then register the specific apps you want using ``dmp_app()``.
+Project Patterns
+----------------------------
 
-
-
-
-
-
-The following is one of the URL patterns, modified to include the ``userid`` parameter in between the app and page:
-
-::
-
-    from django_mako_plus import route_request
-    urlpatterns = [
-        ...
-        url(r'^(?P<dmp_app>[_a-zA-Z0-9\.\-]+)/(?P<userid>\d+)/(?P<dmp_page>[_a-zA-Z0-9\.\-]+)/?(?P<urlparams>.*?)/?$', route_request, name='DMP - /app/page'),
-        ...
-    ]
-
-Then, in your process\_request method, be sure to include the userid parameter. This is according to the standard Django documentation with named parameters:
-
-::
-
-    @view_function
-    def process_request(request, userid):
-        ...
-
-Be sure to use named parameters for both DMP and your custom parameters in your regular expression pattern.  Django doesn't allow both named and positional parameters in a single pattern, so we had to choose one.  Named parameters are the way to go when using DMP.
-
-You can also "hard code" the app or page name in a given pattern. Suppose you want URLs entirely made of numbers (without any slashes) to go the user app: ``/user/views/account.py``. The pattern would hard-code the app and page as `extra options <http://docs.djangoproject.com/en/1.10/topics/http/urls/#passing-extra-options-to-view-functions>`__. In urls.py:
+Per Django best practices, we'll split the patterns into a main include for the app and another file for the app. First modify your project URL file: ``mysite/urls.py``:
 
 .. code:: python
 
-    from django_mako_plus import route_request
+    from django.apps import apps
+    from django.conf.urls import url, include
+    from django.views.static import serve
+    import os
+
     urlpatterns = [
-        ...
-        url(r'^(?P<user_id>\d+)$', route_request, { 'dmp_app': 'user', 'dmp_page': 'account' }, name='User Account'),
-        ...
+
+        # DMP's JS file (for DEBUG mode)
+        url(
+            r'^django_mako_plus/(?P<path>[^/]+)',
+            serve,
+            { 'document_root': os.path.join(apps.get_app_config('django_mako_plus').path, 'webroot') },
+            name='DMP webroot (for devel)',
+        ),
+
+        # include the homepage app urls.py file
+        url('^homepage/?', include('homepage.urls')),
+
     ]
 
-Use the following named parameters in your patterns to tell DMP which
-app, page, and function to call:
+Patterns for the ``homepage`` App
+------------------------------------
 
--  ``(?P<dmp_app>[_a-zA-Z0-9\-]+)`` is the app name. If omitted, it is set to ``DEFAULT_APP`` in settings.
--  ``(?P<dmp_page>[_a-zA-Z0-9\-]+)`` is the view module name. If omitted, it is set to ``DEFAULT_APP`` in settings.
--  ``(?P<dmp_function>[_a-zA-Z0-9\.\-]+)`` is the function name.  If omitted, it is set to ``process_request``.
--  ``(?P<urlparams>.*)`` is the url parameters, and it should normally  span multiple slashes. The default patterns set this value to  anything after the page name. This value is split on the slash ``/``   to form the ``request.dmp.urlparams`` list. If omitted, it is set to the empty list ``[]``.
+Create an app-specific file for the homepage app: ``homepage/urls.py``.  These patterns are adapted from `DMP's default urls.py file <http://github.com/doconix/django-mako-plus/blob/master/django_mako_plus/urls.py>`_.  Each call to ``dmp_path`` includes the four routing variables in either the pattern or the kwargs.
 
-The following URL pattern can be used to embed an object ID parameter (named 'id' in this case) into DMP's conventional URL pattern (between the app name and the page name):
+.. code:: python
 
-::
+    from django_mako_plus import dmp_path
 
-    url(r'^(?P<dmp_app>[_a-zA-Z0-9\-]+)/(?P<id>\d+)/(?P<dmp_page>[_a-zA-Z0-9\-]+)\.?(?P<dmp_function>[_a-zA-Z0-9\-]+)?/?(?P<urlparams>.*)$', route_request, name='/app/id/page(.function)(/urlparams)'),
+    urlpatterns = [
+        # Because these patterns are subpatterns within the app's resolver,
+        # we don't include the /app/ in the pattern -- it's already been
+        # handled by the app's resolver.
+        #
+        # Also note how the each pattern below defines the four kwargs--
+        # either as 1) a regex named group or 2) in kwargs.
+        dmp_path(
+            r'^(?P<userid>[0-9-]+)/(?P<dmp_page>[_a-zA-Z0-9\-]+)\.(?P<dmp_function>[_a-zA-Z0-9\.\-]+)/(?P<dmp_urlparams>.+?)/?$',
+            { 'dmp_app': 'homepage' },
+            name='/homepage/userid/page.function/urlparams',
+        ),
+        dmp_path(
+            r'^(?P<userid>[0-9-]+)/(?P<dmp_page>[_a-zA-Z0-9\-]+)\.(?P<dmp_function>[_a-zA-Z0-9\.\-]+)/?$',
+            { 'dmp_app': 'homepage',
+            'dmp_urlparams': '' },
+            name='/homepage/userid/page.function',
+        ),
+        dmp_path(
+            r'^(?P<userid>[0-9-]+)/(?P<dmp_page>[_a-zA-Z0-9\-]+)/(?P<dmp_urlparams>.+?)/?$',
+            { 'dmp_app': 'homepage',
+            'dmp_function': 'process_request' },
+            '/homepage/userid/page/urlparams',
+        ),
+        dmp_path(
+            r'^(?P<userid>[0-9-]+)/(?P<dmp_page>[_a-zA-Z0-9\-]+)/?$',
+            { 'dmp_app': 'homepage',
+                'dmp_function': 'process_request',
+                'dmp_urlparams': '' },
+            name='/homepage/userid/page',
+        ),
+        dmp_path(
+            r'^(?P<userid>[0-9-]+)/?$',
+            { 'dmp_app': 'homepage',
+            'dmp_page': 'index',
+            'dmp_function': 'process_request',
+            'dmp_urlparams': '' },
+            name='/homepage/userid',
+        ),
+    ]
+
+The ``userid`` group in the patterns above accepts any number, plus a dash.  The dash is the DMP value for "empty".  Our pattern could actually be improved, but it'll work for this example.
+
+View Function
+---------------------
+
+Your view function needs to change because we have an additional named group in our patternns: ``userid``.  We'll have DMP convert this parameter to an int, with a default value of 0.
+
+.. code:: python
+
+    from django.http import HttpResponse
+    from django_mako_plus import view_function
+
+    @view_function
+    def process_request(request, userid:0=None):
+        return HttpResponse('The userid was %s' % userid)
+
+All view functions in the ``homepage`` need this function signature.
+
+Test with the following urls:
+
+* `http://localhost:8000/homepage/42/index <http://localhost:8000/homepage/-/index>`_
+* `http://localhost:8000/homepage/-/index <http://localhost:8000/homepage/-/index>`_
+
+
+Next Steps
+----------------
+
+We haven't added any patterns for the default app.  If ``homepage`` is our default app, we need additional patterns in the main ``urls.py`` file that don't have an app.

@@ -61,7 +61,7 @@ class view_function(BaseDecorator):
 
 
 #############################################
-###  Per-request view function wrapper
+###  Per-request wrapper for view functions
 
 class RequestViewWrapper(object):
     '''
@@ -92,8 +92,9 @@ class RequestViewWrapper(object):
         log.info('%s', self.routing_data)
         dmp = apps.get_app_config('django_mako_plus')
 
-        # the only purpose of the middleware is to attach the RoutingData object.
-        # let's attach it here again, just in case the project didn't use our middleware.
+        # the middleware attaches the routing data to request.dmp, but the
+        # middleware is optional. let's attach it here again for those not
+        # using the middleware
         request.dmp = self.routing_data
 
         # an outer try that catches the redirect exceptions

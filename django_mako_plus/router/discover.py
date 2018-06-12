@@ -47,8 +47,6 @@ def get_view_function(module_name, function_name, fallback_app=None, fallback_te
     raise Exception("Django-Mako-Plus error: get_view_function() should not have been able to get to this point.  Please notify the owner of the DMP project.  Thanks.")
 
 
-
-
 def find_view_function(module_name, function_name, fallback_app=None, fallback_template=None, verify_decorator=True):
     '''
     Finds a view function, class-based view, or template view.
@@ -68,7 +66,7 @@ def find_view_function(module_name, function_name, fallback_app=None, fallback_t
         try:
             return create_view_for_template(fallback_app, fallback_template)
         except TemplateDoesNotExist as e:
-            raise ViewDoesNotExist('View module {} not found, and fallback template {} could not be loaded ({})'.format(module_name, fallback_template, e))
+            raise ViewDoesNotExist('view module {} not found, and fallback template {} could not be loaded ({})'.format(module_name, fallback_template, e))
 
     # load the module and function
     try:
@@ -76,9 +74,9 @@ def find_view_function(module_name, function_name, fallback_app=None, fallback_t
         func = getattr(module, function_name)
         func.view_type = 'function'
     except ImportError as e:
-        raise ViewDoesNotExist('Module "{}" could not be imported: {}'.format(module_name, e))
+        raise ViewDoesNotExist('module "{}" could not be imported: {}'.format(module_name, e))
     except AttributeError as e:
-        raise ViewDoesNotExist('Module "{}" found successfully, but "{}" was not found: {}'.format(module_name, function_name, e))
+        raise ViewDoesNotExist('module "{}" found successfully, but "{}" was not found: {}'.format(module_name, function_name, e))
 
     # if class-based view, call as_view() to get a view function to it
     if inspect.isclass(func) and issubclass(func, View):
@@ -87,7 +85,7 @@ def find_view_function(module_name, function_name, fallback_app=None, fallback_t
 
     # if regular view function, check the decorator
     elif verify_decorator and not view_function.is_decorated(func):
-        raise ViewDoesNotExist("View {}.{} was found successfully, but it must be decorated with @view_function or be a subclass of django.views.generic.View.".format(module_name, function_name))
+        raise ViewDoesNotExist("view {}.{} was found successfully, but it must be decorated with @view_function or be a subclass of django.views.generic.View.".format(module_name, function_name))
 
     # attach a converter to the view function
     if dmp.options['PARAMETER_CONVERTER'] is not None:
@@ -99,7 +97,6 @@ def find_view_function(module_name, function_name, fallback_app=None, fallback_t
 
     # return the function/class
     return func
-
 
 
 def create_view_for_template(app_name, template_name):

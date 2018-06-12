@@ -27,10 +27,10 @@ This section shows how to go cafeteria-style with DMP.
     install_app_specific
 
 
-Installation Needs
+Special Topics
 -----------------------------------
 
-The following pages discuss special installation needs some users may have:
+The following pages discuss additional installation topics:
 
 .. toctree::
     :maxdepth: 1

@@ -18,14 +18,37 @@ from .router import RequestViewWrapper, RoutingData
 
 class RequestInitMiddleware(MiddlewareMixin):
     '''
-    Adds several fields to the request that our controller needs.
-    Projects can customize the variables with view middleware that runs after this class.
+    An optional middleware class that adds a RoutingData object to the request
+    at the earliest possible moment.
 
-    This class should be included in settings.py -> MIDDLEWARE.
+    tl;dr: You only need this middlware if you want to use `request.dmp` in view middleware
+    functions.
 
-    Technically, this middleware is only required if you need access to request.dmp in
-    other middleware.  If the routing data object isn't attached here, it is
-    attached in the view function wrapper (which runs just after view middleware).
+    If included in MIDDLEWARE, the following happens:
+
+        1. During initial middleware, request.dmp is set with an empty RoutingData object.
+        2. During url resolution, a RoutingData object is created with information from the request
+            and is available as request.resolver_match.routing_data.
+        3. During view middleware, it is attached to the request:
+                request.dmp = request.resolver_match.routing_data
+        4. After view middleware, parameter conversion occurs.
+        5. It is available throughout view decorators and the view function.
+
+    If not included in MIDDLEWARE, the following happens:
+
+        1. During initial middleware, request.dmp doesn't exist (raises an AttributeError).
+        2. During url resolution, a RoutingData object is created with information from the request
+            and is available as request.resolver_match.routing_data.
+        3. During view middleware, it is still available as request.resolver_match.routing_data,
+            but request.dmp still raises AttributeError.
+        4. After view middleware, it is attached to the request:
+                request.dmp = request.resolver_match.routing_data
+            Also, parameter conversion occurs now.
+        5. It is available throughout view decorators and the view function.
+
+    Note that view middleware functions can not only read the RouteData variables, but they can
+    adjust values as well. This power should be used with great responsibility, but it allows
+    middleware to adjust the app, page, function, and url params if needed.
     '''
     # This singleton is set on the request object early in the request (during middleware).
     # Once urls.py has processed, request.dmp is changed to a populated RoutingData object.
@@ -33,33 +56,10 @@ class RequestInitMiddleware(MiddlewareMixin):
 
 
     def process_request(self, request):
-        '''
-        Adds stubs for the DMP custom variables to the request object.
-
-        We do this early in the middleware process because process_view() below gets called
-        *after* URL resolution.  If an exception occurs before that (a 404, a middleware exception),
-        the variables won't be put on the request object.  Therefore, we put stubs on it at the
-        earliest possible place so they exist even if we don't get to process_view().
-        '''
         request.dmp = self.INITIAL_ROUTING_DATA
 
 
     def process_view(self, request, view_func, view_args, view_kwargs):
-        '''
-        Adds the following to the request object:
-
-            request.dmp.app            The Django application (such as "homepage"), as a string.
-            request.dmp.page           The view module (such as "index" for index.py), as a string.
-            request.dmp.function       The function within the view module to be called (usually "process_request"),
-                                       as a string.
-            request.dmp.module         The module path in Python terms (such as homepage.views.index), as a string.
-            request.dmp.callable       The view callable (function, method, etc.) to be called by the router.
-            request.dmp.view_type      The type of view: function, class, or template.
-            request.dmp.urlparams      A list of the remaining url parts, as a list of strings.
-                                       View function parameter conversion uses the values in this list.
-
-        As view middleware, this function runs just before the router.route_request is called.
-        '''
         # view_func will be a RequestViewWrapper when our resolver (DMPResolver) matched
         if isinstance(view_func, RequestViewWrapper):
             view_func.routing_data.request = request

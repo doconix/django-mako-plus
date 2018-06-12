@@ -17,7 +17,6 @@ log = logging.getLogger('django_mako_plus')
 
 
 
-
 ################################################################
 ###   Special type of list used for url params
 
@@ -69,7 +68,8 @@ def merge_dicts(*dicts):
     '''
     merged = {}
     for d in dicts:
-        merged.update(d)
+        if d:
+            merged.update(d)
     return merged
 
 

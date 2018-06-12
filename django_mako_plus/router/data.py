@@ -9,11 +9,20 @@ from urllib.parse import unquote
 
 class RoutingData(object):
     '''
-    The routing information for a request.  This is basically an enhanced ResolverMatch,
-    but since Django creates its own ResolverMatch object during resolution (throwing ours
-    away), this is stored in a per-request decorator on the actual view function.
+    The routing information for a request.  This is created during url resolution when a pattern
+    matches (see resolver.py).
 
-    During view middleware, this object is also attached to the request as `request.dmp`.
+    During middleware, this is not available
+        request.dmp.app         The Django application (such as "homepage"), as a string.
+        request.dmp.page        The view module (such as "index" for index.py), as a string.
+        request.dmp.function    The function within the view module to be called (usually "process_request"),
+                                as a string.
+        request.dmp.module      The module path in Python terms (such as homepage.views.index), as a string.
+        request.dmp.callable    The view callable (function, method, etc.) to be called by the router.
+        request.dmp.view_type   The type of view: function, class, or template.
+        request.dmp.urlparams   A list of the remaining url parts, as a list of strings. Parameter conversion
+                                uses the values in this list.
+
     '''
     def __init__(self, app=None, page=None, function=None, urlparams=None):
         '''These variables are set by the process_view method above'''
