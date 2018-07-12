@@ -53,7 +53,7 @@ class Command(DMPCommandMixIn, BaseCommand):
             metavar='',
             parser_class=create_subparser,
         )
-        for name in find_subcommands():
+        for name in self.find_subcommands():
             current_subcommand = self.fetch_subcommand(name)
             subparsers.add_parser(name, description=current_subcommand.help, help=current_subcommand.help, add_help=False)
 
@@ -71,13 +71,8 @@ class Command(DMPCommandMixIn, BaseCommand):
         subcommand.execute(*args, **options)
 
 
-
-#########################################
-###   Helper functions
-
-def find_subcommands():
-    # this is ripped from django.core.management.__init__.py and switched to our subcommand dir
-    dmp = apps.get_app_config('django_mako_plus')
-    command_dir = os.path.join(dmp.path, 'management', 'subcommands')
-    return [name for _, name, is_pkg in pkgutil.iter_modules([command_dir])
-            if not is_pkg and not name.startswith('_')]
+    def find_subcommands(self):
+        # this is ripped from django.core.management.__init__.py (but uses 'subcommands')
+        subcmd_dir = os.path.join(self.get_dmp_path(), 'management', 'subcommands')
+        return [name for _, name, is_pkg in pkgutil.iter_modules([subcmd_dir])
+                if not is_pkg and not name.startswith('_')]

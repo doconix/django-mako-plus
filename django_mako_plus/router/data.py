@@ -87,7 +87,7 @@ class RoutingData(object):
     def render(self, template, context=None, def_name=None, subdir='templates', content_type=None, status=None, charset=None):
         '''App-specific render function that renders templates in the *current app*, attached to the request for convenience'''
         if self.request is None:
-            raise ValueError("RoutingData.render() can only be called after the view middleware is run.")
+            raise ValueError("RoutingData.render() can only be called after the view middleware is run. Check that `django_mako_plus.middleware` is in MIDDLEWARE.")
         dmp = apps.get_app_config('django_mako_plus')
         template_loader = dmp.engine.get_template_loader(self.app, subdir)
         template_adapter = template_loader.get_template(template)
@@ -97,7 +97,7 @@ class RoutingData(object):
     def render_to_string(self, template, context=None, def_name=None, subdir='templates'):
         '''App-specific render function that renders templates in the *current app*, attached to the request for convenience'''
         if self.request is None:
-            raise ValueError("RoutingData.render() can only be called after the view middleware is run.")
+            raise ValueError("RoutingData.render() can only be called after the view middleware is run. Check that `django_mako_plus.middleware` is in MIDDLEWARE.")
         dmp = apps.get_app_config('django_mako_plus')
         template_loader = dmp.engine.get_template_loader(self.app, subdir)
         template_adapter = template_loader.get_template(template)

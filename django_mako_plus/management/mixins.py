@@ -1,3 +1,4 @@
+import os, os.path
 
 
 
@@ -44,6 +45,11 @@ class DMPCommandMixIn(object):
             options['verbosity'] = 0
         self.verbosity = options.get('verbosity', 1)
         super().execute(*args, **options)
+
+
+    def get_dmp_path(self):
+        '''Returns the absolute path to DMP.  Apps do not have to be loaded yet'''
+        return os.path.dirname(os.path.dirname(__file__))
 
 
     def message(self, msg='', level=1, tab=0):
