@@ -1,3 +1,4 @@
+from django import VERSION as DJANGO_VERSION
 from django.apps import apps
 from django.core.management import BaseCommand
 from django.core.management.base import CommandParser
@@ -16,10 +17,8 @@ SUBCOMMAND_DEST = 'subcommand'
 class Command(DMPCommandMixIn, BaseCommand):
     '''Runs DMP subcommands'''
     help = "The dmp management command runs a number of subcommands.  See below for the available subcommands."
-    # settings might not be available yet, so can't set locale or run checks
-    # once a subcommand is selected, these are reset to the subcommand settings
-    leave_locale_alone = True
     requires_system_checks = False
+    leave_locale_alone = True
 
     def __init__(self, *args, **kwargs):
         self.saved_args = args
@@ -28,34 +27,44 @@ class Command(DMPCommandMixIn, BaseCommand):
         super().__init__(*args, **kwargs)
 
 
+    def add_arguments(self, parser):
+        super().add_arguments(parser)
+        self.parser = parser
+
+        # add each subcommand
+        dmp_subparser = parser.add_subparsers(
+            title='DMP subcommands: (`python3 manage.py dmp [subcommand] --help` for docs)',
+            dest=SUBCOMMAND_DEST,
+            metavar='',
+        )
+        for name in self.find_subcommands():
+            current_subcommand = self.fetch_subcommand(name)
+            kwargs = {}
+            kwargs['description'] = current_subcommand.help
+            kwargs['help'] = current_subcommand.help
+            kwargs['add_help'] = False
+            # this gets all the options from the subcommand into this command
+            kwargs['parents'] = [ current_subcommand.create_parser('', '') ]
+            if DJANGO_VERSION < ( 2, 1 ):
+                kwargs['cmd'] = current_subcommand
+            else:
+                kwargs['called_from_command_line'] = parser.called_from_command_line
+                kwargs['missing_args_message'] = parser.missing_args_message
+            dmp_subparser.add_parser(name, **kwargs)
+
+
+    def find_subcommands(self):
+        # this is ripped from django.core.management.__init__.py (but uses 'subcommands')
+        subcmd_dir = os.path.join(self.get_dmp_path(), 'management', 'subcommands')
+        return [name for _, name, is_pkg in pkgutil.iter_modules([subcmd_dir])
+                if not is_pkg and not name.startswith('_')]
+
+
     def fetch_subcommand(self, subcommand):
         mod = import_module('django_mako_plus.management.subcommands.{}'.format(subcommand))
         cmd = mod.Command(*self.saved_args, **self.saved_kwargs)
         cmd._called_from_command_line = self._called_from_command_line
         return cmd
-
-
-    def add_arguments(self, parser):
-        super().add_arguments(parser)
-        self.parser = parser
-
-        # add a subparser for each subcommand
-        current_subcommand = None
-        def create_subparser(**kwargs):
-            # I have to ask Django to create the parser and then use that as
-            # a parent (template) for a new parser because django doesn't allow
-            # the extra args and kwargs in its factory method (lame).
-            kwargs['parents'] = [ current_subcommand.create_parser('', '') ]
-            return CommandParser(current_subcommand, **kwargs)
-        subparsers = parser.add_subparsers(
-            title='DMP subcommands: (`python3 manage.py dmp [subcommand] --help` for docs)',
-            dest=SUBCOMMAND_DEST,
-            metavar='',
-            parser_class=create_subparser,
-        )
-        for name in self.find_subcommands():
-            current_subcommand = self.fetch_subcommand(name)
-            subparsers.add_parser(name, description=current_subcommand.help, help=current_subcommand.help, add_help=False)
 
 
     def handle(self, *args, **options):
@@ -66,13 +75,5 @@ class Command(DMPCommandMixIn, BaseCommand):
 
         # trigger the subcommand handling
         subcommand = self.fetch_subcommand(options[SUBCOMMAND_DEST])
-        self.leave_locale_alone = subcommand.leave_locale_alone
-        self.requires_system_checks = subcommand.requires_system_checks
+#        subcommand.requires_system_checks = self.requires_system_checks
         subcommand.execute(*args, **options)
-
-
-    def find_subcommands(self):
-        # this is ripped from django.core.management.__init__.py (but uses 'subcommands')
-        subcmd_dir = os.path.join(self.get_dmp_path(), 'management', 'subcommands')
-        return [name for _, name, is_pkg in pkgutil.iter_modules([subcmd_dir])
-                if not is_pkg and not name.startswith('_')]
