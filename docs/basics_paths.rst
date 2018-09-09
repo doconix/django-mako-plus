@@ -10,7 +10,7 @@ Template Inheritance Across Apps
 
 You may have noticed that this tutorial has focused on a single app. Most projects consist of many apps. For example, a sales site might have an app for user management, an app for product management, and an app for the catalog and sales/shopping-cart experience. All of these apps probably want the same look and feel, and all of them likely want to extend from the **same** ``base.htm`` file.
 
-When you run ``python3 manage.py dmp startapp <appname>``, you get **new** ``base.htm`` and ``base_ajax.htm`` files each time. This is done to get you started on your first app. On your second, third, and subsequent apps, you probably want to delete these starter files and instead extend your templates from the ``base.htm`` and ``base_ajax.htm`` files in your first app.
+When you run ``python3 manage.py dmp_startapp <appname>``, you get **new** ``base.htm`` and ``base_ajax.htm`` files each time. This is done to get you started on your first app. On your second, third, and subsequent apps, you probably want to delete these starter files and instead extend your templates from the ``base.htm`` and ``base_ajax.htm`` files in your first app.
 
 In fact, in my projects, I usually create an app called ``base_app`` that contains the common ``base.htm`` html code, site-wide CSS, and site-wide Javascript. Subsequent apps simply extend from ``/base_app/templates/base.htm``. The common ``base_app`` doesn't really have end-user templates in it -- they are just supertemplates that support other, public apps.
 
@@ -186,7 +186,7 @@ There may be some modules, such as ``re`` or ``decimal`` that are so useful you 
 
 Any entries in this list will be automatically included in templates throughout all apps of your site. With the above imports, you'll be able to use ``re`` and ``Decimal`` and ``os`` and ``os.path`` anywhere in any .html, .cssm, and .jsm file.
 
-    Whenever you modify the DMP settings, be sure to clean out your cached templates with ``python3 manage.py dmp cleanup``. This ensures your compiled templates are rebuilt with the new settings.
+    Whenever you modify the DMP settings, be sure to clean out your cached templates with ``python3 manage.py dmp_cleanup``. This ensures your compiled templates are rebuilt with the new settings.
 
 
 Cleaning Up
@@ -197,10 +197,10 @@ DMP caches its compiled templates in subdirectories of each app. The default loc
 ::
 
     # see what would be be done without actually deleting any cache folders
-    python3 manage.py dmp cleanup --trial-run
+    python3 manage.py dmp_cleanup --trial-run
 
     # really delete the folders
-    python3 manage.py dmp cleanup
+    python3 manage.py dmp_cleanup
 
 
 With this management command, add ``--verbose`` to the command to include messages about skipped files, and add ``--quiet`` to silence all messages (except errors).

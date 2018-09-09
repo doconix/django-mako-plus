@@ -74,6 +74,7 @@ def dmp_paths_for_app(app_name, pattern_kwargs=None, pretty_app_name=None):
                 'dmp_app': app_name or dmp.options['DEFAULT_APP'],
             }, pattern_kwargs),
             'DMP /{}/page.function/urlparams'.format(pretty_app_name),
+            app_name,
         ),
 
         # page.function
@@ -84,6 +85,7 @@ def dmp_paths_for_app(app_name, pattern_kwargs=None, pretty_app_name=None):
                 'dmp_urlparams': '',
             }, pattern_kwargs),
             'DMP /{}/page.function'.format(pretty_app_name),
+            app_name,
         ),
 
         # page/urlparams
@@ -94,6 +96,7 @@ def dmp_paths_for_app(app_name, pattern_kwargs=None, pretty_app_name=None):
                 'dmp_function': 'process_request',
             }, pattern_kwargs),
             'DMP /{}/page/urlparams'.format(pretty_app_name),
+            app_name,
         ),
 
         # page
@@ -105,6 +108,7 @@ def dmp_paths_for_app(app_name, pattern_kwargs=None, pretty_app_name=None):
                 'dmp_urlparams': '',
             }, pattern_kwargs),
             'DMP /{}/page'.format(pretty_app_name),
+            app_name,
         ),
 
         # empty
@@ -117,6 +121,7 @@ def dmp_paths_for_app(app_name, pattern_kwargs=None, pretty_app_name=None):
                 'dmp_page': dmp.options['DEFAULT_PAGE'],
             }, pattern_kwargs),
             'DMP /{}'.format(pretty_app_name),
+            app_name,
         ),
     ]
 
@@ -147,7 +152,7 @@ def dmp_path(regex, kwargs=None, name=None, app_name=None):
     The reason for this convenience function is to be similar to
     Django functions like url(), re_path(), and path().
     '''
-    return PagePattern(regex, kwargs, name)
+    return PagePattern(regex, kwargs, name, app_name)
 
 
 EMPTY_ARG = object()

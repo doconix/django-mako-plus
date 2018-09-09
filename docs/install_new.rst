@@ -45,7 +45,7 @@ Change to your project directory in the terminal/console, then create a new Djan
 
 ::
 
-    python3 manage.py dmp startapp homepage
+    python3 manage.py dmp_startapp homepage
 
 **After** the new ``homepage`` app is created, add your new app to the ``INSTALLED_APPS`` list in ``settings.py``:
 

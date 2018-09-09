@@ -35,6 +35,6 @@ class Command(DMPCommandMixIn, StartProjectCommand):
 
 What's next?
     1. cd {name}
-    2. python3 manage.py dmp startapp homepage
+    2. python3 manage.py dmp_startapp homepage
 
 """.format(name=options['name']))

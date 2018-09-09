@@ -37,4 +37,8 @@ for config in apps.get_app_configs():
 
 # add a DMP-style resolver for the default app
 if dmp.options['DEFAULT_APP']:
-    urlpatterns.append(app_resolver())
+    try:
+        apps.get_app_config(dmp.options['DEFAULT_APP'])
+        urlpatterns.append(app_resolver())
+    except LookupError:
+        pass  # the default app in dmp's TEMPLATES entry isn't an installed app, so skip it

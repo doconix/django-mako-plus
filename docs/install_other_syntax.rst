@@ -45,7 +45,7 @@ Then clear out the compiled templates caches:
 
 ::
 
-    python3 manage.py dmp cleanup
+    python3 manage.py dmp_cleanup
 
 In your Mako template, include a Django expression or embed an entire block by using a Mako filter:
 

@@ -30,7 +30,7 @@ If the tag can't be called using regular Python, you can usually inspect the thi
 
 If you call the ``render_crispy_form`` method in many templates, you may want to add the import to ``DEFAULT_TEMPLATE_IMPORTS`` in your ``settings.py`` file. Once this import exists in your settings, the function will be globally available in every template on your site.
 
-    Whenever you modify the DMP settings, be sure to clean out your cached templates with ``python3 manage.py dmp cleanup``. This ensures your compiled templates are rebuilt with the new settings.
+    Whenever you modify the DMP settings, be sure to clean out your cached templates with ``python3 manage.py dmp_cleanup``. This ensures your compiled templates are rebuilt with the new settings.
 
 
 Using Third-Party Tags

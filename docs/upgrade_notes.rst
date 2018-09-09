@@ -3,6 +3,17 @@ Upgrade Notes
 
 This document contains upgrade notes for those already using DMP.  We started the document at version 4.3.
 
+5.6 - September, 2018
+
+1. Changed the management command format to the way it used to be.  Sorry for the change, everyone!  Doing subcommands the way we were required tying to internal Django classes.  When Django changed things in 2.1, it broke subcommands. It was going to be quite difficult to support both 2.0 and 2.1 at the same time.  Plus I probably shouldn't have tied to internal stuff more than needed anyway.
+
+So back to old style.  If you previously typed:
+
+python manage.py dmp startapp homepage
+
+you now type:
+
+python manage.py dmp_startapp homepage
 
 
 5.5 - June, 2018

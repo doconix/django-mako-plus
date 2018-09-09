@@ -25,7 +25,7 @@ class Tester(TestCase):
         orig_stdout = sys.stdout
         sys.stdout = buffer
         try:
-            execute_from_command_line([ 'manage.py', 'dmp' ] + list(argv))
+            execute_from_command_line([ 'manage.py' ] + list(argv))
         except CommandError as e:
             raise AssertionError('CommandError ocurred: {}'.format(e))
         except Exception as e:
@@ -42,11 +42,11 @@ class Tester(TestCase):
         template = get_template('homepage', 'index.basic.html')
         self.assertTrue(os.path.exists(cache_dir))
         # run the cleanup command in trial mode
-        result = self.subcommand('cleanup', '--trial-run')
+        result = self.subcommand('dmp_cleanup', '--trial-run')
         self.assertTrue('Cleaning up app: homepage' in result)
         self.assertTrue(os.path.exists(cache_dir))
         # run the cleanup command
-        result = self.subcommand('cleanup')
+        result = self.subcommand('dmp_cleanup')
         self.assertTrue('Cleaning up app: homepage' in result)
         self.assertFalse(os.path.exists(cache_dir))
 
@@ -56,7 +56,7 @@ class Tester(TestCase):
         if os.path.exists(settings.STATIC_ROOT):
             shutil.rmtree(settings.STATIC_ROOT)
         try:
-            result = self.subcommand('collectstatic')
+            result = self.subcommand('dmp_collectstatic')
             self.assertTrue(os.path.exists(os.path.join(settings.STATIC_ROOT, 'homepage', 'media')))
             self.assertTrue(os.path.exists(os.path.join(settings.STATIC_ROOT, 'homepage', 'scripts')))
             self.assertTrue(os.path.exists(os.path.join(settings.STATIC_ROOT, 'homepage', 'scripts', 'base.js')))
@@ -70,7 +70,7 @@ class Tester(TestCase):
 
     def test_makemessages(self):
         # TODO: the tests for this command need improvement
-        result = self.subcommand('makemessages', '--ignore-template-errors', '--verbose')
+        result = self.subcommand('dmp_makemessages', '--ignore-template-errors', '--verbose')
 
 
     def test_startapp(self):
@@ -78,7 +78,7 @@ class Tester(TestCase):
         if os.path.exists(appdir):
             shutil.rmtree(appdir)
         try:
-            result = self.subcommand('startapp', 'teststartapp1')
+            result = self.subcommand('dmp_startapp', 'teststartapp1')
             self.assertTrue('teststartapp1 created successfully!' in result)
             self.assertTrue(os.path.exists(appdir))
             self.assertTrue(os.path.isdir(os.path.join(appdir, 'media')))
@@ -99,7 +99,7 @@ class Tester(TestCase):
         if os.path.exists(projdir):
             shutil.rmtree(projdir)
         try:
-            result = self.subcommand('startproject', 'testproject1')
+            result = self.subcommand('dmp_startproject', 'testproject1')
             self.assertTrue('testproject1 created successfully!' in result)
             self.assertTrue(os.path.exists(projdir))
             self.assertTrue(os.path.isdir(os.path.join(projdir, 'testproject1')))
@@ -119,7 +119,7 @@ class Tester(TestCase):
         if os.path.exists(entrypath):
             os.remove(entrypath)
         try:
-            result = self.subcommand('webpack', 'homepage', '--verbose')
+            result = self.subcommand('dmp_webpack', 'homepage', '--verbose')
             self.assertTrue(os.path.exists(os.path.exists(entrypath)))
         finally:
             if os.path.exists(entrypath):

@@ -47,7 +47,7 @@ Quick Start
     # create a new project with a 'homepage' app
     python3 -m django_mako_plus dmp startproject
     cd mysite
-    python3 manage.py dmp startapp homepage
+    python3 manage.py dmp_startapp homepage
 
     # open mysite/settings.py and append 'homepage' to the INSTALLED_APPS list
     INSTALLED_APPS = [

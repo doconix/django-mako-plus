@@ -100,7 +100,7 @@ Two groups of providers exist above.  ``WEBPACK_PROVIDERS`` is used at developme
 WEBPACK_PROVIDERS
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-In the above settings, ``WEBPACK_PROVIDERS`` is used by ``python3 manage.py dmp webpack``, where your ``__entry__.js`` files are generated.  Any providers listed here are used to discover the JS files for your templates.
+In the above settings, ``WEBPACK_PROVIDERS`` is used by ``python3 manage.py dmp_webpack``, where your ``__entry__.js`` files are generated.  Any providers listed here are used to discover the JS files for your templates.
 
 DMP searches for scripts starting with a template name.  In keeping with this pattern, the ``dmp_webpack`` management command loads each template your apps and includes its script through ``require()``.  The command creates ``app/scripts/__entry__.js`` as an entry point for webpack.  Try running the command on an app that contains several template-related .js files:
 

@@ -42,7 +42,7 @@ The following should already be done (see the webpack docs if not).
 Settings
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The typical DMP entry file contains Javascript and CSS files.  We need to tell DMP's ``manage.py dmp webpack`` command to find ``*.coffee`` and ``*.ts`` files as well as ``*.js``.
+The typical DMP entry file contains Javascript and CSS files.  We need to tell DMP's ``manage.py dmp_webpack`` command to find ``*.coffee`` and ``*.ts`` files as well as ``*.js``.
 
 This is done in ``settings.py`` under the DMP options:
 
@@ -61,7 +61,7 @@ This is done in ``settings.py`` under the DMP options:
         },
     ],
 
-    Remember that Webpack is going to do the transpiling (not DMP).  The purpose of ``manage.py dmp webpack`` is to connect the files together so webpack knows where to put them in the bundle.
+    Remember that Webpack is going to do the transpiling (not DMP).  The purpose of ``manage.py dmp_webpack`` is to connect the files together so webpack knows where to put them in the bundle.
 
 
 Create your entry file(s):

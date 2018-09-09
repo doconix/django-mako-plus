@@ -3,7 +3,7 @@ Translation (Internationalization)
 
 If your site needs to be translated into other languages, this section is for you. I'm sure you are aware that Django has full support for translation to other languages. If not, you should first read the standard Translation documentation at http://docs.djangoproject.com/en/dev/topics/i18n/translation/.
 
-DMP supports Django's translation functions--with one caveat. Since Django doesn't know about Mako, it can't translate strings in your Mako files. DMP fixes this with the ``dmp makemessages`` command. Instead of running ``python3 manage.py makemessages`` like the Django tutorial shows, run ``python3 manage.py dmp makemessages``. Since the DMP version is an extension of the standard version, the same command line options apply to both.
+DMP supports Django's translation functions--with one caveat. Since Django doesn't know about Mako, it can't translate strings in your Mako files. DMP fixes this with the ``dmp makemessages`` command. Instead of running ``python3 manage.py makemessages`` like the Django tutorial shows, run ``python3 manage.py dmp_makemessages``. Since the DMP version is an extension of the standard version, the same command line options apply to both.
 
     IMPORTANT: Django ignores hidden directories when creating a translation file. Most DMP users keep compiled templates in the hidden directory ``.cached_templates``. The directory is hidden on Unix because it starts with a period. If your cached templates are in hidden directories, be sure to run the command with ``--no-default-ignore``, which allows hidden directories to be searched.
 
@@ -20,7 +20,7 @@ Run the following at the command line:
 
 ::
 
-    python3 manage.py dmp makemessages --no-default-ignore
+    python3 manage.py dmp_makemessages --no-default-ignore
 
 Assuming you have translations set up the way Django's documentation tells you to, you'll get a new language.po file. Edit this file and add the translation. Then compile your translations:
 
