@@ -25,7 +25,7 @@ Create a Django project, and specify that you want a DMP-style project layout:
 
 ::
 
-    python3 -m django_mako_plus dmp startproject mysite
+    python3 -m django_mako_plus dmp_startproject mysite
 
 You can, of course, name your project anything you want, but in the sections below, I'll assume you called your project ``mysite``.
 

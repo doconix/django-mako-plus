@@ -45,7 +45,7 @@ Quick Start
     pip3 install django-mako-plus
 
     # create a new project with a 'homepage' app
-    python3 -m django_mako_plus dmp startproject
+    python3 -m django_mako_plus dmp_startproject
     cd mysite
     python3 manage.py dmp_startapp homepage
 
