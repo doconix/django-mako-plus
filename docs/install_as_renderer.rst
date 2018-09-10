@@ -13,7 +13,7 @@ The following will install all three dependencies:
 
 ::
 
-    pip3 install django-mako-plus
+    pip3 install --upgrade django-mako-plus
 
 (note that on Windows machines, ``pip3`` may need to be replaced with ``pip``)
 
