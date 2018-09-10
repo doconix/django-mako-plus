@@ -42,7 +42,7 @@ Quick Start
 .. code:: bash
 
     # install/upgrade django, mako, and DMP
-    pip3 install --upgrade django-mako-plus
+    pip3 install -U django-mako-plus
 
     # create a new project with a 'homepage' app
     python3 -m django_mako_plus dmp_startproject
