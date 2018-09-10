@@ -10,11 +10,15 @@ This document contains upgrade notes for those already using DMP.  We started th
 
 So back to old style.  If you previously typed:
 
+```
 python manage.py dmp startapp homepage
+```
 
 you now type:
 
+```
 python manage.py dmp_startapp homepage
+```
 
 
 5.5 - June, 2018
