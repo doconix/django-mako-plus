@@ -3,6 +3,34 @@ Upgrade Notes
 
 This document contains upgrade notes for those already using DMP.  We started the document at version 4.3.
 
+5.7 - September, 2018
+---------------------------------------
+
+Changed autoescaping to be ON by default. This now matches Django's default.
+
+1. Anywhere you use expressions ${...} and need them to be literal, change them from ``${ something }`` to ``${ something | n }``.
+
+Read more ways to enable/disable autoescaping at `Escaping Special Characters </basics_escaping.html>`_.
+
+If you would like things back to the old way, set autoescaping to False in your project settings file:
+
+.. code:: python
+
+    TEMPLATES = [
+        {
+            'NAME': 'django_mako_plus',
+            'BACKEND': 'django_mako_plus.MakoTemplates',
+            'OPTIONS': {
+                # I liked things the old way...now quit messin' with 'em
+                'AUTOESCAPE': False,
+                ...
+            }
+        }
+    ]
+
+As with the last change, apologies for backward-breaking changes. I decided to add this now since 5.6 *just* came out, and users can make the modifications for 5.6 and 5.7 together.
+
+
 5.6 - September, 2018
 ----------------------------------------
 

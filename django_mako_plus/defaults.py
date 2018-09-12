@@ -31,6 +31,9 @@ DEFAULT_OPTIONS = {
         # 'import os, os.path, re, json',
     ],
 
+    # whether autoescaping of expressions is on or off
+    'AUTOESCAPE': True,
+
     # the converter class to use for parameter conversion
     # this should be ParameterConverter or a subclass of it
     'PARAMETER_CONVERTER': 'django_mako_plus.converter.ParameterConverter',

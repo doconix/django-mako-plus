@@ -40,6 +40,8 @@ from .exceptions import ConverterException
 # filters and tags
 from .filters import django_syntax, jinja2_syntax, alternate_syntax
 from .templatetags.django_mako_plus import dmp_include
+# used internally for autoescaping
+from .template import ExpressionPostProcessor
 
 # the http responses
 from .http import HttpResponseJavascriptRedirect

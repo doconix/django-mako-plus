@@ -34,11 +34,15 @@ def app_resolver(app_name=None, pattern_kwargs=None, name=None):
     This function is meant to be called in a project's urls.py.
     '''
     urlconf = URLConf(app_name, pattern_kwargs)
-    return re_path(
+    resolver = re_path(
         '^{}/?'.format(app_name) if app_name is not None else '',
         include(urlconf),
         name=urlconf.app_name,
     )
+    # this next line is a workaround for Django's URLResolver class not having
+    # a `name` attribute, which is expected in Django's technical_404.html.
+    resolver.name = getattr(resolver, 'name', name or app_name)
+    return resolver
 
 
 class URLConf(object):
@@ -155,8 +159,6 @@ def dmp_path(regex, kwargs=None, name=None, app_name=None):
     return PagePattern(regex, kwargs, name, app_name)
 
 
-EMPTY_ARG = object()
-
 class PagePattern(URLPattern):
     '''
     Creates a DMP-style, convention-based pattern that resolves
@@ -205,7 +207,7 @@ class PagePattern(URLPattern):
                 msg = '[pattern matched but discovery failed: {}]'.format(vdne)
                 log.debug("%s %s", match.url_name, msg)
                 raise Resolver404({
-                    # this is a bit convoluted, but it make sthe PatternStub work with Django 1.x and 2.x
+                    # this is a bit convoluted, but it makes the PatternStub work with Django 1.x and 2.x
                     'tried': [[ PatternStub(match.url_name, msg, PatternStub(match.url_name, msg, None)) ]],
                     'path': path,
                 })

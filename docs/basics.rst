@@ -7,6 +7,7 @@ After the tutorial, start through these topics to learn how to use DMP.
     :maxdepth: 1
 
     basics_settings
+    basics_escaping
     basics_variables
     basics_paths
     basics_convenience

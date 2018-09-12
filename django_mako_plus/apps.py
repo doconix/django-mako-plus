@@ -32,7 +32,10 @@ class Config(AppConfig):
         self.engine = engines['django_mako_plus']
 
         # default imports on every compiled template
-        self.template_imports = [ 'import django_mako_plus' ]
+        self.template_imports = [
+            'import django_mako_plus',
+            'import django.utils.html',     # used in template.py
+        ]
         self.template_imports.extend(self.options['DEFAULT_TEMPLATE_IMPORTS'])
 
         # set up the static file providers

@@ -3,8 +3,6 @@ from django.template import RequestContext, engines
 from .util import log
 
 
-
-
 ############################################################################
 ###   Rendering template blocks in other syntax languages
 
@@ -112,4 +110,3 @@ def alternate_syntax(local, using, **kwargs):
 
     # return the embedded function
     return wrap
-

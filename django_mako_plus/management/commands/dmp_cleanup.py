@@ -50,14 +50,25 @@ class Command(DMPCommandMixIn, BaseCommand):
         for config in dmp.get_registered_apps():
             self.message('Cleaning up app: {}'.format(config.name), level=1)
             for subdir in ( 'templates', 'scripts', 'styles' ):
-                cache_dir = os.path.join(config.path, subdir, dmp.options['TEMPLATES_CACHE_DIR'])
-                if os.path.exists(cache_dir):
-                    self.message('Removing {}'.format(pretty_relpath(cache_dir, settings.BASE_DIR)), level=2)
-                    if not options.get('trial_run'):
-                        shutil.rmtree(cache_dir)
-                else:
-                    self.message('Skipping {} because it does not exist'.format(pretty_relpath(cache_dir, settings.BASE_DIR)), level=2)
+                self.deep_clean(os.path.join(config.path, subdir), options.get('trial_run'))
 
+    def deep_clean(self, path, trial_run):
+        dmp = apps.get_app_config('django_mako_plus')
+
+        # clean this directory
+        cache_dir = os.path.join(path, dmp.options['TEMPLATES_CACHE_DIR'])
+        if os.path.exists(cache_dir):
+            self.message('Removing {}'.format(pretty_relpath(cache_dir, settings.BASE_DIR)), level=2)
+            if not trial_run:
+                shutil.rmtree(cache_dir)
+        else:
+            self.message('Skipping {} because it does not exist'.format(pretty_relpath(cache_dir, settings.BASE_DIR)), level=2)
+
+        # recurse to subdirectories
+        for name in os.listdir(path):
+            subpath = os.path.join(path, name)
+            if os.path.isdir(subpath):
+                self.deep_clean(subpath, trial_run)
 
 
 

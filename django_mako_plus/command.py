@@ -1,9 +1,6 @@
 from .util import log
 
-import os, os.path
-import sys
 import subprocess
-import time
 from collections import namedtuple
 
 

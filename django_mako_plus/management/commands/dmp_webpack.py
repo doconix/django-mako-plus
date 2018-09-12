@@ -1,7 +1,7 @@
 from django.apps import apps as django_apps
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
-from django_mako_plus.provider import create_mako_context
+from django_mako_plus.template import create_mako_context
 from django_mako_plus.provider.runner import ProviderRun, init_provider_factories
 from django_mako_plus.management.mixins import DMPCommandMixIn
 
