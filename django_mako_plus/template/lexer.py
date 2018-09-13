@@ -92,10 +92,12 @@ class ExpressionPostProcessor(object):
         Right now this html escapes the expression, unless autoescape
         is toggled off.
         '''
+        # we apply this across the board, even if the `n` filter is present because
+        # DMP always creates unicode (see adapter.py where render_unicode() is used)
+        text = force_text(text)
+
         # html encoding
         if self.html_escape:
             text = conditional_escape(text)  # internally, this honors mark_safe()
 
-        # we apply this across the board, even if the `n` filter is present because
-        # DMP always creates unicode (see adapter.py where render_unicode() is used)
-        return force_text(text)
+        return text
