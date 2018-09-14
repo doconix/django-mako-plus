@@ -9,6 +9,7 @@ This document contains upgrade notes for those already using DMP.  We started th
 Changed autoescaping to be ON by default. This now matches Django's default.
 
 1. Anywhere you use expressions ${...} and need them to be literal, change them from ``${ something }`` to ``${ something | n }``.
+2. *Important: Erase the cached templates.* Run ``python3 manage.py dmp_cleanup``.
 
 Read more ways to enable/disable autoescaping at `Escaping Special Characters </basics_escaping.html>`_.
 
