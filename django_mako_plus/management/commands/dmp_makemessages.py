@@ -15,13 +15,24 @@ class Command(DMPCommandMixIn, MakeMessagesCommand):
         "Mako files, so this command compiles all your templates so it can find the compiled .py versions of the templates."
     )
 
+    # needs to be true so Django initializes urls.py (which registers the dmp apps)
+    requires_system_checks = True
+
     SEARCH_DIRS = [
         os.path.join('{app_path}', 'templates')
     ]
 
+
     def add_arguments(self, parser):
         super().add_arguments(parser)
 
+        parser.add_argument(
+            '--template-dir',
+            default=[],
+            dest='template_dir',
+            action='append',
+            help="Precompile all Mako templates in the given subdirectory of each app. Deep search is used, so children of a subdirectory are automatically included. May be specified multiple times. Ex: --template-dir=templates"
+        )
         parser.add_argument(
             '--extra-gettext-option',
             default=[],
@@ -41,6 +52,10 @@ class Command(DMPCommandMixIn, MakeMessagesCommand):
     def handle(self, *args, **options):
         dmp = apps.get_app_config('django_mako_plus')
         self.options = options
+        if self.options.get('template_dir', []):
+            self.SEARCH_DIRS = []
+            for subdir in self.options.get('template_dir', []):
+                self.SEARCH_DIRS.append(os.path.join('{app_path}', subdir))
 
         # go through each dmp_enabled app and compile its mako templates
         for app_config in dmp.get_registered_apps():
@@ -62,15 +77,26 @@ class Command(DMPCommandMixIn, MakeMessagesCommand):
                 app_path=app_config.path,
                 app_name=app_config.name,
             )
-            if os.path.exists(subdir):
-                for filename in os.listdir(subdir):
-                    _, ext = os.path.splitext(filename)
-                    if ext.lower() in ( '.htm', '.html', '.mako' ):
-                        # create the template object, which creates the compiled .py file
-                        filepath = os.path.join(subdir, filename)
-                        self.message(filepath, 2)
-                        try:
-                            get_template_for_path(filepath)
-                        except TemplateSyntaxError:
-                            if not self.options.get('ignore_template_errors'):
-                                raise
+
+            def recurse_path(path):
+                self.message('searching for Mako templates in {}'.format(path), 1)
+                if os.path.exists(path):
+                    for filename in os.listdir(path):
+                        filepath = os.path.join(path, filename)
+                        _, ext = os.path.splitext(filename)
+                        if filename.startswith('__'):  # __dmpcache__, __pycache__
+                            continue
+
+                        elif os.path.isdir(filepath):
+                            recurse_path(filepath)
+
+                        elif ext.lower() in ( '.htm', '.html', '.mako' ):
+                            # create the template object, which creates the compiled .py file
+                            self.message('compiling {}'.format(filepath), 2)
+                            try:
+                                get_template_for_path(filepath)
+                            except TemplateSyntaxError:
+                                if not self.options.get('ignore_template_errors'):
+                                    raise
+
+            recurse_path(subdir)
