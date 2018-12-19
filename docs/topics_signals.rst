@@ -19,7 +19,7 @@ Step 2: Create a Signal Receiver
 
 The following creates two receivers. The first is called just before the view's process\_request function is called. The second is called just before DMP renders .html templates.
 
-.. code:: python
+.. code-block:: python
 
     from django.dispatch import receiver
     from django_mako_plus import signals, get_template_loader

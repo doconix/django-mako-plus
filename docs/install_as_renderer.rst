@@ -25,7 +25,7 @@ Create a Vanilla Django Project
 
 2. Create a basic view function in ``polls/views.py``:
 
-.. code:: python
+.. code-block:: python
 
     from django.shortcuts import render
     from datetime import datetime
@@ -50,7 +50,7 @@ Create a Vanilla Django Project
 
 4. Add a path in ``mysite/urls.py``:
 
-.. code:: python
+.. code-block:: python
 
     from django.urls import url
     from polls import views
@@ -68,7 +68,7 @@ Enable the DMP Template Engine
 
 1. Add DMP to your installed apps in ``settings.py``.
 
-.. code:: python
+.. code-block:: python
 
     INSTALLED_APPS = [
         ...
@@ -78,7 +78,7 @@ Enable the DMP Template Engine
 
 2. Add the DMP template engine in ``settings.py``.
 
-.. code:: python
+.. code-block:: python
 
     TEMPLATES = [
         {
@@ -104,7 +104,7 @@ Note that we won't be using DMP to render templates.  But as a Django template e
 
 3. Enable a logger in ``settings.py`` to see DMP routing information and other messages:
 
-.. code:: python
+.. code-block:: python
 
     LOGGING = {
         'version': 1,
@@ -137,7 +137,7 @@ Let's create a new endpoint that uses the Mako engine.  We'll leave the ``index`
 
 1. Add another endpoint to ``polls/views.py``:
 
-.. code:: python
+.. code-block:: python
 
     from django.shortcuts import render
     from datetime import datetime
@@ -175,7 +175,7 @@ See how the extra ``polls`` is missing in the DMP template?  That's because DMP 
 
 The following code instructs DMP to go to the ``polls`` app and look for the ``another.html`` template.  Where Django would enumerate all your apps in search of the file, DMP looks for exactly one file path.
 
-.. code:: python
+.. code-block:: python
 
     # goes directly to `polls/templates/another.html`
     render(request, 'polls/another.html', context)
@@ -185,7 +185,7 @@ We could adjust the DMP algorithm to match Django's locations, but the differenc
 
 3. Add a path in ``mysite/mysite/urls.py``:
 
-.. code:: python
+.. code-block:: python
 
     from django.urls import path
     from polls import views

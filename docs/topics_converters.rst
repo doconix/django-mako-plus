@@ -6,7 +6,7 @@ Parameter Conversion
 
 DMP automatically converts URL parameters for you.  To enable this, simply put standard Python type hints in your ``process_request`` functions:
 
-.. code:: python
+.. code-block:: python
 
     def process_request(request, name:str, age:int=40, happy:bool=True):
         ...
@@ -76,7 +76,7 @@ Suppose we want to use geographic locations in the format "20.4,-162.0".  The UR
 
 Let's place our new class and converter function in ``homepage/__init__.py`` (you can actually place these in any file that loads with Django). Decorate the function with ``@parameter_converter``, with the type(s) as arguments.
 
-.. code:: python
+.. code-block:: python
 
     from django_mako_plus import parameter_converter
 
@@ -105,7 +105,7 @@ When called, your function must do one of the following:
 
 Now in ``homepage/views/index.py``, use our custom ``GeoLocation`` class as the type hint in the index file.
 
-.. code:: python
+.. code-block:: python
 
     @view_function
     def process_request(request, loc:GeoLocation):
@@ -123,7 +123,7 @@ Since Python usually parses converter functions **before** your models are ready
 
 In other words, the following doesn't work:
 
-.. code:: python
+.. code-block:: python
 
     from django_mako_plus import parameter_converter
     from homepage.models import Question
@@ -135,7 +135,7 @@ In other words, the following doesn't work:
 
 DMP uses the same solution as Django when referencing models: use "app.Model" syntax.  In the following function, we specify the type as a string.  After Django starts up, DMP replaces the string with the actual type.
 
-.. code:: python
+.. code-block:: python
 
     from django_mako_plus import parameter_converter
 
@@ -153,7 +153,7 @@ There may be situations where you need to specialize the converter.  This is don
 
 As an example, suppose you need to convert the first url parameter in a standard way, regardless of its type.  The following code looks for this parameter by position:
 
-.. code:: python
+.. code-block:: python
 
     from django_mako_plus.converter.base import ParameterConverter
 
@@ -171,7 +171,7 @@ As an example, suppose you need to convert the first url parameter in a standard
 
 We'll assume you placed the class in ``myproject/lib/converters.py``.  Activate your new converter in DMP's section of ``settings.py``:
 
-.. code:: python
+.. code-block:: python
 
     DEFAULT_OPTIONS = {
         'PARAMETER_CONVERTER': 'lib.converters.SiteConverter',
@@ -186,7 +186,7 @@ Non-Wrapping Decorators
 
 Automatic conversion is done using ``inspect.signature``, which comes standard with Python.  This function reads your ``process_request`` source code signature and gives DMP the parameter hints.  As we saw in the `tutorial <tutorial_urlparams.html#adding-type-hints>`_, your code specifies these hints with something like the following:
 
-.. code:: python
+.. code-block:: python
 
     @view_function
     def process_request(request, hrs:int, mins:int, forward:bool=True):
@@ -196,7 +196,7 @@ The trigger for DMP to read parameter hints is the ``@view_function`` decorator,
 
 Normally, this process works without issues.  But it can fail when certain decorators are chained together.  Consider the following code:
 
-.. code:: python
+.. code-block:: python
 
     @view_function
     @other_decorator   # this might mess up the type hints!
@@ -209,7 +209,7 @@ Debugging when this occurs can be fubar and hazardous to your health.  Unwrapped
 
 You can avoid/fix this issue by ensuring each decorator you are using is wrapped correctly, per the Python decorator pattern.  When coding ``other_decorator``, be sure to include the ``@wraps(func)`` line.  You can read more about this in the `Standard Python Documentation <https://docs.python.org/3/library/functools.html#functools.wraps>`_.  The pattern looks something like the following:
 
-.. code:: python
+.. code-block:: python
 
     from functools import wraps
 
@@ -233,7 +233,7 @@ Disabling the Converter
 
 If you want to entirely disable the parameter converter, set DMP's converter setting to None.  This will result in a slight speedup.
 
-.. code:: python
+.. code-block:: python
 
     DEFAULT_OPTIONS = {
         'PARAMETER_CONVERTER': None,

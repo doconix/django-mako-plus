@@ -71,85 +71,138 @@ If you have read through the Django Tutorial, you've seen examples for templatin
 +==========================================================================+=======================================================================+
 | **Output the value of the question variable:**                                                                                                   |
 +--------------------------------------------------------------------------+-----------------------------------------------------------------------+
-| | {{ question }}                                                         | | ${ question }                                                       |
+| .. code-block:: django                                                   | .. code-block:: html+mako                                             |
+|                                                                          |                                                                       |
+|     {{ question }}                                                       |     ${ question }                                                     |
+|                                                                          |                                                                       |
 +--------------------------------------------------------------------------+-----------------------------------------------------------------------+
 | **Call a method on the User object:**                                                                                                            |
 +--------------------------------------------------------------------------+-----------------------------------------------------------------------+
-| | {{ user.get_full_name }}                                               | | ${ user.get_full_name() }                                           |
+| .. code-block:: django                                                   | .. code-block:: html+mako                                             |
+|                                                                          |                                                                       |
+|     {{ user.get_full_name }}                                             |     ${ user.get_full_name() }                                         |
+|                                                                          |                                                                       |
 +--------------------------------------------------------------------------+-----------------------------------------------------------------------+
 | **Call a method with parameters on the User object:**                                                                                            |
 +--------------------------------------------------------------------------+-----------------------------------------------------------------------+
-| Requires a custom tag.                                                   | | ${ user.has_perm('app.get_main_view') }                             |
+| .. code-block:: django                                                   | .. code-block:: html+mako                                             |
+|                                                                          |                                                                       |
+|     {# Requires a custom tag #}                                          |     ${ user.has_perm('app.get_main_view') }                           |
+|                                                                          |                                                                       |
 +--------------------------------------------------------------------------+-----------------------------------------------------------------------+
 | **Iterate through a relationship:**                                                                                                              |
 +--------------------------------------------------------------------------+-----------------------------------------------------------------------+
-| | <ul>                                                                   | | <ul>                                                                |
-| |   {% for choice in question.choice_set.all %}                          | |   %for choice in question.choice_set.all():                         |
-| |     <li>{{ choice.choice_text }}</li>                                  | |     <li>${ choice.choice_text }</li>                                |
-| |   {% endfor %}                                                         | |   %endfor                                                           |
-| | </ul>                                                                  | | </ul>                                                               |
+| .. code-block:: django                                                   | .. code-block:: html+mako                                             |
+|                                                                          |                                                                       |
+|     <ul>                                                                 |     <ul>                                                              |
+|         {% for choice in question.choice_set.all %}                      |         %for choice in question.choice_set.all():                     |
+|             <li>{{ choice.choice_text }}</li>                            |             <li>${ choice.choice_text }</li>                          |
+|         {% endfor %}                                                     |         %endfor                                                       |
+|     </ul>                                                                |     </ul>                                                             |
+|                                                                          |                                                                       |
 +--------------------------------------------------------------------------+-----------------------------------------------------------------------+
 | **Set a variable:**                                                                                                                              |
 +--------------------------------------------------------------------------+-----------------------------------------------------------------------+
-| | {% with name="Sam" %}                                                  | | <% name = "Sam" %>                                                  |
+| .. code-block:: django                                                   | .. code-block:: html+mako                                             |
+|                                                                          |                                                                       |
+|     {% with name="Sam" %}                                                |     <% name = "Sam" %>                                                |
+|                                                                          |                                                                       |
 +--------------------------------------------------------------------------+-----------------------------------------------------------------------+
 | **Format a date:**                                                                                                                               |
 +--------------------------------------------------------------------------+-----------------------------------------------------------------------+
-| | {{ value|date:"D d M Y" }}                                             | | ${ value.strftime('%D %d %M %Y') }                                  |
+| .. code-block:: django                                                   | .. code-block:: html+mako                                             |
+|                                                                          |                                                                       |
+|     {{ value|date:"D d M Y" }}                                           |     ${ value.strftime('%D %d %M %Y') }                                |
+|                                                                          |                                                                       |
 +--------------------------------------------------------------------------+-----------------------------------------------------------------------+
 | **Join a list:**                                                                                                                                 |
 +--------------------------------------------------------------------------+-----------------------------------------------------------------------+
-| | {{ mylist | | join:', ' }}                                             | | ${ ', '.join(mylist) }                                              |
+| .. code-block:: django                                                   | .. code-block:: html+mako                                             |
+|                                                                          |                                                                       |
+|     {{ mylist | join:', ' }}                                             |     ${ ', '.join(mylist) }                                            |
+|                                                                          |                                                                       |
 +--------------------------------------------------------------------------+-----------------------------------------------------------------------+
 | **Use the /static prefix:**                                                                                                                      |
 +--------------------------------------------------------------------------+-----------------------------------------------------------------------+
-| | {% load static %} <img src="{% get_static_prefix %}images/hi.jpg"/>    | | <img src="${ STATIC_ROOT }images/hi.jpg"/>                          |
+| .. code-block:: django                                                   | .. code-block:: html+mako                                             |
+|                                                                          |                                                                       |
+|     {% load static %}                                                    |     <img src="${ STATIC_ROOT }images/hi.jpg"/>                        |
+|     <img src="{% get_static_prefix %}images/hi.jpg"/>                    |                                                                       |
+|                                                                          |                                                                       |
 +--------------------------------------------------------------------------+-----------------------------------------------------------------------+
 | **Call a Python method:**                                                                                                                        |
 +--------------------------------------------------------------------------+-----------------------------------------------------------------------+
-| Requires a custom tag, unless a built-in tag provides the behavior.      | Any Python method can be called:                                      |
-|                                                                          | |   <%! import random %>                                              |
-|                                                                          | |   ${ random.randint(1, 10) }                                        |
+| .. code-block:: django                                                   | .. code-block:: html+mako                                             |
+|                                                                          |                                                                       |
+|     {% Requires a custom tag, unless a    %}                             |     ## Any Python method can be called:                               |
+|     {% built-in tag provides the behavior %}                             |     <%! import random %>                                              |
+|                                                                          |     ${ random.randint(1, 10) }                                        |
+|                                                                          |                                                                       |
 +--------------------------------------------------------------------------+-----------------------------------------------------------------------+
 | **Print a Django form:**                                                                                                                         |
 +--------------------------------------------------------------------------+-----------------------------------------------------------------------+
-| | <form action="/your-name/" method="post">                              | | <form action="/your-name/" method="post">                           |
-| |   {% csrf_token %}                                                     | |   ${ csrf_input }                                                   |
-| |   {{ form }}                                                           | |   ${ form }                                                         |
-| |   <input type="submit" value="Submit" />                               | |   <input type="submit" value="Submit" />                            |
-| | </form>                                                                | | </form>                                                             |
+| .. code-block:: django                                                   | .. code-block:: html+mako                                             |
+|                                                                          |                                                                       |
+|     <form action="/your-name/" method="post">                            |     <form action="/your-name/" method="post">                         |
+|         {% csrf_token %}                                                 |         ${ csrf_input }                                               |
+|         {{ form }}                                                       |         ${ form }                                                     |
+|         <input type="submit" value="Submit" />                           |         <input type="submit" value="Submit" />                        |
+|     </form>                                                              |     </form>                                                           |
+|                                                                          |                                                                       |
 +--------------------------------------------------------------------------+-----------------------------------------------------------------------+
 | **Output a default if empty:**                                                                                                                   |
 +--------------------------------------------------------------------------+-----------------------------------------------------------------------+
-| | {{ value | | default:"nothing" }}                                      | Use a boolean:                                                        |
-|                                                                          | | ${ value or "nothing" }                                             |
-|                                                                          | or use a Python if statement:                                         |
-|                                                                          | | ${ value if value is not None else "nothing" }                      |
+| .. code-block:: django                                                   | .. code-block:: html+mako                                             |
+|                                                                          |                                                                       |
+|     {{ value | default:"nothing" }}                                      |     ## Use a boolean:                                                 |
+|                                                                          |     ${ value or "nothing" }                                           |
+|                                                                          |                                                                       |
+|                                                                          |     ## or use a Python if statement:                                  |
+|                                                                          |     ${ value if value is not None else "nothing" }                    |
+|                                                                          |                                                                       |
 +--------------------------------------------------------------------------+-----------------------------------------------------------------------+
-| | Run arbitrary Python (keep it simple, Tex!):                                                                                                   |
+|     Run arbitrary Python:                                                                                                                        |
 +--------------------------------------------------------------------------+-----------------------------------------------------------------------+
-| Requires a custom tag                                                    | | <%                                                                  |
-|                                                                          | |   i = 1                                                             |
-|                                                                          | |   while i < 10:                                                     |
-|                                                                          | |     context.write('<p>Testing {0}</p>'.format(i))                   |
-|                                                                          | |   i += 1                                                            |
-|                                                                          | | %>                                                                  |
+| .. code-block:: django                                                   | .. code-block:: html+mako                                             |
+|                                                                          |                                                                       |
+|     {# Requires a custom tag  #}                                         |     ## Keep it simple, Tex!                                           |
+|                                                                          |     <%                                                                |
+|                                                                          |         i = 1                                                         |
+|                                                                          |         while i < 10:                                                 |
+|                                                                          |             context.write('<p>Testing {0}</p>'.format(i))             |
+|                                                                          |         i += 1                                                        |
+|                                                                          |     %>                                                                |
+|                                                                          |                                                                       |
 +--------------------------------------------------------------------------+-----------------------------------------------------------------------+
 | **Inherit another template:**                                                                                                                    |
 +--------------------------------------------------------------------------+-----------------------------------------------------------------------+
-| | {% extends "base.html" %}                                              | | <%inherit file="base.htm" />                                        |
+| .. code-block:: django                                                   | .. code-block:: html+mako                                             |
+|                                                                          |                                                                       |
+|     {% extends "base.html" %}                                            |     <%inherit file="base.htm" />                                      |
+|                                                                          |                                                                       |
 +--------------------------------------------------------------------------+-----------------------------------------------------------------------+
 | **Override a block:**                                                                                                                            |
 +--------------------------------------------------------------------------+-----------------------------------------------------------------------+
-| | {% block title %}My amazing blog{% endblock %}                         | | <%block name="title">My amazing blog</%block>                       |
+| .. code-block:: django                                                   | .. code-block:: html+mako                                             |
+|                                                                          |                                                                       |
+|     {% block title %}                                                    |     <%block name="title">                                             |
+|         My amazing blog                                                  |         My amazing blog                                               |
+|     {% endblock %}                                                       |     </%block>                                                         |
+|                                                                          |                                                                       |
 +--------------------------------------------------------------------------+-----------------------------------------------------------------------+
 | **Link to a CSS file:**                                                                                                                          |
 +--------------------------------------------------------------------------+-----------------------------------------------------------------------+
-| Place in template:                                                       | Simply name the .css/.js file the same name as your .html template.   |
-| |  <link rel="stylesheet" type="text/css" href="...">                    | DMP will include the link automatically.                              |
+| .. code-block:: django                                                   | .. code-block:: html+mako                                             |
+|                                                                          |                                                                       |
+|     {# Place in template #}                                              |     ## Automatically done by DMP (by name convention)                 |
+|     <link rel="stylesheet" type="text/css" href="...">                   |                                                                       |
+|                                                                          |                                                                       |
 +--------------------------------------------------------------------------+-----------------------------------------------------------------------+
 | **Perform per-request logic in JS files:**                                                                                                       |
 +--------------------------------------------------------------------------+-----------------------------------------------------------------------+
-| Difficult, young padwan...very difficult.                                | Wrap context keys with ``jscontext()``, and DMP will                  |
-|                                                                          | make the variable available in your JS file.                          |
+| .. code-block:: django                                                   | .. code-block:: html+mako                                             |
+|                                                                          |                                                                       |
+|     {# Difficult, young padwan...very difficult #}                       |     ## Wrap context keys with ``jscontext()``, and DMP will           |
+|                                                                          |     ## make the variable available in your JS file.                   |
+|                                                                          |                                                                       |
 +--------------------------------------------------------------------------+-----------------------------------------------------------------------+

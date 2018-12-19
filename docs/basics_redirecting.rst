@@ -13,7 +13,7 @@ The fourth exception, ``InternalRedirectException``, is simpler and faster: it r
 
 The following code shows examples of different redirection methods:
 
-.. code:: python
+.. code-block:: python
 
     from django.http import HttpResponseRedirect
     from django_mako_plus import HttpResponseJavascriptRedirect

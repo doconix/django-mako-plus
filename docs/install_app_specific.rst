@@ -14,7 +14,7 @@ An Example
 
 The following ``urls.py`` file enables DMP-style patterns on just two apps: ``polls`` and ``account``:
 
-.. code:: python
+.. code-block:: python
 
     from django.apps import apps
     from django.conf.urls import url, include

@@ -16,7 +16,7 @@ A Bit of Style
 
 To style our index.html file, open ``homepage/styles/index.css`` and copy the following into it:
 
-.. code:: python
+.. code-block:: python
 
     .server-time {
         font-size: 2em;
@@ -54,7 +54,7 @@ The framework knows how to follow template inheritance. For example, since ``ind
 
 Since base.htm will be the parent page of nearly every HTML page on your site, these common styles will apply to all pages. If you view source in the browser, you'll see the CSS files were included as follows:
 
-.. code:: html
+.. code-block:: html+mako
 
     <link rel="stylesheet" type="text/css" href="/static/homepage/styles/base.css?v=5a8931aee4c59dee" />
     <link rel="stylesheet" type="text/css" href="/static/homepage/styles/index.css?v=5aac6c929d3401a1" />
@@ -89,7 +89,7 @@ What if we need to get a value from our Python view code, such as the server tim
 
 Lets compare the server time with the browser time allows us to calculate the time zone difference between the two. To send a variable to the JS environment, tag it with ``jscontext()``.  Change your ``index.py`` file to the following:
 
-.. code:: python
+.. code-block:: python
 
     from django.conf import settings
     from django_mako_plus import view_function, jscontext

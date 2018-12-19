@@ -35,7 +35,7 @@ Setup
 
 In your project's settings.py file, you should have the following.  These settings are not specific to DMP, and they are described in the `Django documentation <https://docs.djangoproject.com/en/dev/howto/static-files/>`_.
 
-.. code:: python
+.. code-block:: python
 
     STATIC_URL = '/static/'
     STATICFILES_DIRS = (
@@ -47,7 +47,7 @@ In your project's settings.py file, you should have the following.  These settin
 
 Also in settings.py, ensure you have Django's static files app enabled:
 
-.. code:: python
+.. code-block:: python
 
     INSTALLED_APPS = [
         ...
@@ -63,7 +63,7 @@ During development, place media files for the homepage app in the homepage/media
 
 Reference static files using the ``${ STATIC_URL }`` variable. For example, reference images in your html pages like this:
 
-.. code:: html
+.. code-block:: html+mako
 
     <img src="${ STATIC_URL }homepage/media/image.png" />
 
@@ -74,7 +74,7 @@ Deployment
 
 At production/deployment, comment out ``BASE_DIR`` because it essentially makes your entire project available via your static url (a serious security concern):
 
-.. code:: python
+.. code-block:: python
 
     STATIC_URL = '/static/'
     STATICFILES_DIRS = (

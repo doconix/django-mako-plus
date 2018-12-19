@@ -3,7 +3,7 @@ Creating a Provider
 
 Suppose you need custom preprocessing of static files or custom template content.  Your future may include creating a new provider class. Fortunately, these are pretty simple classes. Once you create the class, simply reference it in your settings.py file.
 
-.. code:: python
+.. code-block:: python
 
     from django_mako_plus import BaseProvider
     from django_mako_plus.utils import merge_dicts

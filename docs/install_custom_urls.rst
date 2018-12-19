@@ -13,7 +13,7 @@ Project Patterns
 
 Per Django best practices, we'll split the patterns into a main include for the app and another file for the app. First modify your project URL file: ``mysite/urls.py``:
 
-.. code:: python
+.. code-block:: python
 
     from django.apps import apps
     from django.conf.urls import url, include
@@ -40,7 +40,7 @@ Patterns for the ``homepage`` App
 
 Create an app-specific file for the homepage app: ``homepage/urls.py``.  These patterns are adapted from `DMP's default urls.py file <http://github.com/doconix/django-mako-plus/blob/master/django_mako_plus/urls.py>`_.  Each call to ``dmp_path`` includes the four routing variables in either the pattern or the kwargs.
 
-.. code:: python
+.. code-block:: python
 
     from django_mako_plus import dmp_path
 
@@ -92,7 +92,7 @@ View Function
 
 Your view function needs to change because we have an additional named group in our patternns: ``userid``.  We'll have DMP convert this parameter to an int, with a default value of 0.
 
-.. code:: python
+.. code-block:: python
 
     from django.http import HttpResponse
     from django_mako_plus import view_function

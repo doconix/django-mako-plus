@@ -11,7 +11,7 @@ DMP supports Django's translation functions--with one caveat. Since Django doesn
 
 Suppose you have a template with a header you want translated. Simply use the following in your template:
 
-.. code:: html
+.. code-block:: html+mako
 
     <%! from django.utils.translation import ugettext as _ %>
     <p>${ _("World History") }</p>

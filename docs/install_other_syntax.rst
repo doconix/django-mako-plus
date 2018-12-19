@@ -14,7 +14,7 @@ This situation can occur when you include a third-party app in your project, and
 
 To enable alternative syntaxes, enable the DMP tags with the following settings.  Also ensure you have the Django template engine included.
 
-.. code:: python
+.. code-block:: python
 
     TEMPLATES = [
         {

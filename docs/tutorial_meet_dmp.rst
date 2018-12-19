@@ -60,7 +60,7 @@ Let's start with the two primary html template files: ``base.htm`` and ``index.h
 
 ``index.html`` is pretty simple:
 
-.. code:: html
+.. code-block:: html+mako
 
     <%inherit file="base.htm" />
 
@@ -76,7 +76,7 @@ If you are familiar with Django templates, you'll recognize the template inherit
 
 The real HTML is kept in the ``base.htm`` file. It looks like this:
 
-.. code:: html
+.. code-block:: html+mako
 
     ## this is the skeleton of all pages on in this app - it defines the basic html tags
     <!DOCTYPE html>
@@ -123,7 +123,7 @@ First, don't erase anything in the base.htm file. In particular, ``django_mako_p
 
 If you get this error, you might need to update a setting in ``settings.py``. Ensure that DMP is imported in the ``DEFAULT_TEMPLATE_IMPORTS`` list:
 
-.. code:: python
+.. code-block:: python
 
     'DEFAULT_TEMPLATE_IMPORTS': [
         'import django_mako_plus',
@@ -148,7 +148,7 @@ Goodbye, urls.py
 
 In the installation procedures above, you set your urls.py file to look something like the following:
 
-.. code:: python
+.. code-block:: python
 
     from django.conf.urls import url, include
     from django.contrib import admin

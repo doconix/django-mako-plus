@@ -6,7 +6,7 @@ The framework is built to be extended for custom file types.  When you call ``li
 
 Here's a basic version:
 
-.. code:: python
+.. code-block:: python
 
     TEMPLATES = [
         {
@@ -32,7 +32,7 @@ Setting Options
 
 Each provider has an options dictionary that allows you to adjust its behavior.  For example, link providers like ``JsLinkProvider`` allow custom search paths:
 
-.. code:: python
+.. code-block:: python
 
     {
         'provider': 'django_mako_plus.JsContextProvider',
@@ -42,7 +42,7 @@ Each provider has an options dictionary that allows you to adjust its behavior. 
 
 The following lists the complete options for all providers that come with DMP:
 
-.. code:: python
+.. code-block:: python
 
     {
         # adds JS context - this should normally be listed first
@@ -238,7 +238,7 @@ Assuming you aren't bundling with something like webpack, there are at least two
 
 **Option 1: Place generated files in a top-level ``dist/`` folder in your project.**
 
-.. code:: python
+.. code-block:: python
 
     {
         'provider': 'django_mako_plus.CompileScssProvider',
@@ -252,7 +252,7 @@ Assuming you aren't bundling with something like webpack, there are at least two
 
 **Option 2: Use a custom extension for generated files, such as `[name].scss.css``.**
 
-.. code:: python
+.. code-block:: python
 
     {
         'provider': 'django_mako_plus.CompileScssProvider',
@@ -275,7 +275,7 @@ Transpiling is usually done with a bundler like ``webpack``.  However, there may
 1. A ``CompileProvider`` to run the transpiler when the source file changes.
 2. A ``JsLinkProvider`` to link the generated javascript (transcrypt places the generated files in a subdirectory).
 
-.. code:: python
+.. code-block:: python
 
     {
         'provider': 'django_mako_plus.CompileProvider',

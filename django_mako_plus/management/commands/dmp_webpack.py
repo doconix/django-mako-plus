@@ -34,13 +34,6 @@ class Command(DMPCommandMixIn, BaseCommand):
             help='Instead of per-app entry files, create a single file that includes the JS for all listed apps'
         )
         parser.add_argument(
-            '--dependent',
-            action='store_true',
-            dest='dependent',
-            default=False,
-            help='Create smaller, dependent bundles by linking to bundles from other apps when possible'
-        )
-        parser.add_argument(
             'appname',
             type=str,
             nargs='*',
@@ -108,7 +101,7 @@ class Command(DMPCommandMixIn, BaseCommand):
         for page, scripts in script_map.items():
             require = []
             for script_path in scripts:
-                if not self.options.get('dependent') or in_apps(script_path):
+                if in_apps(script_path):
                     require.append('require("./{}")'.format(os.path.relpath(script_path, filedir)))
             if len(require) > 0:
                 lines.append('DMP_CONTEXT.appBundles["{}"] = () => {{ \n        {};\n    }};'.format(page, ';\n        '.join(require)))
@@ -119,19 +112,20 @@ class Command(DMPCommandMixIn, BaseCommand):
             if not os.path.exists(os.path.dirname(filename)):
                 os.makedirs(os.path.dirname(filename))
             with open(filename, 'w') as fout:
-                fout.write('// Generated on {} by `{}`\n'.format(
-                    datetime.now().strftime('%Y-%m-%d %H:%M'),
-                    ' '.join(sys.argv),
-                ))
-                fout.write('// Contains links for app{}: {}\n'.format(
-                    's' if len(apps) > 1 else '',
-                    ', '.join(sorted([ app.name for app in apps ])),
-                ))
-                fout.write('\n')
-                fout.write('(context => {\n')
-                for line in lines:
-                    fout.write('    {}\n'.format(line))
-                fout.write('})(DMP_CONTEXT.get());\n')
+                fout.write('''
+// Generated on {now} by `{argv}`
+// Contains links for app{plural}: {appnames}
+
+(context => {{
+    {lines}
+}})(DMP_CONTEXT.get());
+                '''.format(
+                    now=datetime.now().strftime('%Y-%m-%d %H:%M'),
+                    argv=' '.join(sys.argv),
+                    plural='s' if len(apps) > 1 else '',
+                    appnames=', '.join(sorted([ app.name for app in apps ])),
+                    lines='\n    '.join(lines),
+                ).strip())
 
 
     def generate_script_map(self, config):

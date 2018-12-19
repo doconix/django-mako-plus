@@ -6,7 +6,7 @@ T2: .py View Files
 
 Let's add some "work" to the process by adding the current server time to the index page. Empty out ``homepage/views/index.py`` and copy this code into it:
 
-.. code:: python
+.. code-block:: python
 
     from django.conf import settings
     from django_mako_plus import view_function
@@ -40,7 +40,7 @@ The third line shows the controller found the ``index.py`` view, and it called t
 
 You can have multiple decorators on your function, such as a permissions check and ``view_function``. The order isn't important unless the other decorators don't wrap the function correctly.  If ``@view_function`` is listed first, you won't have to worry.
 
-.. code:: python
+.. code-block:: python
 
     @view_function
     @permission_required('can_vote')
@@ -55,7 +55,7 @@ As stated earlier, we explicitly call the Mako renderer at the end of the ``proc
 
 Let's use the ``now`` variable in our index.html template:
 
-.. code:: html
+.. code-block:: html+mako
 
     <%inherit file="base.htm" />
 
@@ -86,7 +86,7 @@ DMP provides a second function, ``request.dmp.render_to_string``. This is nearly
 
 **You really don't need to worry about any of this.**  Templates are rendered in the current app 99% of the time, so just use this code unless you are in a special use case:
 
-.. code:: python
+.. code-block:: python
 
     from django.conf import settings
     from django_mako_plus import view_function

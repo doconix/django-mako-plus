@@ -3,7 +3,7 @@ The JS Context
 
 In the `tutorial <tutorial_css_js.html>`_, you learned to send context variables to ``*.js`` files using ``jscontext``:
 
-.. code:: python
+.. code-block:: python
 
     from django.conf import settings
     from django_mako_plus import view_function, jscontext
@@ -46,7 +46,7 @@ The context dictionary is sent to Javascript using JSON, which places limits on 
 
 However, there may be times when you need to send "full" objects.  When preparing the JS object, DMP looks for a class method named ``__jscontext__`` in the context values.  If the method exists on a value, DMP calls it and includes the return as the reduced, "JSON-compatible" version of the object.  The following is an example:
 
-.. code:: python
+.. code-block:: python
 
     class NonJsonObject(object):
         def __init__(self):
@@ -60,7 +60,7 @@ However, there may be times when you need to send "full" objects.  When preparin
 
 When you add a ``NonJsonObject`` instance to the render context, you'll still get the full ``NonJsonObject`` in your template code (since it's running on the server side). But it's reduced with ``instance.__jscontext__()`` to transit to the browser JS runtime:
 
-.. code:: python
+.. code-block:: python
 
     def process_request(request):
         obj = NonJsonObject()

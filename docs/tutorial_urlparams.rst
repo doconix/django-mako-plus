@@ -48,7 +48,7 @@ A New View Function Signature
 
 Let's modify ``homepage/views/index.py`` to support adjusting the current date by a certain amount of time.  We'll specify the hours, minutes, and direction in the URL:
 
-.. code:: python
+.. code-block:: python
 
     from django.conf import settings
     from django_mako_plus import view_function
@@ -69,7 +69,7 @@ Let's modify ``homepage/views/index.py`` to support adjusting the current date b
 
 We'll use the ``homepage/templates/index.html`` file we created in previous tutorial parts:
 
-.. code:: html
+.. code-block:: html+mako
 
     <%inherit file="base.htm" />
 
@@ -165,7 +165,7 @@ Adding Type Hints
 
 In your example code, add the following type hints to your ``process_request`` function, and remove the typecasting calls:
 
-.. code:: python
+.. code-block:: python
 
     from django.conf import settings
     from django_mako_plus import view_function
@@ -192,7 +192,7 @@ Automatic Model Conversion
 
 DMP converts all of the Model classes in your project.   Suppose we have an model called ``storefront.Purchase``.  If we list this type as the type hint, DMP will pull the object from the database automatically:
 
-.. code:: python
+.. code-block:: python
 
     from django_mako_plus import view_function
     from storefront.models import Purchase

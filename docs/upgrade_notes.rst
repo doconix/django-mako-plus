@@ -15,7 +15,7 @@ Read more ways to enable/disable autoescaping at `Escaping Special Characters </
 
 If you would like things back to the old way, set autoescaping to False in your project settings file:
 
-.. code:: python
+.. code-block:: python
 
     TEMPLATES = [
         {

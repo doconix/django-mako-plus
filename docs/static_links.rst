@@ -55,7 +55,7 @@ During development, this check is done every time the template is rendered.  Dur
 
 To enable automatic compiling, uncomment the appropriate provider to your settings.py.  The following setting adds Scss compiling to the normal JS Context, JS, and CSS providers:
 
-.. code:: python
+.. code-block:: python
 
     TEMPLATES = [
         {
@@ -82,7 +82,7 @@ But suppose you need to autorender the JS or CSS from a page *other than the one
 
 To include CSS and JS by name, use the following within any template on your site (``mypage.html`` in this example):
 
-.. code:: python
+.. code-block:: html+mako
 
     ## instead of using the normal:
     ## ${ django_mako_plus.links(self) }

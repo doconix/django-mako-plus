@@ -43,7 +43,7 @@ Suppose I have the following app structure:
 
 I want ``homepage/templates/index.html`` to extend from ``base_app/templates/site_base.htm``. The following code in ``index.html`` sets up the inheritance:
 
-.. code:: html
+.. code-block:: html+mako
 
             <%inherit file="/base_app/templates/site_base.htm" />
 
@@ -63,7 +63,7 @@ Need to render templates from a different app?  There's two ways to do it.  Note
 
 First Way:
 
-.. code:: python
+.. code-block:: python
 
     from django.conf import settings
     from django.http import HttpResponse
@@ -80,7 +80,7 @@ First Way:
 
 Second Way (this way uses the standard Django API):
 
-.. code:: python
+.. code-block:: python
 
     from django.conf import settings
     from django.shortcuts import render
@@ -101,7 +101,7 @@ Content Types and Status Codes
 
 The ``request.dmp.render()`` function determines the mime type from the template extension and returns a *200* status code. What if you need to return JSON, CSV, or a 404 not found?  The function takes these parameters too. A few examples:
 
-.. code:: python
+.. code-block:: python
 
     from django.http import HttpResponse
 
@@ -124,7 +124,7 @@ Case 1: Templates Within Your Project Directory
 
 If the templates you need to access are within your project directory, no extra setup is required. Simply reference those templates relative to the root project directory. For example, to access a template located at BASE\_DIR/homepage/mytemplates/sub1/page.html, use the following:
 
-.. code:: python
+.. code-block:: python
 
     return request.dmp.render('/homepage/mytemplates/sub1/page.html', context)
 
@@ -137,7 +137,7 @@ Case 2: Templates Outside Your Project Directory
 
 Suppose your templates are located on a different disk or entirely different directory from your project. DMP allows you to add extra directories to the template search path through the ``TEMPLATES_DIRS`` setting. This setting contains a list of directories that are searched by DMP regardless of the app being referenced. To include the ``/var/templates/`` directory in the search path, set this variable as follows:
 
-.. code:: python
+.. code-block:: python
 
     'TEMPLATES_DIRS': [
        '/var/templates/',
@@ -145,7 +145,7 @@ Suppose your templates are located on a different disk or entirely different dir
 
 Suppose, after making the above change, you need to render the '/var/templates/page1.html' template:
 
-.. code:: python
+.. code-block:: python
 
     return request.dmp.render('page1.html', context)
 
@@ -159,7 +159,7 @@ Importing Python Modules
 
 It's easy to import Python modules in your Mako templates. Simply use a module-level block:
 
-.. code:: python
+.. code-block:: python
 
     <%!
         import datetime
@@ -168,7 +168,7 @@ It's easy to import Python modules in your Mako templates. Simply use a module-l
 
 or a Python-level block (see the Mako docs for the difference):
 
-.. code:: python
+.. code-block:: python
 
     <%
         import datetime
@@ -177,7 +177,7 @@ or a Python-level block (see the Mako docs for the difference):
 
 There may be some modules, such as ``re`` or ``decimal`` that are so useful you want them available in every template of your site. In settings.py, add these to the ``DEFAULT_TEMPLATE_IMPORTS`` variable:
 
-.. code:: python
+.. code-block:: python
 
     DEFAULT_TEMPLATE_IMPORTS = [
         'import os, os.path, re',

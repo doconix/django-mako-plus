@@ -19,7 +19,7 @@ For this example, lets check user groups in the view function decorator.  We rea
 
 We'll override both the constructor and the __call__ methods in this example so you can see both:
 
-.. code:: python
+.. code-block:: python
 
     from django_mako_plus import view_parameter
 
@@ -51,7 +51,7 @@ We'll override both the constructor and the __call__ methods in this example so 
 
 In ``homepage/views/index.py``, use your custom decorator.
 
-.. code:: python
+.. code-block:: python
 
     from .some.where import site_endpoint
 

@@ -5,7 +5,7 @@ Django-Mako-Plus supports Django's class-based view concept. You can read more a
 
 With DMP, your class-based view will be discovered via request url, so you have to name your class accordingly. In keeping with the rest of DMP, the default class name in a file should be named ``class process_request()``. Consider the following ``index.py`` file:
 
-.. code:: python
+.. code-block:: python
 
     from django.conf import settings
     from django.http import HttpResponse
@@ -38,7 +38,7 @@ In contrast with normal function-based routing, class-based views do not require
 
 One case where you might want to decorate your class-based endpoints is when using `keyword arguments <topics_view_function.html>`_.  Here's an example of what that might look like:
 
-.. code:: python
+.. code-block:: python
 
     from django.views.generic import View
 

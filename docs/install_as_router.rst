@@ -39,7 +39,7 @@ Create a Vanilla Django Project
 
 3. Add DMP to your installed apps in ``settings.py``:
 
-.. code:: python
+.. code-block:: python
 
     INSTALLED_APPS = [
         ...
@@ -49,7 +49,7 @@ Create a Vanilla Django Project
 
 4. Enable a logger in ``settings.py``. Routing problems can be solved much easier with DMP's debug messages:
 
-.. code:: python
+.. code-block:: python
 
     LOGGING = {
         'version': 1,
@@ -76,7 +76,7 @@ Create a Vanilla Django Project
 
 5. Add DMP's router to ``urls.py``:
 
-.. code:: python
+.. code-block:: python
 
     from django.conf.urls import path, include
 
@@ -91,7 +91,7 @@ Create an Endpoint
 
 1. Create a new file called ``polls/views/index.py``.  In this file, add the following content:
 
-.. code:: python
+.. code-block:: python
 
     from django.shortcuts import render
     from django_mako_plus import view_function

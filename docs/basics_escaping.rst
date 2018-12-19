@@ -6,13 +6,13 @@ Escaping Special Characters
 
 Mako expressions are the simplest way to include a variable in a template, and they are autoescaped for HTML by default:
 
-::
+.. code-block:: html+mako
 
     This is x: ${ x }
 
 **Autoescaping of expressions in DMP is consistent with Django rather than Mako.**  Django autoescapes; Mako does not. Since Mako is the template engine, DMP converts the above expression to the following:
 
-::
+.. code-block:: html+mako
 
     This is x: ${ x | h }
 
@@ -24,7 +24,7 @@ A Little Background
 
 As described in the `Mako documentation <http://docs.makotemplates.org/en/latest/filtering.html>`_, expressions can be filtered using modifer tokens like the following:
 
-.. code:: html
+.. code-block:: html+mako
 
     ## html escaped (automatic in DMP)
     ${ x | h }
@@ -43,7 +43,7 @@ Python blocks, denoted with ``<% ... %>``, are not escaped automatically.  Since
 
 If you need to html escape some outupt in your block, use something like the following:
 
-.. code:: html
+.. code-block:: html+mako
 
     <%! from django.utils.html import conditional_escape %>
     <%
@@ -56,7 +56,7 @@ Disabling per Expression
 -------------------------------
 You can stop all filtering/autoescaping for any expression with the ``n`` token:
 
-.. code:: html
+.. code-block:: html+mako
 
     ## autoescaping disabled
     ${ x | n }
@@ -68,7 +68,7 @@ This method of disabling is patterned after the Django ``autoescape off`` tag.  
 
 The code below first aliases the name ``dmp`` to DMP's tag module, which contains both ``autoescape_on`` and ``autoescape_off``.  For more information about using tag modules, see the `Mako documentation <http://docs.makotemplates.org/en/latest/defs.html>`_.
 
-.. code:: html
+.. code-block:: html+mako
 
     <%namespace name="dmp" module="django_mako_plus.tags"/>
 
@@ -89,7 +89,7 @@ Disabling by Marking Safe
 ----------------------------------------
 Just like in Django, any string can be marked as "safe" for html with ``mark_safe()``:
 
-.. code:: python
+.. code-block:: python
 
     from django_mako_plus import view_function
     from django.utils.html import mark_safe
@@ -103,7 +103,7 @@ Just like in Django, any string can be marked as "safe" for html with ``mark_saf
 
 In your template (``index.html``):
 
-.. code:: html
+.. code-block:: html+mako
 
     This will display directly, even though autoescaping is otherwise enabled:
     ${ escapemenot }
@@ -114,7 +114,7 @@ Disabling Globally
 
 You can disable autoescaping project-wide by changing a DMP setting in ``settings.py``:
 
-.. code:: python
+.. code-block:: python
 
     TEMPLATES = [
         {

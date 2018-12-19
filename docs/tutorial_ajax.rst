@@ -13,7 +13,7 @@ A Simple Example
 
 Suppose we want to reload the server time every few seconds, but we don't want to reload the entire page. Let's start with the client side of things. Let's place a refresh button in ``homepage/templates/index.html``:
 
-.. code:: html
+.. code-block:: html+mako
 
     <%inherit file="base.htm" />
 
@@ -49,7 +49,7 @@ The client side is now ready, so let's create the
 ``/homepage/index_time/`` server endpoint. Create a new
 ``homepage/views/index_time.py`` file:
 
-.. code:: python
+.. code-block:: python
 
     from django.conf import settings
     from django_mako_plus import view_function
@@ -66,7 +66,7 @@ The client side is now ready, so let's create the
 Finally, create the ``/homepage/templates/index_time.html`` template,
 which is rendered at the end of ``process_request()`` above:
 
-.. code:: html
+.. code-block:: html+mako
 
     <%inherit file="base_ajax.htm" />
 
@@ -103,7 +103,7 @@ Let's get rid of ``homepage/views/index_time.py``. That's right, just delete the
 Open ``homepage/views/index.py`` and add the following to the end of the
 file:
 
-.. code:: python
+.. code-block:: python
 
     @view_function
     def gettime(request):

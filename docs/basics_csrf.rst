@@ -27,7 +27,7 @@ The functions to create the token are actually right in Django (no need for DMP)
 
 Example:
 
-.. code:: python
+.. code-block:: python
 
     from io import StringIO
     from django.template.backends.utils import csrf_input

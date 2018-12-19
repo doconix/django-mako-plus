@@ -49,7 +49,7 @@ Change to your project directory in the terminal/console, then create a new Djan
 
 **After** the new ``homepage`` app is created, add your new app to the ``INSTALLED_APPS`` list in ``settings.py``:
 
-.. code:: python
+.. code-block:: python
 
     INSTALLED_APPS = [
         ...

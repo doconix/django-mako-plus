@@ -32,7 +32,7 @@ Edit Your ``settings.py`` File:
 
 Add ``django_mako_plus`` to the end of your ``INSTALLED_APPS`` list:
 
-.. code:: python
+.. code-block:: python
 
     INSTALLED_APPS = [
         ...
@@ -42,7 +42,7 @@ Add ``django_mako_plus`` to the end of your ``INSTALLED_APPS`` list:
 Add ``django_mako_plus.RequestInitMiddleware`` to your ``MIDDLEWARE``
 list:
 
-.. code:: python
+.. code-block:: python
 
     MIDDLEWARE = [
         ...
@@ -52,7 +52,7 @@ list:
 
 Add a logger to help you debug (optional but highly recommended!):
 
-.. code:: python
+.. code-block:: python
 
     DEBUG_PROPAGATE_EXCEPTIONS = DEBUG  # SECURITY WARNING: never set this True on a live site
     LOGGING = {
@@ -82,7 +82,7 @@ Add a logger to help you debug (optional but highly recommended!):
 Add the Django-Mako-Plus engine to the ``TEMPLATES`` list. Note that a
 standard Django project already has the ``TEMPLATES =`` line and the 'django' template backend.  You probably just need to add the ``django_mako_plus`` dictionary below.
 
-.. code:: python
+.. code-block:: python
 
     TEMPLATES = [
         {
@@ -101,7 +101,7 @@ standard Django project already has the ``TEMPLATES =`` line and the 'django' te
 
 Add the following to serve your static files. Note that a standard Django project already has the first ``STATIC_URL =`` line.
 
-.. code:: python
+.. code-block:: python
 
     STATIC_URL = '/static/'   # you probably already have this
     STATICFILES_DIRS = (
@@ -121,7 +121,7 @@ Enable the Django-Mako-Plus Router
 
 Add the Django-Mako-Plus router in your ``urls.py`` file (the default admin is also included here for completeness).
 
-.. code:: python
+.. code-block:: python
 
     from django.conf.urls import url, include
 
@@ -136,13 +136,13 @@ Create a DMP-Style App
 
 Change to your project directory in the terminal/console, then create a new Django-Mako-Plus app with the following:
 
-.. code:: python
+.. code-block:: python
 
     python3 manage.py dmp_startapp homepage
 
 **After** the new ``homepage`` app is created, add your new app to the ``INSTALLED_APPS`` list in ``settings.py``:
 
-.. code:: python
+.. code-block:: python
 
     INSTALLED_APPS = [
         ...
@@ -157,7 +157,7 @@ Load it Up!
 
 Start your web server with the following:
 
-.. code:: python
+.. code-block:: python
 
     python3 manage.py runserver
 

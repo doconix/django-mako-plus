@@ -10,7 +10,7 @@ But that doesn't mean you can't use the standard Django shortcuts and template c
 
 The following imports only from ``django.shortcuts``:
 
-.. code:: python
+.. code-block:: python
 
     # doin' the django way:
     from django.shortcuts import render
@@ -38,7 +38,7 @@ Django provides two classes that delay template rendering until the last possibl
 
 To use these classes with DMP, use the file pattern we just discussed: ``app/template``.  Or to be more explicit, get the template object explicitly.  Here are some examples:
 
-.. code:: python
+.. code-block:: python
 
     # using TemplateResponse:
     from django.template.response import TemplateResponse

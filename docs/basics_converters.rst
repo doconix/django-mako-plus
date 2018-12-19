@@ -7,7 +7,7 @@ Converting URL Parameters
 
 In the `initial tutorial <tutorial_urlparams.html>`_, you learned that any extra parameters in the URL are sent to your view function as parameters.  For example the following view function signature expects two additional parameters in the url: ``hrs`` and ``mins``.  DMP converts these to ``int`` automatically.
 
-.. code:: python
+.. code-block:: python
 
     @view_function
     def process_request(request, hrs:int=12, mins:int=30):
@@ -84,7 +84,7 @@ Notes about Django Models:
 
 URL parameters are excellent places to specify ids of model objects.  For example, suppose the id for Purchase object #1501 is coded in a receipt page URL: ``http://localhost:8000/storefront/receipt/1501/``.  The following view function signature would automatically get the object from your database:
 
-.. code:: python
+.. code-block:: python
 
     from django_mako_plus import view_function
     from storefront.models import Purchase

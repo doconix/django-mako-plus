@@ -37,7 +37,7 @@ Suppose you have the following template, view, and JS files:
 
 **``index.html``** with a ``server_time`` block:
 
-.. code:: html
+.. code-block:: html+mako
 
     <%inherit file="base.htm" />
 
@@ -57,7 +57,7 @@ Suppose you have the following template, view, and JS files:
 
 **``index.py``** with an ``if`` statement and two ``request.dmp.render`` calls:
 
-.. code:: python
+.. code-block:: python
 
     from django.conf import settings
     from django_mako_plus import view_function
@@ -106,7 +106,7 @@ The tricky part of block rendering is ensuring your variables are accessible. Yo
 
 **``index.html``** with a ``counter`` variable defined in the template:
 
-.. code:: html
+.. code-block:: html+mako
 
     <%inherit file="base.htm" />
 
@@ -128,7 +128,7 @@ The tricky part of block rendering is ensuring your variables are accessible. Yo
 
 Since ``counter`` won't get defined when ``def_name='server_time'``, **``index.py``** must add it to the ``context`` (but only for the Ajax-oriented ``request.dmp.render`` function):
 
-.. code:: python
+.. code-block:: python
 
     from django.conf import settings
     from django_mako_plus import view_function
