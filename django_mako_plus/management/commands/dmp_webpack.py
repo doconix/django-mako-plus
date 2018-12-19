@@ -25,19 +25,26 @@ class Command(DMPCommandMixIn, BaseCommand):
             action='store_true',
             dest='overwrite',
             default=False,
-            help='Overwrite existing __entry__.js if necessary.'
+            help='Overwrite existing __entry__.js if necessary'
         )
         parser.add_argument(
             '--single',
             type=str,
             metavar='FILENAME',
-            help='Instead of per-app entry files, create a single file that includes the JS for all listed apps.'
+            help='Instead of per-app entry files, create a single file that includes the JS for all listed apps'
+        )
+        parser.add_argument(
+            '--dependent',
+            action='store_true',
+            dest='dependent',
+            default=False,
+            help='Create smaller, dependent bundles by linking to bundles from other apps when possible'
         )
         parser.add_argument(
             'appname',
             type=str,
             nargs='*',
-            help='The name of one or more DMP apps. If omitted, all DMP apps are processed.'
+            help='The name of one or more DMP apps. If omitted, all DMP apps are processed'
         )
 
 
@@ -101,7 +108,7 @@ class Command(DMPCommandMixIn, BaseCommand):
         for page, scripts in script_map.items():
             require = []
             for script_path in scripts:
-                if in_apps(script_path):
+                if not self.options.get('dependent') or in_apps(script_path):
                     require.append('require("./{}")'.format(os.path.relpath(script_path, filedir)))
             if len(require) > 0:
                 lines.append('DMP_CONTEXT.appBundles["{}"] = () => {{ \n        {};\n    }};'.format(page, ';\n        '.join(require)))
@@ -109,6 +116,8 @@ class Command(DMPCommandMixIn, BaseCommand):
         # if we had at least one line, write the entry file
         if len(lines) > 0:
             self.message('Creating {}'.format(os.path.relpath(filename, settings.BASE_DIR)))
+            if not os.path.exists(os.path.dirname(filename)):
+                os.makedirs(os.path.dirname(filename))
             with open(filename, 'w') as fout:
                 fout.write('// Generated on {} by `{}`\n'.format(
                     datetime.now().strftime('%Y-%m-%d %H:%M'),
@@ -155,11 +164,9 @@ class Command(DMPCommandMixIn, BaseCommand):
                         template_name = os.path.relpath(filerel, template_root)
                         scripts = self.template_scripts(config, template_name)
                         key = '{}/{}'.format(config.name, os.path.splitext(template_name)[0])
+                        self.message('Found template: {}; static files: {}'.format(key, scripts), 3)
                         if len(scripts) > 0:
                             script_map[key] = scripts
-                            self.message('\t{}: {}'.format(key, scripts), 3)
-                        else:
-                            self.message('\t{}: none found'.format(key), 3)
             for subdir in subdirs:
                 recurse(subdir)
 
