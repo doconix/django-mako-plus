@@ -24,7 +24,7 @@ Features
 - `Uses standard Python </tutorial_meet_dmp.html>`_ in templates; no more weak-sauce Django templating.
 - `Calls view functions </tutorial_views.html>`_ by convention instead of listing every. single. page. in urls.py.
 - `Converts parameters </tutorial_urlparams.html>`_ in the URL and loads model objects by convention.
-- Supports `bundling of static files </static_webpack.html>`_ with tools like Webpack.
+- Supports bundling of static files with `tools like Webpack </static_webpack.html>`_.
 - Automatically `links .js and .css </tutorial_css_js.html>`_ in your HTML documents (if not using bundlers).
 - Automatically injects `context variables </tutorial_css_js.html#static-and-dynamic-javascript>`_ in the client-side Javascript namespace.
 - Provides `Django-style signals </topics_signals.html>`_.

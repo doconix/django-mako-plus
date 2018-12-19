@@ -116,7 +116,7 @@ class MakoTemplateAdapter(object):
                     content = ret_content  # sets it to the last non-None return in the signal receiver chain
 
         # return
-        return content
+        return mark_safe(content)
 
 
     def render_to_response(self, context=None, request=None, def_name=None, content_type=None, status=None, charset=None):

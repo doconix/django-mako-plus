@@ -19,7 +19,7 @@ import logging
 
 
 def init_provider_factories(key='CONTENT_PROVIDERS'):
-    '''Called from here as well as dmp_webpack.py'''
+    '''Called from apps.py when setting up'''
     factories = []
     dmp = apps.get_app_config('django_mako_plus')
     for index, provider_def in enumerate(dmp.options.get(key, [])):

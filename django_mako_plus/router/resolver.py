@@ -204,7 +204,8 @@ class PagePattern(URLPattern):
                 # we had a pattern match, but we couldn't get a callable using kwargs from the pattern
                 # create a "pattern" so the programmer can see what happened
                 # this is a hack, but the resolver error page doesn't give other options.
-                msg = '[pattern matched but discovery failed: {}]'.format(vdne)
+                # the sad face is to catch the dev's attention in Django's printout
+                msg = "◉︵◉ Pattern matched, but discovery failed: {}".format(vdne)
                 log.debug("%s %s", match.url_name, msg)
                 raise Resolver404({
                     # this is a bit convoluted, but it makes the PatternStub work with Django 1.x and 2.x

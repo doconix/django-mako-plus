@@ -14,10 +14,8 @@ class WebpackCssLinkProvider(CssLinkProvider):
     Generates a CSS <link> tag for the sitewide or app-level CSS bundle file, if it exists.
     '''
     default_options = merge_dicts(JsLinkProvider.default_options, {
-        # the filename to search for (resolves to a single file, if it exists)
-        # if it does not start with a slash, it is relative to the app directory.
-        # if it starts with a slash, it is an absolute path.
         'filepath': os.path.join('styles', '__bundle__.css'),
+        'skip_duplicates': True,
     })
 
 
@@ -28,10 +26,8 @@ class WebpackJsLinkProvider(JsLinkProvider):
     In settings, this provider should be defined *before* WebpackJsCallProvider is defined.
     '''
     default_options = merge_dicts(JsLinkProvider.default_options, {
-        # the filename to search for (resolves to a single file, if it exists)
-        # if it does not start with a slash, it is relative to the app directory.
-        # if it starts with a slash, it is an absolute path.
         'filepath': os.path.join('scripts', '__bundle__.js'),
+        'skip_duplicates': True,
     })
 
 
