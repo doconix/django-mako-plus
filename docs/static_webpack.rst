@@ -1,8 +1,6 @@
 Webpack
 ================
 
-    Apologies in advance for the denseness of this page; it bears no relation to the denseness (or lack thereof) of the author.
-
 As you know, DMP automatically creates links for your static files.  When you render ``app/templates/mypage.html``, DMP creates a script tag for ``app/scripts/mypage.js`` and a style tag for ``app/styles/mypage.css``.  This is the default configuration.
 
 Today's production sites generally bundle scripts, styles, and other static assets into combined, optimized files that improve speed and enable better browser caching.  DMP comes with support for bundling with `Webpack <https://webpack.js.org/>`_.

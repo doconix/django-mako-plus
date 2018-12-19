@@ -45,7 +45,6 @@ The following are the full list of available options.  Each option is described 
 
 
 
-
 ``DEFAULT_APP``, ``DEFAULT_PAGE``
 ----------------------------------
 

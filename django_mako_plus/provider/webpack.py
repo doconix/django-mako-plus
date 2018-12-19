@@ -14,6 +14,7 @@ class WebpackCssLinkProvider(CssLinkProvider):
     Generates a CSS <link> tag for the sitewide or app-level CSS bundle file, if it exists.
     '''
     default_options = merge_dicts(JsLinkProvider.default_options, {
+        'group': 'styles',
         'filepath': os.path.join('styles', '__bundle__.css'),
         'skip_duplicates': True,
     })

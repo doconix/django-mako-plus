@@ -197,7 +197,7 @@ class JsContextProvider(BaseProvider):
     This should be listed before JsLinkProvider so the
     context variables are available during <script> runs.
     '''
-    default_options = merge_dicts(LinkProvider.default_options, {
+    default_options = merge_dicts(BaseProvider.default_options, {
         # the group this provider is part of.  this only matters when
         # the html page limits the providers that will be called with
         # ${ django_mako_plus.links(group="...") }
