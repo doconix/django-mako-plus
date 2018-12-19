@@ -58,7 +58,6 @@ class RequestInitMiddleware(MiddlewareMixin):
     def process_request(self, request):
         request.dmp = self.INITIAL_ROUTING_DATA
 
-
     def process_view(self, request, view_func, view_args, view_kwargs):
         # view_func will be a RequestViewWrapper when our resolver (DMPResolver) matched
         if isinstance(view_func, RequestViewWrapper):

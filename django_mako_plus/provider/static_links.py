@@ -231,6 +231,7 @@ class JsContextProvider(BaseProvider):
             if isinstance(k, jscontext):
                 value = provider_run.context[k]
                 context_data[k] = value.__jscontext__() if hasattr(value, '__jscontext__') else value
+        # add to the JS DMP_CONTEXT
         provider_run.write('<script>')
         provider_run.write('DMP_CONTEXT.set("{version}", "{contextid}", {data}, {templates});'.format(
             version=__version__,
