@@ -31,7 +31,7 @@ Note the new ``<button>`` element in the above html. Next, we'll add
 Javascript to the ``homepage/scripts/index.jsm`` file that runs when the
 button is clicked:
 
-.. code:: javascript
+.. code-block:: javascript
 
     $(function() {
         // update the time every n seconds
@@ -119,7 +119,7 @@ In this case, getting the server time is essentially "part" of the index page, s
 To take advantage of this new function, let's modify the url in
 ``homepage/scripts/index.jsm``:
 
-.. code:: javascript
+.. code-block:: javascript
 
     // update button
     $('#server-time-button').click(function() {

@@ -75,7 +75,7 @@ Suppose you have the following template, view, and JS files:
 
 **``index.js``**:
 
-.. code:: javascript
+.. code-block:: javascript
 
     // update button
     $('#server-time-button').click(function() {

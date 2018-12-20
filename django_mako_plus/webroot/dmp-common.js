@@ -10,11 +10,11 @@
 
     // connect the dmp object
     window.DMP_CONTEXT = {
-        __version__: '5.6.5',   // DMP version to check for mismatches
+        __version__: '5.6.7',   // DMP version to check for mismatches
         contexts: {},           // contextid -> context1
         contextsByName: {},     // app/template -> [ context1, context2, ... ]
         lastContext: null,      // last inserted context (see getAll() below)
-        appBundles: {},         // for the webpack provider
+        templateFunctions: {},  // function that wraps template JS/CSS (see DMP's webpack docs)
 
         /* Adds data to the DMP context under the given key */
         set: function(version, contextid, data, templates) {
@@ -22,8 +22,11 @@
                 console.warn('DMP framework version is ' + version + ', while dmp-common.js is ' + DMP_CONTEXT.__version__ + '. Unexpected behavior may occur.');
             }
             // link this contextid to the data
-            DMP_CONTEXT.contexts[contextid] = data;
-            DMP_CONTEXT.lastContext = data
+            DMP_CONTEXT.contexts[contextid] = {
+                data: data,
+                templates: templates
+            };
+            DMP_CONTEXT.lastContext = DMP_CONTEXT.contexts[contextid];
             // reverse lookups by name to contextid
             for (var i = 0; i < templates.length; i++) {
                 if (DMP_CONTEXT.contextsByName[templates[i]] === undefined) {
@@ -31,7 +34,6 @@
                 }
                 DMP_CONTEXT.contextsByName[templates[i]].push(contextid);
             }
-
         },
 
         /*
@@ -96,6 +98,31 @@
             }//if
 
             return ret;
+        },
+
+        /*
+            Adds a bundle-defined template function (which wraps JS/CSS for the template).
+            This allows the function to be called outside the bundle. (See DMP's webpack docs.)
+        */
+        setTemplateFunction(template, func) {
+            DMP_CONTEXT.templateFunctions[template] = func;
+        },
+
+        /*
+            Runs bundle-defined template functions, which wrap JS/CSS for templates,
+            for the templates associated with the given contextid.
+            (See DMP's webpack docs.)
+        */
+        execBundleForContext(contextid) {
+            var context = DMP_CONTEXT.contexts[contextid];
+            if (context) {
+                for (var i = 0; i < context.templates.length; i++) {
+                    var func = DMP_CONTEXT.templateFunctions[context.templates[i]];
+                    if (func) {
+                        func();
+                    }
+                }
+            }
         }
 
     };//DMP_CONTEXT

@@ -59,12 +59,6 @@ class WebpackJsCallProvider(BaseProvider):
         # using the `if` statement in the JS because the function will only
         # exist if a .js file actually existed in the scripts/ directory when
         # dmp_webpack command was run.
-        provider_run.write('<script data-context="{contextid}">'.format(
+        provider_run.write('<script data-context="{contextid}">DMP_CONTEXT.execBundleForContext("{contextid}");</script>'.format(
             contextid=provider_run.uid,
         ))
-        for template in data['funcs_to_run']:
-            provider_run.write('if (DMP_CONTEXT.appBundles["%s"]) { DMP_CONTEXT.appBundles["%s"]() };' % (
-                template,
-                template
-            ))
-        provider_run.write('</script>')

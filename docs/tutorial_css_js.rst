@@ -71,7 +71,7 @@ Javascript files work the same way as CSS files, so if you skipped the CSS secti
 
 Let's add a client-side, Javascript-based timer. Create the file ``homepage/scripts/index.js`` and place the following JQuery code into it:
 
-.. code:: javascript
+.. code-block:: javascript
 
     $(function() {
         // update the time every 1 seconds
@@ -112,7 +112,7 @@ When you tag a context key with ``jscontext('now')``, DMP adds it to a context o
 
 Let's use the variable in ``index.js``.  Note this example uses a ``jQuery`` ready function, but `regular JS works too <static_context.html#referencing-the-context>`_.
 
-.. code:: javascript
+.. code-block:: javascript
 
     $(function(context) {
         return function() {

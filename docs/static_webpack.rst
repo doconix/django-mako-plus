@@ -54,7 +54,7 @@ Run your project, and ensure the "Welcome to DMP" page comes up. If not, head ov
 
 Note that your new project already contains ``homepage/scripts/index.js``. Let's add another script file so we can see the bundling work:
 
-.. code:: javascript
+.. code-block:: javascript
 
     // homepage/scripts/base.js:
     (function(context) {
@@ -90,7 +90,7 @@ The above commands changed your project a little:
 
 Let's create some shortcut comands to make running webpack easier. These are defined in ``package.json`` under the ``scripts`` key, like this:
 
-.. code:: javascript
+.. code-block:: javascript
 
     {
         ...,
@@ -152,24 +152,22 @@ The providers yielded four files, shown here as a list relative to the entry fil
 
 --------
 
-**Finally, DMP created ``homepage/scripts/__entry__.js``, which we'll use later as Webpack's entry point.** This file contains a number of Node ``require`` statements:
+**Finally, DMP created ``homepage/scripts/__entry__.js``, which we'll use later as Webpack's entry point.** This file contains a number of Node ``require`` statements surrounded by function closures:
 
-.. code:: javascript
+.. code-block:: javascript
 
     (context => {
-        DMP_CONTEXT.appBundles["homepage/index"] = () => {
-            require("./base.js");
-            require("./index.js");
+        DMP_CONTEXT.setTemplateFunction("homepage/index", () => {
             require("./../styles/base.css");
             require("./../styles/index.css");
-        };
-        DMP_CONTEXT.appBundles["homepage/base"] = () => {
             require("./base.js");
+            require("./index.js");
+        })
+        DMP_CONTEXT.setTemplateFunction("homepage/base", () => {
             require("./../styles/base.css");
-        };
+            require("./base.js");
+        })
     })(DMP_CONTEXT.get());
-
-
 
 
 Configure and Run Webpack
@@ -177,13 +175,13 @@ Configure and Run Webpack
 
 We need to tell webpack to start with our entry file. Create a file in your project root called ``webpack.config.js``:
 
-.. code:: javascript
+.. code-block:: javascript
 
     const path = require('path');
 
     module.exports = {
         entry: {
-            'homepage': './homepage/scripts/__entry__.js',
+            'homepage': './homepage/scripts/__entry__.js'
         },
         output: {
             path: path.resolve(__dirname),
@@ -195,7 +193,7 @@ We need to tell webpack to start with our entry file. Create a file in your proj
                 test: /\.css$/,
                 use: [
                   { loader: 'style-loader' },
-                  { loader: 'css-loader' },
+                  { loader: 'css-loader' }
                 ]
               }
             ]
@@ -213,15 +211,15 @@ Let's run webpack in development (watch) mode. After creating our initial bundle
 
     npm run watch
 
-Assuming webpack runs successfully, you now have ``homepage/scripts/__bundle__.js``. Scan/search the file for the JS and CSS content that was bundled.
+Assuming webpack runs successfully, you now have ``homepage/scripts/__bundle__.js``. If you open it up, you'll find our JS near the end of the file.
 
 
-Include the Bundle in Templates
+Bundle Links in Templates
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-As you learned in other sections, DMP automatically creates ``<script>`` and ``<style>`` links in your html templates. In our project, this magic happens during the call to ``${ django_mako_plus.links(self) }`` in ``base.htm`` (which ``index.html`` extends from). For example, the template ``homepage/templates/index.html`` directs the Providers to find and link ``homepage/scripts/index.js`` and ``homepage/styles/index.css``.
+As you learned in other sections, DMP automatically creates ``<script>`` and ``<style>`` links in your html templates. In our project, this happens in ``base.htm``, during the call to ``${ django_mako_plus.links(self) }``. By default, DMP uses *Providers* to generate old-style script and style tags directly to the respective files.
 
-We need swap these Providers with ones that find and link ``homepage/scripts/__bundle__.js``. This is done by setting ``CONTENT_PROVIDERS`` in ``settings.py``:
+We need swap the default Providers with bundle-basd Providers link to ``homepage/scripts/__bundle__.js``. This is done by setting ``CONTENT_PROVIDERS`` in ``settings.py``:
 
 ::
 

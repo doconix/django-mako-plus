@@ -4,12 +4,14 @@ from django.core.management.base import BaseCommand, CommandError
 from django_mako_plus.template import create_mako_context
 from django_mako_plus.provider.runner import ProviderRun, init_provider_factories
 from django_mako_plus.management.mixins import DMPCommandMixIn
+from mako.template import Template as MakoTemplate
 
 import sys
 import os
 import os.path
 from collections import OrderedDict
 from datetime import datetime
+
 
 
 class Command(DMPCommandMixIn, BaseCommand):
@@ -78,6 +80,16 @@ class Command(DMPCommandMixIn, BaseCommand):
 
     def create_entry_file(self, filename, script_map, apps):
         '''Creates an entry file for the given script map'''
+        # delete previous file if it exists, and ensure the target directory is there
+        if os.path.exists(filename):
+            if self.options.get('overwrite'):
+                os.remove(filename)
+            else:
+                raise CommandError('Refusing to destroy existing file: {} (use --overwrite option or remove the file)'.format(filename))
+        if not os.path.exists(os.path.dirname(filename)):
+            os.makedirs(os.path.dirname(filename))
+
+        # prune the script_map to the apps we are bundling
         def in_apps(s):
             for app in apps:
                 last = None
@@ -88,55 +100,52 @@ class Command(DMPCommandMixIn, BaseCommand):
                     last = path
                     path = os.path.dirname(last)
             return False
+        pruned_script_map = {}
+        for key in script_map.keys():
+            pruned_paths = [ path for path in script_map[key] if in_apps(path) ]
+            if len(pruned_paths) > 0:
+                pruned_script_map[key] = pruned_paths
+        if len(pruned_script_map) == 0:
+            return
 
-        filedir = os.path.dirname(filename)
-        if os.path.exists(filename):
-            if self.options.get('overwrite'):
-                os.remove(filename)
-            else:
-                raise CommandError('Refusing to destroy existing file: {} (use --overwrite option or remove the file)'.format(filename))
+        # write the entry file
+        self.message('Creating {}'.format(os.path.relpath(filename, settings.BASE_DIR)))
+        template = MakoTemplate('''
+<%! from datetime import datetime %>
+<%! import sys %>
+<%! import os %>
 
-        # create the lines of the entry file
-        lines = []
-        for page, scripts in script_map.items():
-            require = []
-            for script_path in scripts:
-                if in_apps(script_path):
-                    require.append('require("./{}")'.format(os.path.relpath(script_path, filedir)))
-            if len(require) > 0:
-                lines.append('DMP_CONTEXT.appBundles["{}"] = () => {{ \n        {};\n    }};'.format(page, ';\n        '.join(require)))
+// Generated on ${ datetime.now().strftime('%Y-%m-%d %H:%M') } by `${ ' '.join(sys.argv) }`
+// Contains links for ${ 'app' if len(apps) == 1 else 'apps' }: ${ ', '.join(sorted([ a.name for a in apps ])) }
 
-        # if we had at least one line, write the entry file
-        if len(lines) > 0:
-            self.message('Creating {}'.format(os.path.relpath(filename, settings.BASE_DIR)))
-            if not os.path.exists(os.path.dirname(filename)):
-                os.makedirs(os.path.dirname(filename))
-            with open(filename, 'w') as fout:
-                fout.write('''
-// Generated on {now} by `{argv}`
-// Contains links for app{plural}: {appnames}
+(context => {
+  %for (app, template), script_paths in script_map.items():
+    DMP_CONTEXT.setTemplateFunction("${ app }/${ template }", () => {
+      %for path in script_paths:
+        require("./${ os.path.relpath(path, os.path.dirname(filename)) }");
+      %endfor
+    })
+  %endfor
+})(DMP_CONTEXT.get());
+''')
+        with open(filename, 'w') as fout:
+            fout.write(template.render(
+                apps=apps,
+                script_map=pruned_script_map,
+                filename=filename,
+            ).strip())
 
-(context => {{
-    {lines}
-}})(DMP_CONTEXT.get());
-                '''.format(
-                    now=datetime.now().strftime('%Y-%m-%d %H:%M'),
-                    argv=' '.join(sys.argv),
-                    plural='s' if len(apps) > 1 else '',
-                    appnames=', '.join(sorted([ app.name for app in apps ])),
-                    lines='\n    '.join(lines),
-                ).strip())
 
 
     def generate_script_map(self, config):
         '''
-        Maps templates in this app to their scripts.  This function iterates through
-        app/templates/* to find the templates in this app.  Returns the following
-        dictionary with paths relative to BASE_DIR:
+        Maps templates in this app to their scripts.  This function deep searches
+        app/templates/* for the templates of this app.  Returns the following
+        dictionary with absolute paths:
 
         {
-            'app/template1': [ '/abs/path/to/scripts/template1.js', '/abs/path/to/scripts/supertemplate1.js' ],
-            'app/template2': [ '/abs/path/to/scripts/template2.js', '/abs/path/to/scripts/supertemplate2.js', '/abs/path/to/scripts/supersuper2.js' ],
+            ( 'appname', 'template1' ): [ '/abs/path/to/scripts/template1.js', '/abs/path/to/scripts/supertemplate1.js' ],
+            ( 'appname', 'template2' ): [ '/abs/path/to/scripts/template2.js', '/abs/path/to/scripts/supertemplate2.js', '/abs/path/to/scripts/supersuper2.js' ],
             ...
         }
 
@@ -157,7 +166,7 @@ class Command(DMPCommandMixIn, BaseCommand):
                     elif os.path.isfile(filerel):
                         template_name = os.path.relpath(filerel, template_root)
                         scripts = self.template_scripts(config, template_name)
-                        key = '{}/{}'.format(config.name, os.path.splitext(template_name)[0])
+                        key = ( config.name, os.path.splitext(template_name)[0] )
                         self.message('Found template: {}; static files: {}'.format(key, scripts), 3)
                         if len(scripts) > 0:
                             script_map[key] = scripts
