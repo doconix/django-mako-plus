@@ -28,6 +28,7 @@ class WebpackJsLinkProvider(JsLinkProvider):
     default_options = merge_dicts(JsLinkProvider.default_options, {
         'filepath': os.path.join('scripts', '__bundle__.js'),
         'skip_duplicates': True,
+        'async': True,
     })
 
     def create_attrs(self, provider_run, data):

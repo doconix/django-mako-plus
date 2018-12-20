@@ -103,7 +103,6 @@ DEFAULT_OPTIONS = {
             'provider': 'django_mako_plus.WebpackCssLinkProvider',
             'enabled': False,
             # 'group': 'styles',
-            # 'async': False,
             # 'filepath': 'styles/__bundle__.css',
             # 'skip_duplicates': True
         }, {
@@ -111,7 +110,7 @@ DEFAULT_OPTIONS = {
             'provider': 'django_mako_plus.WebpackJsLinkProvider',
             'enabled': False,
             # 'group': 'scripts',
-            # 'async': False,
+            # 'async': True,
             # 'filepath': 'scripts/__bundle__.js',
             # 'skip_duplicates': True
         },

@@ -10,7 +10,7 @@
 
     // connect the dmp object
     window.DMP_CONTEXT = {
-        __version__: '5.7.3',   // DMP version to check for mismatches
+        __version__: '5.7.5',   // DMP version to check for mismatches
         contexts: {},           // contextid -> context1
         contextsByName: {},     // app/template -> [ context1, context2, ... ]
         lastContext: null,      // last inserted context (see getAll() below)
@@ -31,7 +31,7 @@
             DMP_CONTEXT.lastContext = DMP_CONTEXT.contexts[contextid];
             // reverse lookups by name to contextid
             for (var i = 0; i < templates.length; i++) {
-                if (DMP_CONTEXT.contextsByName[templates[i]] === undefined) {
+                if (typeof DMP_CONTEXT.contextsByName[templates[i]] === "undefined") {
                     DMP_CONTEXT.contextsByName[templates[i]] = [];
                 }
                 DMP_CONTEXT.contextsByName[templates[i]].push(contextid);
@@ -81,10 +81,10 @@
             // if a string, assume it is a context name in format "app/template"
             else if (typeof option === 'string' || option instanceof String) {
                 var namemap = DMP_CONTEXT.contextsByName[option];
-                if (namemap !== undefined) {
+                if (typeof namemap !== "undefined") {
                     for (var i = 0; i < namemap.length; i++) {
                         var c = DMP_CONTEXT.contexts[namemap[i]];
-                        if (c !== undefined) {
+                        if (typeof c !== "undefined") {
                             ret.push(c.data);
                         }
                     }
@@ -94,7 +94,7 @@
             // if script[current-context="something"]
             else if (option.nodeType === 1 && option.nodeName.toLowerCase() == 'script' && option.getAttribute('data-context')) {
                 var c = DMP_CONTEXT.contexts[option.getAttribute('data-context')];
-                if (c !== undefined) {
+                if (typeof c !== "undefined") {
                     ret.push(c.data);
                 }
             }//if
@@ -112,7 +112,7 @@
             to link once so state isn't overwritten by duplicate script tags.
         */
         linkBundleFunction(template, func) {
-            if (!DMP_CONTEXT.bundleFunctions[template]) {
+            if (typeof DMP_CONTEXT.bundleFunctions[template] === "undefined") {
                 DMP_CONTEXT.bundleFunctions[template] = func;
             }
         },
@@ -125,14 +125,14 @@
         checkBundle(contextid) {
             // get the context
             var context = DMP_CONTEXT.contexts[contextid];
-            if (!context) {
+            if (typeof context === "undefined") {
                 return;
             }
 
             // are all the bundles we need loaded?
             for (var i = 0; i < context.templates.length; i++) {
                 var template = context.templates[i];
-                if (!DMP_CONTEXT.bundleFunctions[template]) {
+                if (typeof DMP_CONTEXT.bundleFunctions[template] === "undefined") {
                     return;
                 }
             }
@@ -143,7 +143,9 @@
                 context.triggerCount--;
                 for (var i = 0; i < context.templates.length; i++) {
                     var template = context.templates[i];
-                    DMP_CONTEXT.bundleFunctions[template]();
+                    if (DMP_CONTEXT.bundleFunctions[template]) {    // might be null (if no scripts for the template)
+                        DMP_CONTEXT.bundleFunctions[template]();
+                    }
                 }
             }
         },
@@ -154,7 +156,7 @@
         triggerBundle(contextid) {
             // get the context
             var context = DMP_CONTEXT.contexts[contextid];
-            if (!context) {
+            if (typeof context === "undefined") {
                 return;
             }
 
