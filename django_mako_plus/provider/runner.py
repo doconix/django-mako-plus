@@ -69,12 +69,13 @@ class ProviderFactory(object):
 
 class ProviderRun(object):
     '''A run through the providers for tself and its ancestors'''
-    def __init__(self, tself, version_id=None, group=None, factories=None):
+    def __init__(self, tself, version_id=None, group=None, factories=None, ancestor_limit=0):
         '''
         tself:      `self` object from a Mako template (available during rendering).
         version_id: hash/unique number to place on links
         group:      provider group to include (defaults to all groups if None)
         factories:  list of provider factories to run on each template (defaults to settings.py if None)
+        ancestors:  whether to recurse to ancestor templates
         '''
         dmp = apps.get_app_config('django_mako_plus')
         self.uid = wuid()           # a unique id for this run
@@ -83,6 +84,7 @@ class ProviderRun(object):
         if version_id is not None:
             warnings.warn('The `version_id` parameter in links() is deprecated in favor of automatic file hashes.')
         self.buffer = io.StringIO()
+
         # Create a table of providers for each template in the ancestry:
         #
         #     base.htm,      [ JsLinkProvider1, CssLinkProvider1, ... ]
@@ -90,21 +92,25 @@ class ProviderRun(object):
         #     app_base.htm,  [ JsLinkProvider2, CssLinkProvider2, ... ]
         #        |
         #     index.html,    [ JsLinkProvider3, CssLinkProvider3, ... ]
-        factories = [
-            pf
-            for pf in (factories if factories is not None else dmp.provider_factories)
-            if group is None or group == pf.options['group']
-        ]
-        self.template_providers = [
-            [ pf.instance_for_template(template) for pf in factories ]
-            for template in reversed(list(template_inheritance(tself)))
-        ]
+        group_factories = []
+        if factories is None:
+            factories = dmp.provider_factories
+        for pf in factories:
+            if group is None or group == pf.options['group']:
+                group_factories.append(pf)
+        self.template_providers = []
+        for template in reversed(list(template_inheritance(tself, ancestor_limit))):
+            providers = []
+            for pf in group_factories:
+                providers.append(pf.instance_for_template(template))
+            self.template_providers.append(providers)
+
         # Column-specific data dictionaries are maintained as the template providers run
         # (one per provider column).  These allow the provider instances of a given
         # column to share data if needed.
         #
         #      column_data = [ { col 1 }      , { col 2 }      , ... ]
-        self.column_data = [ {} for pf in factories ]
+        self.column_data = [ {} for pf in group_factories ]
 
 
     def run(self):

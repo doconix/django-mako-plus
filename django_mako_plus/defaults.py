@@ -114,11 +114,6 @@ DEFAULT_OPTIONS = {
             # 'async': False,
             # 'filepath': 'scripts/__bundle__.js',
             # 'skip_duplicates': True
-        }, {
-            # calls the bundle func(s) that apply to current page (see DMP docs on webpack)
-            'provider': 'django_mako_plus.WebpackJsCallProvider',
-            'enabled': False,
-            # 'group': 'scripts',
         },
     ],
 

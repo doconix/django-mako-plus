@@ -10,7 +10,7 @@
 
     // connect the dmp object
     window.DMP_CONTEXT = {
-        __version__: '5.6.7',   // DMP version to check for mismatches
+        __version__: '5.7.1',   // DMP version to check for mismatches
         contexts: {},           // contextid -> context1
         contextsByName: {},     // app/template -> [ context1, context2, ... ]
         lastContext: null,      // last inserted context (see getAll() below)
@@ -21,7 +21,7 @@
             if (DMP_CONTEXT.__version__ != version) {
                 console.warn('DMP framework version is ' + version + ', while dmp-common.js is ' + DMP_CONTEXT.__version__ + '. Unexpected behavior may occur.');
             }
-            // link this contextid to the data
+            // link this contextid to the data and templates
             DMP_CONTEXT.contexts[contextid] = {
                 data: data,
                 templates: templates
@@ -72,8 +72,8 @@
             }
 
             // if still empty option, get the last-added context
-            if (!option) {
-                ret.push(DMP_CONTEXT.lastContext);
+            if (!option && DMP_CONTEXT.lastContext) {
+                ret.push(DMP_CONTEXT.lastContext.data);
             }
 
             // if a string, assume it is a context name in format "app/template"
@@ -83,7 +83,7 @@
                     for (var i = 0; i < namemap.length; i++) {
                         var c = DMP_CONTEXT.contexts[namemap[i]];
                         if (c !== undefined) {
-                            ret.push(c);
+                            ret.push(c.data);
                         }
                     }
                 }
@@ -93,7 +93,7 @@
             else if (option.nodeType === 1 && option.nodeName.toLowerCase() == 'script' && option.getAttribute('data-context')) {
                 var c = DMP_CONTEXT.contexts[option.getAttribute('data-context')];
                 if (c !== undefined) {
-                    ret.push(c);
+                    ret.push(c.data);
                 }
             }//if
 
@@ -113,14 +113,15 @@
             for the templates associated with the given contextid.
             (See DMP's webpack docs.)
         */
-        execBundleForContext(contextid) {
-            var context = DMP_CONTEXT.contexts[contextid];
-            if (context) {
-                for (var i = 0; i < context.templates.length; i++) {
-                    var func = DMP_CONTEXT.templateFunctions[context.templates[i]];
-                    if (func) {
-                        func();
-                    }
+        execTemplateFunction(contextid) {
+            if (!DMP_CONTEXT.contexts[contextid]) {
+                return;
+            }
+            for (var i = 0; i < DMP_CONTEXT.contexts[contextid].templates.length; i++) {
+                var template = DMP_CONTEXT.contexts[contextid].templates[i];
+                console.log(DMP_CONTEXT.templateFunctions[template])
+                if (DMP_CONTEXT.templateFunctions[template]) {
+                    DMP_CONTEXT.templateFunctions[template]();
                 }
             }
         }

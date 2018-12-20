@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.forms.utils import flatatt
 from django.utils.module_loading import import_string
 
 from ..util import crc32, getdefaultattr, log, merge_dicts
@@ -143,18 +144,23 @@ class CssLinkProvider(LinkProvider):
         'skip_duplicates': True,
     })
 
-    def create_link(self, provider_run):
-        '''Creates a link to the given URL'''
+    def create_attrs(self, provider_run):
+        '''Creates the attributes for the link (allows subclasses to add)'''
         if settings.DEBUG:
             relpath = os.path.relpath(self.filepath, settings.BASE_DIR)
         else:
             relpath = os.path.relpath(self.filepath, settings.STATIC_ROOT)
-        return '<link data-context="{}" rel="stylesheet" type="text/css" href="{}{}?v={:x}" />'.format(
-            provider_run.uid,
-            settings.STATIC_URL,
-            relpath.replace('\\', '/'),
-            self.version_id,
-        )
+        attrs = {}
+        attrs["data-context"] = provider_run.uid
+        attrs["href"] ="{}{}?{:x}".format(settings.STATIC_URL, relpath.replace('\\', '/'), self.version_id)
+        if self.options['async']:
+            attrs['async'] = "async"
+        return attrs
+
+    def create_link(self, provider_run):
+        '''Creates a link to the given URL'''
+        attrs = self.create_attrs(provider_run)
+        return '<link{} />'.format(flatatt(attrs))
 
 
 class JsLinkProvider(LinkProvider):
@@ -172,19 +178,23 @@ class JsLinkProvider(LinkProvider):
         'async': False,
     })
 
-    def create_link(self, provider_run):
-        '''Creates a link to the given URL'''
+    def create_attrs(self, provider_run):
+        '''Creates the attributes for the link (allows subclasses to add)'''
         if settings.DEBUG:
             relpath = os.path.relpath(self.filepath, settings.BASE_DIR)
         else:
             relpath = os.path.relpath(self.filepath, settings.STATIC_ROOT)
-        return '<script data-context="{}" src="{}{}?v={:x}"{}></script>'.format(
-            provider_run.uid,
-            settings.STATIC_URL,
-            relpath.replace('\\', '/'),
-            self.version_id,
-            ' async="async"' if self.options['async'] else '',
-        )
+        attrs = {}
+        attrs["data-context"] = provider_run.uid
+        attrs["src"] ="{}{}?{:x}".format(settings.STATIC_URL, relpath.replace('\\', '/'), self.version_id)
+        if self.options['async']:
+            attrs['async'] = "async"
+        return attrs
+
+    def create_link(self, provider_run):
+        '''Creates a link to the given URL'''
+        attrs = self.create_attrs(provider_run)
+        return '<script{}></script>'.format(flatatt(attrs))
 
 
 

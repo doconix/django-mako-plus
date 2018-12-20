@@ -80,6 +80,9 @@ class Command(DMPCommandMixIn, BaseCommand):
 
     def create_entry_file(self, filename, script_map, apps):
         '''Creates an entry file for the given script map'''
+        if len(script_map) == 0:
+            return
+
         # delete previous file if it exists, and ensure the target directory is there
         if os.path.exists(filename):
             if self.options.get('overwrite'):
@@ -88,25 +91,6 @@ class Command(DMPCommandMixIn, BaseCommand):
                 raise CommandError('Refusing to destroy existing file: {} (use --overwrite option or remove the file)'.format(filename))
         if not os.path.exists(os.path.dirname(filename)):
             os.makedirs(os.path.dirname(filename))
-
-        # prune the script_map to the apps we are bundling
-        def in_apps(s):
-            for app in apps:
-                last = None
-                path = os.path.dirname(s)
-                while last != path:
-                    if os.path.samefile(app.path, path):
-                        return True
-                    last = path
-                    path = os.path.dirname(last)
-            return False
-        pruned_script_map = {}
-        for key in script_map.keys():
-            pruned_paths = [ path for path in script_map[key] if in_apps(path) ]
-            if len(pruned_paths) > 0:
-                pruned_script_map[key] = pruned_paths
-        if len(pruned_script_map) == 0:
-            return
 
         # write the entry file
         self.message('Creating {}'.format(os.path.relpath(filename, settings.BASE_DIR)))
@@ -131,10 +115,9 @@ class Command(DMPCommandMixIn, BaseCommand):
         with open(filename, 'w') as fout:
             fout.write(template.render(
                 apps=apps,
-                script_map=pruned_script_map,
+                script_map=script_map,
                 filename=filename,
             ).strip())
-
 
 
     def generate_script_map(self, config):
@@ -170,6 +153,7 @@ class Command(DMPCommandMixIn, BaseCommand):
                         self.message('Found template: {}; static files: {}'.format(key, scripts), 3)
                         if len(scripts) > 0:
                             script_map[key] = scripts
+
             for subdir in subdirs:
                 recurse(subdir)
 
@@ -191,7 +175,7 @@ class Command(DMPCommandMixIn, BaseCommand):
         dmp = django_apps.get_app_config('django_mako_plus')
         template_obj = dmp.engine.get_template_loader(config, create=True).get_mako_template(template_name, force=True)
         mako_context = create_mako_context(template_obj)
-        inner_run = ProviderRun(mako_context['self'], factories=self.factories)
+        inner_run = ProviderRun(mako_context['self'], factories=self.factories, ancestor_limit=1)
         inner_run.run()
         scripts = []
         for data in inner_run.column_data:

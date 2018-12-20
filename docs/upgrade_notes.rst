@@ -3,6 +3,15 @@ Upgrade Notes
 
 This document contains upgrade notes for those already using DMP.  We started the document at version 4.3.
 
+5.8 - December, 2018
+
+Refactored the webpack functionality and documentation. This ONLY affects users doing webpack bundling.  Significant improvements to the webpack documentation were done.
+
+The changes you need to worry about:
+
+1. Rerun ``python manage.py dmp_webpack --overwrite`` to generate the altered entry file syntax.
+2. Remove ``django_mako_plus.WebpackJsCallProvider`` from your settings.py. This functionality is now in the webpack link provider.
+
 5.7 - September, 2018
 ---------------------------------------
 

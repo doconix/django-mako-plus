@@ -64,6 +64,13 @@ class BaseProvider(object):
             self.template = self.template_name
         self.options = merge_dicts(self.default_options, options)     # combined options dictionary
 
+    def __repr__(self):
+        return '<{} for {}/{}>'.format(
+            self.__class__.__qualname__,
+            self.app_config.name,
+            self.template_name,
+        )
+
     @property
     def group(self):
         return self.options['group']

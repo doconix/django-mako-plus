@@ -20,7 +20,7 @@ DMP-style scripts are coupled with their templates.  They aren't generally self-
 
 Herein lies the issue that this provider solves: if we bundle several of these scripts together--such as all the scripts in an app--loading the bundle into a page will run not only ``mypage.js``, but also ``otherpage.js`` and ``otherpage2.js`` (assuming these three JS files exist in the same app).  Since the bundle contains scripts for many pages, we need to selectively run a small part of the bundle.
 
-This provider wraps each script inside a function inside the larger bundle.  Since the bundle is a map of template names to functions, the page scripts load but don't run.  When the page is loaded, the ``WebpackJsCallProvider`` runs the appropriate function.
+This provider wraps each script inside a function inside the larger bundle.  Since the bundle is a map of template names to functions, the page scripts load but don't run. DMP manually triggers the right ones for the current template.
 
 .. image:: _static/webpack.png
    :align: center
@@ -232,7 +232,6 @@ We need swap the default Providers with bundle-basd Providers link to ``homepage
                 'CONTENT_PROVIDERS': [
                     { 'provider': 'django_mako_plus.JsContextProvider' },
                     { 'provider': 'django_mako_plus.WebpackJsLinkProvider' },
-                    { 'provider': 'django_mako_plus.WebpackJsCallProvider' },
                 ],
             }
         }
@@ -241,8 +240,7 @@ We need swap the default Providers with bundle-basd Providers link to ``homepage
 These new Providers give the following behavior:
 
 1. ``JsContextProvider`` is the same as before. `It sets values from the view into the JS context </static_context.html>`_.
-2. ``WebpackJsLinkProvider`` creates the link for the bundle: ``<script src="/static/homepage/scripts/__bundle__.js">``.
-3. ``WebpackJsCallProvider`` calls the function(s) appropriate to the current template being shown.
+2. ``WebpackJsLinkProvider`` creates the link for the bundle: ``<script src="/static/homepage/scripts/__bundle__.js">`` and calls the bundle functions for the current template.
 
     Regarding #2, you can `change the default paths in settings.py </basics_settings.html>`_. Just be sure to match the webpack config path with the link provider path.
 
