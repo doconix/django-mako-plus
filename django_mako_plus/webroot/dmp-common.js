@@ -10,7 +10,7 @@
 
     // connect the dmp object
     window.DMP_CONTEXT = {
-        __version__: '5.7.1',   // DMP version to check for mismatches
+        __version__: '5.7.2',   // DMP version to check for mismatches
         contexts: {},           // contextid -> context1
         contextsByName: {},     // app/template -> [ context1, context2, ... ]
         lastContext: null,      // last inserted context (see getAll() below)
@@ -26,7 +26,7 @@
                 id: contextid,
                 data: data,
                 templates: templates,
-                triggered: false
+                triggerCount: 0
             };
             DMP_CONTEXT.lastContext = DMP_CONTEXT.contexts[contextid];
             // reverse lookups by name to contextid
@@ -102,23 +102,30 @@
             return ret;
         },
 
+
+        ////////////////////////////////////////////////////////////////////
+        ///  Webpack bundling functions
+
         /*
-            Links a bundle-defined template function (which wraps JS/CSS for the template).
-            This allows the function to be called outside the bundle. (See DMP's webpack docs.)
+            Links a bundle-defined template function so it can be called
+            from DMP_CONTEXT (i.e. outside the bundle). We only allow functions
+            to link once so state isn't overwritten by duplicate script tags.
         */
         linkBundleFunction(template, func) {
-            DMP_CONTEXT.bundleFunctions[template] = func;
+            if (!DMP_CONTEXT.bundleFunctions[template]) {
+                DMP_CONTEXT.bundleFunctions[template] = func;
+            }
         },
 
         /*
-            Runs bundle-defined template functions, which wrap JS/CSS for templates,
-            for the templates associated with the given contextid.
-            (See DMP's webpack docs.)
+            Checks if bundle-defined template functions need to run for a function.
+            We check with every script's onLoad as well as an explicit call. This
+            ensures the functions are run when async and/or out of order.
         */
-        triggerBundle(contextid) {
+        checkBundle(contextid) {
             // get the context
             var context = DMP_CONTEXT.contexts[contextid];
-            if (!context || context.triggered) {
+            if (!context) {
                 return;
             }
 
@@ -131,11 +138,29 @@
             }
 
             // everything is here, so run the bundle functions
-            context.triggered = true;
-            for (var i = 0; i < context.templates.length; i++) {
-                var template = context.templates[i];
-                DMP_CONTEXT.bundleFunctions[template]();
+            // for each time the triggerBundle() was called
+            while (context.triggerCount > 0) {
+                context.triggerCount--;
+                for (var i = 0; i < context.templates.length; i++) {
+                    var template = context.templates[i];
+                    DMP_CONTEXT.bundleFunctions[template]();
+                }
             }
+        },
+
+        /*
+            Triggers a template context to run a given bundle.
+        */
+        triggerBundle(contextid) {
+            // get the context
+            var context = DMP_CONTEXT.contexts[contextid];
+            if (!context) {
+                return;
+            }
+
+            // increase the trigger count and check the bundle
+            context.triggerCount++;
+            DMP_CONTEXT.checkBundle(contextid);
         }
 
     };//DMP_CONTEXT

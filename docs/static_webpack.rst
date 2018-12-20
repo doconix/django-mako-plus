@@ -242,8 +242,6 @@ These new Providers give the following behavior:
 
     Regarding #2, you can `change the default paths in settings.py </basics_settings.html>`_. Just be sure to match the webpack config path with the link provider path.
 
-    Regarding #3, you could remove this provider and instead add ``<script>`` tags to the templates yourself.  This may make sense in situations like site-wide bundles.
-
 
 Test It!
 ~~~~~~~~~~~~~~~~
@@ -286,11 +284,6 @@ This section describes how to create a single monstrosity that includes the scri
     python3 manage.py dmp_webpack --overwrite --single homepage/scripts/__entry__.js
 
 The above command will place the sitewide entry file in the homepage app, but it could be located anywhere.  Include this single entry file in ``webpack.config.js``.
-
-Since there's only one bundle, you probably don't need the ``WebpackJsLinkProvider`` provider.  Just create a ``<script>`` link in the ``base.htm`` site base template.
-
-When the bundle loads in the browser, the functions for every page will be placed in ``DMP_CONTEXT``.  As described earlier in this document, enable the
-``WebpackJsCallProvider`` provider to call the right functions for the current page.
 
 
 A Few Bundles to Rule Them All

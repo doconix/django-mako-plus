@@ -28,9 +28,19 @@ class WebpackJsLinkProvider(JsLinkProvider):
     default_options = merge_dicts(JsLinkProvider.default_options, {
         'filepath': os.path.join('scripts', '__bundle__.js'),
         'skip_duplicates': True,
+        'async': True,
     })
 
     def create_attrs(self, provider_run, data):
         attrs = super().create_attrs(provider_run, data)
-        attrs['onload'] = "DMP_CONTEXT.triggerBundle('{}')".format(provider_run.uid)
+        attrs['onload'] = "DMP_CONTEXT.checkBundle('{}')".format(provider_run.uid)
         return attrs
+
+    def finish(self, provider_run, data):
+        # this trigger call must be separate because script links may not always
+        # render (duplicates are skipped)
+        super().finish(provider_run, data)
+        if len(data['enabled']) > 0:
+            provider_run.write('<script data-context="{uid}">DMP_CONTEXT.triggerBundle("{uid}")</script>'.format(
+                uid=provider_run.uid,
+            ))
