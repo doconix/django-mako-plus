@@ -92,16 +92,16 @@ class ProviderRun(object):
         #     app_base.htm,  [ JsLinkProvider2, CssLinkProvider2, ... ]
         #        |
         #     index.html,    [ JsLinkProvider3, CssLinkProvider3, ... ]
-        group_factories = []
+        enabled_factories = []
         if factories is None:
             factories = dmp.provider_factories
         for pf in factories:
             if group is None or group == pf.options['group']:
-                group_factories.append(pf)
+                enabled_factories.append(pf)
         self.template_providers = []
         for template in reversed(list(template_inheritance(tself, ancestor_limit))):
             providers = []
-            for pf in group_factories:
+            for pf in enabled_factories:
                 providers.append(pf.instance_for_template(template))
             self.template_providers.append(providers)
 
@@ -110,7 +110,7 @@ class ProviderRun(object):
         # column to share data if needed.
         #
         #      column_data = [ { col 1 }      , { col 2 }      , ... ]
-        self.column_data = [ {} for pf in group_factories ]
+        self.column_data = [ {} for pf in enabled_factories ]
 
 
     def run(self):

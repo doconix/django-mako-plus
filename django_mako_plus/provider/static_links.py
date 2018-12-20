@@ -83,7 +83,7 @@ class LinkProvider(BaseProvider):
             ))
 
 
-    def create_link(self, provider_run):
+    def create_link(self, provider_run, data):
         '''
         If the file referenced in filepath() exists, this method is called
         to create the link to be included in the html.  Subclasses should
@@ -108,7 +108,6 @@ class LinkProvider(BaseProvider):
     def provide(self, provider_run, data):
         filepath = self.filepath
         # delaying printing of tag to finish() because the JsContextProvider delays and this must go after it
-
         # short circuit if the file for this provider doesn't exist
         if self.mtime == 0:
             return
@@ -123,7 +122,7 @@ class LinkProvider(BaseProvider):
 
     def finish(self, provider_run, data):
         for provider in data['enabled']:
-            provider_run.write(provider.create_link(provider_run))
+            provider_run.write(provider.create_link(provider_run, data))
 
 
 
@@ -144,7 +143,7 @@ class CssLinkProvider(LinkProvider):
         'skip_duplicates': True,
     })
 
-    def create_attrs(self, provider_run):
+    def create_attrs(self, provider_run, data):
         '''Creates the attributes for the link (allows subclasses to add)'''
         if settings.DEBUG:
             relpath = os.path.relpath(self.filepath, settings.BASE_DIR)
@@ -153,13 +152,11 @@ class CssLinkProvider(LinkProvider):
         attrs = {}
         attrs["data-context"] = provider_run.uid
         attrs["href"] ="{}{}?{:x}".format(settings.STATIC_URL, relpath.replace('\\', '/'), self.version_id)
-        if self.options['async']:
-            attrs['async'] = "async"
         return attrs
 
-    def create_link(self, provider_run):
+    def create_link(self, provider_run, data):
         '''Creates a link to the given URL'''
-        attrs = self.create_attrs(provider_run)
+        attrs = self.create_attrs(provider_run, data)
         return '<link{} />'.format(flatatt(attrs))
 
 
@@ -178,7 +175,7 @@ class JsLinkProvider(LinkProvider):
         'async': False,
     })
 
-    def create_attrs(self, provider_run):
+    def create_attrs(self, provider_run, data):
         '''Creates the attributes for the link (allows subclasses to add)'''
         if settings.DEBUG:
             relpath = os.path.relpath(self.filepath, settings.BASE_DIR)
@@ -191,9 +188,9 @@ class JsLinkProvider(LinkProvider):
             attrs['async'] = "async"
         return attrs
 
-    def create_link(self, provider_run):
+    def create_link(self, provider_run, data):
         '''Creates a link to the given URL'''
-        attrs = self.create_attrs(provider_run)
+        attrs = self.create_attrs(provider_run, data)
         return '<script{}></script>'.format(flatatt(attrs))
 
 

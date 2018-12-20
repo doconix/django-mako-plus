@@ -14,7 +14,7 @@
         contexts: {},           // contextid -> context1
         contextsByName: {},     // app/template -> [ context1, context2, ... ]
         lastContext: null,      // last inserted context (see getAll() below)
-        templateFunctions: {},  // function that wraps template JS/CSS (see DMP's webpack docs)
+        bundleFunctions: {},    // functions that wraps template JS/CSS (see DMP's webpack docs)
 
         /* Adds data to the DMP context under the given key */
         set: function(version, contextid, data, templates) {
@@ -23,8 +23,10 @@
             }
             // link this contextid to the data and templates
             DMP_CONTEXT.contexts[contextid] = {
+                id: contextid,
                 data: data,
-                templates: templates
+                templates: templates,
+                numLoadedBundles: 0
             };
             DMP_CONTEXT.lastContext = DMP_CONTEXT.contexts[contextid];
             // reverse lookups by name to contextid
@@ -101,11 +103,11 @@
         },
 
         /*
-            Adds a bundle-defined template function (which wraps JS/CSS for the template).
+            Links a bundle-defined template function (which wraps JS/CSS for the template).
             This allows the function to be called outside the bundle. (See DMP's webpack docs.)
         */
-        setTemplateFunction(template, func) {
-            DMP_CONTEXT.templateFunctions[template] = func;
+        linkBundleFunction(template, func) {
+            DMP_CONTEXT.bundleFunctions[template] = func;
         },
 
         /*
@@ -113,15 +115,22 @@
             for the templates associated with the given contextid.
             (See DMP's webpack docs.)
         */
-        execTemplateFunction(contextid) {
-            if (!DMP_CONTEXT.contexts[contextid]) {
+        triggerBundle(contextid, numBundles) {
+            // get the context
+            var context = DMP_CONTEXT.contexts[contextid];
+            if (!context) {
                 return;
             }
-            for (var i = 0; i < DMP_CONTEXT.contexts[contextid].templates.length; i++) {
-                var template = DMP_CONTEXT.contexts[contextid].templates[i];
-                console.log(DMP_CONTEXT.templateFunctions[template])
-                if (DMP_CONTEXT.templateFunctions[template]) {
-                    DMP_CONTEXT.templateFunctions[template]();
+            // skip out if we're still waiting on bundles to load
+            context.numLoadedBundles++;
+            if (context.numLoadedBundles < numBundles) {
+                return;
+            }
+            // run the bundle functions for the template chain
+            for (var i = 0; i < context.templates.length; i++) {
+                var template = context.templates[i];
+                if (DMP_CONTEXT.bundleFunctions[template]) {
+                    DMP_CONTEXT.bundleFunctions[template]();
                 }
             }
         }

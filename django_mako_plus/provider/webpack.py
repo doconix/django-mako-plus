@@ -28,12 +28,12 @@ class WebpackJsLinkProvider(JsLinkProvider):
     default_options = merge_dicts(JsLinkProvider.default_options, {
         'filepath': os.path.join('scripts', '__bundle__.js'),
         'skip_duplicates': True,
-        'async': True,
     })
 
-    def finish(self, provider_run, data):
-        '''Trigger the bundle functions for the template inheritance.'''
-        super().finish(provider_run, data)
-        provider_run.write('<script data-context="{contextid}">DMP_CONTEXT.execTemplateFunction("{contextid}");</script>'.format(
-            contextid=provider_run.uid,
-        ))
+    def create_attrs(self, provider_run, data):
+        attrs = super().create_attrs(provider_run, data)
+        attrs['onload'] = "DMP_CONTEXT.triggerBundle('{}', {})".format(
+            provider_run.uid,
+            len(data['enabled']),
+        )
+        return attrs

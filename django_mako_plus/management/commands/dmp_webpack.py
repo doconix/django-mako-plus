@@ -104,7 +104,7 @@ class Command(DMPCommandMixIn, BaseCommand):
 
 (context => {
   %for (app, template), script_paths in script_map.items():
-    DMP_CONTEXT.setTemplateFunction("${ app }/${ template }", () => {
+    DMP_CONTEXT.linkBundleFunction("${ app }/${ template }", () => {
       %for path in script_paths:
         require("./${ os.path.relpath(path, os.path.dirname(filename)) }");
       %endfor

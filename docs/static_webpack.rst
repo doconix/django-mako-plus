@@ -157,13 +157,11 @@ The providers yielded four files, shown here as a list relative to the entry fil
 .. code-block:: javascript
 
     (context => {
-        DMP_CONTEXT.setTemplateFunction("homepage/index", () => {
-            require("./../styles/base.css");
+        DMP_CONTEXT.linkBundleFunction("homepage/index", () => {
             require("./../styles/index.css");
-            require("./base.js");
             require("./index.js");
         })
-        DMP_CONTEXT.setTemplateFunction("homepage/base", () => {
+        DMP_CONTEXT.linkBundleFunction("homepage/base", () => {
             require("./../styles/base.css");
             require("./base.js");
         })
