@@ -26,7 +26,7 @@
                 id: contextid,
                 data: data,
                 templates: templates,
-                numLoadedBundles: 0
+                triggered: false
             };
             DMP_CONTEXT.lastContext = DMP_CONTEXT.contexts[contextid];
             // reverse lookups by name to contextid
@@ -115,23 +115,26 @@
             for the templates associated with the given contextid.
             (See DMP's webpack docs.)
         */
-        triggerBundle(contextid, numBundles) {
+        triggerBundle(contextid) {
             // get the context
             var context = DMP_CONTEXT.contexts[contextid];
-            if (!context) {
+            if (!context || context.triggered) {
                 return;
             }
-            // skip out if we're still waiting on bundles to load
-            context.numLoadedBundles++;
-            if (context.numLoadedBundles < numBundles) {
-                return;
-            }
-            // run the bundle functions for the template chain
+
+            // are all the bundles we need loaded?
             for (var i = 0; i < context.templates.length; i++) {
                 var template = context.templates[i];
-                if (DMP_CONTEXT.bundleFunctions[template]) {
-                    DMP_CONTEXT.bundleFunctions[template]();
+                if (!DMP_CONTEXT.bundleFunctions[template]) {
+                    return;
                 }
+            }
+
+            // everything is here, so run the bundle functions
+            context.triggered = true;
+            for (var i = 0; i < context.templates.length; i++) {
+                var template = context.templates[i];
+                DMP_CONTEXT.bundleFunctions[template]();
             }
         }
 

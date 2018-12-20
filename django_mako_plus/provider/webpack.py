@@ -32,8 +32,5 @@ class WebpackJsLinkProvider(JsLinkProvider):
 
     def create_attrs(self, provider_run, data):
         attrs = super().create_attrs(provider_run, data)
-        attrs['onload'] = "DMP_CONTEXT.triggerBundle('{}', {})".format(
-            provider_run.uid,
-            len(data['enabled']),
-        )
+        attrs['onload'] = "DMP_CONTEXT.triggerBundle('{}')".format(provider_run.uid)
         return attrs

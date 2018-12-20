@@ -151,8 +151,7 @@ class Command(DMPCommandMixIn, BaseCommand):
                         scripts = self.template_scripts(config, template_name)
                         key = ( config.name, os.path.splitext(template_name)[0] )
                         self.message('Found template: {}; static files: {}'.format(key, scripts), 3)
-                        if len(scripts) > 0:
-                            script_map[key] = scripts
+                        script_map[key] = scripts
 
             for subdir in subdirs:
                 recurse(subdir)
