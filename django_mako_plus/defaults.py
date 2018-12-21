@@ -110,7 +110,7 @@ DEFAULT_OPTIONS = {
             'provider': 'django_mako_plus.WebpackJsLinkProvider',
             'enabled': False,
             # 'group': 'scripts',
-            # 'async': True,
+            # 'async': False,
             # 'filepath': 'scripts/__bundle__.js',
             # 'skip_duplicates': True
         },

@@ -257,8 +257,7 @@ These new Providers give the following behavior:
 
 1. ``JsContextProvider`` is the same as before. `It sets values from the view into the JS context </static_context.html>`_.
 2. ``WebpackJsLinkProider`` creates the link for the bundle: ``<script src="/static/homepage/scripts/__bundle__.js">`` and calls the bundle functions for the current template.
-3. Since bundles can be large, DMP creates ``async`` links to the scripts. If you prefer synchronous links, `change the settings of WebpackJsLinkProvider </basics_settings.html>`_. Either way, DMP will trigger your template functions as soon as the bundles are loaded.
-4. If you prefer to bundle CSS and JS separately, enable code splitting in webpack's config and add ``django_mako_plus.WebpackCssLinkProvider`` to the content providers list. This tutorial puts everything in the JS bundle for simplicity.
+3. If you prefer to bundle CSS and JS separately, enable code splitting in webpack's config and add ``django_mako_plus.WebpackCssLinkProvider`` to the content providers list. This tutorial puts everything in the JS bundle for simplicity.
 
 
 Test It!
