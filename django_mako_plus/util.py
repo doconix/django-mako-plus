@@ -62,7 +62,7 @@ def import_qualified(name):
 
 def merge_dicts(*dicts):
     '''
-    Merges an arbitrary number of dicts, starting
+    Shallow merges an arbitrary number of dicts, starting
     with the first argument and updating through the
     last argument (last dict wins on conflicting keys).
     '''

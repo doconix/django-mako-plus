@@ -20,68 +20,49 @@ class LinkProvider(BaseProvider):
     Renders links like <link> and <script> based on the name of the template
     and supertemplates.
     '''
-
-    # the default options are for CSS files
-    default_options = merge_dicts(BaseProvider.default_options, {
-        # the filename to search for (resolves to a single file, if it exists)
-        # if it does not start with a slash, it is relative to the app directory.
-        # if it starts with a slash, it is an absolute path.
-        # codes: {basedir}, {app}, {template}, {template_name}, {template_file}, {template_subdir}
-        'filepath': os.path.join('scripts', '{template}.js'),
-        # if a template is rendered more than once in a request, should we link more than once?
-        'skip_duplicates': False,
-    })
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        path = self.filepath
+        self.filepath = self.calc_filepath()
         if log.isEnabledFor(logging.DEBUG):
-            log.debug('[%s] %s searching for %s', self.template_file, self.__class__.__qualname__, path)
+            log.debug('%s searching for %s', repr(self), self.filepath)
         # file time and version hash
         try:
-            self.mtime = int(os.stat(path).st_mtime)
+            self.mtime = int(os.stat(self.filepath).st_mtime)
             if log.isEnabledFor(logging.DEBUG):
-                log.debug('[%s] found %s', self.template_file, path)
+                log.debug('%s found %s', repr(self), self.filepath)
             # version_id combines current time and the CRC32 checksum of file bytes
-            self.version_id = (self.mtime << 32) | crc32(path)
+            self.version_id = (self.mtime << 32) | crc32(self.filepath)
         except FileNotFoundError:
             self.mtime = 0
             self.version_id = 0
 
-
     @property
-    def filepath(self):
-        '''
-        The absolute path to the file on disk.  This default implementation uses:
+    def default_options(self):
+        return merge_dicts({
+            # the static file path to look for and include (if exists) in
+            # this should be `function(provider)` or `lambda provider: ...`
+            # or if None, provider.calc_filepath() is called.
+            'filepath': None,
 
-            development: /app path/
-            production:  settings.STATIC_ROOT/app name/ during production.
-        '''
-        if settings.DEBUG:
-            return os.path.normpath(os.path.join(
-                self.app_config.path,
-                self.options['filepath'].format(
-                    basedir=settings.BASE_DIR,
-                    app=self.app_config.name,
-                    template=self.template,
-                    template_name=self.template_name,
-                    template_file=self.template_file,
-                    template_subdir=self.template_subdir,
-                ),
-            ))
-        else:
-            return os.path.normpath(os.path.join(
-                settings.STATIC_ROOT,
-                self.app_config.name,
-                self.options['filepath'].format(
-                    basedir=settings.BASE_DIR,
-                    app=self.app_config.name,
-                    template=self.template,
-                    template_name=self.template_name,
-                    template_file=self.template_file,
-                    template_subdir=self.template_subdir,
-                ),
-            ))
+            # if a template is rendered more than once in a request, should we link more than once?
+            # defaults are: css=False, js=True, bundled_js=False
+            'skip_duplicates': False,
+        }, super().default_options)
 
+    def calc_filepath(self, relpath=None):
+        # in settings?
+        if self.options['filepath']:
+            return self.options['filepath'](self)
+        # calculate it
+        if self.app_config is None:
+            log.warn('DMP static links provider skipped: template %s not in project subdir and `filepath` not in settings', self.template_relpath)
+        if relpath is None:
+            relpath = os.path.join('subdir', self.template_relpath) + '.ext'
+        return os.path.join(
+            settings.BASE_DIR if settings.DEBUG else settings.STATIC_ROOT,
+            self.app_config.name,
+            relpath,
+        )
 
     def create_link(self, provider_run, data):
         '''
@@ -91,7 +72,6 @@ class LinkProvider(BaseProvider):
         <script> or <link>.
         '''
         return '<link rel="stylesheet" type="text/css" href="/web/path/to/file" />'
-
 
     def start(self, provider_run, data):
         # add a set to the request (fallback to provider_run if request is None) for skipping duplicates
@@ -103,7 +83,6 @@ class LinkProvider(BaseProvider):
             )
         # enabled providers in the chain go here
         data['enabled'] = []
-
 
     def provide(self, provider_run, data):
         filepath = self.filepath
@@ -119,7 +98,6 @@ class LinkProvider(BaseProvider):
         # if we get here, this provider is enabled, so add it to the list
         data['enabled'].append(self)
 
-
     def finish(self, provider_run, data):
         for provider in data['enabled']:
             provider_run.write(provider.create_link(provider_run, data))
@@ -132,26 +110,33 @@ class LinkProvider(BaseProvider):
 
 class CssLinkProvider(LinkProvider):
     '''Generates a CSS <link>'''
-    default_options = merge_dicts(LinkProvider.default_options, {
-        'group': 'styles',
-        # the filename to search for (resolves to a single file, if it exists)
-        # if it does not start with a slash, it is relative to the app directory.
-        # if it starts with a slash, it is an absolute path.
-        'filepath': os.path.join('styles', '{template}.css'),
-        # if a template is rendered more than once in a request, we usually don't
-        # need to include the css again.
-        'skip_duplicates': True,
-    })
+    FILE_SUBDIR = 'styles'
+    FILE_EXT = '.css'
+
+    @property
+    def default_options(self):
+        return merge_dicts({
+            'group': 'styles',
+            # if a template is rendered more than once in a request, we usually don't
+            # need to include the css again.
+            'skip_duplicates': True,
+        }, super().default_options)
+
+    def calc_filepath(self, relpath=None):
+        return super().calc_filepath(relpath or os.path.join('styles', self.template_relpath) + '.css')
 
     def create_attrs(self, provider_run, data):
         '''Creates the attributes for the link (allows subclasses to add)'''
-        if settings.DEBUG:
-            relpath = os.path.relpath(self.filepath, settings.BASE_DIR)
-        else:
-            relpath = os.path.relpath(self.filepath, settings.STATIC_ROOT)
         attrs = {}
         attrs["data-context"] = provider_run.uid
-        attrs["href"] ="{}{}?{:x}".format(settings.STATIC_URL, relpath.replace('\\', '/'), self.version_id)
+        attrs["href"] ="{}?{:x}".format(
+            os.path.join(
+                settings.BASE_DIR if settings.DEBUG else settings.STATIC_ROOT,
+                self.app_config.name,
+                self.template_relpath.replace(os.path.sep, '/') + '.css',
+            ),
+            self.version_id,
+        )
         return attrs
 
     def create_link(self, provider_run, data):
@@ -162,28 +147,32 @@ class CssLinkProvider(LinkProvider):
 
 class JsLinkProvider(LinkProvider):
     '''Generates a JS <script>.'''
-    default_options = merge_dicts(LinkProvider.default_options, {
-        'group': 'scripts',
-        # the filename to search for (resolves to a single file, if it exists)
-        # if it does not start with a slash, it is relative to the app directory.
-        # if it starts with a slash, it is an absolute path.
-        'filepath': os.path.join('scripts', '{template}.js'),
-        # if a template is rendered more than once in a request, we should link each one
-        # so the script runs again each time the template runs
-        'skip_duplicates': False,
-        # whether to create an async script tag
-        'async': False,
-    })
+    @property
+    def default_options(self):
+        return merge_dicts({
+            'group': 'scripts',
+            # if a template is rendered more than once in a request, we should link each one
+            # so the script runs again each time the template runs
+            'skip_duplicates': False,
+            # whether to create an async script tag
+            'async': False,
+        }, super().default_options)
+
+    def calc_filepath(self, relpath=None):
+        return super().calc_filepath(relpath or os.path.join('scripts', self.template_relpath) + '.js')
 
     def create_attrs(self, provider_run, data):
         '''Creates the attributes for the link (allows subclasses to add)'''
-        if settings.DEBUG:
-            relpath = os.path.relpath(self.filepath, settings.BASE_DIR)
-        else:
-            relpath = os.path.relpath(self.filepath, settings.STATIC_ROOT)
         attrs = {}
         attrs["data-context"] = provider_run.uid
-        attrs["src"] ="{}{}?{:x}".format(settings.STATIC_URL, relpath.replace('\\', '/'), self.version_id)
+        attrs["src"] ="{}?{:x}".format(
+            os.path.join(
+                settings.BASE_DIR if settings.DEBUG else settings.STATIC_ROOT,
+                self.app_config.name,
+                self.template_relpath.replace(os.path.sep, '/') + '.js',
+            ),
+            self.version_id,
+        )
         if self.options['async']:
             attrs['async'] = "async"
         return attrs
@@ -204,19 +193,21 @@ class JsContextProvider(BaseProvider):
     This should be listed before JsLinkProvider so the
     context variables are available during <script> runs.
     '''
-    default_options = merge_dicts(BaseProvider.default_options, {
-        # the group this provider is part of.  this only matters when
-        # the html page limits the providers that will be called with
-        # ${ django_mako_plus.links(group="...") }
-        'group': 'scripts',
-        # the encoder to use for the JSON structure
-        'encoder': 'django.core.serializers.json.DjangoJSONEncoder',
-    })
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.encoder = import_string(self.options['encoder'])
-        self.template = "{}/{}".format(self.app_config.name, self.template_name)
+        self.template = "{}/{}".format(self.app_config.name, self.template_relpath)
+
+    @property
+    def default_options(self):
+        return merge_dicts({
+            # the group this provider is part of.  this only matters when
+            # the html page limits the providers that will be called with
+            # ${ django_mako_plus.links(group="...") }
+            'group': 'scripts',
+            # the encoder to use for the JSON structure
+            'encoder': 'django.core.serializers.json.DjangoJSONEncoder',
+        }, super().default_options)
 
     def start(self, provider_run, data):
         data['templates'] = []

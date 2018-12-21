@@ -5,9 +5,6 @@ from django.utils.safestring import mark_safe
 from .runner import ProviderRun
 from ..template import create_mako_context
 
-import io
-
-
 
 #########################################################
 ###  Primary functions

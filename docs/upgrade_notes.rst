@@ -5,12 +5,17 @@ This document contains upgrade notes for those already using DMP.  We started th
 
 5.8 - December, 2018
 
-Refactored the webpack functionality and documentation. This ONLY affects users doing webpack bundling.  Significant improvements to the webpack documentation were done.
-
 The changes you need to worry about:
 
 1. Rerun ``python manage.py dmp_webpack --overwrite`` to generate the altered entry file syntax.
 2. Remove ``django_mako_plus.WebpackJsCallProvider`` from your settings.py. This functionality is now in the webpack link provider.
+
+The changes you probably don't need to worry about:
+
+1. Refactored the webpack features to be cleaner. Created a much better tutorial on using webpack with DMP.
+2. Refactored to simplify the providers. If you created custom provider classes, you may need some slight changes. See the examples in the source code.
+3. Removed the `version_id` parameter from providers. This has been deprecated for a *long* time.
+
 
 5.7 - September, 2018
 ---------------------------------------

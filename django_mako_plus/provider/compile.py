@@ -20,29 +20,31 @@ class CompileProvider(BaseProvider):
     When settings.DEBUG=True, checks for a recompile every request.
     When settings.DEBUG=False, checks for a recompile only once per server run.
     '''
-    default_options = merge_dicts(BaseProvider.default_options, {
-        'group': 'styles',
-        # the source filename to search for
-        # if it does not start with a slash, it is relative to the app directory.
-        # if it starts with a slash, it is an absolute path.
-        # codes: {basedir}, {app}, {template}, {template_name}, {template_file}, {template_subdir}
-        'sourcepath': os.path.join('styles', '{template}.scss'),
-        # the destination filename to search for
-        # if it does not start with a slash, it is relative to the app directory.
-        # if it starts with a slash, it is an absolute path.
-        # codes: {basedir}, {app}, {template}, {template_name}, {template_file}, {template_subdir}, {sourcepath}
-        'targetpath': os.path.join('styles', '{template}.css'),
-        # the command to be run, as a list (see subprocess module)
-        # codes: {basedir}, {app}, {template}, {template_name}, {template_file}, {template_subdir}, {sourcepath}, {targetpath}
-        'command': [ 'echo', 'Subclasses should override this option' ],
-    })
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # since this is in the constructor, it runs only one time per server
         # run when in production mode
         if self.needs_compile:
             run_command(*self.build_command())
+
+    @property
+    def default_options(self):
+        return merge_dicts({
+            'group': 'styles',
+            # the source filename to search for
+            # if it does not start with a slash, it is relative to the app directory.
+            # if it starts with a slash, it is an absolute path.
+            # codes: {basedir}, {app}, {template}, {template_name}, {template_file}, {template_subdir}
+            'sourcepath': os.path.join('styles', '{template}.scss'),
+            # the destination filename to search for
+            # if it does not start with a slash, it is relative to the app directory.
+            # if it starts with a slash, it is an absolute path.
+            # codes: {basedir}, {app}, {template}, {template_name}, {template_file}, {template_subdir}, {sourcepath}
+            'targetpath': os.path.join('styles', '{template}.css'),
+            # the command to be run, as a list (see subprocess module)
+            # codes: {basedir}, {app}, {template}, {template_name}, {template_file}, {template_subdir}, {sourcepath}, {targetpath}
+            'command': [ 'echo', 'Subclasses should override this option' ],
+        }, super().default_options)
 
     @property
     def source(self):
@@ -129,24 +131,26 @@ class CompileProvider(BaseProvider):
 
 class CompileScssProvider(CompileProvider):
     '''Specialized CompileProvider that contains settings for *.scss files.'''
-    default_options = merge_dicts(CompileProvider.default_options, {
-        # the source filename to search for
-        # if it does not start with a slash, it is relative to the app directory.
-        # if it starts with a slash, it is an absolute path.
-        'sourcepath': os.path.join('styles', '{template}.scss'),
-        # the destination filename to search for
-        # if it does not start with a slash, it is relative to the app directory.
-        # if it starts with a slash, it is an absolute path.
-        'targetpath': os.path.join('styles', '{template}.css'),
-        # the command to be run, as a list (see subprocess module)
-        # codes: {app}, {template}, {template_name}, {template_file}, {template_subdir}, {sourcepath}, {targetpath}
-        'command': [
-            shutil.which('sass'),
-            '--load-path=.',
-            '{sourcepath}',
-            '{targetpath}',
-        ],
-    })
+    @property
+    def default_options(self):
+        return merge_dicts({
+            # the source filename to search for
+            # if it does not start with a slash, it is relative to the app directory.
+            # if it starts with a slash, it is an absolute path.
+            'sourcepath': os.path.join('styles', '{template}.scss'),
+            # the destination filename to search for
+            # if it does not start with a slash, it is relative to the app directory.
+            # if it starts with a slash, it is an absolute path.
+            'targetpath': os.path.join('styles', '{template}.css'),
+            # the command to be run, as a list (see subprocess module)
+            # codes: {app}, {template}, {template_name}, {template_file}, {template_subdir}, {sourcepath}, {targetpath}
+            'command': [
+                shutil.which('sass'),
+                '--load-path=.',
+                '{sourcepath}',
+                '{targetpath}',
+            ],
+        }, super().default_options)
 
     def build_command(self):
         # sass seems to need the target directory to exist
@@ -163,21 +167,23 @@ class CompileScssProvider(CompileProvider):
 
 class CompileLessProvider(CompileProvider):
     '''Specialized CompileProvider that contains settings for *.less files.'''
-    default_options = merge_dicts(CompileProvider.default_options, {
-        # the source filename to search for
-        # if it does not start with a slash, it is relative to the app directory.
-        # if it starts with a slash, it is an absolute path.
-        'sourcepath': os.path.join('styles', '{template}.less'),
-        # the destination filename to search for
-        # if it does not start with a slash, it is relative to the app directory.
-        # if it starts with a slash, it is an absolute path.
-        'targetpath': os.path.join('styles', '{template}.css'),
-        # the command to be run, as a list (see subprocess module)
-        # codes: {app}, {template}, {template_name}, {template_file}, {template_subdir}, {sourcepath}, {targetpath}
-        'command': [
-            shutil.which('lessc'),
-            '--source-map',
-            '{sourcepath}',
-            '{targetpath}',
-        ],
-    })
+    @property
+    def default_options(self):
+        return merge_dicts({
+            # the source filename to search for
+            # if it does not start with a slash, it is relative to the app directory.
+            # if it starts with a slash, it is an absolute path.
+            'sourcepath': os.path.join('styles', '{template}.less'),
+            # the destination filename to search for
+            # if it does not start with a slash, it is relative to the app directory.
+            # if it starts with a slash, it is an absolute path.
+            'targetpath': os.path.join('styles', '{template}.css'),
+            # the command to be run, as a list (see subprocess module)
+            # codes: {app}, {template}, {template_name}, {template_file}, {template_subdir}, {sourcepath}, {targetpath}
+            'command': [
+                shutil.which('lessc'),
+                '--source-map',
+                '{sourcepath}',
+                '{targetpath}',
+            ],
+        }, super().default_options)
