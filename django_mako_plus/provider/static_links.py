@@ -22,7 +22,7 @@ class LinkProvider(BaseProvider):
     '''
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.filepath = self.calc_filepath()
+        self.filepath = self.build_filepath()
         if log.isEnabledFor(logging.DEBUG):
             log.debug('%s searching for %s', repr(self), self.filepath)
         # file time and version hash
@@ -41,7 +41,7 @@ class LinkProvider(BaseProvider):
         return merge_dicts({
             # the static file path to look for and include (if exists) in
             # this should be `function(provider)` or `lambda provider: ...`
-            # or if None, provider.calc_filepath() is called.
+            # or if None, provider.build_filepath() is called.
             'filepath': None,
 
             # if a template is rendered more than once in a request, should we link more than once?
@@ -49,7 +49,7 @@ class LinkProvider(BaseProvider):
             'skip_duplicates': False,
         }, super().default_options)
 
-    def calc_filepath(self, relpath=None):
+    def build_filepath(self, relpath=None):
         # in settings?
         if self.options['filepath']:
             return self.options['filepath'](self)
@@ -122,8 +122,8 @@ class CssLinkProvider(LinkProvider):
             'skip_duplicates': True,
         }, super().default_options)
 
-    def calc_filepath(self, relpath=None):
-        return super().calc_filepath(relpath or os.path.join('styles', self.template_relpath) + '.css')
+    def build_filepath(self, relpath=None):
+        return super().build_filepath(relpath or os.path.join('styles', self.template_relpath) + '.css')
 
     def create_attrs(self, provider_run, data):
         '''Creates the attributes for the link (allows subclasses to add)'''
@@ -158,8 +158,8 @@ class JsLinkProvider(LinkProvider):
             'async': False,
         }, super().default_options)
 
-    def calc_filepath(self, relpath=None):
-        return super().calc_filepath(relpath or os.path.join('scripts', self.template_relpath) + '.js')
+    def build_filepath(self, relpath=None):
+        return super().build_filepath(relpath or os.path.join('scripts', self.template_relpath) + '.js')
 
     def create_attrs(self, provider_run, data):
         '''Creates the attributes for the link (allows subclasses to add)'''

@@ -34,8 +34,8 @@ class WebpackJsLinkProvider(JsLinkProvider):
             'skip_duplicates': True,
         }, super().default_options)
 
-    def calc_filepath(self, relpath=None):
-        return super().calc_filepath(relpath or os.path.join('scripts', '__bundle__.js'))
+    def build_filepath(self, relpath=None):
+        return super().build_filepath(relpath or os.path.join('scripts', '__bundle__.js'))
 
     def create_attrs(self, provider_run, data):
         attrs = super().create_attrs(provider_run, data)
