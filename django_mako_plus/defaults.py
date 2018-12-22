@@ -53,29 +53,6 @@ DEFAULT_OPTIONS = {
             # 'filepath': 'scripts/{template}.js',
             # 'skip_duplicates': False
         }, {
-            # generates links for app/styles/template.css
-            'provider': 'django_mako_plus.CssLinkProvider',
-            # 'enabled': True,
-            # 'group': 'styles',
-            # 'filepath': 'styles/{template}.css',
-            # 'skip_duplicates': True
-        }, {
-            # generates links for app/scripts/template.js
-            'provider': 'django_mako_plus.JsLinkProvider',
-            # 'enabled': True,
-            # 'group': 'scripts',
-            # 'async': False,
-            # 'filepath': 'scripts/{template}.js',
-            # 'skip_duplicates': False
-        }, {
-            # generic auto-compiler (superclass but can also be used directly)
-            'provider': 'django_mako_plus.CompileProvider',
-            'enabled': False,
-            # 'group': 'styles',
-            # 'command': ['echo', 'Subclasses should override this option'],
-            # 'sourcepath': 'styles/{template}.scss',
-            # 'targetpath': 'styles/{template}.css'
-        }, {
             # autocompiles Scss files
             'provider': 'django_mako_plus.CompileScssProvider',
             'enabled': False,
@@ -91,6 +68,29 @@ DEFAULT_OPTIONS = {
             # 'command': [ '/usr/local/bin/lessc', '--source-map', '{sourcepath}', '{targetpath}' ],
             # 'sourcepath': 'styles/{template}.less',
             # 'targetpath': 'styles/{template}.css'
+        }, {
+            # generic auto-compiler (superclass but can also be used directly)
+            'provider': 'django_mako_plus.CompileProvider',
+            'enabled': False,
+            # 'group': 'styles',
+            # 'command': ['echo', 'Subclasses should override this option'],
+            # 'sourcepath': 'styles/{template}.scss',
+            # 'targetpath': 'styles/{template}.css'
+        }, {
+            # generates links for app/styles/template.css
+            'provider': 'django_mako_plus.CssLinkProvider',
+            # 'enabled': True,
+            # 'group': 'styles',
+            # 'filepath': 'styles/{template}.css',
+            # 'skip_duplicates': True
+        }, {
+            # generates links for app/scripts/template.js
+            'provider': 'django_mako_plus.JsLinkProvider',
+            # 'enabled': True,
+            # 'group': 'scripts',
+            # 'async': False,
+            # 'filepath': 'scripts/{template}.js',
+            # 'skip_duplicates': False
         }, {
             # generic link generator (superclass but can also be used directly)
             'provider': 'django_mako_plus.LinkProvider',

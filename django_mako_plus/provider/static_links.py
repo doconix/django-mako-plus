@@ -151,6 +151,7 @@ class CssLinkProvider(LinkProvider):
             relpath = os.path.relpath(self.filepath, settings.STATIC_ROOT)
         attrs = {}
         attrs["data-context"] = provider_run.uid
+        attrs["rel"] = "stylesheet"
         attrs["href"] ="{}{}?{:x}".format(settings.STATIC_URL, relpath.replace('\\', '/'), self.version_id)
         return attrs
 
