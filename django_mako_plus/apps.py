@@ -4,7 +4,7 @@ from django.core.exceptions import ImproperlyConfigured
 from django.template import engines
 
 from .defaults import DEFAULT_OPTIONS
-from .provider.base import init_provider_factories
+from .provider.runner import initialize_providers
 from .signals import dmp_signal_register_app
 
 import threading
@@ -38,8 +38,8 @@ class Config(AppConfig):
         ]
         self.template_imports.extend(self.options['DEFAULT_TEMPLATE_IMPORTS'])
 
-        # set up the default provider factories (see provider/runner.py)
-        self.provider_factories = init_provider_factories()
+        # initialize the list of providers
+        initialize_providers()
 
         # set up the parameter converters (can't import until apps are set up)
         from .converter.base import ParameterConverter

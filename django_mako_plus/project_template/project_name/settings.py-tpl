@@ -148,7 +148,6 @@ LOGGING = {
     },
     'handlers': {
         'dmp_console':{
-            'level':'DEBUG',
             'class':'logging.StreamHandler',
             'formatter': 'dmp_simple'
         },

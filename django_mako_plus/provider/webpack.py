@@ -1,46 +1,72 @@
-
+from django.conf import settings
+from django.forms.utils import flatatt
 from ..util import merge_dicts
-from .static_links import CssLinkProvider, JsLinkProvider
-
+from .links import CssLinkProvider, JsLinkProvider
 import os
 import os.path
 
 
 
 class WebpackCssLinkProvider(CssLinkProvider):
-    '''
-    Generates a CSS <link> tag for the sitewide or app-level CSS bundle file, if it exists.
-    '''
-    @property
-    def default_options(self):
-        return merge_dicts({
-            'group': 'styles',
-            'filepath': os.path.join('styles', '__bundle__.css'),
-            'skip_duplicates': True,
-        }, super().default_options)
+    '''Generates a CSS <link> tag for the sitewide or app-level CSS bundle file, if it exists.'''
+    DEFAULT_OPTIONS = {
+        'skip_duplicates': True,
+    }
 
+    def build_default_filepath(self):
+        return os.path.join(
+            settings.BASE_DIR if settings.DEBUG else settings.STATIC_ROOT,
+            self.app_config.name,
+            'styles',
+            '__bundle__.css',
+        )
+
+    def build_default_link(self, provider_run, data):
+        attrs = {}
+        attrs["data-context"] = provider_run.uid
+        attrs["href"] ="{}?{:x}".format(
+            os.path.join(
+                '/' if settings.DEBUG else settings.STATIC_URL,
+                self.app_config.name,
+                'styles',
+                '__bundle__.css',
+            ),
+            self.version_id,
+        )
+        return '<link{} />'.format(flatatt(attrs))
 
 
 class WebpackJsLinkProvider(JsLinkProvider):
-    '''
-    Generates a JS <script> tag for the sitewide or app-level JS bundle file, if it exists.
-    In settings, this provider should be defined *before* WebpackJsCallProvider is defined.
-    '''
-    TEMPLATES_KEY = 'bundle_templates'
+    '''Generates a JS <script> tag for the sitewide or app-level JS bundle file, if it exists.'''
+    DEFAULT_OPTIONS = {
+        'skip_duplicates': True,
+        'async': False,
+    }
 
-    @property
-    def default_options(self):
-        return merge_dicts({
-            'skip_duplicates': True,
-        }, super().default_options)
+    def build_default_filepath(self):
+        return os.path.join(
+            settings.BASE_DIR if settings.DEBUG else settings.STATIC_ROOT,
+            self.app_config.name,
+            'scripts',
+            '__bundle__.css',
+        )
 
-    def build_filepath(self, relpath=None):
-        return super().build_filepath(relpath or os.path.join('scripts', '__bundle__.js'))
-
-    def create_attrs(self, provider_run, data):
-        attrs = super().create_attrs(provider_run, data)
+    def build_default_link(self, provider_run, data):
+        attrs = {}
+        attrs["data-context"] = provider_run.uid
+        attrs["src"] ="{}?{:x}".format(
+            os.path.join(
+                '/' if settings.DEBUG else settings.STATIC_URL,
+                self.app_config.name,
+                'scripts',
+                '__bundle__.css',
+            ),
+            self.version_id,
+        )
         attrs['onload'] = "DMP_CONTEXT.checkBundle('{}')".format(provider_run.uid)
-        return attrs
+        if self.options['async']:
+            attrs['async'] = 'async'
+        return '<script{}></script>'.format(flatatt(attrs))
 
     def finish(self, provider_run, data):
         # this trigger call must be separate because script links may not always

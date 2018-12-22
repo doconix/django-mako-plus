@@ -1,20 +1,41 @@
 from django.apps import apps
 from django.conf import settings
+from django.utils.module_loading import import_string
 import io
 import warnings
 import logging
+from collections import OrderedDict
 from ..template import template_inheritance
 from ..util import log
 from ..uid import wuid
 
 
-####################################################
-###   Main runner
+CONTENT_PROVIDERS = OrderedDict()
+WEBPACK_COMMAND_PROVIDERS = OrderedDict()
 
+def initialize_providers():
+    '''Initializes the providers (called from dmp app ready())'''
+    dmp = apps.get_app_config('django_mako_plus')
+
+    # regular content providers
+    for provider_settings in dmp.options['CONTENT_PROVIDERS']:
+        assert 'provider' in provider_settings, "Invalid entry in settings.py: CONTENT_PROVIDERS item must have 'provider' key"
+        cls = import_string(provider_settings['provider'])
+        CONTENT_PROVIDERS[cls] = provider_settings
+
+    # special content providers list used during dmp_webpack management command
+    for provider_settings in dmp.options['WEBPACK_PROVIDERS']:
+        assert 'provider' in provider_settings, "Invalid entry in settings.py: CONTENT_PROVIDERS item must have 'provider' key"
+        cls = import_string(provider_settings['provider'])
+        WEBPACK_COMMAND_PROVIDERS[cls] = provider_settings
+
+
+####################################################
+###   Main runner for providers
 
 class ProviderRun(object):
     '''A run through the providers for tself and its ancestors'''
-    def __init__(self, tself, group=None, factories=None, ancestor_limit=0):
+    def __init__(self, tself, group=None, provider_map=None, ancestor_limit=0):
         '''
         tself:      `self` object from a Mako template (available during rendering).
         version_id: hash/unique number to place on links

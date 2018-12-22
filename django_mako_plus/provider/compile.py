@@ -20,31 +20,44 @@ class CompileProvider(BaseProvider):
     When settings.DEBUG=True, checks for a recompile every request.
     When settings.DEBUG=False, checks for a recompile only once per server run.
     '''
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, template, provider_settings):
+        super().__init__(template, provider_settings)
         # since this is in the constructor, it runs only one time per server
         # run when in production mode
-        if self.needs_compile:
-            run_command(*self.build_command())
+        # if self.needs_compile:
+        #     run_command(*self.build_command())
 
-    @property
-    def default_options(self):
-        return merge_dicts({
-            'group': 'styles',
-            # the source filename to search for
-            # if it does not start with a slash, it is relative to the app directory.
-            # if it starts with a slash, it is an absolute path.
-            # codes: {basedir}, {app}, {template}, {template_name}, {template_file}, {template_subdir}
-            'sourcepath': os.path.join('styles', '{template}.scss'),
-            # the destination filename to search for
-            # if it does not start with a slash, it is relative to the app directory.
-            # if it starts with a slash, it is an absolute path.
-            # codes: {basedir}, {app}, {template}, {template_name}, {template_file}, {template_subdir}, {sourcepath}
-            'targetpath': os.path.join('styles', '{template}.css'),
-            # the command to be run, as a list (see subprocess module)
-            # codes: {basedir}, {app}, {template}, {template_name}, {template_file}, {template_subdir}, {sourcepath}, {targetpath}
-            'command': [ 'echo', 'Subclasses should override this option' ],
-        }, super().default_options)
+    DEFAULT_OPTIONS = {
+        'group': 'styles',
+        # the source filename to search for
+        # if it does not start with a slash, it is relative to the app directory.
+        # if it starts with a slash, it is an absolute path.
+        # codes: {basedir}, {app}, {template}, {template_name}, {template_file}, {template_subdir}
+        'sourcepath': os.path.join('styles', '{template}.scss'),
+        # the destination filename to search for
+        # if it does not start with a slash, it is relative to the app directory.
+        # if it starts with a slash, it is an absolute path.
+        # codes: {basedir}, {app}, {template}, {template_name}, {template_file}, {template_subdir}, {sourcepath}
+        'targetpath': os.path.join('styles', '{template}.css'),
+        # the command to be run, as a list (see subprocess module)
+        # codes: {basedir}, {app}, {template}, {template_name}, {template_file}, {template_subdir}, {sourcepath}, {targetpath}
+        'command': [ 'echo', 'Subclasses should override this option' ],
+    }
+
+    def build_filepath(self):
+        # in settings?
+        if self.options['filepath']:
+            return self.options['filepath'](self)
+        # calculate it
+        if self.app_config is None:
+            log.warn('DMP static links provider skipped: template %s not in project subdir and `filepath` not in settings', self.template_relpath)
+        if relpath is None:
+            relpath = os.path.join('subdir', self.template_relpath) + '.ext'
+        return os.path.join(
+            settings.BASE_DIR if settings.DEBUG else settings.STATIC_ROOT,
+            self.app_config.name,
+            relpath,
+        )
 
     @property
     def source(self):
@@ -131,26 +144,24 @@ class CompileProvider(BaseProvider):
 
 class CompileScssProvider(CompileProvider):
     '''Specialized CompileProvider that contains settings for *.scss files.'''
-    @property
-    def default_options(self):
-        return merge_dicts({
-            # the source filename to search for
-            # if it does not start with a slash, it is relative to the app directory.
-            # if it starts with a slash, it is an absolute path.
-            'sourcepath': os.path.join('styles', '{template}.scss'),
-            # the destination filename to search for
-            # if it does not start with a slash, it is relative to the app directory.
-            # if it starts with a slash, it is an absolute path.
-            'targetpath': os.path.join('styles', '{template}.css'),
-            # the command to be run, as a list (see subprocess module)
-            # codes: {app}, {template}, {template_name}, {template_file}, {template_subdir}, {sourcepath}, {targetpath}
-            'command': [
-                shutil.which('sass'),
-                '--load-path=.',
-                '{sourcepath}',
-                '{targetpath}',
-            ],
-        }, super().default_options)
+    DEFAULT_OPTIONS = {
+        # the source filename to search for
+        # if it does not start with a slash, it is relative to the app directory.
+        # if it starts with a slash, it is an absolute path.
+        'sourcepath': os.path.join('styles', '{template}.scss'),
+        # the destination filename to search for
+        # if it does not start with a slash, it is relative to the app directory.
+        # if it starts with a slash, it is an absolute path.
+        'targetpath': os.path.join('styles', '{template}.css'),
+        # the command to be run, as a list (see subprocess module)
+        # codes: {app}, {template}, {template_name}, {template_file}, {template_subdir}, {sourcepath}, {targetpath}
+        'command': [
+            shutil.which('sass'),
+            '--load-path=.',
+            '{sourcepath}',
+            '{targetpath}',
+        ],
+    }
 
     def build_command(self):
         # sass seems to need the target directory to exist
@@ -167,23 +178,21 @@ class CompileScssProvider(CompileProvider):
 
 class CompileLessProvider(CompileProvider):
     '''Specialized CompileProvider that contains settings for *.less files.'''
-    @property
-    def default_options(self):
-        return merge_dicts({
-            # the source filename to search for
-            # if it does not start with a slash, it is relative to the app directory.
-            # if it starts with a slash, it is an absolute path.
-            'sourcepath': os.path.join('styles', '{template}.less'),
-            # the destination filename to search for
-            # if it does not start with a slash, it is relative to the app directory.
-            # if it starts with a slash, it is an absolute path.
-            'targetpath': os.path.join('styles', '{template}.css'),
-            # the command to be run, as a list (see subprocess module)
-            # codes: {app}, {template}, {template_name}, {template_file}, {template_subdir}, {sourcepath}, {targetpath}
-            'command': [
-                shutil.which('lessc'),
-                '--source-map',
-                '{sourcepath}',
-                '{targetpath}',
-            ],
-        }, super().default_options)
+    DEFAULT_OPTIONS = {
+        # the source filename to search for
+        # if it does not start with a slash, it is relative to the app directory.
+        # if it starts with a slash, it is an absolute path.
+        'sourcepath': os.path.join('styles', '{template}.less'),
+        # the destination filename to search for
+        # if it does not start with a slash, it is relative to the app directory.
+        # if it starts with a slash, it is an absolute path.
+        'targetpath': os.path.join('styles', '{template}.css'),
+        # the command to be run, as a list (see subprocess module)
+        # codes: {app}, {template}, {template_name}, {template_file}, {template_subdir}, {sourcepath}, {targetpath}
+        'command': [
+            shutil.which('lessc'),
+            '--source-map',
+            '{sourcepath}',
+            '{targetpath}',
+        ],
+    }

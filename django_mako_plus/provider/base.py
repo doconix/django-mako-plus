@@ -6,60 +6,10 @@ import os
 from ..util import merge_dicts
 
 
-##################################################
-###   Static File Provider Factory
-
-def init_provider_factories(key='CONTENT_PROVIDERS'):
-    '''Called from apps.py when setting up'''
-    factories = []
-    dmp = apps.get_app_config('django_mako_plus')
-    for index, provider_settings in enumerate(dmp.options.get(key, [])):
-        fac = ProviderFactory(provider_settings, '_django_mako_plus_providers_{}_{}_'.format(key, index))
-        factories.append(fac)
-    return factories
-
-
-class ProviderFactory(object):
-    '''Creator for a given Provider definition in settings.py.'''
-    def __init__(self, provider_settings, cache_key):
-        self.cache_key = cache_key
-        self.provider_settings = provider_settings
-        try:
-            self.provider_class = provider_settings['provider']
-        except KeyError:
-            raise ImproperlyConfigured('Invalid DMP CONTENT_PROVIDERS item in settings.py: missing `provider`')
-        if isinstance(self.provider_class, str):
-            self.provider_class = import_string(self.provider_class)
-        if not issubclass(self.provider_class, BaseProvider):
-            raise ImproperlyConfigured('Invalid DMP CONTENT_PROVIDERS item in settings.py: `provider` must reference a subclass of django_mako_plus.BaseProvider')
-
-    def instance_for_template(self, template):
-        '''Returns a provider instance for the given template'''
-        # Mako already caches template objects, so I'm attaching the instance to the template for speed during production
-        try:
-            return getattr(template, self.cache_key)
-        except AttributeError:
-            pass
-
-        # create and cache (if in prod mode)
-        instance = self.provider_class(template, self.provider_settings)
-        if not settings.DEBUG:
-            setattr(template, self.cache_key, instance)
-        return instance
-
 
 
 ##############################################################
-###   Static File Provider Base
-
-BASE_DEFAULT_OPTIONS = {
-    # the group this provider is part of.  this only matters when
-    # the html page limits the providers that will be called with
-    # ${ django_mako_plus.links(group="...") }
-    'group': 'styles',
-    # whether enabled (see "Dev vs. Prod" in the DMP docs)
-    'enabled': True,
-}
+###   Abstract Provider Base
 
 
 class BaseProvider(object):
@@ -78,7 +28,36 @@ class BaseProvider(object):
     If app can be inferred (None if not):
         self.app_config         AppConfig the template resides in, if possible to infer.
         self.template_relpath   Template path, relative to app/templates/, without extension.
+                                Usually this is just the template name, but could contain a subdirectory:
+                                    homepage/templates/index.html       => "index"
+                                    homepage/templates/forms/login.html => "forms/login"
     '''
+    DEFAULT_OPTIONS = {
+        # the group this provider is part of.  this only matters when
+        # the html page limits the providers that will be called with
+        # ${ django_mako_plus.links(group="...") }
+        'group': 'styles',
+        # whether enabled (see "Dev vs. Prod" in the DMP docs)
+        'enabled': True,
+    }
+
+    @classmethod
+    def instance_for_template(cls, template, options):
+        '''Returns an instance for the given template'''
+        # Mako already caches template objects, so I'm attaching the instance to the template for speed during production
+        cache_key = '_django_mako_plus_providers_{}_{}_'.format(key, index)
+        try:
+            return getattr(template, self.cache_key)
+        except AttributeError:
+            pass
+
+        # not cached yet, so create the object
+        instance = self.provider_class(template, options)
+        if not settings.DEBUG:
+            setattr(template, self.cache_key, instance)
+        return instance
+
+
     def __init__(self, template, provider_settings):
         self.template = template
         self.app_config = None
@@ -104,12 +83,13 @@ class BaseProvider(object):
 
     @property
     def default_options(self):
-        '''Subclasses should override this for default options specific to them.'''
+        '''Subclasses should override with any default options specific to them.'''
         return {}
 
     def __repr__(self):
-        return '<{}: {}/{}>'.format(
+        return '<{}{}: {}/{}>'.format(
             self.__class__.__qualname__,
+            '' if self.options['enabled'] else ' (disabled)',
             self.app_config.name if self.app_config is not None else 'unknown',
             self.template_relpath if self.template_relpath is not None else self.template,
         )
