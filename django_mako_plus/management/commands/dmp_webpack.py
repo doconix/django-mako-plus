@@ -1,17 +1,15 @@
-from django.apps import apps as django_apps
+from django.apps import apps
+from django.utils.module_loading import import_string
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
 from django_mako_plus.template import create_mako_context
 from django_mako_plus.provider.runner import ProviderRun
-from django_mako_plus.provider.base import init_provider_factories
 from django_mako_plus.management.mixins import DMPCommandMixIn
 from mako.template import Template as MakoTemplate
 
-import sys
 import os
 import os.path
 from collections import OrderedDict
-from datetime import datetime
 
 
 
@@ -45,26 +43,27 @@ class Command(DMPCommandMixIn, BaseCommand):
 
 
     def handle(self, *args, **options):
-        dmp = django_apps.get_app_config('django_mako_plus')
+        dmp = apps.get_app_config('django_mako_plus')
         self.options = options
+        WebpackProviderRun.initialize_providers()
 
         # ensure we have a base directory
         try:
             if not os.path.isdir(os.path.abspath(settings.BASE_DIR)):
                 raise CommandError('Your settings.py BASE_DIR setting is not a valid directory.  Please check your settings.py file for the BASE_DIR variable.')
-        except AttributeError as e:
+        except AttributeError:
             raise CommandError('Your settings.py file is missing the BASE_DIR setting.')
 
         # the apps to process
-        apps = []
+        enapps = []
         for appname in options.get('appname'):
-            apps.append(django_apps.get_app_config(appname))
-        if len(apps) == 0:
-            apps = dmp.get_registered_apps()
+            enapps.append(apps.get_app_config(appname))
+        if len(enapps) == 0:
+            enapps = dmp.get_registered_apps()
 
         # main runner for per-app files
         if options.get('single') is None:
-            for app in apps:
+            for app in enapps:
                 self.message('Searching `{}` app...'.format(app.name))
                 filename = os.path.join(app.path, 'scripts', '__entry__.js')
                 self.create_entry_file(filename, self.generate_script_map(app), [ app ])
@@ -72,13 +71,13 @@ class Command(DMPCommandMixIn, BaseCommand):
         # main runner for one sitewide file
         else:
             script_map = {}
-            for app in apps:
+            for app in enapps:
                 self.message('Searching `{}` app...'.format(app.name))
                 script_map.update(self.generate_script_map(app))
-            self.create_entry_file(options.get('single'), script_map, apps)
+            self.create_entry_file(options.get('single'), script_map, enapps)
 
 
-    def create_entry_file(self, filename, script_map, apps):
+    def create_entry_file(self, filename, script_map, enapps):
         '''Creates an entry file for the given script map'''
         if len(script_map) == 0:
             return
@@ -100,7 +99,7 @@ class Command(DMPCommandMixIn, BaseCommand):
 <%! import os %>
 
 // Generated on ${ datetime.now().strftime('%Y-%m-%d %H:%M') } by `${ ' '.join(sys.argv) }`
-// Contains links for ${ 'app' if len(apps) == 1 else 'apps' }: ${ ', '.join(sorted([ a.name for a in apps ])) }
+// Contains links for ${ 'app' if len(enapps) == 1 else 'apps' }: ${ ', '.join(sorted([ a.name for a in enapps ])) }
 
 (context => {
 %for (app, template), script_paths in script_map.items():
@@ -118,7 +117,7 @@ class Command(DMPCommandMixIn, BaseCommand):
 ''')
         with open(filename, 'w') as fout:
             fout.write(template.render(
-                apps=apps,
+                enapps=enapps,
                 script_map=script_map,
                 filename=filename,
             ).strip())
@@ -175,10 +174,10 @@ class Command(DMPCommandMixIn, BaseCommand):
         because that class creates the 'enabled' list of provider instances, and each
         provider instance has a url.
         '''
-        dmp = django_apps.get_app_config('django_mako_plus')
+        dmp = apps.get_app_config('django_mako_plus')
         template_obj = dmp.engine.get_template_loader(config, create=True).get_mako_template(template_name, force=True)
         mako_context = create_mako_context(template_obj)
-        inner_run = ProviderRun(mako_context['self'], factories=WEBPACK_COMMAND_PROVIDERS, ancestor_limit=1)
+        inner_run = WebpackProviderRun(mako_context['self'])
         inner_run.run()
         scripts = []
         for data in inner_run.column_data:
@@ -186,3 +185,27 @@ class Command(DMPCommandMixIn, BaseCommand):
                 if hasattr(provider, 'filepath'):       # providers used to collect for webpack must have a .filepath property
                     scripts.append(provider.filepath)   # the absolute path to the file (see providers/static_links.py)
         return scripts
+
+
+
+###############################################################################
+###   Specialized provider run for the above management command
+
+class WebpackProviderRun(ProviderRun):
+    @classmethod
+    def initialize_providers(cls):
+        '''Initializes the providers (called from dmp app ready())'''
+        dmp = apps.get_app_config('django_mako_plus')
+        # regular content providers
+        cls.CONTENT_PROVIDERS = []
+        for provider_settings in dmp.options['WEBPACK_PROVIDERS']:
+            assert 'provider' in provider_settings, "Invalid entry in settings.py: WEBPACK_PROVIDERS item must have 'provider' key"
+            provider_class = import_string(provider_settings['provider'])
+            provider_class.initialize_options(provider_settings)
+            if provider_class.OPTIONS['enabled']:
+                cls.CONTENT_PROVIDERS.append(provider_class)
+        import pprint; pprint.pprint(cls.CONTENT_PROVIDERS)
+
+    def get_template_inheritance(self, tself):
+        '''Returns a list of the template inheritance of tself, starting with the oldest ancestor'''
+        return [ tself.template ]

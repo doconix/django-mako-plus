@@ -31,9 +31,7 @@ class ProviderRun(object):
     def __init__(self, tself, group=None):
         '''
         tself:              `self` object from a Mako template (available during rendering).
-        version_id:         hash/unique number to place on links
         group:              provider group to include (defaults to all groups if None)
-        ancestors:          whether to recurse to ancestor templates
         '''
         dmp = apps.get_app_config('django_mako_plus')
         self.uid = wuid()           # a unique id for this run
@@ -49,7 +47,7 @@ class ProviderRun(object):
         #        |
         #     index.html,    [ JsLinkProvider3, CssLinkProvider3, ... ]
         self.template_providers = []
-        for template in reversed(list(template_inheritance(tself))):
+        for template in self.get_template_inheritance(tself):
             providers = []
             for provider_class in self.CONTENT_PROVIDERS:
                 provider = provider_class.instance_for_template(template)
@@ -63,6 +61,11 @@ class ProviderRun(object):
         #
         #      column_data = [ { col 1 }      , { col 2 }      , ... ]
         self.column_data = [ {} for pf in self.CONTENT_PROVIDERS ]
+
+
+    def get_template_inheritance(self, tself):
+        '''Returns a list of the template inheritance of tself, starting with the oldest ancestor'''
+        return reversed(list(template_inheritance(tself)))
 
 
     def run(self):

@@ -1,6 +1,5 @@
 from django.apps import apps
-from django.utils.html import escape, mark_safe
-from django.utils.encoding import force_text
+from django.utils.html import mark_safe
 from mako.exceptions import RichTraceback
 from mako.template import Template
 import mako.runtime

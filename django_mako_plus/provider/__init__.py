@@ -9,9 +9,9 @@ from ..template import create_mako_context
 #########################################################
 ###  Primary functions
 
-def links(tself, version_id=None, group=None):
+def links(tself, group=None):
     '''Returns the HTML for the given provider group (or all groups if None)'''
-    pr = ProviderRun(tself, version_id, group)
+    pr = ProviderRun(tself, group)
     pr.run()
     return mark_safe(pr.getvalue())
 

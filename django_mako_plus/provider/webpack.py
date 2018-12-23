@@ -61,7 +61,7 @@ class WebpackJsLinkProvider(JsLinkProvider):
             ),
             self.version_id,
         )
-        attrs['onload'] = "DMP_CONTEXT.checkBundle('{}')".format(provider_run.uid)
+        attrs['onload'] = "DMP_CONTEXT.checkBundleLoaded('{}')".format(provider_run.uid)
         if self.OPTIONS['async']:
             attrs['async'] = 'async'
         return '<script{}></script>'.format(flatatt(attrs))
@@ -71,6 +71,6 @@ class WebpackJsLinkProvider(JsLinkProvider):
         # render (duplicates are skipped)
         super().finish(provider_run, data)
         if len(data['enabled']) > 0:
-            provider_run.write('<script data-context="{uid}">DMP_CONTEXT.triggerBundle("{uid}")</script>'.format(
+            provider_run.write('<script data-context="{uid}">DMP_CONTEXT.triggerBundleContext("{uid}")</script>'.format(
                 uid=provider_run.uid,
             ))

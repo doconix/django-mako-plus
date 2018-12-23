@@ -122,7 +122,7 @@
             We check with every script's onLoad as well as an explicit call. This
             ensures the functions are run when async and/or out of order.
         */
-        checkBundle(contextid) {
+        checkBundleLoaded(contextid) {
             // get the context
             var context = DMP_CONTEXT.contexts[contextid];
             if (typeof context === "undefined") {
@@ -138,7 +138,7 @@
             }
 
             // everything is here, so run the bundle functions
-            // for each time the triggerBundle() was called
+            // for each time the triggerBundleContext() was called
             while (context.triggerCount > 0) {
                 context.triggerCount--;
                 for (var i = 0; i < context.templates.length; i++) {
@@ -153,7 +153,7 @@
         /*
             Triggers a template context to run a given bundle.
         */
-        triggerBundle(contextid) {
+        triggerBundleContext(contextid) {
             // get the context
             var context = DMP_CONTEXT.contexts[contextid];
             if (typeof context === "undefined") {
@@ -162,7 +162,7 @@
 
             // increase the trigger count and check the bundle
             context.triggerCount++;
-            DMP_CONTEXT.checkBundle(contextid);
+            DMP_CONTEXT.checkBundleLoaded(contextid);
         }
 
     };//DMP_CONTEXT

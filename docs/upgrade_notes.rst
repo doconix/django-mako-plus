@@ -9,6 +9,7 @@ The changes you need to worry about:
 
 1. Rerun ``python manage.py dmp_webpack --overwrite`` to generate the altered entry file syntax.
 2. Remove ``django_mako_plus.WebpackJsCallProvider`` from your settings.py. This functionality is now in the webpack link provider.
+3. `version_id` is now calculated automatically for static files. It has been removed from the links() signature.
 
 The changes you probably don't need to worry about:
 
