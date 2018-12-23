@@ -1,13 +1,13 @@
 from django.core.exceptions import ImproperlyConfigured
 from django.conf import settings
 from django.forms.utils import flatatt
-from ..util import crc32, getdefaultattr
-from ..util import log
-from .base import BaseProvider
 import logging
 import os
 import os.path
 import posixpath
+from ..util import crc32, getdefaultattr
+from ..util import log
+from .base import BaseProvider
 
 
 #####################################################
@@ -49,18 +49,16 @@ class LinkProvider(BaseProvider):
             settings.BASE_DIR if settings.DEBUG else settings.STATIC_ROOT,
             self.build_source_filepath()
         )
-        if log.isEnabledFor(logging.DEBUG):
-            log.debug('%s searching for %s', repr(self), self.filepath)
         # file time and version hash
         try:
             self.mtime = int(os.stat(self.filepath).st_mtime)
-            if log.isEnabledFor(logging.DEBUG):
-                log.debug('%s found %s', repr(self), self.filepath)
             # version_id combines current time and the CRC32 checksum of file bytes
             self.version_id = (self.mtime << 32) | crc32(self.filepath)
         except FileNotFoundError:
             self.mtime = 0
             self.version_id = 0
+        if log.isEnabledFor(logging.DEBUG):
+            log.debug('%s created for %s: [%s]', repr(self), self.filepath, 'will link' if self.mtime > 0 else 'will skip nonexistent file')
 
 
     ### Source Filepath Building Methods ###
@@ -115,9 +113,13 @@ class LinkProvider(BaseProvider):
         # short circut if we're skipping duplicates and we've already seen this one
         if self.OPTIONS['skip_duplicates']:
             if filepath in data['seen']:
+                if log.isEnabledFor(logging.DEBUG):
+                    log.debug('%s skipped duplicate %s', repr(self), self.filepath)
                 return
             data['seen'].add(filepath)
         # if we get here, this provider is enabled, so add it to the list
+        if log.isEnabledFor(logging.DEBUG):
+            log.debug('%s linking %s', repr(self), self.filepath)
         data['enabled'].append(self)
 
     def finish(self, provider_run, data):
@@ -146,6 +148,7 @@ class CssLinkProvider(LinkProvider):
 
     def build_default_link(self, provider_run, data):
         attrs = {}
+        attrs['rel'] = 'stylesheet'
         attrs["data-context"] = provider_run.uid
         attrs["href"] ="{}?{:x}".format(
             # posixpath because URLs use forward slash

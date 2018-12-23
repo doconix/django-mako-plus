@@ -1,10 +1,10 @@
 from django.conf import settings
 from django.forms.utils import flatatt
-from ..util import merge_dicts
-from .link import CssLinkProvider, JsLinkProvider
 import os
 import os.path
 import posixpath
+from ..util import merge_dicts
+from .link import CssLinkProvider, JsLinkProvider
 
 
 class WebpackCssLinkProvider(CssLinkProvider):

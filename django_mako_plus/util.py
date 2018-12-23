@@ -4,8 +4,6 @@ import os, os.path
 import collections
 import zlib
 from importlib import import_module
-from ..util import log
-
 
 
 # set up the logger

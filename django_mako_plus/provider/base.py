@@ -57,13 +57,10 @@ class BaseProvider(object):
         if provider_cache is None:
             provider_cache = {}
             setattr(template, TEMPLATE_ATTR_NAME, provider_cache)
-
-        # try to get it from the cache
         try:
             return provider_cache[cls]
         except KeyError:
             pass
-
         # not cached yet, so create the object
         instance = cls(template)
         if not settings.DEBUG:

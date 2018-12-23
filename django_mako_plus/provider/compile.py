@@ -1,14 +1,12 @@
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
-
-from .base import BaseProvider
-from ..util import log
-from ..command import run_command
-
 import os
 import os.path
 import shutil
 import collections
+from .base import BaseProvider
+from ..util import log
+from ..command import run_command
 
 
 class CompileProvider(BaseProvider):
@@ -54,8 +52,11 @@ class CompileProvider(BaseProvider):
         #   3. str: used directly
         'targetpath': None,
 
-        # the command to be run, as a list (see subprocess module)
-        'command': [ 'echo', 'Subclasses should override this option' ],
+        # explicitly sets the command to be run. possible values:
+        #   1. None: the default command is run
+        #   2. function, lambda, or other callable: called as func(provider), expects list as return
+        #   3. list: used directly in the call to subprocess module
+        'command': [],
     }
 
     def build_sourcepath(self):
@@ -82,6 +83,17 @@ class CompileProvider(BaseProvider):
     def build_default_targetpath(self):
         raise ImproperlyConfigured('{} must set `targetpath` in options (or a subclass can override build_default_targetpath).'.format(self.__class__.__qualname__))
 
+    def build_command(self):
+        '''Returns the command to run, as a list (see subprocess module)'''
+        # if defined in settings, run the function or return the string
+        if self.OPTIONS['command']:
+            return self.OPTIONS['command'](self) if callable(self.OPTIONS['command']) else self.OPTIONS['command']
+        # build the default
+        return self.build_default_command()
+
+    def build_default_command(self):
+        raise ImproperlyConfigured('{} must set `command` in options (or a subclass can override build_default_command).'.format(self.__class__.__qualname__))
+
     @property
     def needs_compile(self):
         '''Returns True if self.sourcepath is newer than self.targetpath'''
@@ -95,17 +107,6 @@ class CompileProvider(BaseProvider):
             return True
         # both source and target exist, so compile if source newer
         return source_mtime > target_mtime
-
-    def build_command(self):
-        '''Returns the command to run, as a list (see subprocess module)'''
-        # if defined in settings, run the function or return the string
-        if self.OPTIONS['command'] is not None:
-            return self.OPTIONS['command'](self) if callable(self.OPTIONS['command']) else self.OPTIONS['command']
-        # build the default
-        return self.build_default_targetpath()
-
-    def build_default_command(self):
-        raise ImproperlyConfigured('{} must set `command` in options (or a subclass can override build_default_command).'.format(self.__class__.__qualname__))
 
 
 ###################
@@ -131,6 +132,7 @@ class CompileScssProvider(CompileProvider):
     def build_default_command(self):
         return [
             shutil.which('sass'),
+            '--source-map',
             '--load-path={}'.format(settings.BASE_DIR),
             self.sourcepath,
             self.targetpath,
