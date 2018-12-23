@@ -78,5 +78,5 @@ from .provider import template_links, template_obj_links
 from .provider.base import BaseProvider
 from .provider.compile import CompileProvider, CompileScssProvider, CompileLessProvider
 from .provider.context import JsContextProvider, jscontext
-from .provider.links import LinkProvider, CssLinkProvider, JsLinkProvider
+from .provider.link import LinkProvider, CssLinkProvider, JsLinkProvider
 from .provider.webpack import WebpackCssLinkProvider, WebpackJsLinkProvider

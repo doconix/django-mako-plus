@@ -1,10 +1,13 @@
+from django.core.exceptions import ImproperlyConfigured
 from django.conf import settings
 from django.forms.utils import flatatt
-from ..util import crc32, getdefaultattr, log, merge_dicts
+from ..util import crc32, getdefaultattr
+from ..util import log
 from .base import BaseProvider
 import logging
 import os
 import os.path
+import posixpath
 
 
 #####################################################
@@ -15,7 +18,7 @@ class LinkProvider(BaseProvider):
     Renders links like <link> and <script> based on the name of the template
     and supertemplates.
     '''
-    DEFAULT_OPTIONS {
+    DEFAULT_OPTIONS = {
         # explicitly sets the path to search for - if this filepath exists, DMP
         # includes a link to it in the template. globs are not supported because this
         # should resolve to one exact file. possible values:
@@ -23,7 +26,7 @@ class LinkProvider(BaseProvider):
         #      with the static root at production; see subclasses for their default filenames.
         #   2. function, lambda, or other callable: called as func(provider) and
         #      should return a string
-        #   3. str: used directly in os.path.exists()
+        #   3. str: used directly
         'filepath': None,
 
         # explicitly sets the link to be inserted into the template (when filepath exists).
@@ -40,9 +43,12 @@ class LinkProvider(BaseProvider):
         'skip_duplicates': False,
     }
 
-    def __init__(self, template, provider_settings):
-        super().__init__(template, provider_settings)
-        self.filepath = self.build_source_filepath()
+    def __init__(self, template):
+        super().__init__(template)
+        self.filepath = os.path.join(
+            settings.BASE_DIR if settings.DEBUG else settings.STATIC_ROOT,
+            self.build_source_filepath()
+        )
         if log.isEnabledFor(logging.DEBUG):
             log.debug('%s searching for %s', repr(self), self.filepath)
         # file time and version hash
@@ -61,39 +67,37 @@ class LinkProvider(BaseProvider):
 
     def build_source_filepath(self):
         # if defined in settings, run the function or return the string
-        if self.options['filepath'] is not None:
-            return self.options['filepath'](self) if callable(self.options['filepath']) else self.options['filepath']
-
+        if self.OPTIONS['filepath'] is not None:
+            return self.OPTIONS['filepath'](self) if callable(self.OPTIONS['filepath']) else self.OPTIONS['filepath']
         # build the default
         if self.app_config is None:
-            log.warn('DMP static links provider skipped: template %s not in project subdir and `filepath` not in settings', self.template_relpath)
+            log.warn('{} skipped: template %s not in project subdir and `targetpath` not in settings', (self.__class__.__qualname__, self.template_relpath))
         return self.build_default_filepath()
 
     def build_default_filepath(self):
-        raise NotImplementedError('{} did not override a required method.'.format(self.__class__.__qualname__))
+        raise ImproperlyConfigured('{} must set `filepath` in options (or a subclass can override build_default_filepath).'.format(self.__class__.__qualname__))
 
 
     ### Target Link Building Methods ###
 
     def build_target_link(self, provider_run, data):
         # if defined in settings, run the function or return the string
-        if self.options['link'] is not None:
-            return self.options['link'](self) if callable(self.options['link']) else self.options['link']
-
+        if self.OPTIONS['link'] is not None:
+            return self.OPTIONS['link'](self) if callable(self.OPTIONS['link']) else self.OPTIONS['link']
         # build the default
         if self.app_config is None:
-            log.warn('DMP static links provider skipped: template %s not in project subdir and `link` not in settings', self.template_relpath)
+            log.warn('{} skipped: template %s not in project subdir and `targetpath` not in settings', (self.__class__.__qualname__, self.template_relpath))
         return self.build_default_link(provider_run, data)
 
     def build_default_link(self, provider_run, data):
-        raise NotImplementedError('{} did not override a required method.'.format(self.__class__.__qualname__))
+        raise ImproperlyConfigured('{} must set `link` in options (or a subclass can override build_default_link).'.format(self.__class__.__qualname__))
 
 
     ### Provider Run Methods ###
 
     def start(self, provider_run, data):
         # add a set to the request (fallback to provider_run if request is None) for skipping duplicates
-        if self.options['skip_duplicates']:
+        if self.OPTIONS['skip_duplicates']:
             data['seen'] = getdefaultattr(
                 provider_run.request.dmp if provider_run.request is not None else provider_run,
                 '_LinkProvider_Filename_Cache_',
@@ -109,7 +113,7 @@ class LinkProvider(BaseProvider):
         if self.mtime == 0:
             return
         # short circut if we're skipping duplicates and we've already seen this one
-        if self.options['skip_duplicates']:
+        if self.OPTIONS['skip_duplicates']:
             if filepath in data['seen']:
                 return
             data['seen'].add(filepath)
@@ -135,7 +139,6 @@ class CssLinkProvider(LinkProvider):
 
     def build_default_filepath(self):
         return os.path.join(
-            settings.BASE_DIR if settings.DEBUG else settings.STATIC_ROOT,
             self.app_config.name,
             'styles',
             self.template_relpath + '.css',
@@ -145,8 +148,9 @@ class CssLinkProvider(LinkProvider):
         attrs = {}
         attrs["data-context"] = provider_run.uid
         attrs["href"] ="{}?{:x}".format(
-            os.path.join(
-                '/' if settings.DEBUG else settings.STATIC_URL,
+            # posixpath because URLs use forward slash
+            posixpath.join(
+                settings.STATIC_URL,
                 self.app_config.name,
                 'styles',
                 self.template_relpath.replace(os.path.sep, '/') + '.css',
@@ -172,7 +176,6 @@ class JsLinkProvider(LinkProvider):
 
     def build_default_filepath(self):
         return os.path.join(
-            settings.BASE_DIR if settings.DEBUG else settings.STATIC_ROOT,
             self.app_config.name,
             'scripts',
             self.template_relpath + '.js',
@@ -182,14 +185,15 @@ class JsLinkProvider(LinkProvider):
         attrs = {}
         attrs["data-context"] = provider_run.uid
         attrs["src"] ="{}?{:x}".format(
-            os.path.join(
-                '/' if settings.DEBUG else settings.STATIC_URL,
+            # posixpath because URLs use forward slash
+            posixpath.join(
+                settings.STATIC_URL,
                 self.app_config.name,
                 'scripts',
                 self.template_relpath.replace(os.path.sep, '/') + '.js',
             ),
             self.version_id,
         )
-        if self.options['async']:
+        if self.OPTIONS['async']:
             attrs['async'] = "async"
         return '<script{}></script>'.format(flatatt(attrs))

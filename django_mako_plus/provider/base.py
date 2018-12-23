@@ -1,16 +1,13 @@
 from django.apps import apps
 from django.conf import settings
-from django.core.exceptions import ImproperlyConfigured
-from django.utils.module_loading import import_string
-import os
-from ..util import merge_dicts
+import os, inspect
+from ..util import log
 
 
-
+TEMPLATE_ATTR_NAME = '_dmp_provider_cache_'
 
 ##############################################################
 ###   Abstract Provider Base
-
 
 class BaseProvider(object):
     '''
@@ -22,7 +19,7 @@ class BaseProvider(object):
 
     Always set:
         self.template           Mako template object
-        self.options            The combined options from the provider, its supers, and settings.py
+        self.OPTIONS            The combined options from the provider, its supers, and settings.py
         self.template_ext       Template extension.
 
     If app can be inferred (None if not):
@@ -40,25 +37,40 @@ class BaseProvider(object):
         # whether enabled (see "Dev vs. Prod" in the DMP docs)
         'enabled': True,
     }
+    OPTIONS = {}
 
     @classmethod
-    def instance_for_template(cls, template, options):
+    def initialize_options(cls, provider_settings):
+        '''
+        Combines options from all bases and from settings.py.
+        This is called at system startup by DMP AppConfig.
+        '''
+        for base in reversed(inspect.getmro(cls)):
+            cls.OPTIONS.update(getattr(base, 'DEFAULT_OPTIONS', {}))
+        cls.OPTIONS.update(provider_settings)
+
+    @classmethod
+    def instance_for_template(cls, template):
         '''Returns an instance for the given template'''
-        # Mako already caches template objects, so I'm attaching the instance to the template for speed during production
-        cache_key = '_django_mako_plus_providers_{}_{}_'.format(key, index)
+        # Mako already caches template objects, so I'm attaching provider instances to templates
+        provider_cache = getattr(template, TEMPLATE_ATTR_NAME, None)
+        if provider_cache is None:
+            provider_cache = {}
+            setattr(template, TEMPLATE_ATTR_NAME, provider_cache)
+
+        # try to get it from the cache
         try:
-            return getattr(template, self.cache_key)
-        except AttributeError:
+            return provider_cache[cls]
+        except KeyError:
             pass
 
         # not cached yet, so create the object
-        instance = self.provider_class(template, options)
+        instance = cls(template)
         if not settings.DEBUG:
-            setattr(template, self.cache_key, instance)
+            provider_cache[cls] = instance
         return instance
 
-
-    def __init__(self, template, provider_settings):
+    def __init__(self, template):
         self.template = template
         self.app_config = None
         self.template_ext = None
@@ -74,29 +86,18 @@ class BaseProvider(object):
                     self.template_relpath = '/'.join(path_parts[2:])
                 except LookupError: # template isn't under an app
                     pass
-        # combine the options
-        self.options = merge_dicts(
-            BASE_DEFAULT_OPTIONS,       # standard for all providers (hard coded above)
-            self.default_options,       # from the provider class
-            provider_settings           # from settings.py
-        )
-
-    @property
-    def default_options(self):
-        '''Subclasses should override with any default options specific to them.'''
-        return {}
 
     def __repr__(self):
         return '<{}{}: {}/{}>'.format(
             self.__class__.__qualname__,
-            '' if self.options['enabled'] else ' (disabled)',
+            '' if self.OPTIONS['enabled'] else ' (disabled)',
             self.app_config.name if self.app_config is not None else 'unknown',
             self.template_relpath if self.template_relpath is not None else self.template,
         )
 
     @property
     def group(self):
-        return self.options['group']
+        return self.OPTIONS['group']
 
     def start(self, provider_run, data):
         '''

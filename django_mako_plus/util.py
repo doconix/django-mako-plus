@@ -1,13 +1,10 @@
 from django.apps import apps
-from django.conf import settings
-from django.core.exceptions import ImproperlyConfigured
 
-import base64
 import os, os.path
 import collections
 import zlib
-import re
 from importlib import import_module
+from ..util import log
 
 
 

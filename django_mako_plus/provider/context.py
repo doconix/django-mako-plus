@@ -1,7 +1,7 @@
 from django.utils.module_loading import import_string
 
-from ..util import merge_dicts
 from ..version import __version__
+from ..util import log
 from .base import BaseProvider
 
 import json
@@ -15,21 +15,19 @@ class JsContextProvider(BaseProvider):
     This should be listed before JsLinkProvider so the
     context variables are available during <script> runs.
     '''
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.encoder = import_string(self.options['encoder'])
-        self.template = "{}/{}".format(self.app_config.name, self.template_relpath)
+    DEFAULT_OPTIONS = {
+        # the group this provider is part of.  this only matters when
+        # the html page limits the providers that will be called with
+        # ${ django_mako_plus.links(group="...") }
+        'group': 'scripts',
+        # the encoder to use for the JSON structure
+        'encoder': 'django.core.serializers.json.DjangoJSONEncoder',
+    }
 
-    @property
-    def default_options(self):
-        return merge_dicts({
-            # the group this provider is part of.  this only matters when
-            # the html page limits the providers that will be called with
-            # ${ django_mako_plus.links(group="...") }
-            'group': 'scripts',
-            # the encoder to use for the JSON structure
-            'encoder': 'django.core.serializers.json.DjangoJSONEncoder',
-        }, super().default_options)
+    def __init__(self, template):
+        super().__init__(template)
+        self.encoder = import_string(self.OPTIONS['encoder'])
+        self.template = "{}/{}".format(self.app_config.name, self.template_relpath)
 
     def start(self, provider_run, data):
         data['templates'] = []

@@ -1,10 +1,10 @@
 from django.conf import settings
 from django.forms.utils import flatatt
 from ..util import merge_dicts
-from .links import CssLinkProvider, JsLinkProvider
+from .link import CssLinkProvider, JsLinkProvider
 import os
 import os.path
-
+import posixpath
 
 
 class WebpackCssLinkProvider(CssLinkProvider):
@@ -15,7 +15,6 @@ class WebpackCssLinkProvider(CssLinkProvider):
 
     def build_default_filepath(self):
         return os.path.join(
-            settings.BASE_DIR if settings.DEBUG else settings.STATIC_ROOT,
             self.app_config.name,
             'styles',
             '__bundle__.css',
@@ -25,8 +24,8 @@ class WebpackCssLinkProvider(CssLinkProvider):
         attrs = {}
         attrs["data-context"] = provider_run.uid
         attrs["href"] ="{}?{:x}".format(
-            os.path.join(
-                '/' if settings.DEBUG else settings.STATIC_URL,
+            posixpath.join(
+                settings.STATIC_URL,
                 self.app_config.name,
                 'styles',
                 '__bundle__.css',
@@ -45,26 +44,25 @@ class WebpackJsLinkProvider(JsLinkProvider):
 
     def build_default_filepath(self):
         return os.path.join(
-            settings.BASE_DIR if settings.DEBUG else settings.STATIC_ROOT,
             self.app_config.name,
             'scripts',
-            '__bundle__.css',
+            '__bundle__.js',
         )
 
     def build_default_link(self, provider_run, data):
         attrs = {}
         attrs["data-context"] = provider_run.uid
         attrs["src"] ="{}?{:x}".format(
-            os.path.join(
-                '/' if settings.DEBUG else settings.STATIC_URL,
+            posixpath.join(
+                settings.STATIC_URL,
                 self.app_config.name,
                 'scripts',
-                '__bundle__.css',
+                '__bundle__.js',
             ),
             self.version_id,
         )
         attrs['onload'] = "DMP_CONTEXT.checkBundle('{}')".format(provider_run.uid)
-        if self.options['async']:
+        if self.OPTIONS['async']:
             attrs['async'] = 'async'
         return '<script{}></script>'.format(flatatt(attrs))
 
