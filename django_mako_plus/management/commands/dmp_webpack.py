@@ -47,7 +47,6 @@ class Command(DMPCommandMixIn, BaseCommand):
     def handle(self, *args, **options):
         dmp = django_apps.get_app_config('django_mako_plus')
         self.options = options
-        self.factories = init_provider_factories('WEBPACK_PROVIDERS')
 
         # ensure we have a base directory
         try:
@@ -179,7 +178,7 @@ class Command(DMPCommandMixIn, BaseCommand):
         dmp = django_apps.get_app_config('django_mako_plus')
         template_obj = dmp.engine.get_template_loader(config, create=True).get_mako_template(template_name, force=True)
         mako_context = create_mako_context(template_obj)
-        inner_run = ProviderRun(mako_context['self'], factories=self.factories, ancestor_limit=1)
+        inner_run = ProviderRun(mako_context['self'], factories=WEBPACK_COMMAND_PROVIDERS, ancestor_limit=1)
         inner_run.run()
         scripts = []
         for data in inner_run.column_data:

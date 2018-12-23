@@ -9,7 +9,7 @@ import io
 import os, os.path
 
 
-def template_inheritance(obj, limit=0):
+def template_inheritance(obj):
     '''
     Generator that iterates the template and its ancestors.
     The order is from most specialized (furthest descendant) to
@@ -18,21 +18,14 @@ def template_inheritance(obj, limit=0):
     obj can be either:
         1. Mako Template object
         2. Mako `self` object (available within a rendering template)
-
-    If limit > 0, the function stops after returning
-    "limit" number of templates.
     '''
     if isinstance(obj, Template):
         obj = create_mako_context(obj)['self']
     elif isinstance(obj, mako.runtime.Context):
         obj = obj['self']
-    i = 0
     while obj is not None:
         yield obj.template
         obj = obj.inherits
-        i += 1
-        if limit and i >= limit:
-            break
 
 
 def create_mako_context(template_obj, **kwargs):

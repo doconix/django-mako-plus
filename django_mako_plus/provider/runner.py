@@ -8,47 +8,37 @@ from ..util import log
 from ..uid import wuid
 
 
-CONTENT_PROVIDERS = []
-WEBPACK_COMMAND_PROVIDERS = []
-
-def initialize_providers():
-    '''Initializes the providers (called from dmp app ready())'''
-    dmp = apps.get_app_config('django_mako_plus')
-    # regular content providers
-    for provider_settings in dmp.options['CONTENT_PROVIDERS']:
-        assert 'provider' in provider_settings, "Invalid entry in settings.py: CONTENT_PROVIDERS item must have 'provider' key"
-        cls = import_string(provider_settings['provider'])
-        cls.initialize_options(provider_settings)
-        if cls.OPTIONS['enabled']:
-            CONTENT_PROVIDERS.append(cls)
-    # special content providers list used during dmp_webpack management command
-    for provider_settings in dmp.options['WEBPACK_PROVIDERS']:
-        assert 'provider' in provider_settings, "Invalid entry in settings.py: CONTENT_PROVIDERS item must have 'provider' key"
-        cls = import_string(provider_settings['provider'])
-        cls.initialize_options(provider_settings)
-        if cls.OPTIONS['enabled']:
-            WEBPACK_COMMAND_PROVIDERS.append(cls)
-
-
 ####################################################
 ###   Main runner for providers
 
 class ProviderRun(object):
     '''A run through the providers for tself and its ancestors'''
-    def __init__(self, tself, group=None, provider_classes=None, ancestor_limit=0):
+    CONTENT_PROVIDERS = []
+
+    @classmethod
+    def initialize_providers(cls):
+        '''Initializes the providers (called from dmp app ready())'''
+        dmp = apps.get_app_config('django_mako_plus')
+        # regular content providers
+        for provider_settings in dmp.options['CONTENT_PROVIDERS']:
+            assert 'provider' in provider_settings, "Invalid entry in settings.py: CONTENT_PROVIDERS item must have 'provider' key"
+            provider_class = import_string(provider_settings['provider'])
+            provider_class.initialize_options(provider_settings)
+            if provider_class.OPTIONS['enabled']:
+                cls.CONTENT_PROVIDERS.append(provider_class)
+
+
+    def __init__(self, tself, group=None):
         '''
         tself:              `self` object from a Mako template (available during rendering).
         version_id:         hash/unique number to place on links
         group:              provider group to include (defaults to all groups if None)
-        provider_classes:   list of provider factories to run on each template (defaults to settings.py if None)
         ancestors:          whether to recurse to ancestor templates
         '''
         dmp = apps.get_app_config('django_mako_plus')
         self.uid = wuid()           # a unique id for this run
         self.request = tself.context.get('request')
         self.context = tself.context
-        if provider_classes is None:
-            provider_classes = CONTENT_PROVIDERS
         self.buffer = io.StringIO()
 
         # Create a table of providers for each template in the ancestry:
@@ -59,10 +49,9 @@ class ProviderRun(object):
         #        |
         #     index.html,    [ JsLinkProvider3, CssLinkProvider3, ... ]
         self.template_providers = []
-        import pprint; pprint.pprint(provider_classes)
-        for template in reversed(list(template_inheritance(tself, ancestor_limit))):
+        for template in reversed(list(template_inheritance(tself))):
             providers = []
-            for provider_class in provider_classes:
+            for provider_class in self.CONTENT_PROVIDERS:
                 provider = provider_class.instance_for_template(template)
                 if group is None or provider.group == group:
                     providers.append(provider)
@@ -73,7 +62,7 @@ class ProviderRun(object):
         # column to share data if needed.
         #
         #      column_data = [ { col 1 }      , { col 2 }      , ... ]
-        self.column_data = [ {} for pf in provider_classes ]
+        self.column_data = [ {} for pf in self.CONTENT_PROVIDERS ]
 
 
     def run(self):
