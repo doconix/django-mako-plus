@@ -36,11 +36,22 @@ Each provider has an options dictionary that allows you to adjust its behavior. 
 
     {
         'provider': 'django_mako_plus.JsContextProvider',
-        'filepath': os.path.join('scripts', 'subdir', '{template}.js'),
+        'filepath': lambda provider: os.path.join(provider.app_config.name, 'scripts', provider.template_name + '.js'),
     },
 
+While the options for each provider are different, most allow either a string or a function/lambda (e.g. ``filepath`` above). This allows path names to be created as simple strings or using full logic and method calls. If a function is specified, it should take one parameter: the provider. Every provider contains the following:
 
-All providers and their options are listed on the `settings page </basics_settings.html>`_.
+
+* ``provider.template_name`` - the name of the template, without extension
+* ``provider.template_relpath`` - the path of the template, relative to the ``app/templates`` directory. This is usually the same as ``template_name``, but it can be different if in a subdir of templates (e.g. ``homepage/templates/forms/login.html`` -> ``forms/login``.
+* ``provider.template_ext`` - the extension of the template filename
+* ``provider.app_config`` - the AppConfig the template resides in
+* ``provider.app_config.name`` - the name of the app
+* ``provider.template`` - the Mako template object
+* ``provider.template.filename`` - full path to template file
+* ``provider.options`` - the options for this provider (defaults + settings.py)
+
+    When running in production mode, provider objects are created once and then cached, so any lambda functions are run at system startup (not every request).
 
 
 Order Matters
@@ -50,7 +61,7 @@ Just like Django middleware, the providers are run in order.  If one provider de
 
     ``JsContextProvider`` should usually be listed first because several other providers depend on it.
 
-
+Another example is the need to list ``ScssCompileProvider`` before ``CssLinkProvider``, which allows the first to create the .css file for the second to find.
 
 
 Dev vs. Prod
@@ -83,12 +94,12 @@ Assuming you aren't bundling with something like webpack, there are at least two
 
     {
         'provider': 'django_mako_plus.CompileScssProvider',
-        'sourcepath': os.path.join('styles', '{template}.scss'),
-        'targetpath': os.path.join('{basedir}', 'dist', '{app}', 'styles', '{template}.css'),
+        'sourcepath': lambda provider: os.path.join(provider.app_config.name, 'styles', provider.template_name + '.scss'),
+        'targetpath': lambda provider: os.path.join('dist', provider.app_config.name, 'styles', provider.template_name + '.css'),
     },
     {
         'provider': 'django_mako_plus.CssLinkProvider',
-        'filepath': os.path.join('{basedir}', 'dist', '{app}', 'styles', '{template}.css'),
+        'filepath': lambda provider: os.path.join('dist', provider.app_config.name, 'styles', provider.template_name + '.css'),
     },
 
 **Option 2: Use a custom extension for generated files, such as `[name].scss.css``.**
@@ -97,12 +108,12 @@ Assuming you aren't bundling with something like webpack, there are at least two
 
     {
         'provider': 'django_mako_plus.CompileScssProvider',
-        'sourcepath': os.path.join('styles', '{template}.scss'),
-        'targetpath': os.path.join('styles', '{template}.scss.css'),
+        'sourcepath': lambda provider: os.path.join(provider.app_config.name, 'styles', provider.template_name + '.scss'),
+        'targetpath': lambda provider: os.path.join('dist', provider.app_config.name, 'styles', provider.template_name + '.scss.css'),
     },
     {
         'provider': 'django_mako_plus.CssLinkProvider',
-        'filepath': os.path.join('styles', '{template}.scss.css'),
+        'filepath': lambda provider: os.path.join('dist', provider.app_config.name, 'styles', provider.template_name + '.scss.css'),
     },
 
 
@@ -121,19 +132,19 @@ Transpiling is usually done with a bundler like ``webpack``.  However, there may
     {
         'provider': 'django_mako_plus.CompileProvider',
         'group': 'scripts',
-        'sourcepath': os.path.join('scripts', '{template_subdir}', '{template_name}.py'),
-        'targetpath': os.path.join('scripts', '{template_subdir}', '__javascript__', '{template_name}.js'),
-        'command': [
+        'sourcepath': lambda provider: os.path.join(provider.app_config.name, 'scripts', provider.template_name + '.py'),
+        'targetpath': lambda provider: os.path.join(provider.app_config.name, 'scripts', '__javascript__', provider.template_name + '.js'),
+        'command': lambda provider: [
             shutil.which('transcrypt'),
             '--map',
             '--build',
             '--nomin',
-            '{sourcepath}',
+            os.path.join(provider.app_config.name, 'scripts', provider.template_name + '.py'),
         ],
     },
     {
         'provider': 'django_mako_plus.JsLinkProvider',
-        'filepath': os.path.join('scripts', '{template_subdir}', '__javascript__', '{template_name}.js'),
+        'filepath': lambda provider: os.path.join(provider.app_config.name, 'scripts', '__javascript__', provider.template_name + '.js')
     },
 
 

@@ -293,27 +293,7 @@ To create a production bundle, issue webpack a build command:
 
 If you look at the generated bundle file, you'll find it is minified and ready for deployment.
 
+Further Questions?
+-----------------------
 
-
-
-Sitewide Bundles
---------------------
-
-This section describes how to create a single monstrosity that includes the scripts for every DMP app on your site.  In some situations, such as sites with a small number of scripts, a single bundle might be more efficient than several app bundles.  To create a single ``__entry__.js`` file for your entire site, run the following:
-
-::
-
-    python3 manage.py dmp_webpack --overwrite --single homepage/scripts/__entry__.js
-
-The above command will place the sitewide entry file in the homepage app, but it could be located anywhere.  Include this single entry file in ``webpack.config.js``.
-
-
-A Few Bundles to Rule Them All
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Somewhere in between a sitewide bundle and app-specific bundles lives the multi-app bundle option.  Suppose you want app1 and app2 in one bundle and app3, app4, and app5 in another.  The following commands create the two needed entry files:
-
-::
-
-    python3 manage.py dmp_webpack --overwrite --single homepage/scripts/__entry_1__.js app1 app2
-    python3 manage.py dmp_webpack --overwrite --single homepage/scripts/__entry_2__.js app3 app4 app5
+The `DMP Webpack FAQ </static_webpack_faq.html>`_ goes over several different situations.

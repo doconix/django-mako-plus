@@ -39,6 +39,7 @@ class BaseProvider(object):
         'enabled': True,
     }
 
+
     @classmethod
     def instance_for_template(cls, template, options):
         '''Returns an instance for the given template'''
@@ -57,12 +58,14 @@ class BaseProvider(object):
             provider_cache[options['_template_cache_key']] = instance
         return instance
 
+
     def __init__(self, template, options):
         self.template = template
         self.options = options
         self.app_config = None
         self.template_ext = None
         self.template_relpath = None
+        self.template_name = None
         if self.template.filename is not None:
             # try to infer the app
             fn_no_ext, self.template_ext = os.path.splitext(template.filename)
@@ -72,8 +75,10 @@ class BaseProvider(object):
                     path_parts = os.path.normpath(relpath).split(os.path.sep)
                     self.app_config = apps.get_app_config(path_parts[0])
                     self.template_relpath = '/'.join(path_parts[2:])
+                    self.template_name = path_parts[-1]
                 except LookupError: # template isn't under an app
                     pass
+
 
     def __repr__(self):
         return '<{}{}: {}/{}>'.format(
@@ -83,9 +88,11 @@ class BaseProvider(object):
             self.template_relpath if self.template_relpath is not None else self.template,
         )
 
+
     @property
     def group(self):
         return self.options['group']
+
 
     def start(self, provider_run, data):
         '''
@@ -93,8 +100,10 @@ class BaseProvider(object):
         Initialize values in the data dictionary here.
         '''
 
+
     def provide(self, provider_run, data):
         '''Called on *each* template's provider list in the chain - use provider_run.write() for content'''
+
 
     def finish(self, provider_run, data):
         '''
