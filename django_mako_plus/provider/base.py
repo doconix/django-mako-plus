@@ -1,22 +1,36 @@
-from django.utils.encoding import force_text
+from django.apps import apps
 from django.conf import settings
-
-from ..util import merge_dicts
-
-import os
-import os.path
+import os, inspect
+import logging
+from ..util import log
 
 
+TEMPLATE_ATTR_NAME = '_dmp_provider_cache_'
 
 ##############################################################
-###   Static File Providers
+###   Abstract Provider Base
 
 class BaseProvider(object):
     '''
     Abstract base provider class.  An instance is tied to a template at runtime.
-    '''
 
-    default_options = {
+    Note that the app can only be inferred for templates in project apps (below settings.BASE_DIR).
+    The app has to be inferred because mako creates templates internally during the render runtime,
+    and I don't want to hack into Mako internals.
+
+    Always set:
+        self.template           Mako template object
+        self.options            The combined options from the provider, its supers, and settings.py
+        self.template_ext       Template extension.
+
+    If app can be inferred (None if not):
+        self.app_config         AppConfig the template resides in, if possible to infer.
+        self.template_relpath   Template path, relative to app/templates/, without extension.
+                                Usually this is just the template name, but could contain a subdirectory:
+                                    homepage/templates/index.html       => "index"
+                                    homepage/templates/forms/login.html => "forms/login"
+    '''
+    DEFAULT_OPTIONS = {
         # the group this provider is part of.  this only matters when
         # the html page limits the providers that will be called with
         # ${ django_mako_plus.links(group="...") }
@@ -25,70 +39,74 @@ class BaseProvider(object):
         'enabled': True,
     }
 
-    def __init__(self, app_config, template_file, options):
-        '''
-        Creates the provider.
 
-        When settings.DEBUG=True, the provider is recreated per request.
-        When settings.DEBUG=False, this constructor is run only once per server run.
+    @classmethod
+    def instance_for_template(cls, template, options):
+        '''Returns an instance for the given template'''
+        # Mako already caches template objects, so I'm attaching provider instances to templates
+        provider_cache = getattr(template, TEMPLATE_ATTR_NAME, None)
+        if provider_cache is None:
+            provider_cache = {}
+            setattr(template, TEMPLATE_ATTR_NAME, provider_cache)
+        try:
+            return provider_cache[options['_template_cache_key']]
+        except KeyError:
+            pass
+        # not cached yet, so create the object
+        instance = cls(template, options)
+        if not settings.DEBUG:
+            provider_cache[options['_template_cache_key']] = instance
+        return instance
 
-        The fields created here deconstruct the location of the template.  Examples:
 
-        Regular location: /homepage/templates/index.html
-            self.app_config:            AppConfig for "homepage"
-            self.app_config.path:       "/absolute/path/to/homepage/"
-            self.template_file:         "index.html"
-            self.template_subdir:       ""
-            self.template_name:         "index"
-            self.template_ext:          ".html"
-            self.template:              "index"                          # name within "homepage/templates/"
+    def __init__(self, template, options):
+        self.template = template
+        self.options = options
+        self.app_config = None
+        self.template_ext = None
+        self.template_relpath = None
+        self.template_name = None
+        if self.template.filename is not None:
+            # try to infer the app
+            fn_no_ext, self.template_ext = os.path.splitext(template.filename)
+            relpath = os.path.relpath(fn_no_ext, settings.BASE_DIR)
+            if not relpath.startswith('..'):  # can't infer reliably outside of project dir
+                try:
+                    path_parts = os.path.normpath(relpath).split(os.path.sep)
+                    self.app_config = apps.get_app_config(path_parts[0])
+                    self.template_relpath = '/'.join(path_parts[2:])
+                    self.template_name = path_parts[-1]
+                except LookupError: # template isn't under an app
+                    pass
 
-        Subdir location: /homepage/templates/mail/signup/welcome.txt
-            self.app_config:            AppConfig for "homepage"
-            self.app_config.path:       "/absolute/path/to/homepage/"
-            self.template_file:         "welcome.txt"
-            self.template_subdir:       "mail/signup"
-            self.template_name:         "welcome"
-            self.template_ext:          ".txt"
-            self.template:              "mail/signup/welcome"            # name within "homepage/templates/"
-        '''
-        self.app_config = app_config
-        subdir, self.template_file = os.path.split(template_file)
-        self.template_name, self.template_ext = os.path.splitext(self.template_file)
-        subdir_parts = os.path.normpath(subdir).split(os.path.sep)
-        if len(subdir_parts) > 1:
-            self.template_subdir = os.path.join(*subdir_parts[1:])
-            self.template = os.path.join(self.template_subdir, self.template_name)
-        else:
-            self.template_subdir = ""
-            self.template = self.template_name
-        self.options = merge_dicts(self.default_options, options)     # combined options dictionary
 
     def __repr__(self):
-        return '<{} for {}/{}>'.format(
+        return '<{}{}: {}/{}>'.format(
             self.__class__.__qualname__,
-            self.app_config.name,
-            self.template_name,
+            '' if self.options['enabled'] else ' (disabled)',
+            self.app_config.name if self.app_config is not None else 'unknown',
+            self.template_relpath if self.template_relpath is not None else self.template,
         )
+
 
     @property
     def group(self):
         return self.options['group']
+
 
     def start(self, provider_run, data):
         '''
         Called on the *main* template's provider list as the run starts.
         Initialize values in the data dictionary here.
         '''
-        pass
+
 
     def provide(self, provider_run, data):
         '''Called on *each* template's provider list in the chain - use provider_run.write() for content'''
-        pass
+
 
     def finish(self, provider_run, data):
         '''
         Called on the *main* template's provider list as the run finishes
         Finalize values in the data dictionary here.
         '''
-        pass

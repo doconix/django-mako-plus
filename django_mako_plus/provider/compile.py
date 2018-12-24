@@ -1,14 +1,13 @@
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
-
-from ..command import run_command
-from ..util import merge_dicts
-from .base import BaseProvider
-
 import os
 import os.path
 import shutil
 import collections
+import logging
+from .base import BaseProvider
+from ..util import log
+from ..command import run_command
 
 
 class CompileProvider(BaseProvider):
@@ -20,104 +19,98 @@ class CompileProvider(BaseProvider):
     When settings.DEBUG=True, checks for a recompile every request.
     When settings.DEBUG=False, checks for a recompile only once per server run.
     '''
-    default_options = merge_dicts(BaseProvider.default_options, {
-        'group': 'styles',
-        # the source filename to search for
-        # if it does not start with a slash, it is relative to the app directory.
-        # if it starts with a slash, it is an absolute path.
-        # codes: {basedir}, {app}, {template}, {template_name}, {template_file}, {template_subdir}
-        'sourcepath': os.path.join('styles', '{template}.scss'),
-        # the destination filename to search for
-        # if it does not start with a slash, it is relative to the app directory.
-        # if it starts with a slash, it is an absolute path.
-        # codes: {basedir}, {app}, {template}, {template_name}, {template_file}, {template_subdir}, {sourcepath}
-        'targetpath': os.path.join('styles', '{template}.css'),
-        # the command to be run, as a list (see subprocess module)
-        # codes: {basedir}, {app}, {template}, {template_name}, {template_file}, {template_subdir}, {sourcepath}, {targetpath}
-        'command': [ 'echo', 'Subclasses should override this option' ],
-    })
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, template, options):
+        super().__init__(template, options)
+        self.sourcepath = os.path.join(settings.BASE_DIR if settings.DEBUG else settings.STATIC_ROOT, self.build_sourcepath())
+        self.targetpath = os.path.join(settings.BASE_DIR if settings.DEBUG else settings.STATIC_ROOT, self.build_targetpath())
         # since this is in the constructor, it runs only one time per server
         # run when in production mode
-        if self.needs_compile:
+        if not os.path.exists(self.sourcepath):
+            msg = 'skipping nonexistent file'
+        elif self.needs_compile:
+            msg = 'compiling file'
+            if not os.path.exists(os.path.dirname(self.targetpath)):
+                os.makedirs(os.path.dirname(self.targetpath))
             run_command(*self.build_command())
-
-    @property
-    def source(self):
-        # we look for source files in the project directory
-        # during both dev and prod
-        return os.path.normpath(os.path.join(
-            self.app_config.path,
-            self.options['sourcepath'].format(
-                basedir=settings.BASE_DIR,
-                app=self.app_config.name,
-                template=self.template,
-                template_name=self.template_name,
-                template_file=self.template_file,
-                template_subdir=self.template_subdir,
-            ),
-        ))
-
-    @property
-    def target(self):
-        # we output the target file to the project directory
-        # during dev and to the static directory during prod
-        if settings.DEBUG:
-            return os.path.normpath(os.path.join(
-                self.app_config.path,
-                self.options['targetpath'].format(
-                    basedir=settings.BASE_DIR,
-                    app=self.app_config.name,
-                    template=self.template,
-                    template_name=self.template_name,
-                    template_file=self.template_file,
-                    template_subdir=self.template_subdir,
-                    sourcepath=self.source,
-                ),
-            ))
         else:
-            return os.path.normpath(os.path.join(
-                settings.STATIC_ROOT,
-                self.app_config.name,
-                self.options['targetpath'].format(
-                    basedir=settings.BASE_DIR,
-                    app=self.app_config.name,
-                    template=self.template,
-                    template_name=self.template_name,
-                    template_file=self.template_file,
-                    template_subdir=self.template_subdir,
-                    sourcepath=self.source,
-                ),
-            ))
+            msg = 'already up to date'
+        if log.isEnabledFor(logging.DEBUG):
+            log.debug('%s created for %s: [%s]', repr(self), self.sourcepath, msg)
+
+    DEFAULT_OPTIONS = {
+        'group': 'styles',
+
+        # explicitly sets the path to search for - if this filepath exists, DMP
+        # includes a link to it in the template. globs are not supported because this
+        # should resolve to one exact file. possible values:
+        #   1. None: a default path is used, such as "{app}/{subdir}/{filename.ext}", prefixed
+        #      with the static root at production; see subclasses for their default filenames.
+        #   2. function, lambda, or other callable: called as func(provider) and
+        #      should return a string
+        #   3. str: used directly
+        'sourcepath': None,
+
+        # explicitly sets the path to search for - if this filepath exists, DMP
+        # includes a link to it in the template. globs are not supported because this
+        # should resolve to one exact file. possible values:
+        #   1. None: a default path is used, such as "{app}/{subdir}/{filename.ext}", prefixed
+        #      with the static root at production; see subclasses for their default filenames.
+        #   2. function, lambda, or other callable: called as func(provider) and
+        #      should return a string
+        #   3. str: used directly
+        'targetpath': None,
+
+        # explicitly sets the command to be run. possible values:
+        #   1. None: the default command is run
+        #   2. function, lambda, or other callable: called as func(provider), expects list as return
+        #   3. list: used directly in the call to subprocess module
+        'command': [],
+    }
+
+    def build_sourcepath(self):
+        # if defined in settings, run the function or return the string
+        if self.options['sourcepath'] is not None:
+            return self.options['sourcepath'](self) if callable(self.options['sourcepath']) else self.options['sourcepath']
+        # build the default
+        if self.app_config is None:
+            log.warn('{} skipped: template %s not in project subdir and `targetpath` not in settings', (self.__class__.__qualname__, self.template_relpath))
+        return self.build_default_sourcepath()
+
+    def build_default_sourcepath(self):
+        raise ImproperlyConfigured('{} must set `sourcepath` in options (or a subclass can override build_default_sourcepath).'.format(self.__class__.__qualname__))
+
+    def build_targetpath(self):
+        # if defined in settings, run the function or return the string
+        if self.options['targetpath'] is not None:
+            return self.options['targetpath'](self) if callable(self.options['targetpath']) else self.options['targetpath']
+        # build the default
+        if self.app_config is None:
+            log.warn('{} skipped: template %s not in project subdir and `targetpath` not in settings', (self.__class__.__qualname__, self.template_relpath))
+        return self.build_default_targetpath()
+
+    def build_default_targetpath(self):
+        raise ImproperlyConfigured('{} must set `targetpath` in options (or a subclass can override build_default_targetpath).'.format(self.__class__.__qualname__))
 
     def build_command(self):
-        '''Returns the command to run, as a list/tuple (see subprocess module)'''
-        if not isinstance(self.options['command'], collections.Iterable) or isinstance(self.options['command'], (str, bytes)):
-            raise ImproperlyConfigured('The `command` option on a compile provider must be a list')
-        return [
-            str(arg).format(
-                basedir=settings.BASE_DIR,
-                app=self.app_config.name,
-                template=self.template,
-                template_name=self.template_name,
-                template_file=self.template_file,
-                template_subdir=self.template_subdir,
-                sourcepath=self.source,
-                targetpath=self.target,
-            )
-            for arg in self.options['command']
-        ]
+        '''Returns the command to run, as a list (see subprocess module)'''
+        # if defined in settings, run the function or return the string
+        if self.options['command']:
+            return self.options['command'](self) if callable(self.options['command']) else self.options['command']
+        # build the default
+        return self.build_default_command()
+
+    def build_default_command(self):
+        raise ImproperlyConfigured('{} must set `command` in options (or a subclass can override build_default_command).'.format(self.__class__.__qualname__))
 
     @property
     def needs_compile(self):
+        '''Returns True if self.sourcepath is newer than self.targetpath'''
         try:
-            source_mtime = os.stat(self.source).st_mtime
+            source_mtime = os.stat(self.sourcepath).st_mtime
         except OSError:  # no source for this template, so just return
             return False
         try:
-            target_mtime = os.stat(self.target).st_mtime
+            target_mtime = os.stat(self.targetpath).st_mtime
         except OSError: # target doesn't exist, so compile
             return True
         # both source and target exist, so compile if source newer
@@ -128,34 +121,30 @@ class CompileProvider(BaseProvider):
 ###   Sass
 
 class CompileScssProvider(CompileProvider):
-    '''Specialized CompileProvider that contains settings for *.scss files.'''
-    default_options = merge_dicts(CompileProvider.default_options, {
-        # the source filename to search for
-        # if it does not start with a slash, it is relative to the app directory.
-        # if it starts with a slash, it is an absolute path.
-        'sourcepath': os.path.join('styles', '{template}.scss'),
-        # the destination filename to search for
-        # if it does not start with a slash, it is relative to the app directory.
-        # if it starts with a slash, it is an absolute path.
-        'targetpath': os.path.join('styles', '{template}.css'),
-        # the command to be run, as a list (see subprocess module)
-        # codes: {app}, {template}, {template_name}, {template_file}, {template_subdir}, {sourcepath}, {targetpath}
-        'command': [
+    '''Specialized CompileProvider for SCSS'''
+    def build_default_sourcepath(self):
+        return os.path.join(
+            self.app_config.name,
+            'styles',
+            self.template_relpath + '.scss',
+        )
+
+    def build_default_targetpath(self):
+        # posixpath because URLs use forward slash
+        return os.path.join(
+            self.app_config.name,
+            'styles',
+            self.template_relpath + '.css',
+        )
+
+    def build_default_command(self):
+        return [
             shutil.which('sass'),
-            '--load-path=.',
-            '{sourcepath}',
-            '{targetpath}',
-        ],
-    })
-
-    def build_command(self):
-        # sass seems to need the target directory to exist
-        targetdir = os.path.dirname(self.target)
-        if not os.path.exists(targetdir):
-            os.makedirs(targetdir)
-        return super().build_command()
-
-
+            '--source-map',
+            '--load-path={}'.format(settings.BASE_DIR),
+            self.sourcepath,
+            self.targetpath,
+        ]
 
 
 #####################
@@ -163,21 +152,25 @@ class CompileScssProvider(CompileProvider):
 
 class CompileLessProvider(CompileProvider):
     '''Specialized CompileProvider that contains settings for *.less files.'''
-    default_options = merge_dicts(CompileProvider.default_options, {
-        # the source filename to search for
-        # if it does not start with a slash, it is relative to the app directory.
-        # if it starts with a slash, it is an absolute path.
-        'sourcepath': os.path.join('styles', '{template}.less'),
-        # the destination filename to search for
-        # if it does not start with a slash, it is relative to the app directory.
-        # if it starts with a slash, it is an absolute path.
-        'targetpath': os.path.join('styles', '{template}.css'),
-        # the command to be run, as a list (see subprocess module)
-        # codes: {app}, {template}, {template_name}, {template_file}, {template_subdir}, {sourcepath}, {targetpath}
-        'command': [
+    def build_default_sourcepath(self):
+        return os.path.join(
+            self.app_config.name,
+            'styles',
+            self.template_relpath + '.less',
+        )
+
+    def build_default_targetpath(self):
+        # posixpath because URLs use forward slash
+        return os.path.join(
+            self.app_config.name,
+            'styles',
+            self.template_relpath + '.css',
+        )
+
+    def build_default_command(self):
+        return [
             shutil.which('lessc'),
             '--source-map',
-            '{sourcepath}',
-            '{targetpath}',
-        ],
-    })
+            self.sourcepath,
+            self.targetpath,
+        ]

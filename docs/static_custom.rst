@@ -6,15 +6,15 @@ Suppose you need custom preprocessing of static files or custom template content
 .. code-block:: python
 
     from django_mako_plus import BaseProvider
-    from django_mako_plus.utils import merge_dicts
 
     class YourCustomProvider(BaseProvider):
-        default_options = merge_dicts(BaseProvider.default_options, {
+        # these default options will be combined with BaseProvider.DEFAULT_OPTIONS and any in settings.py
+        DEFAULT_OPTIONS = {
             'any': 'additional',
             'options': 'should',
             'be': 'specified',
             'here': '.',
-        })
+        }
 
     def start(self, provider_run, data):
         '''

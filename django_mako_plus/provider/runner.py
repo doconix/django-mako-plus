@@ -1,88 +1,59 @@
 from django.apps import apps
 from django.conf import settings
-from django.core.exceptions import ImproperlyConfigured
 from django.utils.module_loading import import_string
-
-from .base import BaseProvider
+from collections import namedtuple
+import io
+import logging
+import inspect
 from ..template import template_inheritance
-from ..util import split_app, merge_dicts, log
+from ..util import log, qualified_name
 from ..uid import wuid
 
-import io
-from collections import namedtuple
-import warnings
-import logging
-
-
-##################################################
-###   Static File Provider Factory
-
-
-def init_provider_factories(key='CONTENT_PROVIDERS'):
-    '''Called from apps.py when setting up'''
-    factories = []
-    dmp = apps.get_app_config('django_mako_plus')
-    for index, provider_def in enumerate(dmp.options.get(key, [])):
-        fac = ProviderFactory(provider_def, '_django_mako_plus_providers_{}_{}_'.format(key, index))
-        if fac.options['enabled']:  # providers can be disabled globally in settings (to run on debug or prod only, for example)
-            factories.append(fac)
-    return factories
-
-
-class ProviderFactory(object):
-    '''Creator for a given Provider definition in settings.py.'''
-    def __init__(self, provider_def, cache_key):
-        self.cache_key = cache_key
-        self.options = {}
-        try:
-            self.provider_class = provider_def['provider']
-        except KeyError:
-            raise ImproperlyConfigured('The Django Mako Plus template OPTIONS were not set up correctly in settings.py; a CONTENT_PROVIDERS item is missing `provider`.')
-        if isinstance(self.provider_class, str):
-            self.provider_class = import_string(self.provider_class)
-        if not issubclass(self.provider_class, BaseProvider):
-            raise ImproperlyConfigured('The Django Mako Plus template OPTIONS were not set up correctly in settings.py; The `provider` value must be a subclass of django_mako_plus.BaseProvider.')
-        self.options = merge_dicts(self.provider_class.default_options, provider_def)
-
-    def instance_for_template(self, template):
-        '''Returns a provider instance for the given template'''
-        # Mako already caches template objects, so I'm attaching the instance to the template for speed during production
-        try:
-            return getattr(template, self.cache_key)
-        except AttributeError:
-            pass
-
-        # create and cache (if in prod mode)
-        app_config, template_file = split_app(template.filename)
-        if app_config is None:
-            raise ImproperlyConfigured("Could not determine the app for template {}. Is this template's app registered as a DMP app?".format(template.filename))
-        instance = self.provider_class(app_config, template_file, self.options)
-        if not settings.DEBUG:
-            setattr(template, self.cache_key, instance)
-        return instance
-
-
+# I can't keep the options inside the provider class itself because a given class
+# can be listed more than once in settings.py (with different options).
+# So instead I keep a list of the classes and their options here.
+ProviderClassInfo = namedtuple("ProviderClassInfo", [ 'cls', 'options' ])
 
 ####################################################
-###   Main runner
-
+###   Main runner for providers
 
 class ProviderRun(object):
     '''A run through the providers for tself and its ancestors'''
-    def __init__(self, tself, version_id=None, group=None, factories=None, ancestor_limit=0):
+    SETTINGS_KEY = 'CONTENT_PROVIDERS'
+    CONTENT_PROVIDERS = []
+
+    @classmethod
+    def initialize_providers(cls):
+        '''Initializes the providers (called from dmp app ready())'''
+        dmp = apps.get_app_config('django_mako_plus')
+        # regular content providers
+        cls.CONTENT_PROVIDERS = []
+        for provider_settings in dmp.options[cls.SETTINGS_KEY]:
+            # import the class for this provider
+            assert 'provider' in provider_settings, "Invalid entry in settings.py: CONTENT_PROVIDERS item must have 'provider' key"
+            provider_cls = import_string(provider_settings['provider'])
+            # combine options from all of its bases, then from settings.py
+            options = {}
+            for base in reversed(inspect.getmro(provider_cls)):
+                options.update(getattr(base, 'DEFAULT_OPTIONS', {}))
+            options.update(provider_settings)
+            # add to the list
+            if options['enabled']:
+                # the index in the provider list is needed because a given class
+                # can be listed more than once in settings.py (with different options)
+                options['_template_cache_key'] = '_{}_{}_'.format(qualified_name(provider_cls), len(cls.CONTENT_PROVIDERS))
+                cls.CONTENT_PROVIDERS.append(ProviderClassInfo(provider_cls, options))
+
+
+    def __init__(self, tself, group=None):
         '''
-        tself:      `self` object from a Mako template (available during rendering).
-        version_id: hash/unique number to place on links
-        group:      provider group to include (defaults to all groups if None)
-        factories:  list of provider factories to run on each template (defaults to settings.py if None)
-        ancestors:  whether to recurse to ancestor templates
+        tself:              `self` object from a Mako template (available during rendering).
+        group:              provider group to include (defaults to all groups if None)
         '''
         dmp = apps.get_app_config('django_mako_plus')
         self.uid = wuid()           # a unique id for this run
         self.request = tself.context.get('request')
         self.context = tself.context
-        if version_id is not None:
-            warnings.warn('The `version_id` parameter in links() is deprecated in favor of automatic file hashes.')
         self.buffer = io.StringIO()
 
         # Create a table of providers for each template in the ancestry:
@@ -92,17 +63,13 @@ class ProviderRun(object):
         #     app_base.htm,  [ JsLinkProvider2, CssLinkProvider2, ... ]
         #        |
         #     index.html,    [ JsLinkProvider3, CssLinkProvider3, ... ]
-        enabled_factories = []
-        if factories is None:
-            factories = dmp.provider_factories
-        for pf in factories:
-            if group is None or group == pf.options['group']:
-                enabled_factories.append(pf)
         self.template_providers = []
-        for template in reversed(list(template_inheritance(tself, ancestor_limit))):
+        for template in self.get_template_inheritance(tself):
             providers = []
-            for pf in enabled_factories:
-                providers.append(pf.instance_for_template(template))
+            for pci in self.CONTENT_PROVIDERS:
+                provider = pci.cls.instance_for_template(template, pci.options)
+                if group is None or provider.group == group:
+                    providers.append(provider)
             self.template_providers.append(providers)
 
         # Column-specific data dictionaries are maintained as the template providers run
@@ -110,7 +77,12 @@ class ProviderRun(object):
         # column to share data if needed.
         #
         #      column_data = [ { col 1 }      , { col 2 }      , ... ]
-        self.column_data = [ {} for pf in enabled_factories ]
+        self.column_data = [ {} for pf in self.CONTENT_PROVIDERS ]
+
+
+    def get_template_inheritance(self, tself):
+        '''Returns a list of the template inheritance of tself, starting with the oldest ancestor'''
+        return reversed(list(template_inheritance(tself)))
 
 
     def run(self):
@@ -122,8 +94,6 @@ class ProviderRun(object):
         # provide() on the all provider lists in the chain
         for providers in self.template_providers:
             for provider, data in zip(providers, self.column_data):
-                if log.isEnabledFor(logging.DEBUG):
-                    log.debug('[%s] %s running', provider.template_file, provider.__class__.__qualname__)
                 provider.provide(self, data)
         # finish() on tself (the last template in the list)
         for providers in self.template_providers[-1:]:

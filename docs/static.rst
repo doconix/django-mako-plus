@@ -11,4 +11,5 @@ One of the primary tasks of DMP is to connect your static files to your template
     static_context
     static_providers
     static_webpack
+    static_webpack_faq
     static_custom

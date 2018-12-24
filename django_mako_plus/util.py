@@ -1,14 +1,9 @@
 from django.apps import apps
-from django.conf import settings
-from django.core.exceptions import ImproperlyConfigured
 
-import base64
 import os, os.path
 import collections
 import zlib
-import re
 from importlib import import_module
-
 
 
 # set up the logger
@@ -62,7 +57,7 @@ def import_qualified(name):
 
 def merge_dicts(*dicts):
     '''
-    Merges an arbitrary number of dicts, starting
+    Shallow merges an arbitrary number of dicts, starting
     with the first argument and updating through the
     last argument (last dict wins on conflicting keys).
     '''
