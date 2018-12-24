@@ -48,13 +48,13 @@ class BaseProvider(object):
             provider_cache = {}
             setattr(template, TEMPLATE_ATTR_NAME, provider_cache)
         try:
-            return provider_cache[cls]
+            return provider_cache[options['_template_cache_key']]
         except KeyError:
             pass
         # not cached yet, so create the object
         instance = cls(template, options)
         if not settings.DEBUG:
-            provider_cache[cls] = instance
+            provider_cache[options['_template_cache_key']] = instance
         return instance
 
     def __init__(self, template, options):

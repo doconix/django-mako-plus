@@ -42,7 +42,7 @@ DEFAULT_OPTIONS = {
     # determines whether DMP will send its custom signals during the process
     'SIGNALS': False,
 
-    # static file providers
+    # static file providers (see "static file" docs for full options here)
     'CONTENT_PROVIDERS': [
         { 'provider': 'django_mako_plus.JsContextProvider' },       # adds JS context - this should normally be listed FIRST
         # { 'provider': 'django_mako_plus.CompileProvider' },         # generic auto-compiler
@@ -51,7 +51,6 @@ DEFAULT_OPTIONS = {
         # { 'provider': 'django_mako_plus.LinkProvider' },            # generic link generator
         { 'provider': 'django_mako_plus.CssLinkProvider' },         # generates links for app/styles/template.css
         { 'provider': 'django_mako_plus.JsLinkProvider' },          # generates links for app/scripts/template.js
-        # { 'provider': 'django_mako_plus.WebpackCssLinkProvider' },  # generates links to app/styles/__bundle__.css (see DMP docs on webpack)
         # { 'provider': 'django_mako_plus.WebpackJsLinkProvider' },   # generates links to app/scripts/__bundle__.js (see DMP docs on webpack)
     ],
 

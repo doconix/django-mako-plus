@@ -6,9 +6,8 @@ import io
 import logging
 import inspect
 from ..template import template_inheritance
-from ..util import log
+from ..util import log, qualified_name
 from ..uid import wuid
-
 
 # I can't keep the options inside the provider class itself because a given class
 # can be listed more than once in settings.py (with different options).
@@ -40,6 +39,9 @@ class ProviderRun(object):
             options.update(provider_settings)
             # add to the list
             if options['enabled']:
+                # the index in the provider list is needed because a given class
+                # can be listed more than once in settings.py (with different options)
+                options['_template_cache_key'] = '_{}_{}_'.format(qualified_name(provider_cls), len(cls.CONTENT_PROVIDERS))
                 cls.CONTENT_PROVIDERS.append(ProviderClassInfo(provider_cls, options))
 
 

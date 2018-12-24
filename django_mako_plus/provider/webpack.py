@@ -7,36 +7,9 @@ from ..util import merge_dicts
 from .link import CssLinkProvider, JsLinkProvider
 
 
-class WebpackCssLinkProvider(CssLinkProvider):
-    '''Generates a CSS <link> tag for the sitewide or app-level CSS bundle file, if it exists.'''
-    DEFAULT_OPTIONS = {
-        'skip_duplicates': True,
-    }
-
-    def build_default_filepath(self):
-        return os.path.join(
-            self.app_config.name,
-            'styles',
-            '__bundle__.css',
-        )
-
-    def build_default_link(self, provider_run, data):
-        attrs = {}
-        attrs["data-context"] = provider_run.uid
-        attrs["href"] ="{}?{:x}".format(
-            posixpath.join(
-                settings.STATIC_URL,
-                self.app_config.name,
-                'styles',
-                '__bundle__.css',
-            ),
-            self.version_id,
-        )
-        return '<link{} />'.format(flatatt(attrs))
-
 
 class WebpackJsLinkProvider(JsLinkProvider):
-    '''Generates a JS <script> tag for the sitewide or app-level JS bundle file, if it exists.'''
+    '''Generates a JS <script> tag for an app-level JS bundle file, if it exists.'''
     DEFAULT_OPTIONS = {
         'skip_duplicates': True,
         'async': False,

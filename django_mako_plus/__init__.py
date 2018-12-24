@@ -79,4 +79,4 @@ from .provider.base import BaseProvider
 from .provider.compile import CompileProvider, CompileScssProvider, CompileLessProvider
 from .provider.context import JsContextProvider, jscontext
 from .provider.link import LinkProvider, CssLinkProvider, JsLinkProvider
-from .provider.webpack import WebpackCssLinkProvider, WebpackJsLinkProvider
+from .provider.webpack import WebpackJsLinkProvider
