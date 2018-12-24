@@ -85,7 +85,7 @@ Note in the above options, we're including ``.scss`` and ``.css`` (whenever they
 How do I create a vendor bundle?
 -----------------------------------
 
-In the `tutorial </static_webpack.html>`_, we created one bundle per app.  These bundles can grow large as you enjoy the convenience of ``npm init`` and link to more and more things in ``node_modules/``. Since each bundle is self-contained, there will be a lot of duplication between bundles. For example, the webpack bootstrapping JS will be in every one of your bundles--even if you don't specifically import to any extra modules. At some point, and usually sooner than later, you should probably make a vendor bundle.
+In the `tutorial </static_webpack.html>`_, we created one bundle per app.  These bundles can grow large as you enjoy the convenience of ``npm init`` and link to more and more things in ``node_modules/``. Since each bundle is self-contained, there will be a lot of duplication between bundles. For example, the webpack bootstrapping JS will be in every one of your bundles--even if you don't specifically import any extra modules. At some point, and usually sooner than later, you should probably make a vendor bundle.
 
 A vendor bundle combines the common code into a shared bundle, allowing the per-app bundles to lose quite a bit of weight. To enable a vendor bundle, do the following:
 
@@ -125,7 +125,7 @@ The above config creates a single bundle file in ``homepage/scripts/__bundle__.v
     python3 manage.py dmp_webpack --overwrite
     npm run watch
 
-3. Reference your vendor bundle in ``base.htm`` *before* the ``links()`` call.
+4. Reference your vendor bundle in ``base.htm`` *before* the ``links()`` call.
 
 .. code-block:: html+mako
 
@@ -158,7 +158,7 @@ In some situations, it might make sense to create a single monstrosity that incl
 
 The above command will place the sitewide entry file in the homepage app, but it could be located anywhere.
 
-5. Specify the bundle as the JS link for all pages:
+4. Specify the bundle as the JS link for all pages:
 
 .. code-block:: python
 
