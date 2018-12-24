@@ -1,0 +1,25 @@
+Metadata-Version: 1.1
+Name: django-mako-plus
+Version: 5.7.7
+Summary: Django+Mako: Routing by Convention, Python-Centric Template Language
+Home-page: http://django-mako-plus.readthedocs.io/
+Author: Conan Albrecht
+Author-email: doconix@gmail.com
+License: Apache 2.0
+Download-URL: https://github.com/doconix/django-mako-plus/archive/master.zip
+Description: Routing Django to Mako since 2013.
+        
+        **Please visit http://django-mako-plus.readthedocs.io/ for tutorials, examples, and other documentation topics.**
+        
+        
+Platform: UNKNOWN
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Programming Language :: Python :: 3 :: Only
+Classifier: Framework :: Django
+Classifier: Framework :: Django :: 1.11
+Classifier: Framework :: Django :: 1.10
+Classifier: Framework :: Django :: 1.9
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: Apache Software License
+Classifier: Operating System :: OS Independent
+Classifier: Topic :: Software Development
