@@ -192,20 +192,11 @@ class Command(DMPCommandMixIn, BaseCommand):
 ###   Specialized provider run for the above management command
 
 class WebpackProviderRun(ProviderRun):
-    @classmethod
-    def initialize_providers(cls):
-        '''Initializes the providers (called from dmp app ready())'''
-        dmp = apps.get_app_config('django_mako_plus')
-        # regular content providers
-        cls.CONTENT_PROVIDERS = []
-        for provider_settings in dmp.options['WEBPACK_PROVIDERS']:
-            assert 'provider' in provider_settings, "Invalid entry in settings.py: WEBPACK_PROVIDERS item must have 'provider' key"
-            provider_class = import_string(provider_settings['provider'])
-            provider_class.initialize_options(provider_settings)
-            if provider_class.OPTIONS['enabled']:
-                cls.CONTENT_PROVIDERS.append(provider_class)
-        import pprint; pprint.pprint(cls.CONTENT_PROVIDERS)
+    SETTINGS_KEY = 'WEBPACK_PROVIDERS'
 
     def get_template_inheritance(self, tself):
-        '''Returns a list of the template inheritance of tself, starting with the oldest ancestor'''
+        '''
+        Normally, this returns a list of the template inheritance of tself, starting with the oldest ancestor.
+        But for the webpack one, we just want the template itself, without any ancestors.
+        '''
         return [ tself.template ]

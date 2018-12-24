@@ -62,7 +62,7 @@ class WebpackJsLinkProvider(JsLinkProvider):
             self.version_id,
         )
         attrs['onload'] = "DMP_CONTEXT.checkBundleLoaded('{}')".format(provider_run.uid)
-        if self.OPTIONS['async']:
+        if self.options['async']:
             attrs['async'] = 'async'
         return '<script{}></script>'.format(flatatt(attrs))
 

@@ -4,6 +4,7 @@ import os
 import os.path
 import shutil
 import collections
+import logging
 from .base import BaseProvider
 from ..util import log
 from ..command import run_command
@@ -18,16 +19,23 @@ class CompileProvider(BaseProvider):
     When settings.DEBUG=True, checks for a recompile every request.
     When settings.DEBUG=False, checks for a recompile only once per server run.
     '''
-    def __init__(self, template):
-        super().__init__(template)
+    def __init__(self, template, options):
+        super().__init__(template, options)
         self.sourcepath = os.path.join(settings.BASE_DIR if settings.DEBUG else settings.STATIC_ROOT, self.build_sourcepath())
         self.targetpath = os.path.join(settings.BASE_DIR if settings.DEBUG else settings.STATIC_ROOT, self.build_targetpath())
         # since this is in the constructor, it runs only one time per server
         # run when in production mode
-        if self.needs_compile:
+        if not os.path.exists(self.sourcepath):
+            msg = 'skipping nonexistent file'
+        elif self.needs_compile:
+            msg = 'compiling file'
             if not os.path.exists(os.path.dirname(self.targetpath)):
                 os.makedirs(os.path.dirname(self.targetpath))
             run_command(*self.build_command())
+        else:
+            msg = 'already up to date'
+        if log.isEnabledFor(logging.DEBUG):
+            log.debug('%s created for %s: [%s]', repr(self), self.sourcepath, msg)
 
     DEFAULT_OPTIONS = {
         'group': 'styles',
@@ -61,8 +69,8 @@ class CompileProvider(BaseProvider):
 
     def build_sourcepath(self):
         # if defined in settings, run the function or return the string
-        if self.OPTIONS['sourcepath'] is not None:
-            return self.OPTIONS['sourcepath'](self) if callable(self.OPTIONS['sourcepath']) else self.OPTIONS['sourcepath']
+        if self.options['sourcepath'] is not None:
+            return self.options['sourcepath'](self) if callable(self.options['sourcepath']) else self.options['sourcepath']
         # build the default
         if self.app_config is None:
             log.warn('{} skipped: template %s not in project subdir and `targetpath` not in settings', (self.__class__.__qualname__, self.template_relpath))
@@ -73,8 +81,8 @@ class CompileProvider(BaseProvider):
 
     def build_targetpath(self):
         # if defined in settings, run the function or return the string
-        if self.OPTIONS['targetpath'] is not None:
-            return self.OPTIONS['targetpath'](self) if callable(self.OPTIONS['targetpath']) else self.OPTIONS['targetpath']
+        if self.options['targetpath'] is not None:
+            return self.options['targetpath'](self) if callable(self.options['targetpath']) else self.options['targetpath']
         # build the default
         if self.app_config is None:
             log.warn('{} skipped: template %s not in project subdir and `targetpath` not in settings', (self.__class__.__qualname__, self.template_relpath))
@@ -86,8 +94,8 @@ class CompileProvider(BaseProvider):
     def build_command(self):
         '''Returns the command to run, as a list (see subprocess module)'''
         # if defined in settings, run the function or return the string
-        if self.OPTIONS['command']:
-            return self.OPTIONS['command'](self) if callable(self.OPTIONS['command']) else self.OPTIONS['command']
+        if self.options['command']:
+            return self.options['command'](self) if callable(self.options['command']) else self.options['command']
         # build the default
         return self.build_default_command()
 

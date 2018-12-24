@@ -1,10 +1,10 @@
 from django.utils.module_loading import import_string
-
+import json
+import logging
 from ..version import __version__
 from ..util import log
 from .base import BaseProvider
 
-import json
 
 ###################################
 ###  JS Context Provider
@@ -24,10 +24,12 @@ class JsContextProvider(BaseProvider):
         'encoder': 'django.core.serializers.json.DjangoJSONEncoder',
     }
 
-    def __init__(self, template):
-        super().__init__(template)
-        self.encoder = import_string(self.OPTIONS['encoder'])
+    def __init__(self, template, options):
+        super().__init__(template, options)
+        self.encoder = import_string(self.options['encoder'])
         self.template = "{}/{}".format(self.app_config.name, self.template_relpath)
+        if log.isEnabledFor(logging.DEBUG):
+            log.debug('%s created', repr(self))
 
     def start(self, provider_run, data):
         data['templates'] = []

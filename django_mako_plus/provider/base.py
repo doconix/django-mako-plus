@@ -1,6 +1,7 @@
 from django.apps import apps
 from django.conf import settings
 import os, inspect
+import logging
 from ..util import log
 
 
@@ -19,7 +20,7 @@ class BaseProvider(object):
 
     Always set:
         self.template           Mako template object
-        self.OPTIONS            The combined options from the provider, its supers, and settings.py
+        self.options            The combined options from the provider, its supers, and settings.py
         self.template_ext       Template extension.
 
     If app can be inferred (None if not):
@@ -37,20 +38,9 @@ class BaseProvider(object):
         # whether enabled (see "Dev vs. Prod" in the DMP docs)
         'enabled': True,
     }
-    OPTIONS = {}
 
     @classmethod
-    def initialize_options(cls, provider_settings):
-        '''
-        Combines options from all bases and from settings.py.
-        This is called at system startup by DMP AppConfig.
-        '''
-        for base in reversed(inspect.getmro(cls)):
-            cls.OPTIONS.update(getattr(base, 'DEFAULT_OPTIONS', {}))
-        cls.OPTIONS.update(provider_settings)
-
-    @classmethod
-    def instance_for_template(cls, template):
+    def instance_for_template(cls, template, options):
         '''Returns an instance for the given template'''
         # Mako already caches template objects, so I'm attaching provider instances to templates
         provider_cache = getattr(template, TEMPLATE_ATTR_NAME, None)
@@ -62,13 +52,14 @@ class BaseProvider(object):
         except KeyError:
             pass
         # not cached yet, so create the object
-        instance = cls(template)
+        instance = cls(template, options)
         if not settings.DEBUG:
             provider_cache[cls] = instance
         return instance
 
-    def __init__(self, template):
+    def __init__(self, template, options):
         self.template = template
+        self.options = options
         self.app_config = None
         self.template_ext = None
         self.template_relpath = None
@@ -87,14 +78,14 @@ class BaseProvider(object):
     def __repr__(self):
         return '<{}{}: {}/{}>'.format(
             self.__class__.__qualname__,
-            '' if self.OPTIONS['enabled'] else ' (disabled)',
+            '' if self.options['enabled'] else ' (disabled)',
             self.app_config.name if self.app_config is not None else 'unknown',
             self.template_relpath if self.template_relpath is not None else self.template,
         )
 
     @property
     def group(self):
-        return self.OPTIONS['group']
+        return self.options['group']
 
     def start(self, provider_run, data):
         '''

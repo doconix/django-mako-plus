@@ -44,96 +44,21 @@ DEFAULT_OPTIONS = {
 
     # static file providers
     'CONTENT_PROVIDERS': [
-        {
-            # adds JS context - this should normally be listed FIRST
-            'provider': 'django_mako_plus.JsContextProvider',
-            # 'enabled': True,
-            # 'group': 'scripts',
-            # 'encoder': 'django.core.serializers.json.DjangoJSONEncoder',
-            # 'filepath': 'scripts/{template}.js',
-            # 'skip_duplicates': False
-        }, {
-            # generates links for app/styles/template.css
-            'provider': 'django_mako_plus.CssLinkProvider',
-            # 'enabled': True,
-            # 'group': 'styles',
-            # 'filepath': 'styles/{template}.css',
-            # 'skip_duplicates': True
-        }, {
-            # generates links for app/scripts/template.js
-            'provider': 'django_mako_plus.JsLinkProvider',
-            # 'enabled': True,
-            # 'group': 'scripts',
-            # 'async': False,
-            # 'filepath': 'scripts/{template}.js',
-            # 'skip_duplicates': False
-        }, {
-            # generic auto-compiler (superclass but can also be used directly)
-            'provider': 'django_mako_plus.CompileProvider',
-            'enabled': False,
-            # 'group': 'styles',
-            # 'command': ['echo', 'Subclasses should override this option'],
-            # 'sourcepath': 'styles/{template}.scss',
-            # 'targetpath': 'styles/{template}.css'
-        }, {
-            # autocompiles Scss files
-            'provider': 'django_mako_plus.CompileScssProvider',
-            'enabled': False,
-            # 'group': 'styles',
-            # 'command': [ '/usr/local/bin/sass', '--load-path=.', '{sourcepath}', '{targetpath}' ],
-            # 'sourcepath': 'styles/{template}.scss',
-            # 'targetpath': 'styles/{template}.css'
-        }, {
-            # autocompiles Less files
-            'provider': 'django_mako_plus.CompileLessProvider',
-            'enabled': False,
-            # 'group': 'styles',
-            # 'command': [ '/usr/local/bin/lessc', '--source-map', '{sourcepath}', '{targetpath}' ],
-            # 'sourcepath': 'styles/{template}.less',
-            # 'targetpath': 'styles/{template}.css'
-        }, {
-            # generic link generator (superclass but can also be used directly)
-            'provider': 'django_mako_plus.LinkProvider',
-            'enabled': False,
-            # 'group': 'styles',
-            # 'filepath': 'scripts/{template}.js',
-            # 'skip_duplicates': False
-        }, {
-            # generates links to app/styles/__bundle__.css (see DMP docs on webpack)
-            'provider': 'django_mako_plus.WebpackCssLinkProvider',
-            'enabled': False,
-            # 'group': 'styles',
-            # 'filepath': 'styles/__bundle__.css',
-            # 'skip_duplicates': True
-        }, {
-            # generates links to app/scripts/__bundle__.js (see DMP docs on webpack)
-            'provider': 'django_mako_plus.WebpackJsLinkProvider',
-            'enabled': False,
-            # 'group': 'scripts',
-            # 'async': False,
-            # 'filepath': 'scripts/__bundle__.js',
-            # 'skip_duplicates': True
-        },
+        { 'provider': 'django_mako_plus.JsContextProvider' },       # adds JS context - this should normally be listed FIRST
+        # { 'provider': 'django_mako_plus.CompileProvider' },         # generic auto-compiler
+        # { 'provider': 'django_mako_plus.CompileScssProvider' },     # autocompiles Scss files
+        # { 'provider': 'django_mako_plus.CompileLessProvider' },     # autocompiles Less files
+        # { 'provider': 'django_mako_plus.LinkProvider' },            # generic link generator
+        { 'provider': 'django_mako_plus.CssLinkProvider' },         # generates links for app/styles/template.css
+        { 'provider': 'django_mako_plus.JsLinkProvider' },          # generates links for app/scripts/template.js
+        # { 'provider': 'django_mako_plus.WebpackCssLinkProvider' },  # generates links to app/styles/__bundle__.css (see DMP docs on webpack)
+        # { 'provider': 'django_mako_plus.WebpackJsLinkProvider' },   # generates links to app/scripts/__bundle__.js (see DMP docs on webpack)
     ],
 
     # webpack file discovery (used by `manage.py dmp_webpack`)
     'WEBPACK_PROVIDERS': [
-        {
-            # generates links for app/styles/template.css
-            'provider': 'django_mako_plus.CssLinkProvider',
-            # 'enabled': True,
-            # 'group': 'styles',
-            # 'filepath': 'styles/{template}.css',
-            # 'skip_duplicates': True
-        }, {
-            # generates links for app/scripts/template.js
-            'provider': 'django_mako_plus.JsLinkProvider',
-            # 'enabled': True,
-            # 'group': 'scripts',
-            # 'async': False,
-            # 'filepath': 'scripts/{template}.js',
-            # 'skip_duplicates': False
-        },
+        { 'provider': 'django_mako_plus.CssLinkProvider' },         # generates links for app/styles/template.css
+        { 'provider': 'django_mako_plus.JsLinkProvider' },          # generates links for app/scripts/template.js
     ],
 
     # additional template dirs to search

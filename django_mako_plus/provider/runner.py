@@ -1,18 +1,26 @@
 from django.apps import apps
 from django.conf import settings
 from django.utils.module_loading import import_string
+from collections import namedtuple
 import io
 import logging
+import inspect
 from ..template import template_inheritance
 from ..util import log
 from ..uid import wuid
 
+
+# I can't keep the options inside the provider class itself because a given class
+# can be listed more than once in settings.py (with different options).
+# So instead I keep a list of the classes and their options here.
+ProviderClassInfo = namedtuple("ProviderClassInfo", [ 'cls', 'options' ])
 
 ####################################################
 ###   Main runner for providers
 
 class ProviderRun(object):
     '''A run through the providers for tself and its ancestors'''
+    SETTINGS_KEY = 'CONTENT_PROVIDERS'
     CONTENT_PROVIDERS = []
 
     @classmethod
@@ -20,12 +28,19 @@ class ProviderRun(object):
         '''Initializes the providers (called from dmp app ready())'''
         dmp = apps.get_app_config('django_mako_plus')
         # regular content providers
-        for provider_settings in dmp.options['CONTENT_PROVIDERS']:
+        cls.CONTENT_PROVIDERS = []
+        for provider_settings in dmp.options[cls.SETTINGS_KEY]:
+            # import the class for this provider
             assert 'provider' in provider_settings, "Invalid entry in settings.py: CONTENT_PROVIDERS item must have 'provider' key"
-            provider_class = import_string(provider_settings['provider'])
-            provider_class.initialize_options(provider_settings)
-            if provider_class.OPTIONS['enabled']:
-                cls.CONTENT_PROVIDERS.append(provider_class)
+            provider_cls = import_string(provider_settings['provider'])
+            # combine options from all of its bases, then from settings.py
+            options = {}
+            for base in reversed(inspect.getmro(provider_cls)):
+                options.update(getattr(base, 'DEFAULT_OPTIONS', {}))
+            options.update(provider_settings)
+            # add to the list
+            if options['enabled']:
+                cls.CONTENT_PROVIDERS.append(ProviderClassInfo(provider_cls, options))
 
 
     def __init__(self, tself, group=None):
@@ -49,8 +64,8 @@ class ProviderRun(object):
         self.template_providers = []
         for template in self.get_template_inheritance(tself):
             providers = []
-            for provider_class in self.CONTENT_PROVIDERS:
-                provider = provider_class.instance_for_template(template)
+            for pci in self.CONTENT_PROVIDERS:
+                provider = pci.cls.instance_for_template(template, pci.options)
                 if group is None or provider.group == group:
                     providers.append(provider)
             self.template_providers.append(providers)
@@ -77,8 +92,6 @@ class ProviderRun(object):
         # provide() on the all provider lists in the chain
         for providers in self.template_providers:
             for provider, data in zip(providers, self.column_data):
-                if log.isEnabledFor(logging.DEBUG):
-                    log.debug('%s running', repr(provider))
                 provider.provide(self, data)
         # finish() on tself (the last template in the list)
         for providers in self.template_providers[-1:]:

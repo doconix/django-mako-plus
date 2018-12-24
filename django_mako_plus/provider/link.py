@@ -43,8 +43,8 @@ class LinkProvider(BaseProvider):
         'skip_duplicates': False,
     }
 
-    def __init__(self, template):
-        super().__init__(template)
+    def __init__(self, template, options):
+        super().__init__(template, options)
         self.filepath = os.path.join(
             settings.BASE_DIR if settings.DEBUG else settings.STATIC_ROOT,
             self.build_source_filepath()
@@ -65,8 +65,8 @@ class LinkProvider(BaseProvider):
 
     def build_source_filepath(self):
         # if defined in settings, run the function or return the string
-        if self.OPTIONS['filepath'] is not None:
-            return self.OPTIONS['filepath'](self) if callable(self.OPTIONS['filepath']) else self.OPTIONS['filepath']
+        if self.options['filepath'] is not None:
+            return self.options['filepath'](self) if callable(self.options['filepath']) else self.options['filepath']
         # build the default
         if self.app_config is None:
             log.warn('{} skipped: template %s not in project subdir and `targetpath` not in settings', (self.__class__.__qualname__, self.template_relpath))
@@ -80,8 +80,8 @@ class LinkProvider(BaseProvider):
 
     def build_target_link(self, provider_run, data):
         # if defined in settings, run the function or return the string
-        if self.OPTIONS['link'] is not None:
-            return self.OPTIONS['link'](self) if callable(self.OPTIONS['link']) else self.OPTIONS['link']
+        if self.options['link'] is not None:
+            return self.options['link'](self) if callable(self.options['link']) else self.options['link']
         # build the default
         if self.app_config is None:
             log.warn('{} skipped: template %s not in project subdir and `targetpath` not in settings', (self.__class__.__qualname__, self.template_relpath))
@@ -95,7 +95,7 @@ class LinkProvider(BaseProvider):
 
     def start(self, provider_run, data):
         # add a set to the request (fallback to provider_run if request is None) for skipping duplicates
-        if self.OPTIONS['skip_duplicates']:
+        if self.options['skip_duplicates']:
             data['seen'] = getdefaultattr(
                 provider_run.request.dmp if provider_run.request is not None else provider_run,
                 '_LinkProvider_Filename_Cache_',
@@ -111,7 +111,7 @@ class LinkProvider(BaseProvider):
         if self.mtime == 0:
             return
         # short circut if we're skipping duplicates and we've already seen this one
-        if self.OPTIONS['skip_duplicates']:
+        if self.options['skip_duplicates']:
             if filepath in data['seen']:
                 if log.isEnabledFor(logging.DEBUG):
                     log.debug('%s skipped duplicate %s', repr(self), self.filepath)
@@ -197,6 +197,6 @@ class JsLinkProvider(LinkProvider):
             ),
             self.version_id,
         )
-        if self.OPTIONS['async']:
+        if self.options['async']:
             attrs['async'] = "async"
         return '<script{}></script>'.format(flatatt(attrs))
