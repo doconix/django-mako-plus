@@ -80,10 +80,10 @@
 
             // if a string, assume it is a context name in format "app/template"
             else if (typeof option === 'string' || option instanceof String) {
-                var namemap = DMP_CONTEXT.contextsByName[option];
-                if (typeof namemap !== "undefined") {
-                    for (var i = 0; i < namemap.length; i++) {
-                        var c = DMP_CONTEXT.contexts[namemap[i]];
+                var contextids = DMP_CONTEXT.contextsByName[option];
+                if (typeof contextids !== "undefined") {
+                    for (var i = 0; i < contextids.length; i++) {
+                        var c = DMP_CONTEXT.contexts[contextids[i]];
                         if (typeof c !== "undefined") {
                             ret.push(c.data);
                         }
@@ -92,7 +92,7 @@
             }
 
             // if script[current-context="something"]
-            else if (option.nodeType === 1 && option.nodeName.toLowerCase() == 'script' && option.getAttribute('data-context')) {
+            else if (option && option.nodeType === 1 && option.nodeName.toLowerCase() == 'script' && option.getAttribute('data-context')) {
                 var c = DMP_CONTEXT.contexts[option.getAttribute('data-context')];
                 if (typeof c !== "undefined") {
                     ret.push(c.data);
@@ -140,7 +140,7 @@
             // everything is here, so run the bundle functions
             // for each time the triggerBundleContext() was called
             while (context.triggerCount > 0) {
-                context.triggerCount--;
+                context.triggerCount = Math.max(0, context.triggerCount - 1);
                 for (var i = 0; i < context.templates.length; i++) {
                     var template = context.templates[i];
                     if (DMP_CONTEXT.bundleFunctions[template]) {    // might be null (if no scripts for the template)
@@ -163,6 +163,24 @@
             // increase the trigger count and check the bundle
             context.triggerCount++;
             DMP_CONTEXT.checkBundleLoaded(contextid);
+        },
+
+        /*
+            Triggers a template context to run a bundle by template name.
+            Be careful calling this method for a supertemplate (like base.htm)
+            because it will trigger every context it is part of.
+        */
+        triggerBundleByTemplate(template) {
+            var contextids = DMP_CONTEXT.contextsByName[template];
+            console.log(DMP_CONTEXT.contextsByName);
+            if (typeof contextids !== "undefined") {
+                for (var i = 0; i < contextids.length; i++) {
+                    var c = DMP_CONTEXT.contexts[contextids[i]];
+                    if (typeof c !== "undefined") {
+                        DMP_CONTEXT.triggerBundleContext(contextids[i]);
+                    }
+                }
+            }
         }
 
     };//DMP_CONTEXT
