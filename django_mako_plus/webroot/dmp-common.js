@@ -10,7 +10,7 @@
 
     // connect the dmp object
     window.DMP_CONTEXT = {
-        __version__: '5.7.7',   // DMP version to check for mismatches
+        __version__: '5.7.9',   // DMP version to check for mismatches
         contexts: {},           // contextid -> context1
         contextsByName: {},     // app/template -> [ context1, context2, ... ]
         lastContext: null,      // last inserted context (see getAll() below)
@@ -21,6 +21,7 @@
             if (DMP_CONTEXT.__version__ != version) {
                 console.warn('DMP framework version is ' + version + ', while dmp-common.js is ' + DMP_CONTEXT.__version__ + '. Unexpected behavior may occur.');
             }
+
             // link this contextid to the data and templates
             DMP_CONTEXT.contexts[contextid] = {
                 id: contextid,
@@ -29,6 +30,7 @@
                 triggerCount: 0
             };
             DMP_CONTEXT.lastContext = DMP_CONTEXT.contexts[contextid];
+
             // reverse lookups by name to contextid
             for (var i = 0; i < templates.length; i++) {
                 if (typeof DMP_CONTEXT.contextsByName[templates[i]] === "undefined") {
@@ -164,24 +166,6 @@
             context.triggerCount++;
             DMP_CONTEXT.checkBundleLoaded(contextid);
         },
-
-        /*
-            Triggers a template context to run a bundle by template name.
-            Be careful calling this method for a supertemplate (like base.htm)
-            because it will trigger every context it is part of.
-        */
-        triggerBundleByTemplate(template) {
-            var contextids = DMP_CONTEXT.contextsByName[template];
-            console.log(DMP_CONTEXT.contextsByName);
-            if (typeof contextids !== "undefined") {
-                for (var i = 0; i < contextids.length; i++) {
-                    var c = DMP_CONTEXT.contexts[contextids[i]];
-                    if (typeof c !== "undefined") {
-                        DMP_CONTEXT.triggerBundleContext(contextids[i]);
-                    }
-                }
-            }
-        }
 
     };//DMP_CONTEXT
 

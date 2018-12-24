@@ -2,7 +2,7 @@ Under the Hood: Providers
 ================================
 
 
-The framework is built to be extended for custom file types.  When you call ``links()`` within a template, DMP iterates through a list of providers (``django_mako_plus.BaseProvider`` subclasses).  You can customize the behavior of these providers in your ``settings.py`` file.
+The framework is built to be extended for custom file types.  When you call ``links(self)`` within a template, DMP iterates through a list of providers (``django_mako_plus.BaseProvider`` subclasses).  You can customize the behavior of these providers in your ``settings.py`` file.
 
 Here's a basic version:
 

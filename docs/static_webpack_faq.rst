@@ -1,10 +1,9 @@
-Webpack FAQ
-================
+Webpack - FAQ
+====================================
 
-If you haven't read `the DMP Webpack documentation </static_webpack.html>`_, please do so before reading this FAQ.
 
 How do I clear the generated bundle files?
--------------------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 In a terminal (Mac, Linux, or Windows+GitBash), issue these commands:
 
@@ -17,7 +16,7 @@ In a terminal (Mac, Linux, or Windows+GitBash), issue these commands:
 
 
 How do I use Sass (Less, TypeScript, etc.) with DMP Webpack?
---------------------------------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 One benefit to bundling is the output files from compiles like ``sass`` are piped right into bundles instead of as extra files in your project. Here's the steps:
 
@@ -83,7 +82,7 @@ Note in the above options, we're including ``.scss`` and ``.css`` (whenever they
 
 
 How do I create a vendor bundle?
------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 In the `tutorial </static_webpack.html>`_, we created one bundle per app.  These bundles can grow large as you enjoy the convenience of ``npm init`` and link to more and more things in ``node_modules/``. Since each bundle is self-contained, there will be a lot of duplication between bundles. For example, the webpack bootstrapping JS will be in every one of your bundles--even if you don't specifically import any extra modules. At some point, and usually sooner than later, you should probably make a vendor bundle.
 
@@ -125,7 +124,7 @@ The above config creates a single bundle file in ``homepage/scripts/__bundle__.v
     python3 manage.py dmp_webpack --overwrite
     npm run watch
 
-4. Reference your vendor bundle in ``base.htm`` *before* the ``links()`` call.
+4. Reference your vendor bundle in ``base.htm`` *before* the ``links(self)`` call.
 
 .. code-block:: html+mako
 
@@ -135,7 +134,7 @@ The above config creates a single bundle file in ``homepage/scripts/__bundle__.v
 
 
 How do I create a single, sitewide bundle?
------------------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 In some situations, it might make sense to create a single monstrosity that includes the scripts for every DMP app on your site.   Let's create a single ``__entry__.js`` file for your entire site
 
@@ -170,11 +169,30 @@ The above command will place the sitewide entry file in the homepage app, but it
         },
     ],
 
-The above settings hard code the bundle location for all apps. Since 'duplicates' is False, the bundle will be included once per request, even if your base template (the ``links()`` call) is run multiple times by subtemplates.
+The above settings hard code the bundle location for all apps. Since 'duplicates' is False, the bundle will be included once per request, even if your base template (the ``links(self)`` call) is run multiple times by subtemplates.
+
+See also the question (below) regarding creating links manually.
+
+
+How do I specify the <script> link myself?
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This is easy to do as long as you call the bundle functions properly. Let's review the provider process:
+
+1. Your template calls ``links(self)``, which triggers a "provider run". DMP generates a unique ``contextid`` and then iterates through the providers and template inheritance. For this example, suppose the context id is ``12345``.
+2. ``[JsContextProvider]`` maps a "context" object to key ``12345`` to include the variables from the python ``render`` call.
+3. ``[WebpackJsLinkProvider]`` creates the script link, ``<script data-context="12345" onLoad="DMP_CONTEXT.checkBundleLoaded('12345')">...</script>``, which makes the bundle functions accessible to the page.
+4. ``[WebpackJsLinkProvider]`` creates a second script link, ``<script data-context="12345">DMP_CONTEXT.triggerBundleContext("12345")</script>``, which triggers the bundle functions for the template (and ancestors).
+
+#1 and #2 should remain as they are because DMP has the information for the context. However, #3 and #4 can be replaced by custom links in your base template:
+
+* Remove the ``WebpackJsLinkProvider`` in settings.py. You only need to leave the ``JsContextProvider`` in place.
+* *After ``dmp-common.js`` and ``links()`` run*, add a custom call to your bundle(s) in your base template. This replaces #3 above.  You only need the "onLoad" event if your script tag is async.
+* After the bundle script tag, trigger the context with a custom script: ``<script>DMP_CONTEXT.triggerBundleContext(DMP_CONTEXT.lastContext.id)</script>``. This works because the last context added by ``links()`` should be the current page. This replaces #4 above, and it runs the correct functions in the bundle. If your script tag was async, dmp-common.js waits if needed for the bundle to load.
 
 
 How do I create multi-app bundles?
--------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Somewhere in between a sitewide bundle and app-specific bundles lives the multi-app bundle.  Suppose you want app1 and app2 in one bundle and app3, app4, and app5 in another.  The following commands create the two needed entry files:
 

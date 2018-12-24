@@ -11,7 +11,7 @@ Open ``base.htm`` and look at the following code:
     ## render the static file links for this template
     ${ django_mako_plus.links(self) }
 
-The calls to ``links()`` include the ``<link>`` and ``<script>`` tags for the template name and all of its supertemplates. These links are placed at the end of your ``<head>`` section.  (Just a few years ago, common practice was to place script tags at the end of the body, but modern browsers with asyncronous and deferred scripts have put them back in the body.)
+The calls to ``links(self)`` include the ``<link>`` and ``<script>`` tags for the template name and all of its supertemplates. These links are placed at the end of your ``<head>`` section.  (Just a few years ago, common practice was to place script tags at the end of the body, but modern browsers with asyncronous and deferred scripts have put them back in the body.)
 
 This all works because the ``index.html`` template extends from the ``base.htm`` template. If you fail to inherit from ``base.htm`` or ``base_ajax.htm``, DMP won't be able to include the support files.
 

@@ -10,7 +10,7 @@ The changes you need to worry about:
 1. Rerun ``python manage.py dmp_webpack --overwrite`` to generate the altered entry file syntax.
 2. Remove ``django_mako_plus.WebpackJsCallProvider`` from your settings.py. This functionality is now in the webpack link provider.
 3. Remove ``django_mako_plus.WebpackCssLinkProvider`` from your settings.py. This functionality represents a very specialized use case, and it's better left to individual projects to do.
-3. `version_id` is now calculated automatically for static files. It has been removed from the links() signature.
+3. `version_id` is now calculated automatically for static files. It has been removed from the links(self) signature.
 
 The changes you probably don't need to worry about:
 
@@ -153,7 +153,7 @@ I refactored the webpack providers and workflow, but I doubt anyone is using the
 
     *Important:* As noted in the table above, search your codebase for ``request.dmp_render`` and replace with ``request.dmp.render``.
 
-3. Static files (CSS/JS): MakoCssProvider, MakoJsProvider, link_css, link_js, link_template_css, link_template_js are removed.  Instad, use ${ django_mako_plus.links() } once in the <head> section of your base page.
+3. Static files (CSS/JS): MakoCssProvider, MakoJsProvider, link_css, link_js, link_template_css, link_template_js are removed.  Instad, use ${ django_mako_plus.links(self) } once in the <head> section of your base page.
 
 4. RedirectException: Optional parameters 'permanent' and 'as_javascript' are removed.  Use the subclasses by these names instead.
 
