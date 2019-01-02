@@ -47,7 +47,7 @@ class JsContextProvider(BaseProvider):
                 'page': provider_run.request.dmp.page if provider_run.request is not None else None,
             },
         }
-        for k in provider_run.context.kwargs:
+        for k in provider_run.context.keys():
             if isinstance(k, jscontext):
                 value = provider_run.context[k]
                 context_data[k] = value.__jscontext__() if hasattr(value, '__jscontext__') else value

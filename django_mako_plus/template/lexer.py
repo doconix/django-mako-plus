@@ -26,7 +26,7 @@ MAKO_ESCAPE_REPLACEMENTS = {
 class DMPLexer(Lexer):
     '''
     Subclass of Mako's Lexer, which is used during compilation of
-    templates.  This subclass injects `process_exception()`
+    templates.  This subclass injects ExpressionPostProcessor
     as the final filter on every expression.  Overriding append_node()
     is a hack, but it's the only way I can find to hook into Mako's
     compile process without modifying Mako directly.
@@ -63,10 +63,9 @@ EMPTY_DICT = {}
 class ExpressionPostProcessor(object):
     '''
     Object that is called as the final filter on every template
-    expression ${...}.  When created, the object keeps the
-    context so it can be used later when the filter is run by Mako.
+    expression ${...}.
 
-    Right now this object only does autoescaping. However, it is placed
+    Right now this object does autoescaping. However, it is placed
     on *every* expression so we have a hook for future post-processing
     of expressions.
 
