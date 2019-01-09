@@ -87,7 +87,7 @@ When you deploy to a web server, run ``dmp collectstatic`` to collect your stati
 ::
 
     python3 manage.py collectstatic
-    python3 manage.py dmp_collectstatic --overwrite
+    python3 manage.py dmp_collectstatic --overwrite (uses python3 manage.py dmp collectstatic instead in the newer versions)
 
 Point your web server (Apache, Nginx, IIS, etc.) to serve this folder directly to browsers. For example, in Nginx, you'd set the following:
 
