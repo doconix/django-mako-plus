@@ -28,7 +28,7 @@ Suppose we want to reload the server time every few seconds, but we don't want t
     </%block>
 
 Note the new ``<button>`` element in the above html. Next, we'll add
-Javascript to the ``homepage/scripts/index.jsm`` file that runs when the
+Javascript to the ``homepage/scripts/index.js`` file that runs when the
 button is clicked:
 
 .. code-block:: javascript
@@ -37,7 +37,7 @@ button is clicked:
         // update the time every n seconds
         window.setInterval(function() {
             $('.browser-time').text('The current browser time is ' + new Date());
-        }, ${ request.dmp.urlparams[1] });
+        }, 1000);
 
         // update server time button
         $('#server-time-button').click(function() {
@@ -117,7 +117,7 @@ Note the function is decorated with ``@view_function``, and it contains the func
 In this case, getting the server time is essentially "part" of the index page, so it makes sense to put the ajax endpoint right in the same file. Both ``process_request`` and ``gettime`` serve content for the ``/homepage/index/`` html page. Having two view files is actually more confusing to a reader of your code because they are so related. Placing two view functions (that are highly related like these are) in the same file keeps everything together and makes your code more concise and easier to understand.
 
 To take advantage of this new function, let's modify the url in
-``homepage/scripts/index.jsm``:
+``homepage/scripts/index.js``:
 
 .. code-block:: javascript
 
