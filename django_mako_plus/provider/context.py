@@ -5,7 +5,6 @@ from ..version import __version__
 from ..util import log
 from .base import BaseProvider
 
-
 ###################################
 ###  JS Context Provider
 
@@ -45,6 +44,7 @@ class JsContextProvider(BaseProvider):
                 'template': self.template,
                 'app': provider_run.request.dmp.app if provider_run.request is not None else None,
                 'page': provider_run.request.dmp.page if provider_run.request is not None else None,
+                'log': log.isEnabledFor(logging.DEBUG),
             },
         }
         for k in provider_run.context.keys():

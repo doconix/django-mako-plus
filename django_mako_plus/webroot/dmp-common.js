@@ -10,16 +10,18 @@
 
     // connect the dmp object
     window.DMP_CONTEXT = {
-        __version__: '5.7.9',   // DMP version to check for mismatches
+        __version__: '5.7.10',   // DMP version to check for mismatches
         contexts: {},           // contextid -> context1
         contextsByName: {},     // app/template -> [ context1, context2, ... ]
         lastContext: null,      // last inserted context (see getAll() below)
         bundleFunctions: {},    // functions that wraps template JS/CSS (see DMP's webpack docs)
+        logEnabled: null,       // whether the log is DEBUG in settings
 
         /* Adds data to the DMP context under the given key */
         set: function(version, contextid, data, templates) {
+            DMP_CONTEXT.logEnabled = DMP_CONTEXT.logEnabled || data.__router__.log;
             if (DMP_CONTEXT.__version__ != version) {
-                console.warn('DMP framework version is ' + version + ', while dmp-common.js is ' + DMP_CONTEXT.__version__ + '. Unexpected behavior may occur.');
+                DMP_CONTEXT.log('DMP version on server is', version, ' but dmp-common.js is', DMP_CONTEXT.__version__, '- unexpected behavior may occur.');
             }
 
             // link this contextid to the data and templates
@@ -104,19 +106,34 @@
             return ret;
         },
 
+        /* Enabled when DMP's logger is set to DEBUG in settings */
+        log() {
+            if (DMP_CONTEXT.logEnabled) {
+                var arguments_ar = Array.prototype.slice.call(arguments);
+                console.log('[DMP] ' + arguments_ar.join(' '));
+            }
+        },
 
         ////////////////////////////////////////////////////////////////////
         ///  Webpack bundling functions
 
         /*
-            Links a bundle-defined template function so it can be called
+            Links bundle-defined template functions so they can be called
             from DMP_CONTEXT (i.e. outside the bundle). We only allow functions
             to link once so state isn't overwritten by duplicate script tags.
         */
-        linkBundleFunction(template, func) {
-            if (typeof DMP_CONTEXT.bundleFunctions[template] === "undefined") {
-                DMP_CONTEXT.bundleFunctions[template] = func;
+        loadBundle(template_functions) {
+            var templates = Object.keys(template_functions);
+            var results = [];
+            for (var i = 0; i < templates.length; i++) {
+                if (typeof DMP_CONTEXT.bundleFunctions[templates[i]] === "undefined") {
+                    results.push(templates[i] + ' (linked)');
+                    DMP_CONTEXT.bundleFunctions[templates[i]] = template_functions[templates[i]];
+                }else{
+                    results.push(templates[i] + ' (skipped because template already linked)');
+                }
             }
+            DMP_CONTEXT.log('processed bundle with', templates.length, 'functions:', results.join(', '));
         },
 
         /*
@@ -132,21 +149,26 @@
             }
 
             // are all the bundles we need loaded?
+            var notLoaded = [];
             for (var i = 0; i < context.templates.length; i++) {
                 var template = context.templates[i];
                 if (typeof DMP_CONTEXT.bundleFunctions[template] === "undefined") {
-                    return;
+                    notLoaded.push(template);
                 }
+            }
+            if (notLoaded.length > 0) {
+                DMP_CONTEXT.log('context', contextid, 'waiting for', notLoaded.length, 'functions to link:', notLoaded.join(', '));
+                return;
             }
 
             // everything is here, so run the bundle functions
             // for each time the triggerBundleContext() was called
             while (context.triggerCount > 0) {
                 context.triggerCount = Math.max(0, context.triggerCount - 1);
+                DMP_CONTEXT.log('triggering linked functions:', context.templates.join(', '))
                 for (var i = 0; i < context.templates.length; i++) {
-                    var template = context.templates[i];
-                    if (DMP_CONTEXT.bundleFunctions[template]) {    // might be null (if no scripts for the template)
-                        DMP_CONTEXT.bundleFunctions[template]();
+                    if (DMP_CONTEXT.bundleFunctions[context.templates[i]]) {    // might be null (if no scripts for the template)
+                        DMP_CONTEXT.bundleFunctions[context.templates[i]]();
                     }
                 }
             }

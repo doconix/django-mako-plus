@@ -102,17 +102,19 @@ class Command(DMPCommandMixIn, BaseCommand):
 // Contains links for ${ 'app' if len(enapps) == 1 else 'apps' }: ${ ', '.join(sorted([ a.name for a in enapps ])) }
 
 (context => {
-%for (app, template), script_paths in script_map.items():
-  %if len(script_paths) == 0:
-    DMP_CONTEXT.linkBundleFunction("${ app }/${ template }", null);
-  %else:
-    DMP_CONTEXT.linkBundleFunction("${ app }/${ template }", () => {
-      %for path in script_paths:
-        require("./${ os.path.relpath(path, os.path.dirname(filename)) }");
-      %endfor
+    DMP_CONTEXT.loadBundle({
+        %for (app, template), script_paths in script_map.items():
+            %if len(script_paths) == 0:
+                "${ app }/${ template }": null,
+            %else:
+                "${ app }/${ template }": function() {
+                %for path in script_paths:
+                    require("./${ os.path.relpath(path, os.path.dirname(filename)) }");
+                %endfor
+                },
+            %endif
+        %endfor
     });
-  %endif
-%endfor
 })(DMP_CONTEXT.get());
 ''')
         with open(filename, 'w') as fout:

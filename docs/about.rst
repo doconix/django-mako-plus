@@ -52,7 +52,7 @@ Can I use both Mako and Django/Jinja2 syntax?
 
 Yes.  Django officially supports having two or more template engines active at the same time.  Third party apps likely use Django's templating system rather than Mako. The two templating systems work fine side by side.
 
-If you temporarily need to switch to Django templating syntax (even within a Mako file), `you can do that too <#using-django-and-jinja2-tags-and-syntax>`__.
+If you temporarily need to switch to Django templating syntax (even within a Mako file), `you can do that too <#using-django-and-jinja2-tags-and-syntax>`_.
 
 
 
