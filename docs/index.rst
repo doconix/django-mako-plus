@@ -69,10 +69,11 @@ Contents
 .. toctree::
     :maxdepth: 2
 
-    about
+    compare
     upgrade_notes
     install
     tutorial
+    faq
     basics
     static
     topics

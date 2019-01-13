@@ -192,7 +192,7 @@ Any entries in this list will be automatically included in templates throughout 
 Cleaning Up
 -----------
 
-DMP caches its compiled templates in subdirectories of each app. The default locations for each app are ``app/templates/__dmpcache__``, ``app/scripts/__dmpcache__``, and ``app/styles/__dmpcache__``, although the exact name depends on your settings.py. Normally, these cache directories are hidden and warrant your utmost apathy. However, there are times when DMP fails to update a cached template as it should. Or you might just need a pristine project without these generated files. This can be done with a Unix find command or through DMP's ``dmp cleanup`` management command:
+DMP caches its compiled templates in subdirectories of each app. The default locations for each app are ``app/templates/__dmpcache__``, ``app/scripts/__dmpcache__``, and ``app/styles/__dmpcache__``, although the exact name depends on your settings.py. Normally, these cache directories are hidden and warrant your utmost apathy. However, there are times when DMP fails to update a cached template as it should. Or you might just need a pristine project without these generated files. This can be done with a Unix find command or through DMP's ``dmp_cleanup`` management command:
 
 ::
 

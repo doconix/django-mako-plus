@@ -142,20 +142,20 @@ LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
     'formatters': {
-        'dmp_simple': {
+        'django_mako_plus_simple': {
             'format': '%(levelname)s::DMP %(message)s'
         },
     },
     'handlers': {
-        'dmp_console':{
+        'django_mako_plus_console':{
             'class':'logging.StreamHandler',
-            'formatter': 'dmp_simple'
+            'formatter': 'django_mako_plus_simple'
         },
     },
     'loggers': {
         'django_mako_plus': {
-            'handlers': ['dmp_console'],
-            'level': 'INFO',
+            'handlers': ['django_mako_plus_console'],
+            'level': 'DEBUG',
             'propagate': False,
         },
     },

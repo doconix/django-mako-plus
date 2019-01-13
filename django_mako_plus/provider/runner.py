@@ -7,7 +7,7 @@ import logging
 import inspect
 from ..template import template_inheritance
 from ..util import log, qualified_name
-from ..uid import wuid
+from ..uid import uid
 
 # I can't keep the options inside the provider class itself because a given class
 # can be listed more than once in settings.py (with different options).
@@ -50,8 +50,7 @@ class ProviderRun(object):
         tself:              `self` object from a Mako template (available during rendering).
         group:              provider group to include (defaults to all groups if None)
         '''
-        dmp = apps.get_app_config('django_mako_plus')
-        self.uid = wuid()           # a unique id for this run
+        self.uid = uid(encode=True)     # the unique context id for this run
         self.request = tself.context.get('request')
         self.context = tself.context
         self.buffer = io.StringIO()

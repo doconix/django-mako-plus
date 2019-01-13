@@ -21,7 +21,7 @@
         set: function(version, contextid, data, templates) {
             DMP_CONTEXT.logEnabled = DMP_CONTEXT.logEnabled || data.__router__.log;
             if (DMP_CONTEXT.__version__ != version) {
-                DMP_CONTEXT.log('framework version on server is', version, ' but dmp-common.js is', DMP_CONTEXT.__version__, '- unexpected behavior may occur.');
+                DMP_CONTEXT.log(['Framework version on server is', version, ' but dmp-common.js is', DMP_CONTEXT.__version__, '- unexpected behavior may occur.']);
             }
 
             // link this contextid to the data and templates
@@ -40,6 +40,8 @@
                 }
                 DMP_CONTEXT.contextsByName[templates[i]].push(contextid);
             }
+
+            DMP_CONTEXT.log(["Context"], DMP_CONTEXT.contexts[contextid]);
         },
 
         /*
@@ -106,14 +108,6 @@
             return ret;
         },
 
-        /* Enabled when DMP's logger is set to DEBUG in settings */
-        log() {
-            if (DMP_CONTEXT.logEnabled) {
-                var arguments_ar = Array.prototype.slice.call(arguments);
-                console.log('[DMP] ' + arguments_ar.join(' '));
-            }
-        },
-
         ////////////////////////////////////////////////////////////////////
         ///  Webpack bundling functions
 
@@ -123,7 +117,7 @@
         */
         loadBundle(template_functions) {
             var templates = Object.keys(template_functions);
-            DMP_CONTEXT.log('linking bundle with', templates.length, 'functions:', templates.join(', '));
+            DMP_CONTEXT.log(['Linking bundle with', templates.length, 'functions'], templates);
             for (var i = 0; i < templates.length; i++) {
                 DMP_CONTEXT.bundleFunctions[templates[i]] = template_functions[templates[i]];
             }
@@ -150,7 +144,7 @@
                 }
             }
             if (notLoaded.length > 0) {
-                DMP_CONTEXT.log('context', contextid, 'waiting for', notLoaded.length, 'functions to link:', notLoaded.join(', '));
+                DMP_CONTEXT.log(['Context', contextid, 'waiting for', notLoaded.length, 'functions to link'], notLoaded);
                 return;
             }
 
@@ -159,7 +153,7 @@
             while (context.callCount > 0) {
                 context.callCount = Math.max(0, context.callCount - 1);
                 for (var i = 0; i < context.templates.length; i++) {
-                    DMP_CONTEXT.log('calling:', context.templates[i]);
+                    DMP_CONTEXT.log(['Calling', context.templates[i]]);
                     DMP_CONTEXT.bundleFunctions[context.templates[i]]();
                 }
             }
@@ -179,6 +173,18 @@
             context.callCount++;
             DMP_CONTEXT.checkBundleLoaded(contextid);
         },
+
+
+        ////////////////////////////////////////////////////////////////////
+        ///  Helper functions
+
+        /* Enabled when DMP's logger is set to DEBUG in settings */
+        log(messages, data) {
+            if (DMP_CONTEXT.logEnabled) {
+                console.info('[DMP] ' + messages.join(' '), data);
+            }
+        },
+
 
     };//DMP_CONTEXT
 
