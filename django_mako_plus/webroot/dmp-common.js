@@ -10,7 +10,7 @@
 
     // connect the dmp object
     window.DMP_CONTEXT = {
-        __version__: '5.7.12',   // DMP version to check for mismatches
+        __version__: '5.7.13',   // DMP version to check for mismatches
         contexts: {},           // contextid -> context1
         contextsByName: {},     // app/template -> [ context1, context2, ... ]
         lastContext: null,      // last inserted context (see getAll() below)
@@ -29,7 +29,7 @@
                 id: contextid,
                 data: data,
                 templates: templates,
-                callCount: 0
+                pendingCalls: 0
             };
             DMP_CONTEXT.lastContext = DMP_CONTEXT.contexts[contextid];
 
@@ -150,8 +150,8 @@
 
             // everything is here, so run the bundle functions
             // for each time the callBundleContext() was called
-            while (context.callCount > 0) {
-                context.callCount = Math.max(0, context.callCount - 1);
+            while (context.pendingCalls > 0) {
+                context.pendingCalls = Math.max(0, context.pendingCalls - 1);
                 for (var i = 0; i < context.templates.length; i++) {
                     DMP_CONTEXT.log(['Calling', context.templates[i]]);
                     DMP_CONTEXT.bundleFunctions[context.templates[i]]();
@@ -170,7 +170,7 @@
             }
 
             // increase the trigger count and check the bundle
-            context.callCount++;
+            context.pendingCalls++;
             DMP_CONTEXT.checkBundleLoaded(contextid);
         },
 
