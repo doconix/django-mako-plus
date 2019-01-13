@@ -56,8 +56,8 @@ DEFAULT_OPTIONS = {
 
     # webpack file discovery (used by `manage.py dmp_webpack`)
     'WEBPACK_PROVIDERS': [
-        { 'provider': 'django_mako_plus.CssLinkProvider' },         # generates links for app/styles/template.css
         { 'provider': 'django_mako_plus.JsLinkProvider' },          # generates links for app/scripts/template.js
+        { 'provider': 'django_mako_plus.CssLinkProvider' },         # generates links for app/styles/template.css
     ],
 
     # additional template dirs to search

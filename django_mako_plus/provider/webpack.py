@@ -44,6 +44,6 @@ class WebpackJsLinkProvider(JsLinkProvider):
         # render (duplicates are skipped)
         super().finish(provider_run, data)
         if len(data['enabled']) > 0:
-            provider_run.write('<script data-context="{uid}">DMP_CONTEXT.triggerBundleContext("{uid}")</script>'.format(
+            provider_run.write('<script data-context="{uid}">DMP_CONTEXT.callBundleContext("{uid}")</script>'.format(
                 uid=provider_run.uid,
             ))

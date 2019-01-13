@@ -103,17 +103,13 @@ class Command(DMPCommandMixIn, BaseCommand):
 
 (context => {
     DMP_CONTEXT.loadBundle({
-        %for (app, template), script_paths in script_map.items():
-            %if len(script_paths) == 0:
-                "${ app }/${ template }": null,
-            %else:
-                "${ app }/${ template }": function() {
-                %for path in script_paths:
-                    require("./${ os.path.relpath(path, os.path.dirname(filename)) }");
-                %endfor
-                },
-            %endif
-        %endfor
+      %for (app, template), script_paths in script_map.items():
+        "${ app }/${ template }": function() {
+          %for path in script_paths:
+            require("./${ os.path.relpath(path, os.path.dirname(filename)) }");
+          %endfor
+        },
+      %endfor
     });
 })(DMP_CONTEXT.get());
 ''')
