@@ -1,5 +1,4 @@
-from datetime import datetime, timedelta
-import pytz
+from datetime import datetime, timedelta, timezone
 import random
 from . import TIME_BITS, COUNTER_BITS, SHARD_BITS, TIME_MASK, COUNTER_MASK, SHARD_MASK
 
@@ -84,28 +83,31 @@ def infinite_counter(minval, maxval):
 
 
 ############################################################################################
-###   Epoch converting
+###   Epoch converting of datetimes
+###
+###   datetime -> epoch:
+###       If dt is timezone-aware, it is converted to UTC before conversion to millis.
+###       If dt is naive, it is assumed to be UTC.
+###
+###   epoch -> datetime:
+###       The input millis must always be since UTC, not another time zone epoch.
+###       The return datetime will be naive (but essentially UTC), so to make it aware
+###       use:
+###           millis_to_datetime(...).replace(tzinfo=pytz.utc)
+###
+###       To make the datetime aware with a different timezone:
+###           dt = millis_to_datetime(...).replace(tzinfo=pytz.utc).astimezone(pytz.timezone('US/Eastern'))
+
+def dt_to_seconds(dt):
+    if dt.tzinfo:
+        dt = dt.astimezone(timezone.utc).replace(tzinfo=None)
+    return (dt - datetime(1970, 1, 1)) / timedelta(seconds=1)
 
 def dt_to_millis(dt):
-    '''
-    Returns the millis since unix UTC epoch.
-    If dt is timezone-aware, it is converted to UTC before conversion to millis.
-    If dt is naive, it is assumed to be UTC.
-    '''
-    if dt.tzinfo:
-        dt = dt.astimezone(pytz.utc).replace(tzinfo=None)
-    return 1000 * (dt - datetime(1970, 1, 1)) / timedelta(seconds=1)
+    return dt_to_seconds(dt) * 1000.0
 
+def seconds_to_dt(seconds):
+    return datetime.utcfromtimestamp(seconds)
 
 def millis_to_dt(millis):
-    '''
-    Returns a naive datetime for the given millis since unix UTC epoch.
-    The input millis must always be since UTC, not another time zone epoch.
-    The return datetime will be naive (but essentially UTC), so to make it aware
-    use:
-        millis_to_datetime(...).replace(tzinfo=pytz.utc)
-
-    To make the datetime aware with a different timezone:
-        dt = millis_to_datetime(...).replace(tzinfo=pytz.utc).astimezone(pytz.timezone('US/Eastern'))
-    '''
-    return datetime.utcfromtimestamp(millis / 1000)
+    return seconds_to_dt(millis / 1000.0)
