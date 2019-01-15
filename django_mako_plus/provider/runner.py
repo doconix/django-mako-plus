@@ -3,11 +3,11 @@ from django.conf import settings
 from django.utils.module_loading import import_string
 from collections import namedtuple
 import io
-import logging
 import inspect
+from uuid import uuid1
 from ..template import template_inheritance
-from ..util import log, qualified_name
-from ..uid import uid
+from ..util import qualified_name, b58enc
+
 
 # I can't keep the options inside the provider class itself because a given class
 # can be listed more than once in settings.py (with different options).
@@ -50,7 +50,8 @@ class ProviderRun(object):
         tself:              `self` object from a Mako template (available during rendering).
         group:              provider group to include (defaults to all groups if None)
         '''
-        self.uid = uid(encode=True)     # the unique context id for this run
+        # a unique context id for this run
+        self.uid = b58enc(uuid1().int)
         self.request = tself.context.get('request')
         self.context = tself.context
         self.buffer = io.StringIO()

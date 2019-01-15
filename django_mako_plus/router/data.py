@@ -1,7 +1,7 @@
 from django.apps import apps
 
 from ..decorators import BaseDecorator
-from ..util import URLParamList
+from .urlparams import URLParamList
 from .discover import get_view_function
 
 from urllib.parse import unquote
