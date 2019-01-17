@@ -13,7 +13,7 @@ class Command(DMPCommandMixIn, StartAppCommand):
         "Creates a DMP app directory structure for the given app name in "
         "the current directory or optionally in the given directory."
     )
-    requires_system_checks = True
+    requires_system_checks = False
 
     def add_arguments(self, parser):
         super().add_arguments(parser)

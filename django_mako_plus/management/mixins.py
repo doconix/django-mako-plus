@@ -7,6 +7,8 @@ import os, os.path
 
 class DMPCommandMixIn(object):
     '''Some extra SWAG that all DMP commands get'''
+    # needs to be true so Django initializes urls.py (which registers the dmp apps)
+    requires_system_checks = True
 
     def add_arguments(self, parser):
         super().add_arguments(parser)

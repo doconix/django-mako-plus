@@ -15,8 +15,6 @@ class Command(DMPCommandMixIn, MakeMessagesCommand):
         "Mako files, so this command compiles all your templates so it can find the compiled .py versions of the templates."
     )
 
-    # needs to be true so Django initializes urls.py (which registers the dmp apps)
-    requires_system_checks = True
 
     SEARCH_DIRS = [
         os.path.join('{app_path}', 'templates')

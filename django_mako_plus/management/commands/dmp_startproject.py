@@ -13,6 +13,7 @@ class Command(DMPCommandMixIn, StartProjectCommand):
         "Creates a DMP project directory structure for the given project "
         "name in the current directory or optionally in the given directory."
     )
+    requires_system_checks = False
 
     def add_arguments(self, parser):
         super().add_arguments(parser)
