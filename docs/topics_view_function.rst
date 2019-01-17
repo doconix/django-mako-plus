@@ -1,10 +1,6 @@
 Customizing @view_function
 --------------------------------------
 
-.. contents::
-    :depth: 2
-
-
 The ``@view_function`` decorator annotates functions in your project that are web-accessible.  Without it, clients could use DMP's conventions to call nearly any function in your system.
 
 The decorator implementation itself is fairly straightforward.  However, as a decorator for all endpoints in your system, it is a great place to do pre-endpoint work.  ``@view_function`` was intentionally programmed as a class-based decorator so you can extend it.
@@ -21,6 +17,7 @@ We'll override both the constructor and the __call__ methods in this example so 
 
 .. code-block:: python
 
+    from django_mako_plus import view_function
     from django_mako_plus import view_parameter
 
     class site_endpoint(view_function):
