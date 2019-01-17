@@ -18,7 +18,7 @@ We'll override both the constructor and the __call__ methods in this example so 
 .. code-block:: python
 
     from django_mako_plus import view_function
-    from django_mako_plus import view_parameter
+    from django.http import HttpResponseRedirect
 
     class site_endpoint(view_function):
         '''Customized view function decorator'''
