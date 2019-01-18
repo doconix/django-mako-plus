@@ -1,59 +1,88 @@
 Customizing @view_function
 --------------------------------------
 
-The ``@view_function`` decorator annotates functions in your project that are web-accessible.  Without it, clients could use DMP's conventions to call nearly any function in your system.
+Since the ``@view_function`` decorator must be placed on all view functions in your system, it's a great place to do pre-endpoint logic.  ``@view_function`` was intentionally programmed as a class-based decorator so you can extend it.
 
-The decorator implementation itself is fairly straightforward.  However, as a decorator for all endpoints in your system, it is a great place to do pre-endpoint work.  ``@view_function`` was intentionally programmed as a class-based decorator so you can extend it.
+    Django provide several ways to insert logic into the request process, so be sure to consider which is the cleanest approach for your situation: the approach here, middleware, signals, or another method.
 
 
 Using Keyword Arguments
 =============================
 
-Although we normally specify ``@view_function`` without any arguments, it can take an arbitrary number of keyword arguments.  Any extra arguments are placed in ``self.decorator_args`` and ``self.decorator_kwargs``.
-
-For this example, lets check user groups in the view function decorator.  We really should use permission-based security rather than group-based security.  And Django already comes with the ``@require_permission`` decorator.  And Django has ``process_view`` middleware you could plug into.  So even if this example is a little contrived, let's go with it. We've found places where, despite the other options, this is the right place to do pre-view work.
-
-We'll override both the constructor and the __call__ methods in this example so you can see both:
+Although we normally specify ``@view_function`` without any arguments, it can take an arbitrary number of keyword arguments. The following are some examples:
 
 .. code-block:: python
 
+    # the normal decorator
+    @view_function
+
+    # ensure the user has a role of "mentor"
+    @view_function(role='mentors')
+
+    # require authenticated access, set response type to text/html
+    @view_function(auth_required=True, mimetype='text/html')
+
+Through a simple extension, you can access the parameters above and do custom logic--just before process_request is called.
+
+Example: Authenticated Endpoints
+=====================================
+
+Suppose your site requires authentication on nearly every endpoint in the system. Normally, you'd add Django's ``@login_required`` decorator to endpoints, like this:
+
+.. code-block:: python
+
+    from django.contrib.auth.decorators import login_required
     from django_mako_plus import view_function
-    from django.http import HttpResponseRedirect
 
-    class site_endpoint(view_function):
-        '''Customized view function decorator'''
-
-        def __init__(self, f, require_role=None, *args, **kwargs):
-            '''
-            This runs as Python loads the module containing your view function.
-            You can specify new parameters (like require_role here) or just use **kwargs.
-            Don't forget to include the function as the first argument.
-            '''
-            super().__init__(self, f, *args, **kwargs)
-            self.require_role = require_role
-
-        def __call__(self, request, *args, **kwargs):
-            '''
-            This runs every time the view function is accessed by a client.
-            Be sure to return the result of super().__call__ as it is your
-            view function's response.
-            '''
-            # check roles
-            if self.require_role:
-                if request.user.is_anonymous or request.user.groups.filter(name=self.require_role).count() == 0:
-                    return HttpResponseRedirect('/login/')
-
-            # call the view function
-            return super().__call__(request, *args, **kwargs)
-
-In ``homepage/views/index.py``, use your custom decorator.
-
-.. code-block:: python
-
-    from .some.where import site_endpoint
-
-    @site_endpoint(require_role='mentors')
+    @login_required
+    @view_function
     def process_request(request):
         ...
 
-In the above example, overriding ``__init__`` isn't technically necessary.  Any extra ``*args`` and ``**kwargs`` in the constructor call are placed in ``self.decorator_args`` and ``self.decorator_kwargs``.  So instead of explictily listing ``require_role`` in the argument list, we could have used ``self.decorator_kwargs.get('require_role')``.  I listed the parameter explicitly for code clarity.
+Rather than hope every endpoint gets marked with the decorator, let's modify DMP's view function decorator to require access by default. Create the following in a file called ``lib/router.py``:
+
+.. code-block:: python
+
+    from django.conf import settings
+    from django.http import HttpResponseRedirect
+    from django_mako_plus import view_function
+    import inspect
+
+
+    class web_endpoint(view_function):
+        '''Marks a view function in the system (with auth required by default)'''
+        def __init__(self, decorated_func, auth_required=True, *args, **kwargs):
+            self.auth_required = auth_required
+            super().__init__(decorated_func, *args, **kwargs)
+
+        def __call__(self, request, *args, **kwargs):
+            # ensure authenticated
+            if self.auth_required and request.user.is_anonymous:
+                return HttpResponseRedirect(settings.LOGIN_URL)
+
+            # allow the call to continue
+            return super().__call__(request, *args, **kwargs)
+
+
+Then, use this decorator **insead** of the normal view function decorator. In fact, do a global search and replace of ``@view_function``, and replace it with ``@secure_function``.
+
+.. code-block:: python
+
+    from lib.router import secure_function
+
+    @secure_function
+    def process_request(request):
+        ...
+
+When DMP calls your view functions, it now runs ``lib.router.secure_function.__call__``. Our function redirects if the current user isn't authenticated yet. If the user is authenticated, we call the super's ``__call__`` method, which runs the view function. Just like that, every endpoint in the system is protected by default.
+
+For endpoints that need to allow anonymous access, the ``auth_required`` parameter signals that everyone can pass (yep, even balrogs). The login endpoint looks like this:
+
+
+.. code-block:: python
+
+    from lib.router import secure_function
+
+    @secure_function(auth_required=False)
+    def process_request(request):
+        # login endpoint, so everyone allowed!
