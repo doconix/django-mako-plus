@@ -54,6 +54,8 @@ class Command(DMPCommandMixIn, BaseCommand):
 
     def deep_clean(self, path, trial_run):
         dmp = apps.get_app_config('django_mako_plus')
+        if not os.path.exists(path):
+            return
 
         # clean this directory
         cache_dir = os.path.join(path, dmp.options['TEMPLATES_CACHE_DIR'])
