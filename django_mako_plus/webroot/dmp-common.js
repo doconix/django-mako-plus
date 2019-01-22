@@ -10,7 +10,7 @@
 
     // connect the dmp object
     window.DMP_CONTEXT = {
-        __version__: '5.7.19',   // DMP version to check for mismatches
+        __version__: '5.7.20',   // DMP version to check for mismatches
         contexts: {},           // contextid -> context1
         contextsByName: {},     // app/template -> [ context1, context2, ... ]
         lastContext: null,      // last inserted context (see getAll() below)
@@ -117,7 +117,7 @@
         */
         loadBundle(template_functions) {
             var templates = Object.keys(template_functions);
-            DMP_CONTEXT.log(['Linking bundle with', templates.length, 'functions'], templates);
+            DMP_CONTEXT.log(['Linking ', templates.length, 'functions'], templates);
             for (var i = 0; i < templates.length; i++) {
                 DMP_CONTEXT.bundleFunctions[templates[i]] = template_functions[templates[i]];
             }
@@ -181,7 +181,7 @@
         /* Enabled when DMP's logger is set to DEBUG in settings */
         log(messages, data) {
             if (DMP_CONTEXT.logEnabled) {
-                console.info('[DMP] ' + messages.join(' '), data || '');
+                console.debug('[DMP] ' + messages.join(' '), data || '');
             }
         },
 

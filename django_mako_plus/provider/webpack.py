@@ -1,10 +1,12 @@
 from django.conf import settings
+from django.core.management import call_command
 from django.forms.utils import flatatt
 import os
 import os.path
 import posixpath
 from ..util import merge_dicts
 from .link import CssLinkProvider, JsLinkProvider
+from ..management.commands.dmp_webpack import Command as WebpackCommand
 
 
 
@@ -13,9 +15,15 @@ class WebpackJsLinkProvider(JsLinkProvider):
     DEFAULT_OPTIONS = {
         'skip_duplicates': True,
         'async': False,
+        'create_entry': True,
     }
 
     def build_default_filepath(self):
+        # if development, recreate the entry file for this app
+        if settings.DEBUG and self.options['create_entry']:
+            call_command(WebpackCommand(running_inline=True), self.app_config.name, overwrite=True)
+
+        # return the bundle path
         return os.path.join(
             self.app_config.name,
             'scripts',

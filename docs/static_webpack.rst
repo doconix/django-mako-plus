@@ -124,7 +124,7 @@ Now that you've seen the result, let's detail the discovery process that just oc
 
 --------
 
-**First, DMP deep searched the templates directory ``homepage/templates/`` for all files (except those starting with double-underscores, like ``__dmpcache__``.** DMP found three files:
+**1. DMP deep searched the templates directory ``homepage/templates/`` for all files (except those starting with double-underscores, like ``__dmpcache__``.** DMP found three files:
 
 ::
 
@@ -134,7 +134,7 @@ Now that you've seen the result, let's detail the discovery process that just oc
 
 --------
 
-**Next, DMP loaded each file as a template object (as if it were about to be rendered) and ran its `Providers </static_providers.html>`_, ``CssLinkProvider`` and ``JsLinkProvider``.**  These two providers are the defaults, but you can `customize them in settings.py </basics_settings.html>`_ (see ``WEBPACK_PROVIDERS``).
+**2. DMP loaded each file as a template object (as if it were about to be rendered) and ran its `Providers </static_providers.html>`_, ``CssLinkProvider`` and ``JsLinkProvider``.**  These two providers are the defaults, but you can `customize them in settings.py </basics_settings.html>`_ (see ``WEBPACK_PROVIDERS``).
 
 Now, providers are built to discover the script and style files that are associated with templates, so DMP used them to find the files needed for our bundle:
 
@@ -152,7 +152,7 @@ The providers yielded four files, shown here as a list relative to the entry fil
 
 --------
 
-**Finally, DMP created ``homepage/scripts/__entry__.js``, which we'll use later as Webpack's entry point.** This file contains a number of Node ``require`` statements surrounded by function closures:
+**3. DMP created ``homepage/scripts/__entry__.js``, which we'll use later as Webpack's entry point.** This file contains a number of Node ``require`` statements surrounded by function closures:
 
 .. code-block:: javascript
 
@@ -206,8 +206,6 @@ We need to tell webpack to start with our entry file. Create a file in your proj
     };
 
 
-
-
 Thanks to the magic of globs, the above config finds all entry files in your project.
 
     You can set the destination to be anywhere you want (such as a ``dist/`` folder), but it's just fine to put them right in your ``app/scripts/`` folder.  DMP only puts **template-related** scripts into ``__entry__.js``, so you won't get infinite bundling recursion by putting the bundle in the same directory. If you decide to change the location, be sure to modify the `provider filepath settings </basics_settings.html>`_ to match.
@@ -227,8 +225,6 @@ Now that you're using bundles, you need TWO terminals running during development
 
 1. ``python3 manage.py runserver`` is your normal Django web server.
 2. ``npm run watch`` recreates bundles you modify the support files.
-
-    Also, don't forget to rerun ``python3 manage.py dmp_webpack --overwrite`` anytime you **add or remove script/style files**. The npm watcher finds changes to existing files, but it doesn't know how to change your entry files. Perhaps we'll create a DMP "watcher" at some point, but right now you need to run this command manually when you create new ``.js`` or ``.css`` files.
 
 Bundle Links in Templates
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

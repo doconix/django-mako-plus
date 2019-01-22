@@ -14,8 +14,85 @@ In a terminal (Mac, Linux, or Windows+GitBash), issue these commands:
     rm **/__bundle__.js
 
 
+How do I recreate ``__entry__.js`` files?
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-How do I use Sass (Less, TypeScript, etc.) with DMP Webpack?
+Webpack depends on the accuracy of your ``__entry__.js`` file, and it's important to keep it in sync with the files in your projects. There are two ways to recreate your entry files:
+
+1. **Manual:** Run ``python3 manage.py dmp_webpack --overwrite`` to recreate the entry files in all apps.
+2. **Automatic:** Whenever you render a page, DMP automatically reruns the ``dmp_webpack`` command to check for needed updates.
+
+You can turn off automatic creation in the webpack provider options:
+
+.. code-block:: python
+
+    TEMPLATES = [
+        {
+            'NAME': 'django_mako_plus',
+            ...
+            'OPTIONS': {
+                ...
+                'CONTENT_PROVIDERS': [
+                    { 'provider': 'django_mako_plus.JsContextProvider' },
+                    {
+                        'provider': 'django_mako_plus.WebpackJsLinkProvider',
+                        'create_entry': False,
+                    }
+                ],
+            },
+        },
+    ]
+
+Why does Webpack report errors whenever I add or delete files?
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+During development, webpack is normally running in "watch" mode. When your entry file gets out of sync with your actual project files, webpack gets grumpy. Refreshing the page a couple times usually brings everything back into sync.
+
+For an example of why this is needed, consider this scenario:
+
+1. You have three related files in your homepage app: ``homepage/templates/index.html``, ``homepage/styles/index.css``, and ``homepage/scripts/index.js``. You run the webpack management command, which creates ``homepage/scripts/__entry__.js`` with references to the two CSS and JS files.
+2. You run the webpack watcher daemon, and it creates ``homepage/scripts/__bundle__.js``. Everything is in sync, and life is happy.
+3. You develop for a bit, and each time you change the support files, webpack recreates the bundle. You pat webpack on the head and give it a treat.
+4. You no longer need ``homepage/styles/index.css``, so you delete the file. This is where things go wrong for a bit... Webpack sees the changes, and it complains that a required file in ``homepage/scripts/__entry__.js`` no longer exists. A red error yells at you in the webpack console. The solution is to recreate your entry file, but DMP hasn't had a chance to do it. That chance comes when the index page gets rendered again.
+5. You reload the index page in your browser. During template rendering (specifically, the ``WebpackJsLinkProvider`` provider), DMP recreates any entry files that are out of sync. Webpack sees changed entry file, and rebuilds your bundle.
+
+    On Step 5, your browser might load the bundle before the webpack watcher recreates it. When this happens, refresh the page one more time to pull the new bundle.
+
+
+Why is DMP blowing up my browser console?
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Bundling is fraught with danger, and it can be difficult to debug the process. Bundling functions might not link right, contexts may trigger before bundles fully load, and in extreme cases, the Killer Rabbit of Caerbannog can show up. The debug messages in your browser console help you see when contexts get created, when bundle functions link into contexts, and when bundle functions get called.
+
+To turn these messages off, adjust the DMP logger in your settings to any level above DEBUG:
+
+.. code-block:: python
+
+    LOGGING = {
+        ...
+        'loggers': {
+            ...
+            'django_mako_plus': {
+                'handlers': ['console_handler'],
+                'level': 'WARNING',     # DMP messages in browser console only show if DEBUG
+            },
+        },
+    }
+
+Why aren't DMP log messages showing in my browser console?
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+DMP's debug messages make bundling more transparent. They can be lifesavers at times, but they can be bothersome once things are working. For more background, read the previous question on how to turn off log messages.
+
+The following must happen for debug messages to show in the browser console:
+
+* The ``django_mako_plus`` logger must be set to DEBUG.
+* Very few messages show in the normal providers, so you won't see many there. Since webpack provider is where transparency is needed, it's where messages are printed.
+* On Chromium browsers, ``console.debug`` messages only print when "Verbose" is selected in the console.
+* If you still can't get messages to print, try adding a few ``console.log`` lines to ``dmp-common.js``, especially in its log method. Hopefully that sorts things out.
+
+
+How do I use Sass (Less, TypeScript, etc.) with DMP Webpack? asdf
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 One benefit to bundling is the output files from compiles like ``sass`` are piped right into bundles instead of as extra files in your project. Here's the steps:
