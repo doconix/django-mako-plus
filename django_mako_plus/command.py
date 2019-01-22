@@ -7,7 +7,7 @@ from collections import namedtuple
 ################################################################
 ###   Run a shell command
 
-ReturnInfo = namedtuple('CommandReturn', ( 'code', 'stdout', 'stderr' ))
+ReturnInfo = namedtuple('ReturnInfo', ( 'code', 'stdout', 'stderr' ))
 
 
 def run_command(*args, raise_exception=True):

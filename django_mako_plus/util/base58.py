@@ -10,7 +10,7 @@ def b58enc(uid):
     '''Encodes a UID to an 11-length string, encoded using base58 url-safe alphabet'''
     # note: i tested a buffer array too, but string concat was 2x faster
     if not isinstance(uid, int):
-        raise Base58Error('Invalid integer: {}'.format(uid))
+        raise ValueError('Invalid integer: {}'.format(uid))
     if uid == 0:
         return BASE58CHARS[0]
     enc_uid = ""
@@ -26,14 +26,11 @@ def b58dec(enc_uid):
     elif isinstance(enc_uid, bytes):
         enc_uid = enc_uid.decode('utf8')
     else:
-        raise Base58Error('Cannot decode this type: {}'.format(enc_uid))
+        raise ValueError('Cannot decode this type: {}'.format(enc_uid))
     uid = 0
     try:
         for i, ch in enumerate(enc_uid):
             uid = (uid * 58) + BASE58INDEX[ch]
     except KeyError:
-        raise Base58Error('Invalid character: "{}" ("{}", index 5)'.format(ch, enc_uid, i))
+        raise ValueError('Invalid character: "{}" ("{}", index 5)'.format(ch, enc_uid, i))
     return uid
-
-class Base58Error(Exception):
-    pass

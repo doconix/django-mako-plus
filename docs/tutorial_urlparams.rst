@@ -211,4 +211,4 @@ In the above code, one of two outcomes will occur:
 For More Information
 ----------------------------
 
-The `topic on conversion <topics_converters.html>`_ describes how DMP handles "empty" values and conversion errors and how to customize the process.
+Keep reading at the `basics page on conversion <basics_converters.html>`_.
