@@ -33,11 +33,11 @@ Mako itself is very stable, both in terms of "lack of bugs" and in "completed fe
 
 The short answer is I liked Mako's approach the best. It felt the most Pythonic to me. Jinja2 may feel more like Django's built-in template system, but Mako won out because it looked more like Python--and the point of DMP is to include Python in templates.
 
+
 Will it bundle?
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Yes. DMP's providers automatically create entry files for template-related JS and CSS. See the `Tutorial </tutorial_css_js.html>`_ for how templates relate to their JS and CSS and `Webpack Providers </static_webpack.html>`_ for webpack-specific information.
-
 
 
 Using Third-Party Apps
@@ -66,8 +66,7 @@ Yes.  Django officially supports having two or more template engines active at t
 If you temporarily need to switch to Django templating syntax (even within a Mako file), `you can do that too <#using-django-and-jinja2-tags-and-syntax>`_.
 
 
-
-Logging
+Technical Details
 ---------------------------------
 
 Why is DMP is logging to the browser console?
@@ -75,14 +74,37 @@ Why is DMP is logging to the browser console?
 
 The automatic inclusion of JS and CSS is a common trouble spot for new users of DMP, so we log debug information to both the Python and browser consoles.
 
-You can turn this off by increasing the log level of DMP in settings.py:
+To turn these messages off, adjust the DMP logger in your settings to any level above DEBUG:
 
 .. code-block:: python
 
-    'loggers': {
-        'django_mako_plus': {
-            'handlers': ['django_mako_plus_console'],
-            'level': 'INFO',
-            'propagate': False,
+    LOGGING = {
+        ...
+        'loggers': {
+            ...
+            'django_mako_plus': {
+                'handlers': ['console_handler'],
+                'level': 'WARNING',     # DMP messages in browser console only show if DEBUG
+            },
         },
     }
+
+Is ``dmp-common.min.js`` really necessary?
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Normally, yes. It supports DMP's providers (automatic JS/CSS links). The file is only 3K, but yeah, I get it. 3K here, 2K there, and pretty soon we have lots of K.
+
+You CAN move it into your codebase or bundle, though. Just be sure you always match the version of this file with the version of DMP you're using. DMP will display a warning (in the browser console) if the version is mismatched between the server DMP and client DMP file.
+
+To move it into your codebase:
+
+1. Copy the file from DMP's source code to a web-accessible location in your codebase. You can find DMP's local directory with: ``python -c 'import django_mako_plus; print(django_mako_plus.__file__)'``
+2. Open ``base.htm`` and adjust ``<script src="/django_mako_plus/dmp-common.min.js"></script>`` for the new location.
+3. Be sure this script is loaded before the call to ``django_mako_plus.links()``.
+
+If you don't need the auto-link-creation feature of DMP, you can entirely remove it. Just open ``base.htm`` and remove these lines:
+
+.. code-block:: html
+
+    <script src="/django_mako_plus/dmp-common.min.js"></script>
+    ${ django_mako_plus.links(self) }

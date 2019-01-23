@@ -1,6 +1,8 @@
 Including Static Files
 ================================
 
+    This page details how DMP supports traditional links. If you've moved on to bundling instead of direct links, these are not the droids you're looking for. Move along to the `bundling page </static_webpack.html>`_.
+
 In the `tutorial <tutorial_css_js.html>`_, you learned how to automatically include CSS and JS based on your page name .
 If your page is named ``mypage.html``, DMP will automatically include ``mypage.css`` and ``mypage.js`` in the page content.  Skip back to the `tutorial <tutorial_css_js.html>`_ if you need a refresher.
 
@@ -14,6 +16,7 @@ Open ``base.htm`` and look at the following code:
 The calls to ``links(self)`` include the ``<link>`` and ``<script>`` tags for the template name and all of its supertemplates. These links are placed at the end of your ``<head>`` section.  (Just a few years ago, common practice was to place script tags at the end of the body, but modern browsers with asyncronous and deferred scripts have put them back in the body.)
 
 This all works because the ``index.html`` template extends from the ``base.htm`` template. If you fail to inherit from ``base.htm`` or ``base_ajax.htm``, DMP won't be able to include the support files.
+
 
 
 Javascript Matters
@@ -44,16 +47,20 @@ If you don't know the location of DMP on your server, try this command:
     python3 -c 'import django_mako_plus; print(django_mako_plus.__file__)'
 
 
-Preprocessors (Scss and Less)
+Sass and Less Support
 -----------------------------------
 
-If you are using preprocessors for your CSS or JS, DMP can automatically compile files.  While this could alternatively be done with an editor plugin or with a 'watcher' process, letting DMP compile for you keeps the responsibility within your project settings (rather than per-programmer-dependent setups).
+If you are using preprocessors for your CSS or JS, DMP can automatically compile files when you load pages.
 
-When this feature is enabled, DMP looks for ``app_folder/styles/index.scss``.  If it exists, DMP checks the timestamp of the compiled version, ``app_folder/styles/index.css``, to see if if recompilation is needed.  If needed, it runs ``scss`` before generating ``<link type="text/css" />`` for the file.
+    This can also be done with editor plugins or watcher processes (``webpack --watch``). Use whatever method is best for your setup.
 
-During development, this check is done every time the template is rendered.  During production, this check is done only once -- the first time the template is rendered.
+First, be sure you've installed `Sass <https://sass-lang.com/>`_ or `Less <http://lesscss.org/>`_ and that you can run them from the command line.
 
-To enable automatic compiling, uncomment the appropriate provider to your settings.py.  The following setting adds Scss compiling to the normal JS Context, JS, and CSS providers:
+When you render an HTML file (i.e. when ``links()`` is called on ``base.htm``), DMP looks for ``<app>/styles/<template>.scss``.  DMP checks the timestamp of the compiled version, ``<app>/styles/<template>.scss``, to see if if recompilation is needed.  If needed, it runs ``scss`` or ``lessc`` before generating links for hte file.
+
+During development, this check is done every time the template is rendered.  During production, this check is done the first time the template is rendered. If you update your files, you need to bounce the server (we assume you've done compiling beforehand anyway).
+
+Precompilers are specified in your settings file. For example, the following adds `Sass <https://sass-lang.com/>`_ compilation (`Less <http://lesscss.org/>`_ is commented out):
 
 .. code-block:: python
 
@@ -65,7 +72,7 @@ To enable automatic compiling, uncomment the appropriate provider to your settin
                 'CONTENT_PROVIDERS': [
                     { 'provider': 'django_mako_plus.JsContextProvider' },     # adds JS context - this should normally be listed first
                     { 'provider': 'django_mako_plus.CompileScssProvider' },   # autocompiles Scss files
-                    # { 'provider': 'django_mako_plus.CompileLessProvider' },   # autocompiles Less files
+                    # { 'provider': 'django_mako_plus.CompileLessProvider' }, # autocompiles Less files
                     { 'provider': 'django_mako_plus.CssLinkProvider' },       # generates links for app/styles/template.css
                     { 'provider': 'django_mako_plus.JsLinkProvider' },        # generates links for app/scripts/template.js
                 ],
@@ -94,6 +101,9 @@ To include CSS and JS by name, use the following within any template on your sit
 Rendering Nonexistent Pages
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-This special case is for times when you need the CSS and JS autorendered, but don't need a template for HTML.  The ``force`` parameter allows you to force the rendering of CSS and JS files, even if DMP can't find the HTML file.   Since ``force`` defaults True, the calls just above will render even if the template isn't found.
+This special case is for times when you need the CSS and JS autorendered, but don't need a template for HTML.  Use the same code as above, but add ``force=True``. DMP will render the CSS and JS files for the given template name, whether or not the template actually exists.
 
-In other words, this behavior already happens; just use the calls above.  Even if ``otherpage.html`` doesn't exist, you'll get ``otherpage.css`` and ``otherpage.js`` in the current page content.
+.. code-block:: html+mako
+
+    ## renders links for `homepage/styles/otherpage.css` and `homepage/styles/otherpage.js`
+    ${ django_mako_plus.template_links(request, 'homepage', 'otherpage.html', context, force=True)
