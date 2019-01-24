@@ -61,7 +61,7 @@ class CompileProvider(BaseProvider):
         'targetpath': None,
 
         # explicitly sets the command to be run. possible values:
-        #   1. None: the default command is run
+        #   1. None or []: the default command is run
         #   2. function, lambda, or other callable: called as func(provider), expects list as return
         #   3. list: used directly in the call to subprocess module
         'command': [],
@@ -77,6 +77,7 @@ class CompileProvider(BaseProvider):
         return self.build_default_sourcepath()
 
     def build_default_sourcepath(self):
+        # this method is overridden in CompileScssProvider and CompileLessProvider lower in this file
         raise ImproperlyConfigured('{} must set `sourcepath` in options (or a subclass can override build_default_sourcepath).'.format(self.__class__.__qualname__))
 
     def build_targetpath(self):
@@ -89,6 +90,7 @@ class CompileProvider(BaseProvider):
         return self.build_default_targetpath()
 
     def build_default_targetpath(self):
+        # this method is overridden in CompileScssProvider and CompileLessProvider lower in this file
         raise ImproperlyConfigured('{} must set `targetpath` in options (or a subclass can override build_default_targetpath).'.format(self.__class__.__qualname__))
 
     def build_command(self):
@@ -100,6 +102,7 @@ class CompileProvider(BaseProvider):
         return self.build_default_command()
 
     def build_default_command(self):
+        # this method is overridden in CompileScssProvider and CompileLessProvider lower in this file
         raise ImproperlyConfigured('{} must set `command` in options (or a subclass can override build_default_command).'.format(self.__class__.__qualname__))
 
     @property

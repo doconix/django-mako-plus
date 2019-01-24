@@ -73,6 +73,7 @@ class LinkProvider(BaseProvider):
         return self.build_default_filepath()
 
     def build_default_filepath(self):
+        # this method is overridden in CssLinkProvider and JsLinkProvider lower in this file
         raise ImproperlyConfigured('{} must set `filepath` in options (or a subclass can override build_default_filepath).'.format(self.__class__.__qualname__))
 
 
@@ -88,6 +89,7 @@ class LinkProvider(BaseProvider):
         return self.build_default_link(provider_run, data)
 
     def build_default_link(self, provider_run, data):
+        # this method is overridden in CssLinkProvider and JsLinkProvider lower in this file
         raise ImproperlyConfigured('{} must set `link` in options (or a subclass can override build_default_link).'.format(self.__class__.__qualname__))
 
 
@@ -140,6 +142,7 @@ class CssLinkProvider(LinkProvider):
     }
 
     def build_default_filepath(self):
+        '''Called when 'filepath' is not defined in the settings'''
         return os.path.join(
             self.app_config.name,
             'styles',
@@ -147,6 +150,7 @@ class CssLinkProvider(LinkProvider):
         )
 
     def build_default_link(self, provider_run, data):
+        '''Called when 'link' is not defined in the settings'''
         attrs = {}
         attrs['rel'] = 'stylesheet'
         attrs["data-context"] = provider_run.uid
@@ -154,9 +158,7 @@ class CssLinkProvider(LinkProvider):
             # posixpath because URLs use forward slash
             posixpath.join(
                 settings.STATIC_URL,
-                self.app_config.name,
-                'styles',
-                self.template_relpath.replace(os.path.sep, '/') + '.css',
+                self.build_source_filepath().replace(os.path.sep, '/'),
             ),
             self.version_id,
         )
@@ -178,6 +180,7 @@ class JsLinkProvider(LinkProvider):
     }
 
     def build_default_filepath(self):
+        '''Called when 'filepath' is not defined in the settings'''
         return os.path.join(
             self.app_config.name,
             'scripts',
@@ -185,15 +188,14 @@ class JsLinkProvider(LinkProvider):
         )
 
     def build_default_link(self, provider_run, data):
+        '''Called when 'link' is not defined in the settings'''
         attrs = {}
         attrs["data-context"] = provider_run.uid
         attrs["src"] ="{}?{:x}".format(
             # posixpath because URLs use forward slash
             posixpath.join(
                 settings.STATIC_URL,
-                self.app_config.name,
-                'scripts',
-                self.template_relpath.replace(os.path.sep, '/') + '.js',
+                self.build_source_filepath().replace(os.path.sep, '/'),
             ),
             self.version_id,
         )
