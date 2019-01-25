@@ -22,7 +22,7 @@ If ``x`` is the string ``'<div>'``, the rendered template will contain ``&lt;div
 A Little Background
 ------------------------
 
-As described in the `Mako documentation <http://docs.makotemplates.org/en/latest/filtering.html>`_, expressions can be filtered using modifer tokens like the following:
+As described in `Mako Filtering <http://docs.makotemplates.org/en/latest/filtering.html>`_, expressions can be filtered using modifer tokens like the following:
 
 .. code-block:: html+mako
 

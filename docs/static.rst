@@ -2,14 +2,17 @@ Static Files
 ==========================
 
 
-One of the primary tasks of DMP is to connect your static files to your templates. The following topics explain how this is done.
+One of the primary tasks of DMP is to connect your static files to your templates. Read deeper to see what DMP can do for your static files...
+
 
 .. toctree::
     :maxdepth: 1
 
-    static_links
+    static_overview
     static_context
+    static_links
+    static_precompilers
     static_providers
     static_webpack
-    static_webpack_faq
+    static_faq
     static_custom

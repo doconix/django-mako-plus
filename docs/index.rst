@@ -1,3 +1,6 @@
+.. role::  raw-html(raw)
+    :format: html
+
 .. sidebar:: Show Me the Code:
 
     1. `Django Syntax vs. DMP Syntax <about.html#comparison-with-django>`_

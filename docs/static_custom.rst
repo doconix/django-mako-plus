@@ -1,5 +1,5 @@
-Creating a Provider
-==========================
+Creating a Custom Provider
+==============================
 
 Suppose you need custom preprocessing of static files or custom template content.  Your future may include creating a new provider class. Fortunately, these are pretty simple classes. Once you create the class, simply reference it in your settings.py file.
 

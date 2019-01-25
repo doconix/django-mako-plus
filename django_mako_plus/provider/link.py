@@ -3,8 +3,6 @@ from django.conf import settings
 from django.forms.utils import flatatt
 import logging
 import os
-import os.path
-import posixpath
 from ..util import crc32, getdefaultattr
 from ..util import log
 from .base import BaseProvider
@@ -155,11 +153,13 @@ class CssLinkProvider(LinkProvider):
         attrs['rel'] = 'stylesheet'
         attrs["data-context"] = provider_run.uid
         attrs["href"] ="{}?{:x}".format(
-            # posixpath because URLs use forward slash
-            posixpath.join(
+            os.path.join(
                 settings.STATIC_URL,
-                self.build_source_filepath().replace(os.path.sep, '/'),
-            ),
+                os.path.relpath(
+                    self.build_source_filepath(),
+                    settings.BASE_DIR,
+                ),
+            ).replace(os.path.sep, '/'),
             self.version_id,
         )
         return '<link{} />'.format(flatatt(attrs))
@@ -192,13 +192,15 @@ class JsLinkProvider(LinkProvider):
         attrs = {}
         attrs["data-context"] = provider_run.uid
         attrs["src"] ="{}?{:x}".format(
-            # posixpath because URLs use forward slash
-            posixpath.join(
+            os.path.join(
                 settings.STATIC_URL,
-                self.build_source_filepath().replace(os.path.sep, '/'),
-            ),
+                os.path.relpath(
+                    self.build_source_filepath(),
+                    settings.BASE_DIR,
+                ),
+            ).replace(os.path.sep, '/'),
             self.version_id,
         )
         if self.options['async']:
-            attrs['async'] = "async"
+            attrs['async'] = "true"
         return '<script{}></script>'.format(flatatt(attrs))

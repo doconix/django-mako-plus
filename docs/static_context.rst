@@ -1,7 +1,16 @@
-The JS Context
+Context :raw-html:`&rarr;` JS
 ================================
 
-In the `tutorial <tutorial_css_js.html>`_, you learned to send context variables to ``*.js`` files using ``jscontext``:
+Getting data from server-side, Python view files (e.g. ``process_request`` functions) to the client-side, browser JS scope can be difficult. The `tutorial <tutorial_css_js.html>`_, introduced this issue with a simple example: you need to access the **server's(** current time in your JS code.
+
+Normally, ``.js`` files are static, meaning they don't change from one request to another. (We actually **could** render JS and CSS files the same way we render templates, but writing meta code that writes JS is reserved for special, unmentionable cases.)
+
+Since we can't (aren't willing) to change the JS itself, a workaround is writing small script sections inside templates. While this method is common, it has some drawbacks. First, it mixes JS into HTML code. Second, it creates variables in the global window scope (so JS files can get to them).
+
+Step 1: Mark Variables
+-----------------------------------
+
+Since we already have a mechanism to get values from ``process_request`` to templates--the context dictionary--DMP builds on it. You simply need to signal to DMP the variables you want pushed on to the browser scope. This is done by wrapping context keys with ``jscontext``:
 
 .. code-block:: python
 
@@ -16,145 +25,97 @@ In the `tutorial <tutorial_css_js.html>`_, you learned to send context variables
         }
         return request.dmp.render('index.html', context)
 
-Two providers in DMP go to work.  First, the ``JsContextProvider`` adds the values to its variable in context (initially created by ``dmp-common.js``). This script goes right into the generated html, which means the values can change per request.  Your script file uses these context variables, essentially allowing your Python view to influence Javascript files in the browser, even cached ones!
+When your template calls DMP's ``links(self)`` method (see ``base.htm``), the first provider that goes to work is ``JsContextProvider``. This provider inspects the context dictionary for keys marked with ``jscontext``. It converts these values to JSON and inserts the first line below into your template. The next provider to run is ``JsLinkProvider``, which creates the second line below:
 
-::
+.. code-block:: html
 
-    <script>DMP_CONTEXT.set('u1234567890abcdef', { "now": "2020-02-11 09:32:35.41233"}, ...)</script>
-
-Second, the ``JsLinkProvider`` adds a script tag for your script--immediately after the context.  The ``data-context`` attribute on this tag links it to your data in ``DMP_CONTEXT``.
-
-::
-
-    <script src="/static/homepage/scripts/index.js?1509480811" data-context="u1234567890abcdef"></script>
+    <script>DMP_CONTEXT.set(..., "ketkk4MY3rAXNipepsUrV", { "now": "2020-02-11 09:32:35.41233"}, ...)</script>
+    <script src="/static/homepage/scripts/index.js" data-context="ketkk4MY3rAXNipepsUrV"></script>
 
 
-TypeError: ``context.now`` is undefined
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Step 2: Use in Javascript
+-----------------------------------------
 
-If things are working, open your browser console/inspector and see if JS is giving you any messages.  The following are a few reasons that the context might be undefined:
+In your JS files, you can access your variables in a context dictionary provided by a closure. In layman's terms, this means you should wrap the entire ``index.js`` file in an anonymous function with a parameter for the context dictionary. The following are three examples in ES5 and ES6:
+
++--------------------------------------------+-----------------------------------------------------------------------+-----------------------------------------------------------------------+
+|                                            |  ES5 Javascript (function style)                                      |  ES6 Javascript (fat-arrow style)                                     |
++============================================+=======================================================================+=======================================================================+
+| Run immediately                            | .. code-block:: text                                                  | .. code-block:: text                                                  |
+|                                            |                                                                       |                                                                       |
+|                                            |     (function(context) {                                              |     (context => {                                                     |
+|                                            |         # your JS code here                                           |         # your JS code here                                           |
+|                                            |         console.log(context['now']);                                  |         console.log(context['now'])                                   |
+|                                            |     })(DMP_CONTEXT.get());                                            |     })(DMP_CONTEXT.get())                                             |
+|                                            |                                                                       |                                                                       |
++--------------------------------------------+-----------------------------------------------------------------------+-----------------------------------------------------------------------+
+| Run when page is ready (JQuery)            | .. code-block:: text                                                  | .. code-block:: text                                                  |
+|                                            |                                                                       |                                                                       |
+|                                            |     $(function(context) {                                             |     $((context => () => {                                             |
+|                                            |         return function() {                                           |         # your JS code here                                           |
+|                                            |             # your JS code here                                       |         console.log(context['now'])                                   |
+|                                            |             console.log(context['now']);                              |     })(DMP_CONTEXT.get()))                                            |
+|                                            |         }                                                             |                                                                       |
+|                                            |     })(DMP_CONTEXT.get());                                            |                                                                       |
+|                                            |                                                                       |                                                                       |
++--------------------------------------------+-----------------------------------------------------------------------+-----------------------------------------------------------------------+
+| Run when page is ready (vanilla JS)        | .. code-block:: text                                                  | .. code-block:: text                                                  |
+|                                            |                                                                       |                                                                       |
+|                                            |     document.addEventListener("DOMContentLoaded", function(context) { |     document.addEventListener("DOMContentLoaded", (context => () => { |
+|                                            |         return function() {                                           |         # your JS code here                                           |
+|                                            |             # your JS code here                                       |         console.log(context['now'])                                   |
+|                                            |             console.log(context['now']);                              |     })(DMP_CONTEXT.get()))                                            |
+|                                            |         }                                                             |                                                                       |
+|                                            |     }(DMP_CONTEXT.get()));                                            |                                                                       |
+|                                            |                                                                       |                                                                       |
++--------------------------------------------+-----------------------------------------------------------------------+-----------------------------------------------------------------------+
+
+
+
+Undefined Context?
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If things aren't working, open your browser console/inspector and see if JS is giving you any messages.  The following are a few reasons that the context might be undefined:
 
 * Your JS code is running too late.  If you reverse the closure functions, the code doesn't run in time to catch the context.  Compare your code with the examples below.
 * You might be missing script lines ``<script src="/django_mako_plus/dmp-common.min.js"></script>`` and ``${ django_mako_plus.links(self) }``, or these might be reversed.
 * ``/django_mako_plus/dmp-common.min.js`` might not be available.  Check for a 404 error in the Network tab of your browser's inspector.
+* In rare situations (JQuery, I'm looking at you!), JS returned via ajax may not be able to find the right context. See the FAQ for more info.
 
 
-Serialization
+Limitations
 ------------------------------
 
-The context dictionary is sent to Javascript using JSON, which places limits on the types of objects you can mark with ``jscontext``.  This normally means only strings, booleans, numbers, lists, and dictionaries are available.
+The context dictionary is sent to Javascript using JSON, which places limits on the types of objects you can mark with ``jscontext``.  This normally means only strings, booleans, numbers, lists, and dictionaries work out of the box.
 
-However, there may be times when you need to send "full" objects.  When preparing the JS object, DMP looks for a class method named ``__jscontext__`` in the context values.  If the method exists on a value, DMP calls it and includes the return as the reduced, "JSON-compatible" version of the object.  The following is an example:
+
+Custom JSON Encoding
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+There may be times when you need to send "full" objects.  When preparing the JS object, DMP looks for a class method named ``__jscontext__`` in the context values.  If the method exists on a value, DMP calls it and includes the return as the reduced, "JSON-compatible" version of the object.  The following is an example:
 
 .. code-block:: python
 
-    class NonJsonObject(object):
+    class MyNonJsonObject(object):
         def __init__(self):
             # this is a complex, C-based structure
-            self.root = etree.fromString('...')
+            self.root = etree.fromstring('...')
 
         def __jscontext__(self):
-            # this return string is what DMP will place in the context
-            return etree.tostring(self.root)
+            # this string is what DMP will place in the context
+            return etree.tostring(self.root, encoding=str)
 
 
-When you add a ``NonJsonObject`` instance to the render context, you'll still get the full ``NonJsonObject`` in your template code (since it's running on the server side). But it's reduced with ``instance.__jscontext__()`` to transit to the browser JS runtime:
+When you add a ``MyNonJsonObject`` instance to the render context, you'll still get the full ``MyNonJsonObject`` in your template code (since it's running on the server side). But it's reduced with ``instance.__jscontext__()`` to transit to the browser JS runtime:
 
 .. code-block:: python
 
     def process_request(request):
-        obj = NonJsonObject()
+        mnjo = MyNonJsonObject()
         context = {
             # DMP will call obj.__jscontext__() and send the result to JS
-            jscontext('myobj'): obj,
+            jscontext('mnjo'): mnjo,
         }
         return request.dmp.render('template.html', context)
 
-
-Referencing the Context
------------------------------
-
-*Your script should immediately get a reference to the context data object*.  The Javascript global variable ``document.currentScript`` points at the correct ``<script>`` tag *on initial script run only*.  If you delay through ``async`` or a ready function, DMP will still most likely get the right context, but in certain cases (see below) you might get another script's context!
-
-The following is a template for getting context data.  It retrieves the context immediately and creates a closure for scope:
-
-::
-
-    // arrow style
-    (context => {
-        // main code here
-        console.log(context)
-    })(DMP_CONTEXT.get())
-
-    // function style
-    (function(context) {
-        // main code here
-        console.log(context)
-    })(DMP_CONTEXT.get())
-
-Alternatively, the following is a template for getting context data **and** using a ``ready`` (onload) handler.  It retrieves the context reference immediately, but delays the main processing until document load is finished.
-
-Delaying with jQuery ``ready()``:
-
-::
-
-    // arrow style
-    $((context => () => {
-        // main code here
-        console.log(context)
-    })(DMP_CONTEXT.get()))
-
-    // function style
-    $(function(context) {
-        return function() {
-            // main code here
-            console.log(context)
-        }
-    }(DMP_CONTEXT.get()))
-
-Delaying with pure Javascript:
-
-::
-
-    // arrow style
-    document.addEventListener("DOMContentLoaded", (context => () => {
-        // main code here
-        console.log(context)
-    })(DMP_CONTEXT.get()))
-
-    // function style
-    document.addEventListener("DOMContentLoaded", function(context) {
-        return function() {
-            // main code here
-            console.log(context)
-        }
-    }(DMP_CONTEXT.get()))
-
-
-Handling the "Certain Cases"
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Above, we said that DMP could get the wrong context in "certain cases".  These are fringe issues, but you should handle them when developing libraries or widgets that might get ajax'd in many places.
-
-Here's an example of when this might occur:
-
-1. Your code uses jQuery.ajax() to retrieve ``snippet.html``, which has accompanying ``snippet.js`` and ``another.js`` files.
-2. When jQuery receives the response, it strips the ``<script>`` element from the html.  The html is inserted in the DOM **without** the tag (this behavior is how jQuery is written -- it avoids a security issue by doing this).
-3. jQuery executes the script code as a string, disconnected from the DOM.
-4. Since DMP can't use the predictable ``document.currentScript`` variable, it defaults to the last-inserted context.  This is normally a good assumption.
-5. However, suppose the two ``.js`` files were inserted during two different render() calls on the server. Two context dictionaries will be included in the html, and only one of them will be the "last" one.
-6. Both scripts run with the same, incorrect context.  Do not pass Go. Do not collect $200. No context for you.
-
-The solution is to help DMP by specifying the context by its ``app/template`` key:
-
-::
-
-    // look away Ma -- being explicit here!
-    (function(context) {
-        // your code here, such as
-        console.log(context);
-    })(DMP_CONTEXT.get('homepage/index'));
-
-In the above code, DMP retrieves correct context by template name.  Even if the given template has been loaded twice, the latest one will be active (thus giving the right context).  Problem solved.
-
-    A third alternative is to get the context by using a ``<script>`` DOM object as the argument to ``.get``. This approach always returns the correct context.
+Now adjust your JS to parse the XML string, and you're back in business.

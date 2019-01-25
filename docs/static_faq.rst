@@ -1,5 +1,73 @@
-Webpack - FAQ
+FAQ
 ====================================
+
+General Static Files Questions
+-------------------------------------
+
+
+Can DMP provide links for other templates?
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Suppose you need to autorender the JS or CSS from a page *other than the one currently rendering*?  For example, you need to include the CSS and JS for ``otherpage.html`` while ``mypage.html`` is rendering.  This is a bit of a special case, but it has been useful at times.
+
+To include CSS and JS by name, use the following within any template on your site (``mypage.html`` in this example):
+
+.. code-block:: html+mako
+
+    ## instead of using the normal:
+    ## ${ django_mako_plus.links(self) }
+    ##
+    ## specify the app and page name:
+    ${ django_mako_plus.template_links(request, 'homepage', 'otherpage.html', context)
+
+
+What if I need links but don't need a template?
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This special case is for times when you need the CSS and JS autorendered, but don't need a template for HTML.  Use the same code as above, but add ``force=True``. DMP will render the CSS and JS files for the given template name, whether or not the template actually exists.
+
+.. code-block:: html+mako
+
+    ## renders links for `homepage/styles/otherpage.css` and `homepage/styles/otherpage.js`
+    ${ django_mako_plus.template_links(request, 'homepage', 'otherpage.html', context, force=True)
+
+However, I should note that having links without a template will probably confuse readers of your code because it breaks the convention. Unless you really do have a special case, I'd recommend creating an (empty) template anyway.
+
+
+DMP is linking the wrong context. What's up?
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+When libraries play games with the loading process (JQuery, I'm looking at you!), the context can be difficult to find in some situations:
+
+Here's an example of when this might occur:
+
+1. Your code uses jQuery.ajax() to retrieve ``snippet.html``, which has accompanying ``snippet.js`` and ``another.js``.
+2. When jQuery receives the response, it strips the ``<script>`` element from the html.  The html is inserted in the DOM **without** the tag (this behavior is how jQuery is written -- it avoids a security issue by doing this hack).
+3. jQuery executes the script code as a string, disconnected from the DOM.
+4. Since DMP can't use the predictable ``document.currentScript`` variable, it defaults to the last-inserted context.  This is normally a good assumption.
+5. However, since two ``.js`` files were inserted, TWO context dictionaries are linked in DMP_CONTEXT. Only one of them will be the "last" one.
+6. Both scripts run with the same, incorrect context.  Do not pass Go. Do not collect $200. No context for you.
+
+The solution is to help DMP by specifying the context by its ``app/template`` key:
+
+::
+
+    // look away Ma -- being explicit here!
+    (function(context) {
+        // your code here, such as
+        console.log(context);
+    })(DMP_CONTEXT.get('homepage/index'));
+
+In the above code, DMP retrieves correct context by template name.  Even if the given template has been loaded twice, the latest one will be active (thus giving the right context).  Problem solved.
+
+    A third alternative is to get the context by using a ``<script>`` DOM object as the argument to ``.get``. This approach always returns the correct context.
+
+
+
+Webpack Bundling
+-------------------------------
+
+The following questions relate specifically to bundling with DMP.
 
 
 How do I clear the generated bundle files?

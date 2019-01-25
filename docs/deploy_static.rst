@@ -109,6 +109,35 @@ In Apache, you'd set the following:
         Allow from all
     </Directory>
 
+``dmp-common.js``
+----------------------------------
+
+Open ``base.htm`` and look for the following line:
+
+::
+
+    <script src="/django_mako_plus/dmp-common.min.js"></script>
+
+DMP uses this script to make everything work on the browser side. For example, this script injects values sent from your view.py into the client-side JS scope. It's a small script (3K), and it's written in old-school Javascript (for a wide browser audience).
+
+When running in production mode, your web server (IIS, Nginx, etc.) should serve this file (rather than Django).  Or it could be bundled with other vendor code. In any case, the file just needs to be included on every page of your site.
+
+The following is an example setting for Nginx:
+
+::
+
+    location /django_mako_plus/dmp-common.min.js {
+        alias /to/django_mako_plus/scripts/dmp-common.min.js;
+    }
+
+If you don't know the location of DMP on your server, try this command:
+
+::
+
+    python3 -c 'import django_mako_plus; print(django_mako_plus.__file__)'
+
+
+
 Advanced Use
 ---------------------------
 
