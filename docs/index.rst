@@ -32,7 +32,7 @@ Features
 - Automatically injects `context variables </tutorial_css_js.html#static-and-dynamic-javascript>`_ in the client-side Javascript namespace.
 - Provides `Django-style signals </topics_signals.html>`_.
 - Plays nicely with `third party apps </topics_third_party.html>`_.
-- Extends Django's redirecting with `exception-based redirecting </topics_redirecting.html>`_.
+- Extends Django's redirecting with `exception-based redirecting </basics_redirecting.html>`_.
 - Supports `language translations </topics_translation.html>`_, `class-based views </topics_class_views.html>`_, and collection of `static files </static.html>`_.
 - Includes a comprehensive `test suite <https://github.com/doconix/django-mako-plus/tree/master/tests>`_.
 
