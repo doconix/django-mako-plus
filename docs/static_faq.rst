@@ -1,8 +1,38 @@
 FAQ
 ====================================
 
-General Static Files Questions
--------------------------------------
+Why aren't DMP log messages showing in my browser console?
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+DMP's debug messages make bundling more transparent. They can be lifesavers at times, but they can be bothersome once things are working. For more background, read the previous question on how to turn off log messages.
+
+The following must happen for debug messages to show in the browser console:
+
+* The ``django_mako_plus`` logger must be set to DEBUG.
+* Very few messages show in the normal providers, so you won't see many there. Since webpack provider is where transparency is needed, it's where messages are printed.
+* On Chromium browsers, ``console.debug`` messages only print when "Verbose" is selected in the console.
+* If you still can't get messages to print, try adding a few ``console.log`` lines to ``dmp-common.js``, especially in its log method. Hopefully that sorts things out.
+
+
+Why is DMP blowing up my browser console?
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Tracing static file issues can be difficult, so DMP is written to make it as transparent as possible.  In particular, bundling is fraught with danger: functions might not link right, contexts may trigger before bundles fully load, and in extreme cases, the Killer Rabbit of Caerbannog can show up. The debug messages in your browser console help you see exactly what's going on.
+
+To turn these messages off, adjust the DMP logger in your settings to any level above DEBUG:
+
+.. code-block:: python
+
+    LOGGING = {
+        ...
+        'loggers': {
+            ...
+            'django_mako_plus': {
+                'handlers': ['console_handler'],
+                'level': 'WARNING',     # DMP messages in browser console only show if DEBUG
+            },
+        },
+    }
 
 
 Can DMP provide links for other templates?
@@ -64,13 +94,7 @@ In the above code, DMP retrieves correct context by template name.  Even if the 
 
 
 
-Webpack Bundling
--------------------------------
-
-The following questions relate specifically to bundling with DMP.
-
-
-How do I clear the generated bundle files?
+Bundling: How do I clear the generated bundle files?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 In a terminal (Mac, Linux, or Windows+GitBash), issue these commands:
@@ -82,7 +106,7 @@ In a terminal (Mac, Linux, or Windows+GitBash), issue these commands:
     rm **/__bundle__.js
 
 
-How do I recreate ``__entry__.js`` files?
+Bundling: How do I recreate ``__entry__.js`` files?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Webpack depends on the accuracy of your ``__entry__.js`` file, and it's important to keep it in sync with the files in your projects. There are two ways to recreate your entry files:
@@ -111,7 +135,8 @@ You can turn off automatic creation in the webpack provider options:
         },
     ]
 
-Why does Webpack report errors whenever I add or delete files?
+
+Bundling: Why does Webpack report errors whenever I add or delete files?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 During development, webpack is normally running in "watch" mode. When your entry file gets out of sync with your actual project files, webpack gets grumpy. Refreshing the page a couple times usually brings everything back into sync.
@@ -127,40 +152,42 @@ For an example of why this is needed, consider this scenario:
     On Step 5, your browser might load the bundle before the webpack watcher recreates it. When this happens, refresh the page one more time to pull the new bundle.
 
 
-Why is DMP blowing up my browser console?
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Bundling: My functions are loading, but they don't trigger. Whaaaaat?
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Bundling is fraught with danger, and it can be difficult to debug the process. Bundling functions might not link right, contexts may trigger before bundles fully load, and in extreme cases, the Killer Rabbit of Caerbannog can show up. The debug messages in your browser console help you see when contexts get created, when bundle functions link into contexts, and when bundle functions get called.
+The DMP client-side script, ``dmp-common.min.js``, loads bundles using this process:
 
-To turn these messages off, adjust the DMP logger in your settings to any level above DEBUG:
+::
 
-.. code-block:: python
+    1. set() is run, which creates a container for the context, template names, and inheritance.
 
-    LOGGING = {
-        ...
-        'loggers': {
-            ...
-            'django_mako_plus': {
-                'handlers': ['console_handler'],
-                'level': 'WARNING',     # DMP messages in browser console only show if DEBUG
-            },
-        },
-    }
+    2. The browser reaches the bundle <script> tag and downloads the bundle file.
+        a. Once downloaded, the script runs and loads its template functions into the context container.
 
-Why aren't DMP log messages showing in my browser console?
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    3. checkBundleLoaded() runs due to the script tag's onLoad= event. The script checks two things:
+        a. Are all template functions are loaded?
+            Example: suppose account/templates/login.html extends from homepage/templates/base.htm.
+            Assuming we create app-based bundles, the login bundle contains login.js and login.css,
+            and the homepage bundle contains base.js and base.css.
+            When the account bundle loads, we still don't have base.js or base.css, so we need to wait.
+            When the homepage bundle loads, all four functions (login.js, login.css, base.js, and base.css)
+            are loaded, so they can be called.
+        b. Is context.pendingCalls > 0?  This variable allows delayed execution of the functions (read on).
+        If both (a) and (b) are True, the template scripts are called.
 
-DMP's debug messages make bundling more transparent. They can be lifesavers at times, but they can be bothersome once things are working. For more background, read the previous question on how to turn off log messages.
+    4. DMP_CONTEXT.callBundleContext() is called by a <script> tag in the template.
+        This function increments context.pendingCalls and then re-calls checkBundleLoaded()
 
-The following must happen for debug messages to show in the browser console:
+The above process (especially #3 and #4) allow things to happen out of order, which can happen with asyncronous scripts. If #4 occurs before #3, ``pendingCalls`` increments but it doesn't trigger because its still waiting on bundle functions. When the bundles finally load, #3 happens again (due to the ``onLoad`` event) and the bundle functions run.
 
-* The ``django_mako_plus`` logger must be set to DEBUG.
-* Very few messages show in the normal providers, so you won't see many there. Since webpack provider is where transparency is needed, it's where messages are printed.
-* On Chromium browsers, ``console.debug`` messages only print when "Verbose" is selected in the console.
-* If you still can't get messages to print, try adding a few ``console.log`` lines to ``dmp-common.js``, especially in its log method. Hopefully that sorts things out.
+Assuming the DMP logger is at ``DEBUG`` level, the process above is reported in detail in the browser console. Follow these log messages to see where the process breaks down. Check that all needed bundle functions get loaded , and check the value of ``pendingCalls``.
+
+Another idea is to disable DMP's automatic ``__entry__.js`` creation (``create_entry`` in the provider options). You can then insert console.log messages in ``__entry__.js`` to test things within the bundle.
+
+A final idea is to link to ``dmp-common.js`` (the unminified version) and have at it the file with console.log.
 
 
-How do I use Sass (Less, TypeScript, etc.) with DMP Webpack? asdf
+Bundling: How do I use Sass (Less, TypeScript, etc.) with DMP Webpack?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 One benefit to bundling is the output files from compiles like ``sass`` are piped right into bundles instead of as extra files in your project. Here's the steps:
@@ -226,7 +253,7 @@ Note in the above options, we're including ``.scss`` and ``.css`` (whenever they
 
 
 
-How do I create a vendor bundle?
+Bundling: How do I create a vendor bundle?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 In the `tutorial </static_webpack.html>`_, we created one bundle per app.  These bundles can grow large as you enjoy the convenience of ``npm init`` and link to more and more things in ``node_modules/``. Since each bundle is self-contained, there will be a lot of duplication between bundles. For example, the webpack bootstrapping JS will be in every one of your bundles--even if you don't specifically import any extra modules. At some point, and usually sooner than later, you should probably make a vendor bundle.
@@ -278,7 +305,7 @@ The above config creates a single bundle file in ``homepage/scripts/__bundle__.v
     ${ django_mako_plus.links(self) }
 
 
-How do I create a single, sitewide bundle?
+Bundling: How do I create a single, sitewide bundle?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 In some situations, it might make sense to create a single monstrosity that includes the scripts for every DMP app on your site.   Let's create a single ``__entry__.js`` file for your entire site
@@ -319,24 +346,7 @@ The above settings hard code the bundle location for all apps. Since 'duplicates
 See also the question (below) regarding creating links manually.
 
 
-How do I specify the <script> link myself?
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-This is easy to do as long as you call the bundle functions properly. Let's review the provider process:
-
-1. Your template calls ``links(self)``, which triggers a "provider run". DMP generates a unique ``contextid`` and then iterates through the providers and template inheritance. For this example, suppose the context id is ``12345``.
-2. ``[JsContextProvider]`` maps a "context" object to key ``12345`` to include the variables from the python ``render`` call.
-3. ``[WebpackJsLinkProvider]`` creates the script link, ``<script data-context="12345" onLoad="DMP_CONTEXT.checkBundleLoaded('12345')">...</script>``, which makes the bundle functions accessible to the page.
-4. ``[WebpackJsLinkProvider]`` creates a second script link, ``<script data-context="12345">DMP_CONTEXT.triggerBundleContext("12345")</script>``, which triggers the bundle functions for the template (and ancestors).
-
-#1 and #2 should remain as they are because DMP has the information for the context. However, #3 and #4 can be replaced by custom links in your base template:
-
-* Remove the ``WebpackJsLinkProvider`` in settings.py. You only need to leave the ``JsContextProvider`` in place.
-* *After ``dmp-common.js`` and ``links()`` run*, add a custom call to your bundle(s) in your base template. This replaces #3 above.  You only need the "onLoad" event if your script tag is async.
-* After the bundle script tag, trigger the context with a custom script: ``<script>DMP_CONTEXT.triggerBundleContext(DMP_CONTEXT.lastContext.id)</script>``. This works because the last context added by ``links()`` should be the current page. This replaces #4 above, and it runs the correct functions in the bundle. If your script tag was async, dmp-common.js waits if needed for the bundle to load.
-
-
-How do I create multi-app bundles?
+Bundling: How do I create multi-app bundles?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Somewhere in between a sitewide bundle and app-specific bundles lives the multi-app bundle.  Suppose you want app1 and app2 in one bundle and app3, app4, and app5 in another.  The following commands create the two needed entry files:

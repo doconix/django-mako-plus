@@ -125,6 +125,13 @@ a:hover, a:focus {
 /* Strong */
 .wy-nav-content b,
 .wy-nav-content strong {
+    font-weight: bold;
+    color: #AF591A;
+}
+
+/* Emphasis */
+.wy-nav-content i,
+.wy-nav-content em {
     font-weight: normal;
     color: #AF591A;
 }

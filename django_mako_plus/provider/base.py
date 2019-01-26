@@ -5,30 +5,16 @@ import logging
 from ..util import log
 
 
-TEMPLATE_ATTR_NAME = '_dmp_provider_cache_'
-
 ##############################################################
 ###   Abstract Provider Base
 
 class BaseProvider(object):
     '''
-    Abstract base provider class.  An instance is tied to a template at runtime.
+    Abstract base provider class.  Instances of this class are created by ProviderRun's constructor.
 
     Note that the app can only be inferred for templates in project apps (below settings.BASE_DIR).
     The app has to be inferred because mako creates templates internally during the render runtime,
     and I don't want to hack into Mako internals.
-
-    Always set:
-        self.template           Mako template object
-        self.options            The combined options from the provider, its supers, and settings.py
-        self.template_ext       Template extension.
-
-    If app can be inferred (None if not):
-        self.app_config         AppConfig the template resides in, if possible to infer.
-        self.template_relpath   Template path, relative to app/templates/, without extension.
-                                Usually this is just the template name, but could contain a subdirectory:
-                                    homepage/templates/index.html       => "index"
-                                    homepage/templates/forms/login.html => "forms/login"
     '''
     DEFAULT_OPTIONS = {
         # the group this provider is part of.  this only matters when
@@ -40,32 +26,20 @@ class BaseProvider(object):
     }
 
 
-    @classmethod
-    def instance_for_template(cls, template, options):
-        '''Returns an instance for the given template'''
-        # Mako already caches template objects, so I'm attaching provider instances to templates
-        provider_cache = getattr(template, TEMPLATE_ATTR_NAME, None)
-        if provider_cache is None:
-            provider_cache = {}
-            setattr(template, TEMPLATE_ATTR_NAME, provider_cache)
-        try:
-            return provider_cache[options['_template_cache_key']]
-        except KeyError:
-            pass
-        # not cached yet, so create the object
-        instance = cls(template, options)
-        if not settings.DEBUG:
-            provider_cache[options['_template_cache_key']] = instance
-        return instance
+    def __init__(self, provider_run, template, index, options):
+        # the following are always set
+        self.provider_run = provider_run    # the object in charge of this run of providers for the given template
+        self.template = template            # Mako template object
+        self.index = index                  # position of this provider in the list for this run
+        self.options = options              # the combined options from the provider, its supers, and settings.py
 
-
-    def __init__(self, template, options):
-        self.template = template
-        self.options = options
-        self.app_config = None
-        self.template_ext = None
-        self.template_relpath = None
-        self.template_name = None
+        # the only time these remain None is if we can't infer the app. that happens when:
+        #   1. the template was created from a string (and has no filename), or
+        #   2. the template file is located outside of an app directory
+        self.app_config = None              # AppConfig the template resides in, if possible to infer.
+        self.template_ext = None            # Template filename extension
+        self.template_relpath = None        # Template path, relative to app/templates/ and without extension, if possible to infer
+        self.template_name = None           # Template filename without extension, if possible to infer
         if self.template.filename is not None:
             # try to infer the app
             fn_no_ext, self.template_ext = os.path.splitext(template.filename)
@@ -79,34 +53,78 @@ class BaseProvider(object):
                 except LookupError: # template isn't under an app
                     pass
 
-
     def __repr__(self):
-        return '<{}{}: {}/{}>'.format(
-            self.__class__.__qualname__,
-            '' if self.options['enabled'] else ' (disabled)',
+        return '<{}/{}:{}{}>'.format(
             self.app_config.name if self.app_config is not None else 'unknown',
             self.template_relpath if self.template_relpath is not None else self.template,
+            self.__class__.__qualname__,
+            '' if self.options['enabled'] else ' (disabled)',
         )
-
 
     @property
     def group(self):
         return self.options['group']
 
-
-    def start(self, provider_run, data):
+    def provide(self):
         '''
-        Called on the *main* template's provider list as the run starts.
-        Initialize values in the data dictionary here.
+        Generate the content and do the work of this provider.
+        Use self.write() to output content.
         '''
+        pass
+
+    def write(self, content):
+        '''Writes content to the response'''
+        # really just a redirect to the provider run
+        self.provider_run.write(content)
 
 
-    def provide(self, provider_run, data):
-        '''Called on *each* template's provider list in the chain - use provider_run.write() for content'''
+    # in these next methods, the concept of "related providers" means the providers
+    # of the same class type in the same position.
+    # Suppose we have index.html inheriting from base.htm and we have three providers
+    # listed in settings. We get six total providers:
+    #
+    #    base.htm   ->  JsContextProvider, CssLinkProvider, JsLinkProvider
+    #       |
+    #   index.html  ->  JsContextProvider, CssLinkProvider, JsLinkProvider
+    #
+    # In this example, the two JsContextProviders are "related providers",
+    # the two CssLinkProviders are "related providers", and the two
+    # JsLinkProviders are "related providers".
 
-
-    def finish(self, provider_run, data):
+    def iter_related(self):
         '''
-        Called on the *main* template's provider list as the run finishes
-        Finalize values in the data dictionary here.
+        Generator function that iterates this object's related providers,
+        which includes this provider.
         '''
+        for tpl in self.provider_run.templates:
+            yield tpl.providers[self.index]
+
+    def get_first(self):
+        '''
+        Returns the first provider in the related providers to this one.
+        This is the provider instance for the base template (e.g. base.htm).
+        This is useful when a provider class needs to do things at the start of a run.
+        '''
+        return self.provider_run.templates[0].providers[self.index]
+
+    def is_first(self):
+        '''
+        Returns true if this provider is first to run among its related providers.
+        This is the provider associated with the base template (e.g. base.htm).
+        '''
+        return self.provider_run.templates[0].template is self.template
+
+    def get_last(self):
+        '''
+        Returns the last provider in the related providers to this one.
+        This is the provider instance for the main template (e.g. index.html).
+        This is useful when a provider class needs to do things at the end of a run.
+        '''
+        return self.provider_run.templates[-1].providers[self.index]
+
+    def is_last(self):
+        '''
+        Returns true if this provider is last to run among its related providers.
+        This is the provider associated with the main template (e.g. index.htm).
+        '''
+        return self.provider_run.templates[-1].template is self.template

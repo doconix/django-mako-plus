@@ -3,6 +3,12 @@ Upgrade Notes
 
 This document contains upgrade notes for those already using DMP.  We started the document at version 4.3.
 
+5.9 - January, 2019
+
+Refactored the providers based on feedback from users. This especially affects the ``ProviderRun`` class, but the changes shouldn't affect existing sites because these areas aren't generally used.
+
+The docs for the providers was fully rewritten to be more clear.
+
 5.8 - December, 2018
 
 The changes you need to worry about:

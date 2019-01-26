@@ -25,10 +25,10 @@ The other two providers, ``CssLinkProvider`` and ``JsLinkProvider`` generate ``<
 
 This mechanism provides several spots to put CSS and JS, depending on the scope you want affected. If the ``<footer>`` tag is in ``base.htm``, any CSS and/or JS related to it should probably be in ``base.css`` and ``base.js``.
 
-Full Options
+Detailed Options
 --------------------------------
 
-You can change the source paths and link format by overriding default options in settings. DMP deep merges ``CONTENT_PROVIDERS`` in your settings file wuth its defaults, so you can override a single option or many options. The following is the full set of options for these providers:
+Specify the source paths and link format by overriding default options in settings. DMP merges ``CONTENT_PROVIDERS`` in your settings file wuth its defaults, so you can override a single option or many options. The following is the full set of options for these providers:
 
 .. code-block:: python
 
@@ -38,26 +38,26 @@ You can change the source paths and link format by overriding default options in
             'BACKEND': 'django_mako_plus.MakoTemplates',
             'OPTIONS': {
                 'CONTENT_PROVIDERS': [
-                    {
-                        'provider': 'django_mako_plus.JsContextProvider',
+                    {   'provider': 'django_mako_plus.JsContextProvider',
                         'group': 'styles',
                         'enabled': True,
                         'encoder': 'django.core.serializers.json.DjangoJSONEncoder',
-                    },{
-                        'provider': 'django_mako_plus.CssLinkProvider',
+                    },
+                    {   'provider': 'django_mako_plus.CssLinkProvider',
                         'group': 'styles',
                         'enabled': True,
                         'filepath': None,
                         'link': None,
+                        'link_attrs': {},
                         'skip_duplicates': True,
-                    },{
-                        'provider': 'django_mako_plus.JsLinkProvider',
+                    },
+                    {   'provider': 'django_mako_plus.JsLinkProvider',
                         'group': 'styles',
                         'enabled': True,
                         'filepath': None,
                         'link': None,
+                        'link_attrs': {},
                         'skip_duplicates': False,
-                        'async': False,
                     },
                 ],
             },
@@ -67,7 +67,7 @@ You can change the source paths and link format by overriding default options in
 Primary options:
 
 :filepath:
-    Specifies the search path DMP uses to find the static file for a given template. Links are created only when filepaths exist. The possible values are:
+    Specifies the search path DMP uses to find the static file for a given template.  The possible values are:
 
     * If ``None``, the providers call a built-in method that returns the pattern you saw in the tutorial: ``<app>/styles/<template>.css`` and ``<app>/styles/<template>.js``.
     * If a *function or lambda*, the function is called: ``func(provider)``. The ``provider`` object contains useful information, such as template name, extension, app name and config object, various paths, and options. Specifying a lambda is the typical way to customize the filepath. See the examples below for more on this.
@@ -80,11 +80,11 @@ Primary options:
     * If a *function or lambda*, the function is called: ``func(provider)``. The ``provider`` object contains useful information, such as template name, extension, app name and config object, various paths, and options. Specifying a lambda is the typical way to customize the link. See the examples below for more on this.
     * If a *string*, it is used directly. This is useful when you want to hard code a link.
 
+:link_attrs:
+    Specifies additional attributes for the link tag, such as ``async``, ``type``, ``rel``, etc.
+
 :skip_duplicates:
     Specifies how DMP should act when duplicate links are created by two providers (or two runs of the same provider). In the case of CSS files, the second link is unnecessary. In the case of JS files, a second link usually means the script should run a second time.
-
-:async:
-    Specifies whether a script tag should be asynchronous: ``<script src="..." async="true"></script>``. Browsers normally run scripts synchronously, but modern sites often switch to asyncronous execution.
 
 Less used options:
 
@@ -95,7 +95,7 @@ Less used options:
     Specifies whether a provider is enabled or disabled (skipped). For example, if you specify ``'enabled': DEBUG``, a provider will run during development but be skipped at production.
 
 
-Example: Specifying the Filepath
+Example
 -------------------------------------
 
 Suppose we want to use a traditional Django project structure (different from DMP convention):
@@ -120,17 +120,7 @@ Suppose we want to use a traditional Django project structure (different from DM
                     base.js
                     index.js
 
-By specifying the filepath with a lambda function, we can use the following attributes of the provider objects:
-
-    * ``provider.template_name`` - the name of the template, without extension
-    * ``provider.template_relpath`` - the path of the template, relative to the ``app/templates`` directory. This is usually the same as ``template_name``, but it can be different if in a subdir of templates (e.g. ``homepage/templates/forms/login.html`` -> ``forms/login``.
-    * ``provider.template_ext`` - the extension of the template filename
-    * ``provider.app_config`` - the AppConfig the template resides in
-    * ``provider.app_config.name`` - the name of the app
-    * ``provider.template`` - the Mako template object
-    * ``provider.template.filename`` - full path to template file
-    * ``provider.options`` - the options for this provider (defaults + settings.py)
-
+The provider options in ``settings.py`` look like this:
 
 .. code-block:: python
 
@@ -140,16 +130,43 @@ By specifying the filepath with a lambda function, we can use the following attr
             'BACKEND': 'django_mako_plus.MakoTemplates',
             'OPTIONS': {
                 'CONTENT_PROVIDERS': [
-                    {
-                        'provider': 'django_mako_plus.JsContextProvider',
-                    },{
-                        'provider': 'django_mako_plus.CssLinkProvider',
-                        'filepath': lambda:
-                    },{
-                        'provider': 'django_mako_plus.JsLinkProvider',
-                        'filepath': None,
+                    {   'provider': 'django_mako_plus.JsContextProvider' },
+                    {   'provider': 'django_mako_plus.CssLinkProvider',
+                        'filepath': lambda p: os.path.join(BASE_DIR, 'static', p.app_config.name, 'css', p.template_relpath + '.css'),
+                    },
+                    {   'provider': 'django_mako_plus.JsLinkProvider',
+                        'filepath': lambda p: os.path.join(BASE_DIR, 'static', p.app_config.name, 'js', p.template_relpath + '.js'),
                     },
                 ],
             },
         },
     ]
+
+Also, since DMP looks for templates in the app directory, be sure to write the render call to the new structure:
+
+.. code-block:: python
+
+    @view_function
+    def process_request(request):
+        ...
+        return request.dmp.render('homepage/index.html', ...)
+
+
+By specifying the filepath with a lambda function, we can use the following attributes of the provider objects:
+
+* ``provider.template_name`` - the name of the template, without extension
+* ``provider.template_relpath`` - the path of the template, relative to the ``app/templates`` directory. This is usually the same as ``template_name``, but it can be different if in a subdir of templates (e.g. ``homepage/templates/forms/login.html`` -> ``forms/login``.
+* ``provider.template_ext`` - the extension of the template filename
+* ``provider.app_config`` - the AppConfig the template resides in
+* ``provider.app_config.name`` - the name of the app
+* ``provider.template`` - the Mako template object
+* ``provider.template.filename`` - full path to template file
+* ``provider.options`` - the options for this provider (defaults + settings.py)
+* ``provider.provider_run.uid`` - the unique context id (needed when creating links)
+* ``provider.provider_run.request`` - the request object
+
+*Hints:*
+
+1. Be sure DMP's logging is set to "DEBUG" level (in settings). Then check the server logs; DMP's providers print a lot of useful information to help you troubleshoot. The file paths printed should be especially useful.
+2. If the command is failing, you can copy the exact command being run from your server logs. Try running this command manually at a new terminal.
+3. Open the browser source (not the parsed DOM in the console, but the actual content being sent from the server). Inspect the link elements and paths for problems.

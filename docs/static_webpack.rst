@@ -292,4 +292,4 @@ If you look at the generated bundle file, you'll find it is minified and ready f
 Further Questions?
 -----------------------
 
-The `DMP Webpack FAQ </static_webpack_faq.html>`_ goes over several different situations.
+The `Provider FAQ </static_faq.html>`_ goes over several different situations.

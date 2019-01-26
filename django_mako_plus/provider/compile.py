@@ -13,36 +13,15 @@ from ..command import run_command
 class CompileProvider(BaseProvider):
     '''
     Runs a command, such as compiling *.scss or *.less, when an output file
-    timestamp is older than the source file. In production mode, this check
-    is done only once (the first time a template is run) per server start.
+    timestamp is older than the source file.
 
     When settings.DEBUG=True, checks for a recompile every request.
     When settings.DEBUG=False, checks for a recompile only once per server run.
     '''
-    def __init__(self, template, options):
-        super().__init__(template, options)
-        self.sourcepath = os.path.join(settings.BASE_DIR if settings.DEBUG else settings.STATIC_ROOT, self.build_sourcepath())
-        self.targetpath = os.path.join(settings.BASE_DIR if settings.DEBUG else settings.STATIC_ROOT, self.build_targetpath())
-        # since this is in the constructor, it runs only one time per server
-        # run when in production mode
-        if not os.path.exists(self.sourcepath):
-            msg = 'skipping nonexistent file'
-        elif self.needs_compile:
-            msg = 'compiling file'
-            if not os.path.exists(os.path.dirname(self.targetpath)):
-                os.makedirs(os.path.dirname(self.targetpath))
-            run_command(*self.build_command())
-        else:
-            msg = 'already up to date'
-        if log.isEnabledFor(logging.DEBUG):
-            log.debug('%s created for %s: [%s]', repr(self), self.sourcepath, msg)
-
     DEFAULT_OPTIONS = {
         'group': 'styles',
 
-        # explicitly sets the path to search for - if this filepath exists, DMP
-        # includes a link to it in the template. globs are not supported because this
-        # should resolve to one exact file. possible values:
+        # source path to search for, relative to the project directory.  possible values are:
         #   1. None: a default path is used, such as "{app}/{subdir}/{filename.ext}", prefixed
         #      with the static root at production; see subclasses for their default filenames.
         #   2. function, lambda, or other callable: called as func(provider) and
@@ -50,8 +29,7 @@ class CompileProvider(BaseProvider):
         #   3. str: used directly
         'sourcepath': None,
 
-        # explicitly sets the path to search for - if this filepath exists, DMP
-        # includes a link to it in the template. globs are not supported because this
+        # target path to search for, relative to the project directory.  possible values are:
         # should resolve to one exact file. possible values:
         #   1. None: a default path is used, such as "{app}/{subdir}/{filename.ext}", prefixed
         #      with the static root at production; see subclasses for their default filenames.
@@ -66,6 +44,20 @@ class CompileProvider(BaseProvider):
         #   3. list: used directly in the call to subprocess module
         'command': [],
     }
+
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.sourcepath = os.path.join(settings.BASE_DIR if settings.DEBUG else settings.STATIC_ROOT, self.build_sourcepath())
+        self.targetpath = os.path.join(settings.BASE_DIR if settings.DEBUG else settings.STATIC_ROOT, self.build_targetpath())
+        self.do_compile, msg = True, 'will compile'
+        if not os.path.exists(self.sourcepath):
+            self.do_compile, msg = False, 'will skip compilation - nonexistent file'
+        elif not self.needs_compile:
+            self.do_compile, msg = False, 'will skip compilation - already updated'
+        if log.isEnabledFor(logging.DEBUG):
+            log.debug('%s created for %s [%s]', repr(self), self.sourcepath, msg)
+
 
     def build_sourcepath(self):
         # if defined in settings, run the function or return the string
@@ -118,6 +110,17 @@ class CompileProvider(BaseProvider):
             return True
         # both source and target exist, so compile if source newer
         return source_mtime > target_mtime
+
+
+    def provide(self):
+        if not self.do_compile:
+            return
+        if log.isEnabledFor(logging.DEBUG):
+            log.debug('%s compiling: %s', repr(self), self.sourcepath)
+        if not os.path.exists(os.path.dirname(self.targetpath)):
+            os.makedirs(os.path.dirname(self.targetpath))
+        run_command(*self.build_command())
+
 
 
 ###################

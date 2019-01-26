@@ -13,9 +13,11 @@ from ..management.commands.dmp_webpack import Command as WebpackCommand
 class WebpackJsLinkProvider(JsLinkProvider):
     '''Generates a JS <script> tag for an app-level JS bundle file, if it exists.'''
     DEFAULT_OPTIONS = {
-        'skip_duplicates': True,
-        'async': False,
         'create_entry': True,
+        'link_attrs': {
+            'async': True,
+        },
+        'skip_duplicates': True,
     }
 
     def build_default_filepath(self):
@@ -30,9 +32,9 @@ class WebpackJsLinkProvider(JsLinkProvider):
             '__bundle__.js',
         )
 
-    def build_default_link(self, provider_run, data):
+    def build_default_link(self):
         attrs = {}
-        attrs["data-context"] = provider_run.uid
+        attrs["data-context"] = self.provider_run.uid
         attrs["src"] ="{}?{:x}".format(
             posixpath.join(
                 settings.STATIC_URL,
@@ -42,16 +44,15 @@ class WebpackJsLinkProvider(JsLinkProvider):
             ),
             self.version_id,
         )
-        attrs['onload'] = "DMP_CONTEXT.checkBundleLoaded('{}')".format(provider_run.uid)
-        if self.options['async']:
-            attrs['async'] = 'async'
+        attrs.update(self.options['link_attrs'])
+        attrs['onload'] = "DMP_CONTEXT.checkBundleLoaded('{}')".format(self.provider_run.uid)
         return '<script{}></script>'.format(flatatt(attrs))
 
-    def finish(self, provider_run, data):
-        # this trigger call must be separate because script links may not always
-        # render (duplicates are skipped)
-        super().finish(provider_run, data)
-        if len(data['enabled']) > 0:
-            provider_run.write('<script data-context="{uid}">DMP_CONTEXT.callBundleContext("{uid}")</script>'.format(
-                uid=provider_run.uid,
+    def provide(self):
+        # this must come after the regular JsLinkProvider script because the JsLinkProvider doesn't always
+        # output a link (duplicates get skipped)
+        super().provide()
+        if self.is_last():
+            self.write('<script data-context="{uid}">DMP_CONTEXT.callBundleContext("{uid}")</script>'.format(
+                uid=self.provider_run.uid,
             ))

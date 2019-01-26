@@ -1,6 +1,8 @@
 from django.apps import apps
 from django.conf import settings
+from django.core.exceptions import ImproperlyConfigured
 from django.core.management.base import BaseCommand, CommandError
+from django_mako_plus import LinkProvider
 from django_mako_plus.template import create_mako_context
 from django_mako_plus.provider.runner import ProviderRun
 from django_mako_plus.management.mixins import DMPCommandMixIn
@@ -49,6 +51,9 @@ class Command(DMPCommandMixIn, BaseCommand):
         dmp = apps.get_app_config('django_mako_plus')
         self.options = options
         WebpackProviderRun.initialize_providers()
+        for pci in WebpackProviderRun.CONTENT_PROVIDERS:
+            if not issubclass(pci.cls, LinkProvider):
+                raise ImproperlyConfigured('Invalid provider {} listed in {}: must extend django_mako_plus.LinkProvider'.format(pci.cls.__qualname__, WebpackProviderRun.SETTINGS_KEY))
 
         # ensure we have a base directory
         try:
@@ -177,10 +182,6 @@ class Command(DMPCommandMixIn, BaseCommand):
 
         This runs a ProviderRun on the given template (as if it were being displayed).
         This allows the WEBPACK_PROVIDERS to provide the JS files to us.
-
-        For this algorithm to work, the providers must extend static_links.LinkProvider
-        because that class creates the 'enabled' list of provider instances, and each
-        provider instance has a url.
         '''
         dmp = apps.get_app_config('django_mako_plus')
         template_obj = dmp.engine.get_template_loader(config, create=True).get_mako_template(template_name, force=True)
@@ -188,10 +189,10 @@ class Command(DMPCommandMixIn, BaseCommand):
         inner_run = WebpackProviderRun(mako_context['self'])
         inner_run.run()
         scripts = []
-        for data in inner_run.column_data:
-            for provider in data.get('enabled', []):    # if file doesn't exist, the provider won't be enabled
-                if hasattr(provider, 'filepath'):       # providers used to collect for webpack must have a .filepath property
-                    scripts.append(provider.filepath)   # the absolute path to the file (see providers/static_links.py)
+        for tpl in inner_run.templates:
+            for p in tpl.providers:
+                if os.path.exists(p.absfilepath):
+                    scripts.append(p.absfilepath)
         return scripts
 
 
@@ -202,9 +203,10 @@ class Command(DMPCommandMixIn, BaseCommand):
 class WebpackProviderRun(ProviderRun):
     SETTINGS_KEY = 'WEBPACK_PROVIDERS'
 
-    def get_template_inheritance(self, tself):
+    def _get_template_inheritance(self):
         '''
         Normally, this returns a list of the template inheritance of tself, starting with the oldest ancestor.
         But for the webpack one, we just want the template itself, without any ancestors.
+        This gives the static files for this exact template (not including all ancestors).
         '''
-        return [ tself.template ]
+        return [ self.tself.template ]
