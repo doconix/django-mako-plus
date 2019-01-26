@@ -57,7 +57,7 @@ class LinkProvider(BaseProvider):
             # file time and version hash
             try:
                 self.mtime = int(os.stat(self.absfilepath).st_mtime)
-                # version_id combines current time and the CRC32 checksum of file bytes
+                # version_id combines file modification time and the CRC32 checksum of file bytes
                 self.version_id = (self.mtime << 32) | crc32(self.absfilepath)
             except FileNotFoundError:
                 self.mtime = 0

@@ -73,12 +73,16 @@ Primary options:
     * If a *function or lambda*, the function is called: ``func(provider)``. The ``provider`` object contains useful information, such as template name, extension, app name and config object, various paths, and options. Specifying a lambda is the typical way to customize the filepath. See the examples below for more on this.
     * If a *string*, it is used directly. This is useful when you want to hard code a file path.
 
+    See the examples below for specifying custom file paths.
+
 :link:
     Generates the link to be inserted into the rendering template. The possible values are:
 
     * If ``None``, the providers call a built-in method that generates the links: ``<link rel="stylesheet" .../>`` and ``<script src="..." ...></script>``.
     * If a *function or lambda*, the function is called: ``func(provider)``. The ``provider`` object contains useful information, such as template name, extension, app name and config object, various paths, and options. Specifying a lambda is the typical way to customize the link. See the examples below for more on this.
     * If a *string*, it is used directly. This is useful when you want to hard code a link.
+
+    See the examples below for specifying custom link elements.
 
 :link_attrs:
     Specifies additional attributes for the link tag, such as ``async``, ``type``, ``rel``, etc.
@@ -95,7 +99,7 @@ Less used options:
     Specifies whether a provider is enabled or disabled (skipped). For example, if you specify ``'enabled': DEBUG``, a provider will run during development but be skipped at production.
 
 
-Example
+Example: Custom Paths
 -------------------------------------
 
 Suppose we want to use a traditional Django project structure (different from DMP convention):
@@ -132,10 +136,10 @@ The provider options in ``settings.py`` look like this:
                 'CONTENT_PROVIDERS': [
                     {   'provider': 'django_mako_plus.JsContextProvider' },
                     {   'provider': 'django_mako_plus.CssLinkProvider',
-                        'filepath': lambda p: os.path.join(BASE_DIR, 'static', p.app_config.name, 'css', p.template_relpath + '.css'),
+                        'filepath': lambda p: os.path.join('static', p.app_config.name, 'css', p.template_relpath + '.css'),
                     },
                     {   'provider': 'django_mako_plus.JsLinkProvider',
-                        'filepath': lambda p: os.path.join(BASE_DIR, 'static', p.app_config.name, 'js', p.template_relpath + '.js'),
+                        'filepath': lambda p: os.path.join('static', p.app_config.name, 'js', p.template_relpath + '.js'),
                     },
                 ],
             },
@@ -154,16 +158,76 @@ Also, since DMP looks for templates in the app directory, be sure to write the r
 
 By specifying the filepath with a lambda function, we can use the following attributes of the provider objects:
 
-* ``provider.template_name`` - the name of the template, without extension
-* ``provider.template_relpath`` - the path of the template, relative to the ``app/templates`` directory. This is usually the same as ``template_name``, but it can be different if in a subdir of templates (e.g. ``homepage/templates/forms/login.html`` -> ``forms/login``.
-* ``provider.template_ext`` - the extension of the template filename
-* ``provider.app_config`` - the AppConfig the template resides in
-* ``provider.app_config.name`` - the name of the app
-* ``provider.template`` - the Mako template object
-* ``provider.template.filename`` - full path to template file
-* ``provider.options`` - the options for this provider (defaults + settings.py)
-* ``provider.provider_run.uid`` - the unique context id (needed when creating links)
-* ``provider.provider_run.request`` - the request object
+* ``p.template_name`` - the name of the template, without extension
+* ``p.template_relpath`` - the path of the template, relative to the ``app/templates`` directory. This is usually the same as ``template_name``, but it can be different if in a subdir of templates (e.g. ``homepage/templates/forms/login.html`` -> ``forms/login``.
+* ``p.template_ext`` - the extension of the template filename
+* ``p.app_config`` - the AppConfig the template resides in
+* ``p.app_config.name`` - the name of the app
+* ``p.template`` - the Mako template object
+* ``p.template.filename`` - full path to template file
+* ``p.options`` - the options for this provider (defaults + settings.py)
+* ``p.provider_run.uid`` - the unique context id (needed when creating links)
+* ``p.provider_run.request`` - the request object
+
+*Hints:*
+
+1. Be sure DMP's logging is set to "DEBUG" level (in settings). Then check the server logs; DMP's providers print a lot of useful information to help you troubleshoot. The file paths printed should be especially useful.
+2. If the command is failing, you can copy the exact command being run from your server logs. Try running this command manually at a new terminal.
+3. Open the browser source (not the parsed DOM in the console, but the actual content being sent from the server). Inspect the link elements and paths for problems.
+
+
+Example: Custom Links
+-------------------------------------
+
+Suppose we need a dynamic onLoad event to run with each template-related CSS file. In short, we want to generate custom CSS link elements.
+
+    If the event were the same across all CSS link elements, we could simply override the ``link_attrs`` value in the options. But for a truly unique tag for each template, we'll need to generate the full link.
+
+The provider options in ``settings.py`` look like this:
+
+.. code-block:: python
+
+    TEMPLATES = [
+        {
+            'NAME': 'django_mako_plus',
+            'BACKEND': 'django_mako_plus.MakoTemplates',
+            'OPTIONS': {
+                'CONTENT_PROVIDERS': [
+                    {   'provider': 'django_mako_plus.JsContextProvider' },
+                    {   'provider': 'django_mako_plus.CssLinkProvider',
+                        'filepath': lambda p: os.path.join(p.app_config.name, 'styles', p.template_relpath + '.css'),
+                        'link': lambda p: """<link rel="stylesheet" onLoad="custFunc('{app}/{tmpl}')" data-context="{uid}" href="{path}?{vid}" />""".format(
+                            app=p.app_config.name,
+                            tmpl=p.template_name,
+                            uid=p.provider_run.uid,
+                            path=os.path.join(STATIC_URL, p.filepath).replace(os.path.sep, '/'),
+                            vid=p.version_id,
+                        ),
+                    },
+                    {   'provider': 'django_mako_plus.JsLinkProvider' },
+                ],
+            },
+        },
+    ]
+
+Not the following in the above link.
+
+* The ``data-context`` attribute is set to the context (provider run) uid. Be sure to include this in any custom links so the client-side DMP script can find the element.
+* The ``p.version_id`` variable is used as a cache buster. This id is calculated from the file "last modified" time and a hash of the file contents. When you change the file, the changed version_id will force client browsers to download the new file.
+
+By specifying the link with a lambda function, we can use the following attributes of the provider objects:
+
+* ``p.template_name`` - the name of the template, without extension
+* ``p.template_relpath`` - the path of the template, relative to the ``app/templates`` directory. This is usually the same as ``template_name``, but it can be different if in a subdir of templates (e.g. ``homepage/templates/forms/login.html`` -> ``forms/login``.
+* ``p.template_ext`` - the extension of the template filename
+* ``p.app_config`` - the AppConfig the template resides in
+* ``p.app_config.name`` - the name of the app
+* ``p.template`` - the Mako template object
+* ``p.template.filename`` - full path to template file
+* ``p.options`` - the options for this provider (defaults + settings.py)
+* ``p.provider_run.uid`` - the unique context id (needed when creating links)
+* ``p.provider_run.request`` - the request object
+* ``p.version_id`` - the unique id calculated from the file modified time and contents
 
 *Hints:*
 

@@ -136,16 +136,16 @@ In the following setup, note the changes to 1) the Sass compile provider's outpu
 
 By specifying the paths with lambda functions, we can use the following attributes of the provider objects:
 
-* ``provider.template_name`` - the name of the template, without extension
-* ``provider.template_relpath`` - the path of the template, relative to the ``app/templates`` directory. This is usually the same as ``template_name``, but it can be different if in a subdir of templates (e.g. ``homepage/templates/forms/login.html`` -> ``forms/login``.
-* ``provider.template_ext`` - the extension of the template filename
-* ``provider.app_config`` - the AppConfig the template resides in
-* ``provider.app_config.name`` - the name of the app
-* ``provider.template`` - the Mako template object
-* ``provider.template.filename`` - full path to template file
-* ``provider.options`` - the options for this provider (defaults + settings.py)
-* ``provider.provider_run.uid`` - the unique context id (needed when creating links)
-* ``provider.provider_run.request`` - the request object
+* ``p.template_name`` - the name of the template, without extension
+* ``p.template_relpath`` - the path of the template, relative to the ``app/templates`` directory. This is usually the same as ``template_name``, but it can be different if in a subdir of templates (e.g. ``homepage/templates/forms/login.html`` -> ``forms/login``.
+* ``p.template_ext`` - the extension of the template filename
+* ``p.app_config`` - the AppConfig the template resides in
+* ``p.app_config.name`` - the name of the app
+* ``p.template`` - the Mako template object
+* ``p.template.filename`` - full path to template file
+* ``p.options`` - the options for this provider (defaults + settings.py)
+* ``p.provider_run.uid`` - the unique context id (needed when creating links)
+* ``p.provider_run.request`` - the request object
 
 *Hints:*
 
@@ -188,16 +188,16 @@ In the following setup, note the changes to 1) the Sass compile provider's outpu
 
 By specifying the paths with lambda functions, we can use the following attributes of the provider objects:
 
-* ``provider.template_name`` - the name of the template, without extension
-* ``provider.template_relpath`` - the path of the template, relative to the ``app/templates`` directory. This is usually the same as ``template_name``, but it can be different if in a subdir of templates (e.g. ``homepage/templates/forms/login.html`` -> ``forms/login``.
-* ``provider.template_ext`` - the extension of the template filename
-* ``provider.app_config`` - the AppConfig the template resides in
-* ``provider.app_config.name`` - the name of the app
-* ``provider.template`` - the Mako template object
-* ``provider.template.filename`` - full path to template file
-* ``provider.options`` - the options for this provider (defaults + settings.py)
-* ``provider.provider_run.uid`` - the unique context id (needed when creating links)
-* ``provider.provider_run.request`` - the request object
+* ``p.template_name`` - the name of the template, without extension
+* ``p.template_relpath`` - the path of the template, relative to the ``app/templates`` directory. This is usually the same as ``template_name``, but it can be different if in a subdir of templates (e.g. ``homepage/templates/forms/login.html`` -> ``forms/login``.
+* ``p.template_ext`` - the extension of the template filename
+* ``p.app_config`` - the AppConfig the template resides in
+* ``p.app_config.name`` - the name of the app
+* ``p.template`` - the Mako template object
+* ``p.template.filename`` - full path to template file
+* ``p.options`` - the options for this provider (defaults + settings.py)
+* ``p.provider_run.uid`` - the unique context id (needed when creating links)
+* ``p.provider_run.request`` - the request object
 
 
 *Hints:*
