@@ -15,7 +15,7 @@ class WebpackJsLinkProvider(JsLinkProvider):
     DEFAULT_OPTIONS = {
         'create_entry': True,
         'link_attrs': {
-            'async': True,
+            'async': False,
         },
         'skip_duplicates': True,
     }

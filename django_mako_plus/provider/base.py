@@ -21,17 +21,17 @@ class BaseProvider(object):
         # the html page limits the providers that will be called with
         # ${ django_mako_plus.links(group="...") }
         'group': 'styles',
+
         # whether enabled (see "Dev vs. Prod" in the DMP docs)
         'enabled': True,
     }
 
-
     def __init__(self, provider_run, template, index, options):
         # the following are always set
-        self.provider_run = provider_run    # the object in charge of this run of providers for the given template
-        self.template = template            # Mako template object
-        self.index = index                  # position of this provider in the list for this run
-        self.options = options              # the combined options from the provider, its supers, and settings.py
+        self.provider_run = provider_run        # the object in charge of this run of providers for the given template
+        self.template = template                # Mako template object
+        self.index = index                      # position of this provider in the list for this run
+        self.options = options                  # the combined options from the provider, its supers, and settings.py
 
         # the only time these remain None is if we can't infer the app. that happens when:
         #   1. the template was created from a string (and has no filename), or
@@ -128,3 +128,30 @@ class BaseProvider(object):
         This is the provider associated with the main template (e.g. index.htm).
         '''
         return self.provider_run.templates[-1].template is self.template
+
+
+
+    #  Each provider can cache one item in the template to make
+    #  things faster at production. Raises an AttributeError if nothing has
+    #  been cached.
+    #
+    #  Why store things in the template? Because Mako already uses a cache
+    #  for templates, so this keeps the values alive as long as a template object is.
+    #
+    #  Note that:
+    #   1. Values can't be stored in provider objects because new objects are created
+    #      on each provider run.
+    #   2. Values can't be stored as class variables because the same class can
+    #      be listed more than once in settings.
+    #   3. The options dict IS unique to a given provider entry, but there's no need
+    #      to manage another cache there when Mako is doing it.
+
+    def get_cache_item(self):
+        '''Gets the cached item. Raises AttributeError if it hasn't been set.'''
+        if settings.DEBUG:
+            raise AttributeError('Caching disabled in DEBUG mode')
+        return getattr(self.template, self.options['template_cache_key'])
+
+    def set_cache_item(self, item):
+        '''Sets the cached item'''
+        setattr(self.template, self.options['template_cache_key'], item)

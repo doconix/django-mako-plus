@@ -9,15 +9,17 @@ from ..template import template_inheritance
 from ..util import qualified_name, b58enc
 
 
-# initialize_providers() below creates a list of these to hold provider options from settings.py
-# I can't keep the options inside the provider class itself because a given class can be listed
-# more than once in settings.py (with different options).
-ProviderClassInfo = namedtuple("ProviderClassInfo", [ 'cls', 'options' ])
 
 # __init__() below creates a list of templates, each of which has a list of providers
 # this named tuple adds a small amount of extra clarity to it.
 # I could use a dict or OrderedDict, but I need order AND fast indexing
 TemplateProviderList = namedtuple("TemplateProviderList", [ 'template', 'providers' ])
+
+# ProviderRun.initialize_providers() creates a list of these to hold provider options from settings.py
+# I can't keep the options inside the provider class itself because a given class can be listed
+# more than once in settings.py (with different options).
+ProviderEntry = namedtuple("ProviderEntry", [ 'cls', 'options' ])
+
 
 
 ####################################################
@@ -45,7 +47,9 @@ class ProviderRun(object):
             options.update(provider_settings)
             # add to the list
             if options['enabled']:
-                cls.CONTENT_PROVIDERS.append(ProviderClassInfo(provider_cls, options))
+                pe = ProviderEntry(provider_cls, options)
+                pe.options['template_cache_key'] = '_dmp_provider_{}_'.format(id(pe))
+                cls.CONTENT_PROVIDERS.append(pe)
 
 
     def __init__(self, tself, group=None):
@@ -61,7 +65,7 @@ class ProviderRun(object):
         self.buffer = io.StringIO()
 
         # get the ProviderClassInfo objects that are used in this group
-        group_pcis = [ pci for pci in self.CONTENT_PROVIDERS if group is None or pci.options['group'] == group ]
+        group_pes = [ pe for pe in self.CONTENT_PROVIDERS if group is None or pe.options['group'] == group ]
 
         # Create a map of template -> providers for this run
         #   {
@@ -72,8 +76,8 @@ class ProviderRun(object):
         self.templates = []
         for tmpl in self._get_template_inheritance():
             tpl = TemplateProviderList(tmpl, [])
-            for index, pci in enumerate(group_pcis):
-                tpl.providers.append(pci.cls(self, tmpl, index, pci.options))
+            for index, pe in enumerate(group_pes):
+                tpl.providers.append(pe.cls(self, tmpl, index, pe.options))
             self.templates.append(tpl)
 
     def _get_template_inheritance(self):

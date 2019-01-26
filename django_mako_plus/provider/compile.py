@@ -10,9 +10,6 @@ from ..util import log
 from ..command import run_command
 
 
-PREVIOUS_SOURCEPATH_KEY = '_previous_sourcepaths_'
-
-
 
 class CompileProvider(BaseProvider):
     '''
@@ -47,37 +44,36 @@ class CompileProvider(BaseProvider):
         #   2. function, lambda, or other callable: called as func(provider), expects list as return
         #   3. list: used directly in the call to subprocess module
         'command': [],
-
-        # set of sourcepaths we've previously checked for compilation - for internal use only
-        # I'm using the options for this because this dictionary is unique to this exact provider and
-        # its options. The provider class is NOT unique because the same provider can be listed more
-        # than once in settings.
-        PREVIOUS_SOURCEPATH_KEY: set(),
     }
 
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.sourcepath = os.path.join(settings.BASE_DIR if settings.DEBUG else settings.STATIC_ROOT, self.build_sourcepath())
-        self.targetpath = os.path.join(settings.BASE_DIR if settings.DEBUG else settings.STATIC_ROOT, self.build_targetpath())
+
+        # create the paths
+        try:
+            self.sourcepath, self.targetpath = self.get_cache_item()
+            checked_previously = True
+        except AttributeError:
+            self.sourcepath = os.path.join(settings.BASE_DIR if settings.DEBUG else settings.STATIC_ROOT, self.build_sourcepath())
+            self.targetpath = os.path.join(settings.BASE_DIR if settings.DEBUG else settings.STATIC_ROOT, self.build_targetpath())
+            self.set_cache_item((self.sourcepath, self.targetpath))
+            checked_previously = False
+
+        if not settings.DEBUG and checked_previously:
+            log.debug('%s created for %s [checked previously]', self, self.sourcepath)
+            return
+
         # do we need to compile?
-        if not settings.DEBUG and self.sourcepath in self.options[PREVIOUS_SOURCEPATH_KEY]:
-            do_compile, msg = False, 'checked earlier'
-        elif not os.path.exists(self.sourcepath):
-            do_compile, msg = False, 'nonexistent file'
+        if not os.path.exists(self.sourcepath):
+            log.debug('%s created for %s [nonexistent file]', self, self.sourcepath)
         elif not self.needs_compile:
-            do_compile, msg = False, 'already up-to-date'
+            log.debug('%s created for %s [already up-to-date]', self, self.sourcepath)
         else:
-            do_compile, msg = True, 'compiling'
-        if log.isEnabledFor(logging.DEBUG):
-            log.debug('%s created for %s [%s]', repr(self), self.sourcepath, msg)
-        # do the compile
-        if do_compile:
+            log.debug('%s created for %s [compiling]', self, self.sourcepath)
             if not os.path.exists(os.path.dirname(self.targetpath)):
                 os.makedirs(os.path.dirname(self.targetpath))
             run_command(*self.build_command())
-        # record that we've checked this template
-        self.options[PREVIOUS_SOURCEPATH_KEY].add(self.sourcepath)
 
     def build_sourcepath(self):
         # if defined in settings, run the function or return the string

@@ -45,19 +45,25 @@ class LinkProvider(BaseProvider):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.filepath = self.build_source_filepath()
-        self.absfilepath = os.path.join(
-            settings.BASE_DIR if settings.DEBUG else settings.STATIC_ROOT,
-            self.filepath,
-        )
-        # file time and version hash
         try:
-            self.mtime = int(os.stat(self.absfilepath).st_mtime)
-            # version_id combines current time and the CRC32 checksum of file bytes
-            self.version_id = (self.mtime << 32) | crc32(self.absfilepath)
-        except FileNotFoundError:
-            self.mtime = 0
-            self.version_id = 0
+            self.filepath, self.absfilepath, self.mtime, self.version_id = self.get_cache_item()
+
+        except AttributeError:
+            self.filepath = self.build_source_filepath()
+            self.absfilepath = os.path.join(
+                settings.BASE_DIR if settings.DEBUG else settings.STATIC_ROOT,
+                self.filepath,
+            )
+            # file time and version hash
+            try:
+                self.mtime = int(os.stat(self.absfilepath).st_mtime)
+                # version_id combines current time and the CRC32 checksum of file bytes
+                self.version_id = (self.mtime << 32) | crc32(self.absfilepath)
+            except FileNotFoundError:
+                self.mtime = 0
+                self.version_id = 0
+            self.set_cache_item((self.filepath, self.absfilepath, self.mtime, self.version_id))
+
         if log.isEnabledFor(logging.DEBUG):
             log.debug('%s created for %s: [%s]', repr(self), self.filepath, 'will link' if self.mtime > 0 else 'will skip nonexistent file')
 
