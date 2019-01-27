@@ -10,7 +10,7 @@
 
     // connect the dmp object
     window.DMP_CONTEXT = {
-        __version__: '5.9.4',   // DMP version to check for mismatches
+        __version__: '5.9.5',   // DMP version to check for mismatches
         contexts: {},           // id -> context1
         contextsByName: {},     // app/template -> [ context1, context2, ... ]
         lastContext: null,      // last inserted context (see getAll() below)

@@ -73,7 +73,7 @@ class Command(DMPCommandMixIn, BaseCommand):
         created = False
         if options.get('single') is None:
             for app in enapps:
-                self.message('Searching `{}` app...'.format(app.name))
+                self.message('Searching `{}` app...'.format(app.name), level=3)
                 filename = os.path.join(app.path, 'scripts', '__entry__.js')
                 created = created or self.create_entry_file(filename, self.generate_script_map(app), [ app ])
 
@@ -81,7 +81,7 @@ class Command(DMPCommandMixIn, BaseCommand):
         else:
             script_map = {}
             for app in enapps:
-                self.message('Searching `{}` app...'.format(app.name))
+                self.message('Searching `{}` app...'.format(app.name), level=3)
                 script_map.update(self.generate_script_map(app))
             created = created or self.create_entry_file(options.get('single'), script_map, enapps)
 
@@ -131,7 +131,7 @@ class Command(DMPCommandMixIn, BaseCommand):
             raise CommandError('Refusing to destroy existing file: {} (use --overwrite option or remove the file)'.format(filename))
 
         # if we get here, write the file
-        self.message('Creating {}'.format(os.path.relpath(filename, settings.BASE_DIR)))
+        self.message('Creating {}'.format(os.path.relpath(filename, settings.BASE_DIR)), level=3)
         with open(filename, 'w') as fout:
             fout.write(content)
         return True
@@ -166,7 +166,7 @@ class Command(DMPCommandMixIn, BaseCommand):
                         template_name = os.path.relpath(filerel, template_root)
                         scripts = self.template_scripts(config, template_name)
                         key = ( config.name, os.path.splitext(template_name)[0] )
-                        self.message('Found template: {}; static files: {}'.format(key, scripts), 3)
+                        self.message('Found template: {}; static files: {}'.format(key, scripts), level=3)
                         script_map[key] = scripts
 
             for subdir in subdirs:
