@@ -151,7 +151,6 @@ class CompileScssProvider(CompileProvider):
     def build_default_command(self):
         return [
             shutil.which('sass'),
-            '--source-map',
             '--load-path={}'.format(settings.BASE_DIR),
             self.sourcepath,
             self.targetpath,
