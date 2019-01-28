@@ -22,7 +22,7 @@ VSCode
 
     To activate highlighting, click the language in the bottom right of the vscode window (or type "Change Language Mode" in the command dropdown) and select Mako.
 
-    If you want to make the association stick, add the following to the vscode settings file:
+    If you want to make the association stick, add the following to the vscode settings file [Command Palette: Open settings (JSON)]:
 
     ::
 
