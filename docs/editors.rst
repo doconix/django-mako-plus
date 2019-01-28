@@ -4,7 +4,7 @@ Editors
 This page contains ideas for customizing your favorite editor for DMP and Django development. If your editor isn't listed here, please contribute ideas for it!
 
 :File extensions:
-    Templates can have any extension--DMP does not require ``.html`` extensions to your files. For example, if you prefer ``*.mako``, simply use this extension in view functions:
+    Templates can have any extension--DMP does not require ``.html`` extensions to your files. For example, if you prefer ``.mako``, simply use this extension in view functions:
 
     .. code-block:: python
 
@@ -18,12 +18,11 @@ VSCode
 -------------------------------------
 
 :Code Highlighting:
-    A vscode extension for Mako exists in the marketplace. Simply search "Mako" on the extensions tab and install.
+    A VSCode extension for Mako exists in the marketplace. Simply search "Mako" on the extensions tab and install.
 
     To activate highlighting, click the language in the bottom right of the vscode window (or type "Change Language Mode" in the command dropdown) and select Mako.
 
-    If you want to make the association stick, add the following to the vscode settings file [Command Palette: Open settings (JSON)]:
-
+    If you want to make the association stick, add the following to the vscode settings file. Open the command Command Palette and type ``Open settings (JSON)`` for the settings file.
     ::
 
         "files.associations": {
