@@ -81,7 +81,7 @@ Contents
     static
     topics
     deploy
-
+    editors
 
 
 Compatability

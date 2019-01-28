@@ -27,7 +27,7 @@ This section shows how to go cafeteria-style with DMP.
     install_app_specific
 
 
-Special Topics
+Customizations
 -----------------------------------
 
 The following pages discuss additional installation topics:
