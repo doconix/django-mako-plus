@@ -124,6 +124,8 @@ In the following setup, note the changes to 1) the Sass compile provider's outpu
                     {   'provider': 'django_mako_plus.CompileScssProvider',
                         'sourcepath': lambda p: os.path.join(p.app_config.name, 'styles', p.template_relpath + '.scss'),
                         'targetpath': lambda p: os.path.join(p.app_config.name, 'styles', p.template_relpath + '.scss.css'),
+                        # if you need to override the default command:
+                        # 'command': lambda p: [ 'sass', f'--load-path="{BASE_DIR}"', p.sourcepath, p.targetpath ],
                     },
                     {   'provider': 'django_mako_plus.CssLinkProvider',
                         'filepath': lambda p: os.path.join(p.app_config.name, 'styles', p.template_relpath + '.scss.css'),
@@ -176,6 +178,8 @@ In the following setup, note the changes to 1) the Sass compile provider's outpu
                     {   'provider': 'django_mako_plus.CompileLessProvider',
                         'sourcepath': lambda p: os.path.join(p.app_config.name, 'styles', p.template_relpath + '.less'),
                         'targetpath': lambda p: os.path.join('dist', f'{p.app_config.name}.{p.template_relpath}.css'),
+                        # if you need to override the default command:
+                        # 'command': lambda p: [ 'lessc', '--source-map', p.sourcepath, p.targetpath ],
                     },
                     {   'provider': 'django_mako_plus.CssLinkProvider',
                         'filepath': lambda p: os.path.join('dist', f'{p.app_config.name}.{p.template_relpath}.css'),
