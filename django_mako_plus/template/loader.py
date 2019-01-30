@@ -6,6 +6,7 @@ from mako.exceptions import CompileException, SyntaxException, TemplateLookupExc
 from mako.lookup import TemplateLookup
 from mako.template import Template
 
+from .util import get_template_debug
 from .lexer import DMPLexer
 from .adapter import MakoTemplateAdapter
 
@@ -80,10 +81,18 @@ class MakoTemplateLoader(object):
         try:
             # wrap the mako template in an adapter that gives the Django template API
             return MakoTemplateAdapter(self.get_mako_template(template), def_name)
+
         except (TopLevelLookupException, TemplateLookupException) as e: # Mako exception raised
-            raise TemplateDoesNotExist('Template "%s" not found in search path: %s.' % (template, self.template_search_dirs))
+            tdne = TemplateDoesNotExist('Template "%s" not found in search path: %s.' % (template, self.template_search_dirs))
+            if settings.DEBUG:
+                tdne.template_debug = get_template_debug(template, e)
+            raise tdne from e
+
         except (CompileException, SyntaxException) as e: # Mako exception raised
-            raise TemplateSyntaxError('Template "%s" raised an error: %s' % (template, e))
+            tse = TemplateSyntaxError('Template "%s" raised an error: %s' % (template, e))
+            if settings.DEBUG:
+                tse.template_debug = get_template_debug(template, e)
+            raise tse from e
 
 
     def get_mako_template(self, template, force=False):

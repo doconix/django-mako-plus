@@ -4,13 +4,10 @@ from django.http import HttpResponse
 from django.utils.html import mark_safe
 from django.template import Context, RequestContext
 
-from mako.exceptions import html_error_template, MakoException
-from mako.exceptions import RichTraceback
-
 from ..exceptions import RedirectException
 from ..signals import dmp_signal_pre_render_template, dmp_signal_post_render_template, dmp_signal_redirect_exception
 from ..util import log
-from .util import get_template_debug_info
+from .util import get_template_debug
 
 import logging
 import mimetypes
@@ -38,6 +35,14 @@ class MakoTemplateAdapter(object):
         '''Returns the DMP engine (method required by Django specs)'''
         dmp = apps.get_app_config('django_mako_plus')
         return dmp.engine
+
+
+    @property
+    def name(self):
+        '''Returns the name of this template (if created from a file) or "string" if not'''
+        if self.mako_template.filename:
+            return os.path.basename(self.mako_template.filename)
+        return 'string'
 
 
     def render(self, context=None, request=None, def_name=None):
@@ -88,7 +93,6 @@ class MakoTemplateAdapter(object):
 
         # do we need to limit down to a specific def?
         # this only finds within the exact template (won't go up the inheritance tree)
-        # I wish I could make it do so, but can't figure this out
         render_obj = self.mako_template
         if def_name is None:
             def_name = self.def_name
@@ -96,16 +100,15 @@ class MakoTemplateAdapter(object):
             render_obj = self.mako_template.get_def(def_name)
 
         # PRIMARY FUNCTION: render the template
-        template_name = '%s::%s' % (self.mako_template.filename or 'string', def_name or 'body')
         if log.isEnabledFor(logging.INFO):
-            log.info('rendering template %s', template_name)
+            log.info('rendering template %s%s%s', self.name, ('::' if def_name else ''), def_name or '')
         if settings.DEBUG:
             try:
                 content = render_obj.render_unicode(**context_dict)
             except Exception as e:
-                e.template_debug = get_template_debug_info(e)
                 log.exception('exception raised during template rendering: %s', e)  # to the console
-                raise   # reraises the same error
+                e.template_debug = get_template_debug('%s%s%s' % (self.name, ('::' if def_name else ''), def_name or ''), e)
+                raise
         else:  # this is outside the above "try" loop because in non-DEBUG mode, we want to let the exception throw out of here (without having to re-raise it)
             content = render_obj.render_unicode(**context_dict)
 
