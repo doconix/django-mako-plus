@@ -1,4 +1,4 @@
-Frequently Asked Questions
+FAQ
 =================================
 
 
@@ -68,6 +68,33 @@ If you temporarily need to switch to Django templating syntax (even within a Mak
 
 Technical Details
 ---------------------------------
+
+Why am I getting Page Not Found?
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Check your console logs. Assuming you have DMP logging at DEBUG level (see next question), your terminal should be blowing up with lots of messages that should make the process transparent and debuggable.
+
+Another possibility is that you have the right url, but your view module has syntax or import errors and isn't compiling. In this case, you'll get Django's yellow and white "404 Not Found" page. If a url matches but DMP still can't resolve it, the reason will be listed on this page.
+
+DMP adds a text emoji to help you spot these. In the following example, the sad face ``◉︵◉`` is followed by the reason url reslution failed.
+
+::
+
+    Page not found (404)
+    Request Method: 	GET
+    Request URL: 	http://localhost:8000/...
+
+    Using the URLconf defined in project.urls, Django tried these URL patterns, in this order:
+
+        ^admin/
+        ...
+        ^(?P<dmp_page>[_a-zA-Z0-9\-]+)/(?P<dmp_urlparams>.+?)/?$ ◉︵◉ Pattern matched, but discovery failed: module "homepage.views.process_request" could not be imported: cannot import name '...' from '...'
+
+    The current path, ..., didn't match any of these.
+
+    You're seeing this error because you have DEBUG = True in your Django settings file. Change that to False, and Django will display a standard 404 page.
+
+
 
 Why is DMP is logging to the browser console?
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
