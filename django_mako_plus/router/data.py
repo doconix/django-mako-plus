@@ -86,19 +86,24 @@ class RoutingData(object):
 
     def render(self, template, context=None, def_name=None, subdir='templates', content_type=None, status=None, charset=None):
         '''App-specific render function that renders templates in the *current app*, attached to the request for convenience'''
-        if self.request is None:
-            raise ValueError("RoutingData.render() can only be called after the view middleware is run. Check that `django_mako_plus.middleware` is in MIDDLEWARE.")
-        dmp = apps.get_app_config('django_mako_plus')
-        template_loader = dmp.engine.get_template_loader(self.app, subdir)
-        template_adapter = template_loader.get_template(template)
+        template_adapter = self.get_template_loader(subdir).get_template(template)
         return getattr(template_adapter, 'render_to_response')(context=context, request=self.request, def_name=def_name, content_type=content_type, status=status, charset=charset)
 
 
     def render_to_string(self, template, context=None, def_name=None, subdir='templates'):
         '''App-specific render function that renders templates in the *current app*, attached to the request for convenience'''
-        if self.request is None:
-            raise ValueError("RoutingData.render() can only be called after the view middleware is run. Check that `django_mako_plus.middleware` is in MIDDLEWARE.")
-        dmp = apps.get_app_config('django_mako_plus')
-        template_loader = dmp.engine.get_template_loader(self.app, subdir)
-        template_adapter = template_loader.get_template(template)
+        template_adapter = self.get_template_loader(subdir).get_template(template)
         return getattr(template_adapter, 'render')(context=context, request=self.request, def_name=def_name)
+
+
+    def get_template(self, template, subdir='templates'):
+        '''App-specific function to get a template from the current app'''
+        return self.get_template_loader(subdir).get_template(template)
+
+
+    def get_template_loader(self, subdir='templates'):
+        '''App-specific function to get the current app's template loader'''
+        if self.request is None:
+            raise ValueError("this method can only be called after the view middleware is run. Check that `django_mako_plus.middleware` is in MIDDLEWARE.")
+        dmp = apps.get_app_config('django_mako_plus')
+        return dmp.engine.get_template_loader(self.app, subdir)

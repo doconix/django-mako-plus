@@ -29,13 +29,11 @@ class MakoTemplateAdapter(object):
         self.mako_template = mako_template
         self.def_name = def_name
 
-
     @property
     def engine(self):
         '''Returns the DMP engine (method required by Django specs)'''
         dmp = apps.get_app_config('django_mako_plus')
         return dmp.engine
-
 
     @property
     def name(self):
@@ -44,6 +42,17 @@ class MakoTemplateAdapter(object):
             return os.path.basename(self.mako_template.filename)
         return 'string'
 
+    def has_def(self, name):
+        '''Convenience passthrough to the Mako template'''
+        return self.mako_template.has_def(name)
+
+    def get_def(self, name):
+        '''Convenience passthrough to the Mako template'''
+        return self.mako_template.get_def(name)
+
+    def list_defs(self):
+        '''Convenience passthrough to the Mako template'''
+        return self.mako_template.list_defs()
 
     def render(self, context=None, request=None, def_name=None):
         '''

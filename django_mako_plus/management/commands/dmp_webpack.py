@@ -75,7 +75,7 @@ class Command(DMPCommandMixIn, BaseCommand):
             for app in enapps:
                 self.message('Searching `{}` app...'.format(app.name), level=3)
                 filename = os.path.join(app.path, 'scripts', '__entry__.js')
-                created = created or self.create_entry_file(filename, self.generate_script_map(app), [ app ])
+                created = self.create_entry_file(filename, self.generate_script_map(app), [ app ]) or created
 
         # main runner for one sitewide file
         else:
@@ -83,7 +83,7 @@ class Command(DMPCommandMixIn, BaseCommand):
             for app in enapps:
                 self.message('Searching `{}` app...'.format(app.name), level=3)
                 script_map.update(self.generate_script_map(app))
-            created = created or self.create_entry_file(options.get('single'), script_map, enapps)
+            created = self.create_entry_file(options.get('single'), script_map, enapps) or created
 
 
     def create_entry_file(self, filename, script_map, enapps):
