@@ -2,7 +2,7 @@ from django.apps import apps
 from django.core.management.commands.startproject import Command as StartProjectCommand
 from django_mako_plus.management.mixins import DMPCommandMixIn
 
-import os, os.path
+import os, os.path, platform
 
 
 NOT_SET = object()
@@ -32,10 +32,12 @@ class Command(DMPCommandMixIn, StartProjectCommand):
         # call the super
         StartProjectCommand.handle(self, *args, **options)
 
+        # display a message to help the new kids
+        pyexec = 'python' if platform.system() == 'Windows' else 'python3'
         self.message("""Project {name} created successfully!
 
 What's next?
     1. cd {name}
-    2. python3 manage.py dmp_startapp homepage
+    2. {pyexec} manage.py dmp_startapp homepage
 
-""".format(name=options['name']))
+""".format(name=options.get('name'), pyexec=pyexec))

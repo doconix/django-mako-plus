@@ -2,7 +2,7 @@ from django.apps import apps
 from django.core.management.commands.startapp import Command as StartAppCommand
 from django_mako_plus.management.mixins import DMPCommandMixIn
 
-import os, os.path
+import os, os.path, platform
 
 
 NOT_SET = object()
@@ -38,6 +38,7 @@ class Command(DMPCommandMixIn, StartAppCommand):
         # call the super
         StartAppCommand.handle(self, *args, **options)
 
+        pyexec = 'python' if platform.system() == 'Windows' else 'python3'
         self.message("""App {name} created successfully!
 
 What's next?
@@ -46,7 +47,7 @@ What's next?
             ...
             '{name}',
         ]
-    2. python manage.py runserver
+    2. {pyexec} manage.py runserver
     3. Take a browser to http://localhost:8000/
 
-""".format(name=options.get('name')))
+""".format(name=options.get('name'), pyexec=pyexec))
