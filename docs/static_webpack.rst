@@ -130,54 +130,48 @@ Run the following to create the ``__entry__.js`` file:
 
 When the command finishes, you'll have a new file, ``homepage/scripts/__entry__.js``, that points to the scripts and styles in the app. Check out the file to see what DMP created.
 
-Now that you've seen the result, let's detail the discovery process that just occurred:
+Now that you've seen the result, let's rewind and detail the discovery process:
 
---------
+    1. DMP deep searches the templates directory ``homepage/templates/`` for all files (except those starting with double-underscores, like ``__dmpcache__``. DMP finds three files:
 
-**1. DMP deep searched the templates directory ``homepage/templates/`` for all files (except those starting with double-underscores, like ``__dmpcache__``.** DMP found three files:
+    ::
 
-::
+        homepage/templates/base_ajax.htm
+        homepage/templates/base.htm
+        homepage/templates/index.html
 
-    homepage/templates/base_ajax.htm
-    homepage/templates/base.htm
-    homepage/templates/index.html
+    2. DMP loads each file as a template object (as if it were about to be rendered) and runs its `Providers </static_providers.html>`_, ``CssLinkProvider`` and ``JsLinkProvider``.  These two providers are the defaults, but you can `customize them in settings.py </basics_settings.html>`_ (see ``WEBPACK_PROVIDERS``).
 
---------
+    Since providers are built to discover the script and style files that are associated with templates, DMP uses them to find the files needed for our bundle:
 
-**2. DMP loaded each file as a template object (as if it were about to be rendered) and ran its `Providers </static_providers.html>`_, ``CssLinkProvider`` and ``JsLinkProvider``.**  These two providers are the defaults, but you can `customize them in settings.py </basics_settings.html>`_ (see ``WEBPACK_PROVIDERS``).
+    ::
 
-Now, providers are built to discover the script and style files that are associated with templates, so DMP used them to find the files needed for our bundle:
+        homepage/templates/base_ajax.htm    # has no scripts or styles, so DMP skips it
+        homepage/templates/base.htm         # DMP finds base.js and base.css
+        homepage/templates/index.html       # DMP finds index.js and index.css
 
-::
+    The providers yield four files, shown here as a list relative to the scripts directory:
 
-    homepage/templates/base_ajax.htm    # has no scripts or styles, so DMP skips it
-    homepage/templates/base.htm         # DMP finds base.js and base.css
-    homepage/templates/index.html       # DMP finds index.js and index.css
+    .. code-block:: python
 
-The providers yielded four files, shown here as a list relative to the entry file path:
+        [ "./base.js", "../styles/base.css", "./index.js", "../styles/index.css" ]
 
-.. code-block:: python
+    3. DMP creates ``homepage/scripts/__entry__.js``, which it will use later as Webpack's entry point. This file contains a number of Node ``require`` statements surrounded by function closures:
 
-    [ "./base.js", "../styles/base.css", "./index.js", "../styles/index.css" ]
+    .. code-block:: javascript
 
---------
+        DMP_CONTEXT.loadBundle({
+            "homepage/index": (cb) => Promise.all([
+                import(/* webpackMode: "eager" */ "./index.js"),
+                import(/* webpackMode: "eager" */ "./../styles/index.scss"),
+            ]).then(cb),
+            "homepage/base": (cb) => Promise.all([
+                import(/* webpackMode: "eager" */ "./base.js"),
+                import(/* webpackMode: "eager" */ "./../styles/base.scss"),
+            ]).then(cb),
+        })
 
-**3. DMP created ``homepage/scripts/__entry__.js``, which we'll use later as Webpack's entry point.** This file contains a number of Node ``require`` statements surrounded by function closures:
-
-.. code-block:: javascript
-
-    DMP_CONTEXT.loadBundle({
-        "homepage/index": function(ctx) {
-            DMP_CONTEXT.runModuleDefault(ctx, require("./index.js"))
-            DMP_CONTEXT.runModuleDefault(ctx, require("./../styles/index.css"))
-        },
-        "homepage/base": function(ctx) {
-            DMP_CONTEXT.runModuleDefault(ctx, require("./base.js"))
-            DMP_CONTEXT.runModuleDefault(ctx, require("./../styles/base.css"))
-        },
-    })
-
-The ``runModuleDefault`` method checks the imported module for a default export, and if it exists, calls it.
+    The "eager" hint tells webpack to keep these imports in the parent bundle.
 
 Configure and Run Webpack
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

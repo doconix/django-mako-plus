@@ -94,18 +94,20 @@ class Command(DMPCommandMixIn, BaseCommand):
         # create the entry file
         template = MakoTemplate('''
 <%! import os %>
-
-// links for: ${ ', '.join(sorted([ a.name for a in enapps ])) }
+// dynamic imports are within functions so they don't happen until called
 DMP_CONTEXT.loadBundle({
     %for (app, template), script_paths in script_map.items():
-    "${ app }/${ template }": function(ctx) {
+
+    "${ app }/${ template }": (cb) => Promise.all([
         %for path in script_paths:
-        DMP_CONTEXT.runModuleDefault(ctx, require("./${ os.path.relpath(path, os.path.dirname(filename)) }"))
+        import(/* webpackMode: "eager" */ "./${ os.path.relpath(path, os.path.dirname(filename)) }"),
         %endfor
-    },
+    ]).then(cb),
     %endfor
+
 })
 ''')
+#        DMP_CONTEXT.runModuleDefault(ctx, require("./${ os.path.relpath(path, os.path.dirname(filename)) }"))
         content = template.render(
             enapps=enapps,
             script_map=script_map,

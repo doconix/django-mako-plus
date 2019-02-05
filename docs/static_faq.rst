@@ -157,34 +157,35 @@ Bundling: My functions are loading, but they don't trigger. Whaaaaat?
 
 The DMP client-side script, ``dmp-common.min.js``, loads bundles using this process:
 
-::
+1.  set() is run, which creates a container for the context, template names, and inheritance.
 
-    1. set() is run, which creates a container for the context, template names, and inheritance.
+2.  The browser reaches the bundle <script> tag and downloads the bundle file.
 
-    2. The browser reaches the bundle <script> tag and downloads the bundle file.
-        a. Once downloaded, the script runs and loads its template functions into the context container.
+    a.  Once downloaded, the script runs and loads its template functions into the context container. We recheck if ready.
 
-    3. checkBundleLoaded() runs due to the script tag's onLoad= event. The script checks two things:
-        a. Are all template functions are loaded?
-            Example: suppose account/templates/login.html extends from homepage/templates/base.htm.
-            Assuming we create app-based bundles, the login bundle contains login.js and login.css,
-            and the homepage bundle contains base.js and base.css.
-            When the account bundle loads, we still don't have base.js or base.css, so we need to wait.
-            When the homepage bundle loads, all four functions (login.js, login.css, base.js, and base.css)
-            are loaded, so they can be called.
-        b. Is context.pendingCalls > 0?  This variable allows delayed execution of the functions (read on).
-        If both (a) and (b) are True, the template scripts are called.
+3.  checkContextReady() runs due to the script tag's onLoad= event. The script checks:
 
-    4. DMP_CONTEXT.callBundleContext() is called by a <script> tag in the template.
-        This function increments context.pendingCalls and then re-calls checkBundleLoaded()
+    a.  Are all template functions loaded?
 
-The above process (especially #3 and #4) allow things to happen out of order, which can happen with asyncronous scripts. If #4 occurs before #3, ``pendingCalls`` increments but it doesn't trigger because its still waiting on bundle functions. When the bundles finally load, #3 happens again (due to the ``onLoad`` event) and the bundle functions run.
+            Suppose account/templates/login.html extends from homepage/templates/base.htm. Assuming app-based bundles, we're dealing with two bundles: the login bundle (login.js and login.css), and the homepage bundle contains base.js and base.css.  When the account bundle loads, we still don't have base.js or base.css, so we need to wait. When the homepage bundle loads, all four functions (login.js, login.css, base.js, and base.css) are loaded, so they can be called. Each time a template function loads, we recheck if ready.
 
-Assuming the DMP logger is at ``DEBUG`` level, the process above is reported in detail in the browser console. Follow these log messages to see where the process breaks down. Check that all needed bundle functions get loaded , and check the value of ``pendingCalls``.
+    b.  Are all template functions imports resolved?
 
-Another idea is to disable DMP's automatic ``__entry__.js`` creation (``create_entry`` in the provider options). You can then insert console.log messages in ``__entry__.js`` to test things within the bundle.
+            The body of each template function contains dynamic import statements. So we can't just load the function itself, we need to run the function to and wait for the imports to resolve. It's done this way because we don't want ALL the imports on a given page -- the bundle contains the imports for all the pages in the app, not just for the current page. Each time a template function resolves, we recheck if ready.
 
-A final idea is to link to ``dmp-common.js`` (the unminified version) and have at it the file with console.log.
+    c.  Is context.pendingCalls > 0?  This variable allows delayed execution of the functions (read on).
+
+4.  DMP_CONTEXT.callBundleContext() is called by a <script> tag in the template. This function increments context.pendingCalls and then rechecks if ready.
+
+The constant rechecking allows #2, #3, and #4 to happen in any order--which supports async loading of scripts. If #4 occurs before #3, ``pendingCalls`` increments, but it doesn't trigger because its still waiting on bundle functions. When the bundles finally load and resolve, the check happens again and the bundle functions finally run.
+
+With this understanding, here's some ideas for debugging:
+
+1. Assuming the DMP logger is at ``DEBUG`` level, the process above is reported in detail in the browser console. Follow these log messages to see where the process breaks down. Check that all needed bundle functions get loaded and resolved, and check the value of ``pendingCalls``.
+
+2. Disable DMP's automatic ``__entry__.js`` creation (``create_entry`` in the provider options). You can then insert console.log messages in ``__entry__.js`` to test things within the bundle.
+
+3. Litter ``dmp-common.js`` (the unminified version) with console.log statements.
 
 
 Bundling: How do I use Sass (Less, TypeScript, etc.) with DMP Webpack?
