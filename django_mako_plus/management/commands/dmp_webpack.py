@@ -95,18 +95,16 @@ class Command(DMPCommandMixIn, BaseCommand):
         template = MakoTemplate('''
 <%! import os %>
 
-// Contains links for ${ 'app' if len(enapps) == 1 else 'apps' }: ${ ', '.join(sorted([ a.name for a in enapps ])) }
-(context => {
-    DMP_CONTEXT.loadBundle({
-      %for (app, template), script_paths in script_map.items():
-        "${ app }/${ template }": function() {
-          %for path in script_paths:
-            require("./${ os.path.relpath(path, os.path.dirname(filename)) }");
-          %endfor
-        },
-      %endfor
-    });
-})(DMP_CONTEXT.get());
+// links for: ${ ', '.join(sorted([ a.name for a in enapps ])) }
+DMP_CONTEXT.loadBundle({
+    %for (app, template), script_paths in script_map.items():
+    "${ app }/${ template }": function(ctx) {
+        %for path in script_paths:
+        DMP_CONTEXT.runModuleDefault(ctx, require("./${ os.path.relpath(path, os.path.dirname(filename)) }"))
+        %endfor
+    },
+    %endfor
+})
 ''')
         content = template.render(
             enapps=enapps,

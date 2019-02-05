@@ -52,16 +52,26 @@ The installation steps for DMP are given elsewhere in these documents, so `take 
 
 Run your project, and ensure the "Welcome to DMP" page comes up. If not, head over to the DMP installation pages for ideas.
 
-Note that your new project already contains ``homepage/scripts/index.js``. Let's add another script file so we can see the bundling work:
+Note that your new project already contains ``homepage/scripts/index.js``. The tutorial showed how this anonymous, self-invoking function was called. In webpack, however, we do things a little differently. Modify the ``index.js`` file to export a default function:
+
+.. code-block:: javascript
+
+    // homepage/scripts/index.js
+    export default function(context) {
+        // utc_epoch comes from index.py
+        console.log('Current epoch in UTC is ' + context.utc_epoch);
+    }
+
+Let's also add ``base.js`` to see inheritance working:
 
 .. code-block:: javascript
 
     // homepage/scripts/base.js:
-    (function(context) {
+    export default function(context) {
         console.log('In base.js!')
-    })(DMP_CONTEXT.get());
+    }
 
-You should now have two JS files: ``index.js`` and ``base.js``. Since template ``index.html`` extends template ``base.html``, both JS files should run when we view ``index.html``. Refresh your project home page and check the JS console (right-click the page, then Inspect Element) for the output of both scripts.
+You should now have two JS files: ``index.js`` and ``base.js``. Since template ``index.html`` inherits from template ``base.html``, both JS files should run when we view ``index.html``.
 
 
 Initialize Node
@@ -156,17 +166,18 @@ The providers yielded four files, shown here as a list relative to the entry fil
 
 .. code-block:: javascript
 
-    (context => {
-        DMP_CONTEXT.linkBundleFunction("homepage/index", () => {
-            require("./../styles/index.css");
-            require("./index.js");
-        })
-        DMP_CONTEXT.linkBundleFunction("homepage/base", () => {
-            require("./../styles/base.css");
-            require("./base.js");
-        })
-    })(DMP_CONTEXT.get());
+    DMP_CONTEXT.loadBundle({
+        "homepage/index": function(ctx) {
+            DMP_CONTEXT.runModuleDefault(ctx, require("./index.js"))
+            DMP_CONTEXT.runModuleDefault(ctx, require("./../styles/index.css"))
+        },
+        "homepage/base": function(ctx) {
+            DMP_CONTEXT.runModuleDefault(ctx, require("./base.js"))
+            DMP_CONTEXT.runModuleDefault(ctx, require("./../styles/base.css"))
+        },
+    })
 
+The ``runModuleDefault`` method checks the imported module for a default export, and if it exists, calls it.
 
 Configure and Run Webpack
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

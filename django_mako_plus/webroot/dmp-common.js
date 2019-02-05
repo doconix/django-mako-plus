@@ -10,7 +10,7 @@
 
     // connect the dmp object
     window.DMP_CONTEXT = {
-        __version__: '5.9.11',   // DMP version to check for mismatches
+        __version__: '5.9.12',   // DMP version to check for mismatches
         contexts: {},           // id -> context1
         contextsByName: {},     // app/template -> [ context1, context2, ... ]
         lastContext: null,      // last inserted context (see getAll() below)
@@ -110,7 +110,7 @@
         */
         loadBundle(template_functions) {
             var templates = Object.keys(template_functions);
-            DMP_CONTEXT.log(['context loaded', templates.length, 'template functions from bundle'], templates);
+            DMP_CONTEXT.log(['loaded', templates.length, 'template functions from bundle'], templates);
             for (var i = 0; i < templates.length; i++) {
                 DMP_CONTEXT.bundleFunctions[templates[i]] = template_functions[templates[i]];
             }
@@ -137,28 +137,30 @@
                 }
             }
             if (notLoaded.length > 0) {
-                DMP_CONTEXT.log(['context waiting to call template functions:', notLoaded.length, 'not loaded:', notLoaded.join(', ')], context);
+                DMP_CONTEXT.log(['waiting to call template functions:', notLoaded.length, 'not loaded:', notLoaded.join(', ')], context);
                 return;
             }
 
             // everything is here, so run the bundle functions
             // for each time the callBundleContext() was called
             if (!context.pendingCalls) {
-                DMP_CONTEXT.log(['context waiting to call template functions: required functions loaded but waiting for pendingCalls'], context);
+                DMP_CONTEXT.log(['waiting to call template functions: required functions loaded but waiting for pendingCalls'], context);
             }else{
-                DMP_CONTEXT.log(['context ready to call template functions: required functions loaded and pendingCalls > 0'], context)
+                DMP_CONTEXT.log(['ready to call template functions: required functions loaded and pendingCalls > 0'], context)
                 while (context.pendingCalls > 0) {
                     context.pendingCalls = Math.max(0, context.pendingCalls - 1);
                     for (var i = 0; i < context.templates.length; i++) {
-                        DMP_CONTEXT.log(['context calling', context.templates[i]]);
-                        DMP_CONTEXT.bundleFunctions[context.templates[i]]();
+                        DMP_CONTEXT.log(['calling', context.templates[i]]);
+                        // this calls the __entry__.js function, which requires the right file(s)
+                        DMP_CONTEXT.bundleFunctions[context.templates[i]](context);
                     }
                 }
             }
         },
 
         /*
-            Calls a template context to run a given bundle.
+            Increments the pending call count for a context,
+            then checks the bundle to see if it is loaded.
         */
         callBundleContext(contextid) {
             // get the context
@@ -169,10 +171,24 @@
 
             // increase the trigger count and check the bundle
             context.pendingCalls++;
-            DMP_CONTEXT.log(['context incrementing pendingCalls'], context);
+            DMP_CONTEXT.log(['incrementing pendingCalls'], context);
             DMP_CONTEXT.checkBundleLoaded(contextid);
         },
 
+
+        /*
+            Called when a module is imported by the __entry__ file.
+            Some dependencies have default exports and some don't, so
+            this function checks and runs when exists.
+        */
+        runModuleDefault(context, module) {
+            // imported JS files often have an exported function,
+            // but imported CSS don't. This calls the default using
+            // duck typing rather than trying to keep track of types.
+            if (module && module.default && module.default.apply) {
+                module.default.apply(context, [ context.values ]);
+            }
+        },
 
         ////////////////////////////////////////////////////////////////////
         ///  Helper functions
