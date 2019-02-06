@@ -1,8 +1,9 @@
 (() => {
+
     /** Main DMP class - a single instance of this class is set as window.DMP_CONTEXT */
     class DMP {
         constructor() {
-            this.__version__ = '5.9.14';    // DMP version to check for mismatches
+            this.__version__ = '5.10.1';    // DMP version to check for mismatches
             this.contexts = {};             // id -> context1
             this.templates = {};            // app/template -> info
             this.lastContext = null;        // last inserted context (see getAll() below)
@@ -119,7 +120,7 @@
         */
         loadBundle(bundle) {
             // insert these functions into the main map
-            this.log([ 'loading bundle functions' ], null, Object.keys(bundle));
+            this.log([ 'initializing loaders in bundle' ], null, Object.keys(bundle));
             for (let tname of Object.keys(bundle)) {
                 let template = this.getTemplate(tname);
                 template.loader = bundle[tname];
@@ -137,7 +138,7 @@
             let notifyPromises = context.templates.map(tname => this.getTemplate(tname).notifyReady());
             Promise.all(notifyPromises).then(templates => {
                 for (let template of templates) {
-                    console.log('calling', template.tname, 'for', context.id);
+                    this.log([ 'calling', template.tname ], context, context);
                     template.call(context);
                 }
             });
@@ -216,6 +217,7 @@
         _checkReady() {
             // is the bundle here yet?
             if (!this.loader) {
+                this.dmp.log([ this.tname, 'waiting for bundle' ]);
                 return;
             }
             // not all templates in a bundle need to load, so only
@@ -225,7 +227,7 @@
             }
             // has the loader function run yet?
             if (!this.loaderCalled) {
-                console.log('calling loader for', this.tname);
+                this.dmp.log([ this.tname, 'calling loader' ]);
                 this.loaderCalled = true;
                 Promise.all(this.loader()).then((modules) => {
                     this.modules = modules;
@@ -235,12 +237,12 @@
             }
             // are we still waiting on the dynamically-imported modules to load?
             if (this.modules == null) {
-                console.log('waiting on dynamic imports for', this.tname)
+                this.dmp.log([ this.tname, 'waiting on dynamic imports' ]);
                 return;
             }
             // stick a fork in this template...it's ready - notify everyone
             while (this.unresolvedPromises.length > 0) {
-                console.log('resolving for', this.tname);
+                this.dmp.log([ this.tname, 'dynamic imports loaded' ]);
                 let resolve = this.unresolvedPromises.shift();
                 resolve(this);
             }
@@ -252,7 +254,6 @@
     if (!window.DMP_CONTEXT) {
         window.DMP_CONTEXT = new DMP();
     }
-
 
 })();
 

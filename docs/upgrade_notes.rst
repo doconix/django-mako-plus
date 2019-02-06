@@ -3,6 +3,13 @@ Upgrade Notes
 
 This document contains upgrade notes for those already using DMP.  We started the document at version 4.3.
 
+:5.10:
+    Significant refactoring of dmp-common.js to make webpack bundling work correctly. The file is now programmed in ES6, with babel being used to backport it. You can also import the file from the npm repository instead of including it normally.
+
+    The only API change in the dmp-common file is ``getAll``, which now returns full context objects rather than just values. This isn't in the docs anywhere, so these changes shouldn't affect the userbase.
+
+    tl;dr is none of this version's changes should matter to you.
+
 :5.9:
     Refactored the providers based on feedback from users. This especially affects the ``ProviderRun`` class, but the changes shouldn't affect existing sites because these areas aren't generally used.
 
