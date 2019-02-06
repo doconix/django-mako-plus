@@ -45,7 +45,7 @@ class WebpackJsLinkProvider(JsLinkProvider):
             self.version_id,
         )
         attrs.update(self.options['link_attrs'])
-        attrs['onload'] = "DMP_CONTEXT.checkContextReady('{}')".format(self.provider_run.uid)
+        # attrs['onload'] = "DMP_CONTEXT.checkContextReady('{}')".format(self.provider_run.uid)
         return '<script{}></script>'.format(flatatt(attrs))
 
     def provide(self):

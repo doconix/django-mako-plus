@@ -98,16 +98,15 @@ class Command(DMPCommandMixIn, BaseCommand):
 DMP_CONTEXT.loadBundle({
     %for (app, template), script_paths in script_map.items():
 
-    "${ app }/${ template }": (cb) => Promise.all([
+    "${ app }/${ template }": () => Promise.all([
         %for path in script_paths:
         import(/* webpackMode: "eager" */ "./${ os.path.relpath(path, os.path.dirname(filename)) }"),
         %endfor
-    ]).then(cb),
+    ]),
     %endfor
 
 })
 ''')
-#        DMP_CONTEXT.runModuleDefault(ctx, require("./${ os.path.relpath(path, os.path.dirname(filename)) }"))
         content = template.render(
             enapps=enapps,
             script_map=script_map,

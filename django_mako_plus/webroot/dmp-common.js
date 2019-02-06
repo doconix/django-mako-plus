@@ -32,7 +32,7 @@
                     DMP_CONTEXT.contextsByName[tname].push(context);
                 }
 
-                DMP_CONTEXT.log([ context.id, '-', 'created context' ], context);
+                DMP_CONTEXT.log([ 'created context for', context.templates[context.templates.length-1] ], context, context);
             },
 
             /*
@@ -104,45 +104,13 @@
                 from DMP_CONTEXT (i.e. outside the bundle).
             */
             loadBundle(templateFunctions) {
-                var tkeys = Object.keys(templateFunctions);
-                DMP_CONTEXT.log(['loading', tkeys.length, 'template functions from bundle'], tkeys);
-                for (var i = 0; i < tkeys.length; i++) {
-                    var tkey = tkeys[i];
-                    // create an entry for this template function that knows how
-                    // to import and run the dependencies (but only when asked)
-                    DMP_CONTEXT.templateFunctions[tkey] = {
-                        template: tkey,
-                        loader: templateFunctions[tkey],
-                        status: 'unresolved',
-                        modules: null,
-                        resolveModules: function(context) {
-                            var current = this;
-                            if (current.status == 'unresolved') {
-                                current.status = 'resolving';
-                                current.loader(function(modules) {
-                                    current.modules = modules;
-                                    current.status = 'resolved';
-                                    DMP_CONTEXT.checkContextReady(context.id);
-                                });
-                            }
-                        },
-                        runWithContext: function(context) {
-                            // call our default module functions.  some imports simply need
-                            // to be loaded (e.g. css files) while others need a function to be
-                            // called (e.g. js files). when a template is included more than once
-                            // in a given render (e.g. <%include>), webpack doesn't "run" the import
-                            // a second time, even though the js needs to run more than once.
-                            var current = this;
-                            if (current.modules) {
-                                for (var j = 0; j < current.modules.length; j++) {
-                                    var mod = current.modules[j];
-                                    if (mod && mod.default && mod.default.apply) {
-                                        mod.default.apply(context, [ context.values ])
-                                    }
-                                }
-                            }
-                        },
-                    }
+                // insert these functions into the main map
+                Object.assign(DMP_CONTEXT.templateFunctions, templateFunctions);
+                DMP_CONTEXT.log([ 'bundle functions loaded' ], null, Object.keys(templateFunctions));
+                // check all contexts impacted by this bundle
+                let contexts = Object.keys(templateFunctions).map(tname => DMP_CONTEXT.contextsByName[tname]);
+                for (let context of flatvalid(contexts)) {
+                    DMP_CONTEXT.checkContextReady(context.id);
                 }
             },
 
@@ -156,39 +124,37 @@
                     return;
                 }
 
-                // check if the functions for each template in the inheritance is loaded
+                // check if the <script> tags have loaded yet
                 for (var i = 0; i < context.templates.length; i++) {
                     var tname = context.templates[i];
                     // is the bundle itself loaded?
                     if (typeof DMP_CONTEXT.templateFunctions[tname] === "undefined") {
-                        DMP_CONTEXT.log([ context.id, '-', tname, 'not loaded [waiting]' ]);
-                        // we'll just have to wait until its bundle <script> tag loads and triggers this again
-                        return;
-                    }
-                    // has the template function run to resolve its internal dependencies?
-                    if (DMP_CONTEXT.templateFunctions[tname].status != 'resolved') {
-                        DMP_CONTEXT.log([ context.id, '-', tname, 'resolving internal dependencies [waiting]' ]);
-                        DMP_CONTEXT.templateFunctions[tname].resolveModules(context);
+                        DMP_CONTEXT.log([ 'waiting for bundle for', tname, 'to load' ], context);
                         return;
                     }
                 }
-                // has pendingCalls been incremented?
-                if (!context.pendingCalls) {
-                    DMP_CONTEXT.log([ context.id, '-', 'pendingCalls not incremented yet', '[waiting]' ]);
+                // has pendingCalls been incremented by its <script> tag?
+                if (context.pendingCalls == 0) {
+                    DMP_CONTEXT.log([ 'no calls pending' ], context);
                     return;
                 }
 
-                // if we get here, bundles have loaded and internal dependencies are resolved
-                // run the functions in order of the template inheritance
-                DMP_CONTEXT.log([ context.id, '-', 'dependencies loaded and pendingCalls incremented', '[ready]' ]);
-                while (context.pendingCalls > 0) {
-                    context.pendingCalls--;
-                    for (var j = 0; j < context.templates.length; j++) {
-                        var tname = context.templates[j];
-                        DMP_CONTEXT.log([ context.id, '-', 'running for', tname ]);
-                        DMP_CONTEXT.templateFunctions[tname].runWithContext(context);
+                // bundles have loaded, so run the bundle functions for the templates in this context
+                // and wait for the embedded imports to load
+                DMP_CONTEXT.log([ 'dependencies loaded and pendingCalls incremented' ], context);
+                var importPromises = context.templates.map(tname => DMP_CONTEXT.templateFunctions[tname]());
+                Promise.all(importPromises).then((modArrays) => {
+                    // the embedded imports have now loaded, now run any default functions exported by them
+                    while (context.pendingCalls > 0) {
+                        context.pendingCalls--;
+                        DMP_CONTEXT.log([ 'running bundle functions' ], context);
+                        for (let mod of flatvalid(modArrays)) {
+                            if (mod.default && mod.default.apply) {
+                                mod.default.apply(context, [ context.values ])
+                            }
+                        }
                     }
-                }
+                });
             },
 
             /*
@@ -204,18 +170,33 @@
 
                 // increase the trigger count and check the bundle
                 context.pendingCalls++;
-                DMP_CONTEXT.log([ context.id, '-', 'incrementing pendingCalls to', context.pendingCalls]);
+                DMP_CONTEXT.log([ 'incrementing pendingCalls to', context.pendingCalls], context);
                 DMP_CONTEXT.checkContextReady(contextid);
             },
 
             /* Enabled when DMP's logger is set to DEBUG in settings */
-            log(messages, data) {
+            log(messages, context, data) {
                 if (DMP_CONTEXT.logEnabled) {
-                    console.debug('[DMP] ' + messages.join(' '), data || '');
+                    if (context) {
+                        messages.unshift("-");
+                        messages.unshift("(" + context.templates[context.templates.length - 1] + ")");
+                        messages.unshift(context.id);
+                    }
+                    messages.unshift('[DMP]');
+                    console.debug(messages.join(' '), data || '');
                 }
             },
 
         };//DMP_CONTEXT
+
+        //////////////////////////////////
+        ///  Helpers
+
+        function flatvalid(arr) {
+            let flattened = arr.reduce((acc, val) => acc.concat(val), []);
+            return flattened.filter(val => val); // removes falsey items
+        }
+
     }//if
 
 })()
