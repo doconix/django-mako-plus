@@ -156,19 +156,19 @@ Now that you've seen the result, let's rewind and detail the discovery process:
 
         [ "./base.js", "../styles/base.css", "./index.js", "../styles/index.css" ]
 
-    3. DMP creates ``homepage/scripts/__entry__.js``, which it will use later as Webpack's entry point. This file contains a number of Node ``require`` statements surrounded by function closures:
+    3. DMP creates ``homepage/scripts/__entry__.js``, which it will use later as Webpack's entry point. This file contains a number of ES6 dynamic import statements surrounded by function closures:
 
     .. code-block:: javascript
 
         DMP_CONTEXT.loadBundle({
-            "homepage/index": (cb) => Promise.all([
+            "homepage/index": () => [
                 import(/* webpackMode: "eager" */ "./index.js"),
                 import(/* webpackMode: "eager" */ "./../styles/index.scss"),
-            ]).then(cb),
-            "homepage/base": (cb) => Promise.all([
+            ],
+            "homepage/base": () => [
                 import(/* webpackMode: "eager" */ "./base.js"),
                 import(/* webpackMode: "eager" */ "./../styles/base.scss"),
-            ]).then(cb),
+            ],
         })
 
     The "eager" hint tells webpack to keep these imports in the parent bundle.
