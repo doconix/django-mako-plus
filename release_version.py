@@ -52,3 +52,4 @@ if input('Ready to upload to PyPi. Continue? ')[:1].lower() == 'y':
     run_command('rm', '-rf', 'dist/', 'django_mako_plus.egg-info/')
 
     ret = run_command('npm', 'publish', cwd='./django_mako_plus/webroot/')
+    print(ret.stdout)
