@@ -5,11 +5,11 @@
             [
                 "@babel/env",
                 {
-                    "loose": true,
+                    "loose": false,
                     "modules": false,
                     "targets": {
                         "chrome": "58",
-                        "ie": "9"
+                        "ie": "10"
                     },
                     "useBuiltIns": "usage"
                 }
@@ -37,16 +37,16 @@
     },
     "homepage": "https://github.com/doconix/django-mako-plus#readme",
     "license": "Apache-2.0",
-    "main": "django_mako_plus/webroot/dmp-common.js",
+    "main": "./dmp-common.js",
     "name": "django-mako-plus",
     "repository": {
         "type": "git",
         "url": "git+https://github.com/doconix/django-mako-plus.git"
     },
     "scripts": {
-        "babel": "./node_modules/.bin/babel ./django_mako_plus/webroot/dmp-common.src.js --out-file ./django_mako_plus/webroot/dmp-common.js",
+        "babel": "./node_modules/.bin/babel ./dmp-common.src.js --out-file ./dmp-common.js",
         "build": "./node_modules/.bin/webpack --mode development && ./node_modules/.bin/webpack --mode production",
         "watch": "./node_modules/.bin/webpack --mode development --watch"
     },
-    "version": "5.10.1"
+    "version": "5.10.2"
 }

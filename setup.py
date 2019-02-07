@@ -1,8 +1,23 @@
 import os, os.path, sys, re
+from fnmatch import fnmatch
 from setuptools import setup
 
 MODULE_NAME = 'django_mako_plus'
 
+IGNORE_PATTERNS = [
+    '.*',
+    '__pycache__',
+    '*.pyc',
+    '__dmpcache__',
+    'node_modules',
+    '.vscode',
+    '.DS_Store',
+]
+def is_ignore(fn):
+    for pat in IGNORE_PATTERNS:
+        if fnmatch(fn, pat):
+            return True
+    return False
 
 # I can't import the version file the normal way because it loads
 # __init__.py, which then imports the DMP engine.
@@ -34,22 +49,22 @@ install_requires = [
 
 if len(sys.argv) >= 2 and sys.argv[1] == 'sdist':
     # remove the __pycache__ directories since the ones in project_template seems to stick around
-    os.system('find . -name "__pycache__" -type d -exec rm -r "{}" \; > /dev/null')
+    os.system('find . -name "__pycache__" -type d -exec rm -r "{}" \+')
 
 # Compile the list of packages available
 packages = []
-def walk(root):
-  for fname in os.listdir(root):
-    fpath = os.path.join(root, fname)
-    # skip hidden/cache files
-    if fname.startswith('.') or fname.endswith('.pyc') or fname in ( '__pycache__', 'app_template', 'project_template' ):
-      continue
-    # if a directory, walk it
-    elif os.path.isdir(fpath):
-      walk(fpath)
-    # if an __init__.py file, add the directory to the packages
-    elif fname == '__init__.py':
-      packages.append(os.path.dirname(fpath))
+def walk(parent):
+    for fname in os.listdir(parent):
+        fpath = os.path.join(parent, fname)
+        # skip hidden/cache files
+        if is_ignore(fname) or fname in ( 'app_template', 'project_template' ):
+            continue
+        # if a directory, walk it
+        elif os.path.isdir(fpath):
+            walk(fpath)
+        # if an __init__.py file, add the directory to the packages
+        elif fname == '__init__.py':
+            packages.append(os.path.dirname(fpath))
 walk(MODULE_NAME)
 
 data_files = []
@@ -63,19 +78,24 @@ data_files.extend([
 # add the extra directories
 # empty directories within app_template/ will cause problems with distutils, so be sure each directory has at least one file
 package_data_files = []
-for template_dir in ( 'app_template', 'project_template', 'webroot' ):
-    for root, dirs, files in os.walk(os.path.join(MODULE_NAME, template_dir)):
-      dirs[:] = [ d for d in dirs if not d.startswith('.') and not d in ( '__pycache__', ) ] # skip hidden and __pycache__ directories
-      for fname in files:
-        if fname.startswith('.') or fname.endswith('.pyc'): # skip hidden/cache files
-          continue
-        package_data_files.append(os.path.join(root[len(MODULE_NAME)+1:], fname))
+def walk2(parent):
+    for fname in os.listdir(parent):
+        fpath = os.path.join(parent, fname)
+        if is_ignore(fname):
+            pass  # ignore this one
+        elif os.path.isdir(fpath):
+            walk2(fpath)
+        else:
+            package_data_files.append(fpath)
+walk2(os.path.join(MODULE_NAME, 'app_template'))
+walk2(os.path.join(MODULE_NAME, 'project_template'))
+walk2(os.path.join(MODULE_NAME, 'webroot'))
 
 # read the long description if sdist
 description = 'Django+Mako: Routing by Convention, Python-Centric Template Language'
 long_description = description
 if len(sys.argv) > 1 and sys.argv[1] == 'sdist':
-  long_description = open('readme.txt').read()
+    long_description = open('readme.txt').read()
 
 # run the setup
 setup(

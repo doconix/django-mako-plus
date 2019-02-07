@@ -5,11 +5,11 @@ module.exports = (env, argv) => {
     let DEBUG = argv.mode != 'production';
     return {
         entry: [
-            './django_mako_plus/webroot/dmp-common.src.js',
+            './dmp-common.src.js',
         ],
         output: {
             path: path.resolve(__dirname),
-            filename: DEBUG ? './django_mako_plus/webroot/dmp-common.js' : './django_mako_plus/webroot/dmp-common.min.js',
+            filename: DEBUG ? './dmp-common.js' : './dmp-common.min.js',
         },
         module: {
             rules: [

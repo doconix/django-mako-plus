@@ -10,7 +10,7 @@ from collections import namedtuple
 ReturnInfo = namedtuple('ReturnInfo', ( 'code', 'stdout', 'stderr' ))
 
 
-def run_command(*args, raise_exception=True):
+def run_command(*args, raise_exception=True, cwd=None):
     '''
     Runs a command, piping all output to the DMP log.
     The args should be separate arguments so paths and subcommands can have spaces in them:
@@ -27,7 +27,7 @@ def run_command(*args, raise_exception=True):
     '''
     args = [ str(a) for a in args ]
     log.info('running %s', ' '.join(args))
-    p = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE)
+    p = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE, cwd=cwd)
     stdout, stderr = p.communicate()
     returninfo = ReturnInfo(p.returncode, stdout.decode('utf8'), stderr.decode('utf8'))
     if stdout:

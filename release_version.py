@@ -12,7 +12,7 @@ import json
 
 # set the version number in package.json
 print('Updating the version in package.json...')
-PACKAGE_JSON = 'package.json'
+PACKAGE_JSON = 'django_mako_plus/webroot/package.json'
 with open(PACKAGE_JSON) as fin:
     data = json.load(fin)
 data['version'] = __version__
@@ -34,7 +34,8 @@ with open(DMP_COMMON, 'w') as fout:
 
 # backport and minify dmp-common.src.js
 print('Backporting and minifying JS...')
-run_command('npm', 'run', 'build')
+
+run_command('npm', 'run', 'build', cwd='./django_mako_plus/webroot/')
 
 # update the archives
 print('Creating the archives...')
@@ -49,3 +50,5 @@ if input('Ready to upload to PyPi. Continue? ')[:1].lower() == 'y':
     ret = run_command('twine', 'upload', 'dist/*')
     print(ret.stdout)
     run_command('rm', '-rf', 'dist/', 'django_mako_plus.egg-info/')
+
+    ret = run_command('npm', 'publish', cwd='./django_mako_plus/webroot/')

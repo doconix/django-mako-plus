@@ -253,6 +253,34 @@ Note in the above options, we're including ``.scss`` and ``.css`` (whenever they
     npm run watch
 
 
+Bundling: Can I bundle dmp-webpack.js?
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Short answer:
+
+::
+
+    npm install django-mako-plus
+
+Long answer: there's a few gotchas you need to watch for:
+
+1.  Even when dmp-common is bundled, ``DMP_CONTEXT`` still needs to be available in the window object. It can't live entirely within the bundle scope because ``<script>`` context tags in the template need it. Hoisting to the window scope happens automatically, so just bundle away. This point is just an FYI when you see the variable still attached to the global scope. Hopefully we'll get around this at some point so it does live entirely within the bundle, but there are still some issues to work out.
+
+2.  The bundle containing ``DMP_CONTEXT`` must load **before** the ``<script>`` context tags run.  If you view the source of the rendered HTML page, you can see where the bundle should load in relation to the ``<script>`` tags DMP injects into the page. Make sure the order is right.
+
+3.  You can choose between two possible files to import:
+
+    a.  The transpiled, browser-compatible, ES5 file. It has no external dependencies and should work anywhere. It's the default export on npm:
+
+        ::
+
+            import 'django-mako-plus';
+
+    b.  The original ES6 source, before any webpack/babel modification. If you'd like to include the original file, this one's for you:
+
+        ::
+
+            import 'django-mako-plus/django_mako_plus/webroot/dmp-common.src.js';
+
 
 Bundling: How do I create a vendor bundle?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
