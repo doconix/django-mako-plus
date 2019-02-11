@@ -135,3 +135,26 @@ If you don't need the auto-link-creation feature of DMP, you can entirely remove
 
     <script src="/django_mako_plus/dmp-common.min.js"></script>
     ${ django_mako_plus.links(self) }
+
+
+I updated DMP, but browsers report the old ``dmp-common.min.js``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+This is a caching issue, and it can occur with any of your static files (.js, .css, .png, others). Once browsers download the file from your server, they don't check for new versions for a few days (or even weeks). Your server might have a new version of a file, but the browser doesn't know to get it!
+
+A common solution is to add the server start time to all of your links. Since the server start time changes each time you update/bounce the server, the filename changes. Browsers see the new filename in your HTML and think it's an entirely new file being linked. This is called "busting the cache".
+
+One way to implement this is to add the server time to your settings. In ``settings.py``, add the following:
+
+.. code-block:: python
+
+    import time
+    SERVER_START = int(time.time() * 1000.0)
+
+Then in your HTML files, add the server start time to your static file links:
+
+.. code-block:: html
+
+    <script src="/django_mako_plus/dmp-common.js?${ settings.SERVER_START }"></script>
+
+The links created by DMP automatically bust the cache in a similar way by adding a CRC32 hash of file contents. That hash code changes whenever you make changes to the files.

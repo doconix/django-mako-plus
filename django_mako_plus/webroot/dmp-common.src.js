@@ -1,4 +1,4 @@
-(() => {
+if (!window["DMP_CONTEXT"]) {
 
     /** Main DMP class - a single instance of this class is set as window.DMP_CONTEXT */
     class DMP {
@@ -251,11 +251,12 @@
 
     // main instance - right now it has to be in the global window scope
     // so <script> tags can get to it.
-    if (!window.DMP_CONTEXT) {
-        window.DMP_CONTEXT = new DMP();
+    // we checked at the top, but checking for rerun of this script one
+    // more time before setting in the window
+    if (!window["DMP_CONTEXT"]) {
+        window["DMP_CONTEXT"] = new DMP();
     }
-
-})();
+}
 
 // default export for ES6 environments
-export default window.DMP_CONTEXT;
+export default window["DMP_CONTEXT"];
