@@ -3,7 +3,7 @@ if (!window["DMP_CONTEXT"]) {
     /** Main DMP class - a single instance of this class is set as window.DMP_CONTEXT */
     class DMP {
         constructor() {
-            this.__version__ = '5.10.4';    // DMP version to check for mismatches
+            this.__version__ = '5.10.5';    // DMP version to check for mismatches
             this.contexts = {};             // id -> context1
             this.templates = {};            // app/template -> info
             this.lastContext = null;        // last inserted context (see getAll() below)
