@@ -11,24 +11,11 @@ Why Should I Care?
 
 **Partial templates rock because:**
 
-1. We serve both the initial page *and* the Ajax call with the same
-   code. Write once, debug once, maintain once. Single templates, FTW!
-2. The same logic, ``index.py``, is run for both the initial call and
-   the Ajax call. While this example is really simplistic, more complex
-   views may have significant work to do (form handling, table creation,
-   object retrieval) before the page or the Ajax can be rendered.
-3. By splitting the template into many different blocks, a single
-   view/template can serve many different Ajax calls throughout the
-   page.
+1. We serve both the initial page *and* the Ajax call with the same code. Write once, debug once, maintain once. Single templates, FTW!
+2. The same logic, ``index.py``, is run for both the initial call and the Ajax call. While this example is really simplistic, more complex views may have significant work to do (form handling, table creation, object retrieval) before the page or the Ajax can be rendered.
+3. By splitting the template into many different blocks, a single view/template can serve many different Ajax calls throughout the page.
 
-    Note that, in the Ajax call, your view will likely perform more
-    logic than is needed (i.e. generate data for the parts of the
-    template outside the block that won't be rendered). Often, this
-    additional processing is minimal and is outweighed by the benefits
-    above. When additional processing is not desirable, simply create
-    new ``@view_function`` functions, one for each Ajax call. You can
-    still use the single template by having the Ajax endpoints render
-    specific blocks.
+    Note that, in the Ajax call, your view will likely perform more logic than is needed (i.e. generate data for skipped parts of the template outside the block). Often, this additional processing is minimal and is outweighed by the benefits above. When additional processing is not desirable, simply create new ``@view_function`` functions, one for each Ajax call. You can still use the single template by having the Ajax endpoints render specific blocks.
 
 An Example
 ----------------------
@@ -65,11 +52,11 @@ Suppose you have the following template, view, and JS files:
     import random
 
     @view_function
-    def process_request(request):
+    def process_request(request, mode:str=None):
         context = {
             'now': datetime.now().strftime('%H:%M'),
         }
-        if request.dmp.urlparams[0] == 'gettime':
+        if mode == 'gettime':
             return request.dmp.render('index.html', context, def_name='server_time')
         return request.dmp.render('index.html', context)
 
@@ -82,9 +69,9 @@ Suppose you have the following template, view, and JS files:
         $('.server-time').load('/homepage/index/gettime/');
     });
 
-On initial page load, the ``if request.dmp.urlparams[0] == 'gettime':`` statement is false, so the full ``index.html`` file is rendered. However, when the update button's click event is run, the statement is **true** because ``/gettime`` is added as the first url parameter. This is just one way to switch the ``request.dmp.render`` call. We could also have used a regular CGI parameter, request method (GET or POST), or any other way to perform the logic.
+On initial page load, ``mode == 'gettime'`` is False, so the full ``index.html`` file is rendered. However, when the update button's click event is run, the statement is **true** because ``/gettime`` is added as the first url parameter. This is just one way to switch the ``request.dmp.render`` call. We could also have used a regular CGI parameter, request method (GET or POST), or any other way to perform the logic.
 
-When the ``if`` statement goes **true**, DMP renders the ``server_time`` block of the template instead of the entire template. This corresponds nicely to the way the Ajax call was made: ``$('.server-time').load()``.
+When the ``if`` statement goes **True**, DMP renders the ``server_time`` block of the template instead of the entire template. This corresponds nicely to the way the Ajax call was made: ``$('.server-time').load()``.
 
 
 Variable Scope
@@ -92,17 +79,8 @@ Variable Scope
 
 The tricky part of block rendering is ensuring your variables are accessible. You can read more about namespaces on the Mako web site, but here's the tl;dr version:
 
--  Variables sent from the view in the context dictionary are available
-   throughout the page, regardless of the block. If your variables are
-   part of the context, you're golden.
--  Variables created within your template but **outside the block** have
-   to be explicitly defined in the block declaration. This is a Mako
-   thing, and it's a consequence of the way Mako turns blocks and defs
-   into Python methods. If you need a variable defined outside a block,
-   be sure to define your template with a comma-separated list of
-   ``args``. Again, `the Mako
-   documentation <http://docs.makotemplates.org/en/latest/namespaces.html>`__
-   gives more information on these fine details.
+-  Variables sent from the view in the context dictionary are available throughout the page, regardless of the block. If your variables are part of the context, you're golden.
+-  Variables created within your template but **outside the block** have to be explicitly defined in the block declaration. This is a Mako thing, and it's a consequence of the way Mako turns blocks and defs into Python methods. If you need a variable defined outside a block, be sure to define your template with a comma-separated list of ``args``. Again, `the Mako documentation <http://docs.makotemplates.org/en/latest/namespaces.html>`_ gives more information on these fine details.
 
 **``index.html``** with a ``counter`` variable defined in the template:
 
@@ -136,17 +114,13 @@ Since ``counter`` won't get defined when ``def_name='server_time'``, **``index.p
     import random
 
     @view_function
-    def process_request(request):
+    def process_request(request, mode:str=None):
         context = {
             'now': datetime.now().strftime('%H:%M:%S'),
         }
-        if request.dmp.urlparams[0] == 'gettime':
+        if mode == 'gettime':
             context['counter'] = 100
             return request.dmp.render('index.html', context, def_name='server_time')
         return request.dmp.render('index.html', context)
 
-    The ``def_name`` parameter can be used to call both ``<%block>`` and
-    ``<%def>`` tags in your templates. The two are very similar within
-    the Mako engine. The primary difference is the ``<%def>`` tag can
-    define parameters. When calling these defs directly, be sure each of
-    the parameter names is in your ``context`` dictionary.
+    The ``def_name`` parameter can be used to call both ``<%block>`` and ``<%def>`` tags in your templates. The two are very similar within the Mako engine. The primary difference is the ``<%def>`` tag can define parameters. When calling these defs directly, be sure each of the parameter names is in your ``context`` dictionary.

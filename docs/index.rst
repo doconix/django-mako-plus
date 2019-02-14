@@ -78,6 +78,7 @@ Contents
     tutorial
     faq
     basics
+    converters
     static
     topics
     deploy

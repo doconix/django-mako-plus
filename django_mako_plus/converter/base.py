@@ -1,7 +1,8 @@
 from django.core.exceptions import ImproperlyConfigured
+from django.http import Http404
 
 from ..util import log
-from ..exceptions import ConverterHttp404, ConverterException
+from ..exceptions import ConverterHttp404, ConverterException, BaseRedirectException
 from .parameter import ViewParameter
 from .info import ConverterFunctionInfo
 
@@ -158,8 +159,8 @@ class ParameterConverter(object):
 
         Other useful exceptions that converter functions can raise are:
 
-            RedirectException: redirects the browser (see DMP docs)
-            InternalRedirectException: redirects processing internally (see DMP docs)
+            Any extension of BaseRedirectException (RedirectException,
+                InternalRedirectException, JavascriptRedirectException, ...)
             Http404: returns a Django Http404 response
         '''
         try:
@@ -180,6 +181,10 @@ class ParameterConverter(object):
 
             # if we get here, there wasn't a converter or this type
             raise ImproperlyConfigured(message='No parameter converter exists for type: {}. Do you need to add an @parameter_converter function for the type?'.format(parameter.type))
+
+        except (BaseRedirectException, Http404):
+            log.info('Exception raised during conversion of parameter %s (%s): %s', parameter.position, parameter.name, e)
+            raise   # allow these to pass through to the router
 
         except ValueError as e:
             log.info('ValueError raised during conversion of parameter %s (%s): %s', parameter.position, parameter.name, e)

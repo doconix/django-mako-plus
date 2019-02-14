@@ -137,7 +137,7 @@ If you don't need the auto-link-creation feature of DMP, you can entirely remove
     ${ django_mako_plus.links(self) }
 
 
-I updated DMP, but browsers report the old ``dmp-common.min.js``
+I updated DMP, but browsers report the old ``dmp-common.min.js``.
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This is a caching issue, and it can occur with any of your static files (.js, .css, .png, others). Once browsers download the file from your server, they don't check for new versions for a few days (or even weeks). Your server might have a new version of a file, but the browser doesn't know to get it!

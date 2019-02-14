@@ -19,7 +19,7 @@ from .router import view_function, app_resolver, dmp_path
 
 
 # converter decorator
-from .converter import parameter_converter
+from .converter import parameter_converter, ParameterConverter
 
 
 # the middleware and template

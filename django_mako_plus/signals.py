@@ -32,7 +32,7 @@ dmp_signal_pre_process_request = Signal(providing_args=['request', 'view_args', 
 #
 dmp_signal_post_process_request = Signal(providing_args=['request', 'response', 'view_args', 'view_kwargs'])
 
-#  Triggered just before DMP renders a Mako template
+#  Triggered just before DMP renders a Mako template.
 #  If the method returns a different Template object than the one passed into it, the returned on is used.
 #  In other words, this signal lets you override any template just before DMP renders it.
 #

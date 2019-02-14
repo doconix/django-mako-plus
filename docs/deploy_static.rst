@@ -82,7 +82,7 @@ At production/deployment, comment out ``BASE_DIR`` because it essentially makes 
     )
     STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
-When you deploy to a web server, run ``dmp collectstatic`` to collect your static files into a separate directory (called ``/static/`` in the settings above):
+When you deploy to a web server, run ``dmp_collectstatic`` to collect your static files into a separate directory (called ``/static/`` in the settings above):
 
 ::
 
@@ -130,7 +130,7 @@ The following is an example setting for Nginx:
         alias /to/django_mako_plus/scripts/dmp-common.min.js;
     }
 
-If you don't know the location of DMP on your server, try this command:
+If you don't know the location of DMP_on your server, try this command:
 
 ::
 
@@ -141,7 +141,7 @@ If you don't know the location of DMP on your server, try this command:
 Advanced Use
 ---------------------------
 
-``dmp collectstatic`` will refuse to overwrite an existing ``/static/`` directory. If you already have this directory (either from an earlier run or for another purpose), you can 1) delete it before collecting static files, or 2) specify the overwrite option as follows:
+``dmp_collectstatic`` will refuse to overwrite an existing ``/static/`` directory. If you already have this directory (either from an earlier run or for another purpose), you can 1) delete it before collecting static files, or 2) specify the overwrite option as follows:
 
 ::
 

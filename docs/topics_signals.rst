@@ -1,20 +1,58 @@
 Signals
 ===================
 
-DMP sends several custom signals through the Django signal dispatcher. The purpose is to allow you to hook into the router's processing. Perhaps you need to run code at various points in the process, or perhaps you need to change the request.dmp\_\* variables to modify the router processing.
+DMP sends several custom signals through the Django signal dispatcher. The purpose is to allow you to hook into the router's processing and respond to events that occur in DMP.
 
-Before going further with this section's examples, be sure to read the standard Django signal documentation. DMP signals are simply additional signals in the same dispatching system, so the following examples should be easy to understand once you know how Django dispatches signals.
+    Before going further with this section's examples, be sure to read the standard Django signal documentation. DMP signals are simply additional signals in the same dispatching system, so the following examples should be easy to understand once you know how Django dispatches signals.
 
-Step 1: Enable DMP Signals
+Available Signals
+-------------------------------
+
+``dmp_signal_pre_process_request``
+    Triggered just before DMP calls a view's process_request() method.
+
+``dmp_signal_post_process_request``
+    Triggered just after a view's process_request() method returns.
+
+``dmp_signal_pre_render_template``
+    Triggered just before DMP renders a Mako template.
+
+``dmp_signal_post_render_template``
+    Triggered just after DMP renders a Mako template.
+
+``dmp_signal_redirect_exception``
+    Triggered when a RedirectException is encountered in the DMP controller.
+
+``dmp_signal_internal_redirect_exception``
+    Triggered when an InternalRedirectException is encountered in the DMP controller.
+
+``dmp_signal_register_app``
+    Triggered just after the DMP template engine registers an app as a DMP app (once per app at server start).
+
+
+See the `function documentation in signals.py <https://github.com/doconix/django-mako-plus/blob/master/django_mako_plus/signals.py>`_ for more information about each signal and its kwargs.
+
+
+Enabling DMP Signals
 ---------------------------------
 
 Be sure your settings.py file has the following in it:
 
-::
+.. code-block:: python
 
-    'SIGNALS': True,
+    TEMPLATES = [
+        {
+            'NAME': 'django_mako_plus',
+            'BACKEND': 'django_mako_plus.MakoTemplates',
+            'OPTIONS': {
+                'SIGNALS': True,
+                ...
+            }
+        }
+    ]
 
-Step 2: Create a Signal Receiver
+
+Signal Receivers
 -------------------------------------
 
 The following creates two receivers. The first is called just before the view's process\_request function is called. The second is called just before DMP renders .html templates.
@@ -35,6 +73,4 @@ The following creates two receivers. The first is called just before the view's 
         tlookup = get_template_loader('myapp')
         template = tlookup.get_template('different.html')
 
-The above code should be in a code file that is called during Django initialization. Good locations might be in a ``models.py`` file or your app's ``__init__.py`` file.
-
-See `signals.py <https://github.com/doconix/django-mako-plus/blob/master/django_mako_plus/signals.py>`_ for all the full list of DMP signals and their keyword arguments.
+The above code should be in a code file that is called during Django initialization, such as ``apps.py``.

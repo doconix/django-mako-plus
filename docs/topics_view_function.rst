@@ -1,7 +1,7 @@
-Customizing @view_function
+Customizing ``@view_function``
 --------------------------------------
 
-Since the ``@view_function`` decorator must be placed on all view functions in your system, it's a great place to do pre-endpoint logic.  ``@view_function`` was intentionally programmed as a class-based decorator so you can extend it.
+Since the ``@view_function`` decorator must be placed on all view functions in your system, it's a great place to do pre-endpoint logic.  The decorator was intentionally programmed as a class-based decorator so you can extend it.
 
     Django provide several ways to insert logic into the request process, so be sure to consider which is the cleanest approach for your situation: the approach here, middleware, signals, or another method.
 
@@ -64,7 +64,7 @@ Rather than hope every endpoint gets marked with the decorator, let's modify DMP
             return super().__call__(request, *args, **kwargs)
 
 
-Then, use this decorator **insead** of the normal view function decorator. In fact, do a global search and replace of ``@view_function``, and replace it with ``@secure_function``.
+Then, use this decorator **instead** of the normal view function decorator. In fact, do a global search and replace of ``@view_function``, and replace it with ``@secure_function``.
 
 .. code-block:: python
 
@@ -74,9 +74,9 @@ Then, use this decorator **insead** of the normal view function decorator. In fa
     def process_request(request):
         ...
 
-When DMP calls your view functions, it now runs ``lib.router.secure_function.__call__``. Our function redirects if the current user isn't authenticated yet. If the user is authenticated, we call the super's ``__call__`` method, which runs the view function. Just like that, every endpoint in the system is protected by default.
+When DMP calls your view functions, it now runs ``lib.router.secure_function.__call__``. Our function redirects if the current user isn't authenticated yet. If the user is authenticated, we call the super's ``__call__`` method, which runs the view function. Just like that, every endpoint in the system is protected by default. Yeah, you know you rock!
 
-For endpoints that need to allow anonymous access, the ``auth_required`` parameter signals that everyone can pass (yep, even balrogs). The login endpoint looks like this:
+For endpoints that need to allow anonymous access, the ``auth_required`` parameter signals that anyone can access the endpoint:
 
 
 .. code-block:: python
@@ -85,4 +85,4 @@ For endpoints that need to allow anonymous access, the ``auth_required`` paramet
 
     @secure_function(auth_required=False)
     def process_request(request):
-        # login endpoint, so everyone allowed!
+        # even balrogs allowed to pass!

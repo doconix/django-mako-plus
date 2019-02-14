@@ -12,7 +12,6 @@ After the tutorial, start through these topics to learn how to use DMP.
     basics_paths
     basics_convenience
     basics_redirecting
-    basics_converters
     basics_csrf
     basics_django
 
