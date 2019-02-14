@@ -1,3 +1,5 @@
+import os, shutil
+
 # this dict of options is merged with the current project's TEMPLATES entry for DMP
 DEFAULT_OPTIONS = {
     # the default app and page to render in Mako when the url is too short
@@ -44,20 +46,42 @@ DEFAULT_OPTIONS = {
 
     # static file providers (see "static file" docs for full options here)
     'CONTENT_PROVIDERS': [
-        { 'provider': 'django_mako_plus.JsContextProvider' },       # adds JS context - this should normally be listed FIRST
-        # { 'provider': 'django_mako_plus.CompileProvider' },         # generic auto-compiler
-        # { 'provider': 'django_mako_plus.CompileScssProvider' },     # autocompiles Scss files
-        # { 'provider': 'django_mako_plus.CompileLessProvider' },     # autocompiles Less files
-        # { 'provider': 'django_mako_plus.LinkProvider' },            # generic link generator
-        { 'provider': 'django_mako_plus.CssLinkProvider' },         # generates links for app/styles/template.css
-        { 'provider': 'django_mako_plus.JsLinkProvider' },          # generates links for app/scripts/template.js
-        # { 'provider': 'django_mako_plus.WebpackJsLinkProvider' },   # generates links to app/scripts/__bundle__.js (see DMP docs on webpack)
+        # adds JS context - this should normally be listed FIRST
+        { 'provider':   'django_mako_plus.JsContextProvider' },
+
+        # Sass compiler and link generator
+        # { 'provider':   'django_mako_plus.CompileScssProvider',
+        #   'sourcepath': lambda p: os.path.join(p.app_config.name, 'styles', p.template_relpath + '.scss'),
+        #   'targetpath': lambda p: os.path.join(p.app_config.name, 'styles', p.template_relpath + '.scss.css'),
+        #   'command':    lambda p: [ shutil.which('sass'), f'--load-path="{BASE_DIR}"', p.sourcepath, p.targetpath ] },
+        # { 'provider':   'django_mako_plus.CssLinkProvider',
+        #   'filepath':   lambda p: os.path.join(p.app_config.name, 'styles', p.template_relpath + '.scss.css') },
+
+        # Less compiler and link generator
+        # { 'provider':   'django_mako_plus.CompileLessProvider',
+        #   'sourcepath': lambda p: os.path.join(p.app_config.name, 'styles', p.template_relpath + '.less'),
+        #   'targetpath': lambda p: os.path.join(p.app_config.name, 'styles', p.template_relpath + '.less.css'),
+        #   'command':    lambda p: [ shutil.which('lessc'), f'--source-map', p.sourcepath, p.targetpath ] },
+        # { 'provider':   'django_mako_plus.CssLinkProvider',
+        #   'filepath':   lambda p: os.path.join(p.app_config.name, 'styles', p.template_relpath + '.less.css') },
+
+        # generic compiler and link generator (see DMP docs, same options as other entries here)
+        # { 'provider':   'django_mako_plus.CompileProvider' },
+        # { 'provider':   'django_mako_plus.LinkProvider' },
+
+        # link generators for regular JS and CSS: app/scripts/*.js and app/styles/*.css
+        { 'provider':   'django_mako_plus.CssLinkProvider' },
+        { 'provider':   'django_mako_plus.JsLinkProvider' },
+
+        # link generators for app/scripts/__bundle__.js (webpack bundler)
+        # { 'provider':   'django_mako_plus.WebpackJsLinkProvider' },
     ],
 
-    # webpack file discovery (used by `manage.py dmp_webpack`)
+    # webpack file discovery, used by `manage.py dmp_webpack` to generate __entry__.js files
     'WEBPACK_PROVIDERS': [
-        { 'provider': 'django_mako_plus.JsLinkProvider' },          # generates links for app/scripts/template.js
-        { 'provider': 'django_mako_plus.CssLinkProvider' },         # generates links for app/styles/template.css
+        # finders for app/scripts/*.js and app/styles/*.css
+        { 'provider': 'django_mako_plus.JsLinkProvider' },
+        { 'provider': 'django_mako_plus.CssLinkProvider' },
     ],
 
     # additional template dirs to search
