@@ -1,48 +1,139 @@
-Using Django/Jinja2 in Mako Templates (and vice-versa)
+Combining Django and Mako Templates
 =============================================================
 
+In both Django and Mako, templates can call other templates, essentially including one rendered template within another. Using built-in and DMP tags, you can cross include Mako within Django and Django within Mako.
+
+    For example, suppose you have a DMP site that contains Mako templates, but you want to use a third-party navigation/menu app that uses Django templates. You need to call the third-party app's Django-syntax template from your DMP-based code. Calling Django from Mako is shown in #2 below.
+
+Include Tags
+-------------------------
+
+The following examples show how to include templates in various combinations of syntax:
+
+View function (context includes *navitems* list):
+    ``index.py``
+
+    .. code-block:: html+mako
+
+        @view_function
+        def process_request(request):
+            context = {
+                navitems: ...
+            }
+            return request.dmp.render('index.html', context)
+
+
+
+1. Mako calling a Mako template:
+    ``index.html (Mako)``
+
+    .. code-block:: html+mako
+
+        ## must specify navitems explicitly (per the Mako tag docs)
+        <html>
+        <body>
+            <%include file="bsnav.html" args="theme='dark', size='lg', navitems='${navitems}'" />
+        </body>
+        </html>
+
+    ``bsnav.html (Mako):``
+
+    .. code-block:: html+mako
+
+        ## must specify page args (per the Mako tag docs)
+        <%page args="theme, size, navitems" />
+        <nav class="navbar navbar-expand-${ size } navbar-${ theme } bg-${ theme }">
+            <ul class="navbar-nav">
+                %for item in navitems:
+                    <li class="nav-item"><a class="nav-link" href="${ item.link }">${ item.name }</a></li>
+                %endfor
+            </ul>
+        </nav>
+
+
+2. Mako calling a Django template:
+    ``index.html (Mako)``
+
+    .. code-block:: html+mako
+
+        <%namespace name="dmp" module="django_mako_plus.tags"/>
+        <html>
+        <body>
+            <%dmp:django_include template_name="bsnav.html" theme="dark" size="lg" />
+        </body>
+        </html>
+
+    ``bsnav.html (Django):``
+
+    .. code-block:: html+django
+
+        <nav class="navbar navbar-expand-{{ size }} navbar-{{ theme }} bg-{{ theme }}">
+            <ul class="navbar-nav">
+                {% for item in navitems %}
+                    <li class="nav-item"><a class="nav-link" href="{{ item.link }}">{{ item.name }}</a></li>
+                {% endfor %}
+            </ul>
+        </nav>
+
+
+3. Django calling a Django template:
+    ``index.html (Django)``
+
+    .. code-block:: html+django
+
+        <html>
+        <body>
+            {% include "homepage/bsnav_dj.html" with theme="dark" size="lg" %}
+        </body>
+        </html>
+
+    ``bsnav.html (Django):``
+
+    .. code-block:: html+django
+
+        <nav class="navbar navbar-expand-{{ size }} navbar-{{ theme }} bg-{{ theme }}">
+            <ul class="navbar-nav">
+                {% for item in navitems %}
+                    <li class="nav-item"><a class="nav-link" href="{{ item.link }}">{{ item.name }}</a></li>
+                {% endfor %}
+            </ul>
+        </nav>
+
+
+4. Django calling a Mako template:
+    ``index.html (Django)``
+
+    .. code-block:: html+django
+
+        <html>
+        <body>
+            {% load django_mako_plus %}
+            {% dmp_include "homepage/bsnav.html" with theme="dark" size="lg" %}
+        </body>
+        </html>
+
+    ``bsnav.html (Mako):``
+
+    .. code-block:: html+mako
+
+        <nav class="navbar navbar-expand-${ size } navbar-${ theme } bg-${ theme }">
+            <ul class="navbar-nav">
+                %for item in navitems:
+                    <li class="nav-item"><a class="nav-link" href="${ item.link }">${ item.name }</a></li>
+                %endfor
+            </ul>
+        </nav>
+
+
+
+Django Syntax Blocks
+------------------------
 
 There may be times when you need or want to call real, Django tags or include Django template syntax in your DMP templates. In other words, you need to combine Mako, Django, and even Jinja2 syntaxes in the *same* template.
 
 This situation can occur when you include a third-party app in your project, and the new library provides Django tags.  You need to reference these tags within your DMP templates.
 
     Like the Cataclyst time bomb, this is a kludge that should be used sparingly.
-
-Becoming Bilingual (settings.py):
-    .. code-block:: python
-
-        TEMPLATES = [
-            {
-                'NAME': 'django_mako_plus',
-                'OPTIONS': {
-                    'DEFAULT_TEMPLATE_IMPORTS': [
-                        'from django_mako_plus import django_syntax, jinja2_syntax, alternate_syntax',
-                    ],
-                }
-            },
-            {
-                'NAME': 'django',
-                'BACKEND': 'django.template.backends.django.DjangoTemplates',
-                'DIRS': [],
-                'APP_DIRS': True,
-                'OPTIONS': {
-                    'context_processors': [
-                        'django.template.context_processors.debug',
-                        'django.template.context_processors.request',
-                        'django.contrib.auth.context_processors.auth',
-                        'django.contrib.messages.context_processors.messages',
-                    ],
-                },
-            },
-        ]
-
-Now clear out the compiled templates caches:
-    .. code-block:: bash
-
-        python3 manage.py dmp_cleanup
-
-Using Django Syntax
-------------------------
 
 :A Django expression:
     .. code-block:: html+mako
@@ -99,7 +190,7 @@ In the above examples, you'll notice the use of ``local`` when switching to Djan
 
 
 Using Context Variables
----------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Embedded Django code has access to any variable passed to your template. In other words, Django code in your template has access to anything your view sends:
 
@@ -126,9 +217,9 @@ weather.html
 
 
 Using Template Variables
----------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-While context variables are global anywhere in your template, variables created in templates are available only in the block they are created. These temporary variables don't jump scope into other blocks (that's the way Mako is programmed).
+While context variables are global anywhere in your template, variables created in templates are available only in the block they are created. These temporary variables don't jump scope into other blocks.
 
 To send variables from a parent block to a child block, send them in the block signature:
 
@@ -138,20 +229,16 @@ weather.html
         <% pressure = 29.84 %>
 
         <%block filter="django_syntax(local)">
-            Django doesn't know the pressure in this block!
+            The pressure is undefined here: huh? pressure? whaaa?
         </%block>
-
-        <%block name="sub_block">
-            Mako has the same restrictions - pressure is not in scope here.
-        </block>
 
         <%block filter="django_syntax(local, pressure=pressure)">
             Django now knows the current pressure is {{ pressure }}.
         </%block>
 
 
-Jinja2 or ((insert template engine))
-------------------------------------------------------------------------------
+Jinja2 or (( insert engine here )) Syntax Blocks
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 If Jinja2 is needed, replace the filters with ``jinja2_syntax(context)`` in the above examples. If another engine is needed, replace the filter with ``template_syntax(context, 'engine name')`` as specified in ``settings.TEMPLATES``. DMP will render with the appriate engine and put the result in your HTML page.
 
@@ -165,39 +252,3 @@ weather.html
                 A storm might be coming!
             {% endif %}
         </%block>
-
-
-Reverse That: DMP in Django Templates
--------------------------------------------
-
-Thus far, we've shown how to embed other tags and template languages within DMP templates.  The opposite is supported as well: embedding DMP snippets within Django templates.
-
-Suppose a third party contains a "normal" Django template -- one that uses the standard Django syntax instead of Mako syntax. In customizing these templates, you may want to include DMP templates.  Django has an ``include`` template tag, but that's for Django templates.  That's where DMP's ``dmp_include`` tag comes in.
-
-For example, suppose your Django template, ``django_template.html`` needs to include the Mako-syntax ``navigation_snippet.htm`` in app ``homepage``.  Put the following inside ``django_template.html``:
-
-django_template.html
-    .. code-block:: html+mako
-
-        {% Note the normal Django template syntax %}
-        <html>
-        <body>
-            ...
-            {% load django_mako_plus %}
-            {% dmp_include "homepage" "navigation_snippet.htm" %}
-        </body>
-        </html>
-
-You can also specify a ``def`` or ``block`` within the navigation snippet:
-
-django_template.html
-    .. code-block:: html+mako
-
-        {% Now including just a single def/block from the Mako template %}
-        <html>
-        <body>
-            ...
-            {% load django_mako_plus %}
-            {% dmp_include "homepage" "navigation_snippet.htm" "someblock" %}
-        </body>
-        </html>

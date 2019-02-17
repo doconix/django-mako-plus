@@ -3,8 +3,11 @@ from django.template import RequestContext, engines
 from .util import log
 
 
-############################################################################
+###########################################################################################################
 ###   Rendering template blocks in other syntax languages
+###
+###   See also django_mako_plus/templatetags/django_mako_plus.py
+###
 
 def django_syntax(local, **kwargs):
     '''
@@ -13,6 +16,9 @@ def django_syntax(local, **kwargs):
 
     The template context variables are available in the embedded template.
     Specify kwargs to add additional variables created within the template.
+
+    This is a kludge that should be used sparingly. The `dmp_include` template tag
+    is often a better option.
 
     ## Simple expression in Django syntax:
     ${ '{{ name }}' | django_syntax(local) }
@@ -38,6 +44,9 @@ def jinja2_syntax(local, **kwargs):
     The template context variables are available in the embedded template.
     Specify kwargs to add additional variables created within the template.
 
+    This is a kludge that should be used sparingly. The `dmp_include` template tag
+    is often a better option.
+
     ## Simple expression in Jinja2 syntax:
     ${ '{{ name }}' | jinja2_syntax(local) }
 
@@ -59,6 +68,9 @@ def alternate_syntax(local, using, **kwargs):
 
     The template context variables are available in the embedded template.
     Specify kwargs to add additional variables created within the template.
+
+    This is a kludge that should be used sparingly. The `dmp_include` template tag
+    is often a better option.
 
     The following examples assume you have installed the django_mustache template
     engine in settings.py:
