@@ -3,7 +3,7 @@ Combining Django and Mako Templates
 
 In both Django and Mako, templates can call other templates, essentially including one rendered template within another. Using built-in and DMP tags, you can cross include Mako within Django and Django within Mako.
 
-    For example, suppose you have a DMP site that contains Mako templates, but you want to use a third-party navigation/menu app that uses Django templates. You need to call the third-party app's Django-syntax template from your DMP-based code. Calling Django from Mako is shown in #2 below.
+    For example, suppose you have a DMP site and want to use a third-party navigation/menu app (written using Django templates). You need to call the third-party app's Django-syntax template from your DMP-based code. Calling Django from Mako is shown in #2 below.
 
 Include Tags
 -------------------------
