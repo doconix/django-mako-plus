@@ -1,4 +1,4 @@
-Django-Style Template Rendering
+Using the Django API
 =====================================
 
 In the `tutorial <tutorial_views.html>`_ , you may have noticed that we didn't use the "normal" Django shortcuts like ``render`` and ``render_to_response``.  DMP provides the shortcuts like ``request.dmp.render`` because its renderers are tied to apps (which is different than Django).
@@ -34,24 +34,7 @@ Since app-awareness is at the core of DMP, the template should be specified in t
 ``TemplateResponse`` and ``SimpleTemplateResponse``
 ---------------------------------------------------------
 
-Django provides two classes that delay template rendering until the last possible moment.  Late rendering allows things like middleware to adjust the template or context before rendering occurs.
-
-To use these classes with DMP, use the file pattern we just discussed: ``app/template``.  Or to be more explicit, get the template object explicitly.  Here are some examples:
-
-.. code-block:: python
-
-    # using TemplateResponse:
-    from django.template.response import TemplateResponse
-    return TemplateResponse(request, 'homepage/index.html', context)
-
-    # using SimpleTemplateResponse:
-    from django.template.response import SimpleTemplateResponse
-    return SimpleTemplateResponse('homepage/index.html', context)
-
-    # using TemplateResponse with an explicit template object:
-    from django.template.response import TemplateResponse
-    from django_mako_plus import get_template as dmp_get_template
-    return TemplateResponse(request, dmp_get_template('homepage', 'index.html'), context)
+The topic on `Django's lazy-rendering of templates <topics_responses.html>`_ shows how DMP supports these responses.
 
 
 Further Reading about Template Locations

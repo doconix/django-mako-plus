@@ -1,4 +1,4 @@
-Conversion Errors
+Errors During Conversion
 ===============================
 
 When conversion fails, the default behavior of DMP is to raise an ``Http404`` exception, indicating to the browser that the given url does not exist. Most of the time, this makes sense because it is, in effect, an invalid URL.

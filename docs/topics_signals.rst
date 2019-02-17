@@ -1,4 +1,4 @@
-Signals
+Signals in DMP
 ===================
 
 DMP sends several custom signals through the Django signal dispatcher. The purpose is to allow you to hook into the router's processing and respond to events that occur in DMP.

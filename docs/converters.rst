@@ -8,7 +8,7 @@ In the `initial tutorial <tutorial_urlparams.html>`_, you learned that any extra
 
     converters_types
     converters_adding
+    converters_replacing
     converters_errors
     converters_raw
-    converters_replacing
     converters_decorators

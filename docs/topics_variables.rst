@@ -1,5 +1,5 @@
-Current Request Data
-======================
+Metadata about the Request
+=====================================
 
 As you saw in the tutorial, DMP adds an object to each request as ``request.dmp``. This object supports the inner workings of the DMP router and provides convenient access to render functions. It also contains routing information for the current request.
 

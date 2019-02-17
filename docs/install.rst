@@ -37,5 +37,3 @@ The following pages discuss additional installation topics:
 
     install_custom_urls
     install_subdirectory
-    install_third_party
-    install_other_syntax

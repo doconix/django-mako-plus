@@ -40,7 +40,7 @@ The function must do one of the following:
 2.  Raise one of these exceptions:
 
     *  ``ValueError``, which triggers the Http 404 page. This should be done for "expected" conversion errors (e.g. bad data in url).
-    *  DMP's ``RedirectException`` or ``InternalRedirectException``.
+    *  DMP's `RedirectException <basics_redirecting.html>`_ or `InternalRedirectException <basics_redirecting.html>`_.
     *  Any other exception, which triggers the Http 500 page. This should be done for unexpected errors.
 
 When Django starts up, the ``parameter_converter`` decorator registers our new function as a converter.

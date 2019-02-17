@@ -1,4 +1,4 @@
-Rendering Partial Templates (Ajax!)
+Rendering Partial Templates for Ajax
 ======================================
 
 .. contents::

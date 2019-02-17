@@ -1,9 +1,10 @@
-Template Location/Import
+Inheritance Paths and Template Location
 ===========================================
 
 .. contents::
     :depth: 2
 
+In addition, you can also render the `normal Django API way <basics_django.html>`_.
 
 Template Inheritance Across Apps
 --------------------------------
@@ -12,7 +13,7 @@ You may have noticed that this tutorial has focused on a single app. Most projec
 
 When you run ``python3 manage.py dmp_startapp <appname>``, you get **new** ``base.htm`` and ``base_ajax.htm`` files each time. This is done to get you started on your first app. On your second, third, and subsequent apps, you probably want to delete these starter files and instead extend your templates from the ``base.htm`` and ``base_ajax.htm`` files in your first app.
 
-In fact, in my projects, I usually create an app called ``base_app`` that contains the common ``base.htm`` html code, site-wide CSS, and site-wide Javascript. Subsequent apps simply extend from ``/base_app/templates/base.htm``. The common ``base_app`` doesn't really have end-user templates in it -- they are just supertemplates that support other, public apps.
+In my projects, I usually place all the common files in the ``homepage`` app. I delete ``base.htm`` and ``base_ajax.htm`` from all other apps. Homepage contains the common html code, site-wide CSS, and site-wide Javascript.
 
 DMP supports cross-app inheritance by including your project root (e.g. ``settings.BASE_DIR``) in the template lookup path. All you need to do is use the full path (relative to the project root) to the template in the inherits statement.
 
@@ -20,15 +21,14 @@ Suppose I have the following app structure:
 
 ::
 
-    dmptest
-        base_app/
+    myproject/
+        account/
             __init__.py
             media/
             scripts/
             styles/
             templates/
-                site_base_ajax.htm
-                site_base.htm
+                login.html
             views/
                 __init__.py
         homepage/
@@ -37,21 +37,23 @@ Suppose I have the following app structure:
             scripts/
             styles/
             templates/
+                base_ajax.htm
+                base.htm
                 index.html
             views/
                 __init__.py
 
-I want ``homepage/templates/index.html`` to extend from ``base_app/templates/site_base.htm``. The following code in ``index.html`` sets up the inheritance:
+I set ``account/templates/login.html`` to extend from ``homepage/templates/base.htm`` using the following code at the top of the template:
 
 .. code-block:: html+mako
 
-            <%inherit file="/base_app/templates/site_base.htm" />
+    <%inherit file="/homepage/templates/site_base.htm" />
 
 Again, the front slash in the name above tells DMP to start the lookup at the project root.
 
     In fact, my pages are often three inheritance levels deep:
-    ``base_app/templates/site_base.htm -> homepage/templates/base.htm -> homepage/templates/index.html``
-    to provide for site-wide page code, app-wide page code, and specific
+    ``homepage/templates/base.htm -> account/templates/app_base.htm -> account/templates/index.html``
+    to provide for site-wide page code, app-general page code, and specific
     page code.
 
 
@@ -59,41 +61,41 @@ Again, the front slash in the name above tells DMP to start the lookup at the pr
 Templates in Other Apps
 --------------------------
 
-Need to render templates from a different app?  There's two ways to do it.  Note the imports in the code below:
+Most of the time, you'll render templates in the request's current app. This is easy with ``request.dmp.render(...)``.
 
-First Way:
+Infrequently, you'll likely need to render templates in apps other than the current one. There's two ways to do it:
 
-.. code-block:: python
+Method 1: Use the ``render_template`` convenience function:
+    .. code-block:: python
 
-    from django.conf import settings
-    from django.http import HttpResponse
-    from django_mako_plus import view_function, render_template
-    from datetime import datetime
+        from django.conf import settings
+        from django.http import HttpResponse
+        from django_mako_plus import view_function, render_template
+        from datetime import datetime
 
-    @view_function
-    def process_request(request):
-        context = {
-            'now': datetime.now(),
-        }
-        # replace 'homepage' with the name of any DMP-enabled app:
-        return HttpResponse(render_template(request, 'homepage', 'index.html', context))
+        @view_function
+        def process_request(request):
+            context = {
+                'now': datetime.now(),
+            }
+            # replace 'homepage' with the name of any DMP-enabled app:
+            return HttpResponse(render_template(request, 'homepage', 'index.html', context))
 
-Second Way (this way uses the standard Django API):
+Method 2: Use the standard Django API:
+    .. code-block:: python
 
-.. code-block:: python
+        from django.conf import settings
+        from django.shortcuts import render
+        from django_mako_plus import view_function
+        from datetime import datetime
 
-    from django.conf import settings
-    from django.shortcuts import render
-    from django_mako_plus import view_function
-    from datetime import datetime
-
-    @view_function
-    def process_request(request):
-        context = {
-            'now': datetime.now(),
-        }
-        # replace 'homepage' with the name of any DMP-enabled app:
-        return render(request, 'homepage/index.html', context)
+        @view_function
+        def process_request(request):
+            context = {
+                'now': datetime.now(),
+            }
+            # replace 'homepage' with the name of any DMP-enabled app:
+            return render(request, 'homepage/index.html', context)
 
 
 Content Types and Status Codes
@@ -151,42 +153,6 @@ Suppose, after making the above change, you need to render the '/var/templates/p
 
 DMP will first search the current app's ``templates`` directory (i.e. the normal way), then it will search the ``TEMPLATES_DIRS`` list, which in this case contains ``/var/templates/``. Your ``page1.html`` template will be found and rendered.
 
-
-
-
-Importing Python Modules
--------------------------------
-
-It's easy to import Python modules in your Mako templates. Simply use a module-level block:
-
-.. code-block:: html+mako
-
-    <%!
-        import datetime
-        from decimal import Decimal
-    %>
-
-or a Python-level block (see the Mako docs for the difference):
-
-.. code-block:: html+mako
-
-    <%
-        import datetime
-        from decimal import Decimal
-    %>
-
-There may be some modules, such as ``re`` or ``decimal`` that are so useful you want them available in every template of your site. In settings.py, add these to the ``DEFAULT_TEMPLATE_IMPORTS`` variable:
-
-.. code-block:: python
-
-    DEFAULT_TEMPLATE_IMPORTS = [
-        'import os, os.path, re',
-        'from decimal import Decimal',
-    ],
-
-Any entries in this list will be automatically included in templates throughout all apps of your site. With the above imports, you'll be able to use ``re`` and ``Decimal`` and ``os`` and ``os.path`` anywhere in any .html, .cssm, and .jsm file.
-
-    Whenever you modify the DMP settings, be sure to clean out your cached templates with ``python3 manage.py dmp_cleanup``. This ensures your compiled templates are rebuilt with the new settings.
 
 
 Cleaning Up

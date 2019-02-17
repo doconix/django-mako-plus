@@ -8,7 +8,7 @@ from .decorators import parameter_converter
 import inspect
 import datetime
 import decimal
-
+import base64
 
 
 ###   object (fallback if nothing else matches)  ###
@@ -147,7 +147,7 @@ def convert_date(value, parameter):
     raise ValueError("`{}` does not match a format in settings.DATE_INPUT_FORMATS".format(value))
 
 
-###   Model: any Django model by its id  ###
+###  Model: any Django model by its id  ###
 
 @parameter_converter(Model)  # django models.Model
 def convert_id_to_model(value, parameter):
@@ -163,7 +163,6 @@ def convert_id_to_model(value, parameter):
         except (MultipleObjectsReturned, ObjectDoesNotExist) as e:
             raise ValueError(str(e))
     return value
-
 
 
 ###################################

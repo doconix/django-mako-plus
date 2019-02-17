@@ -77,10 +77,9 @@ Contents
     install
     tutorial
     faq
-    basics
+    topics
     converters
     static
-    topics
     deploy
     editors
 
