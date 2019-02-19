@@ -40,12 +40,14 @@ class JsContextProvider(BaseProvider):
             'app': self.provider_run.request.dmp.app if self.provider_run.request is not None else None,
             'page': self.provider_run.request.dmp.page if self.provider_run.request is not None else None,
             'log': log.isEnabledFor(logging.DEBUG),
-            'values': {},
+            'values': {
+                'id': self.provider_run.uid,
+            },
         }
         for k in self.provider_run.context.keys():
             if isinstance(k, jscontext):
                 value = self.provider_run.context[k]
-                data['values'][k] = value.__jscontext__() if hasattr(value, '__jscontext__') else value
+                data['values'][k] = value.__jscontext__() if callable(getattr(value, '__jscontext__', None)) else value
 
         # output the script
         self.write('<script>')
