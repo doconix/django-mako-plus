@@ -31,7 +31,13 @@
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = []
+extensions = [
+    'sphinx.ext.autosectionlabel',
+    'sphinx_tabs.tabs',
+]
+
+# auto labels created only for top-level (page-level) section headings
+autosectionlabel_maxdepth = 1
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']

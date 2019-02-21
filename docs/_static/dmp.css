@@ -122,6 +122,21 @@ a:hover, a:focus {
     color: #AF591A;
 }
 
+
+/* Tabs */
+.rst-content .sphinx-tabs > .sphinx-menu a.active.item {
+    border-bottom: 1px solid #EEEEEE !important;
+}
+.sphinx-tabs > .sphinx-tab {
+    padding: .5em;
+    background: #eeffcc;
+}
+.sphinx-tabs > .sphinx-tab .highlight {
+    border: none;
+    border-radius: inherit;
+    background: none;
+}
+
 /* Strong */
 .wy-nav-content b,
 .wy-nav-content strong {

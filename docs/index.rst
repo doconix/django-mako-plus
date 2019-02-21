@@ -42,29 +42,56 @@ DMP doesn't replace Django; it extends Django to make you more productive.
 Quick Start
 ----------------------
 
-.. code:: bash
+.. tabs::
 
-    # install/upgrade django, mako, and DMP
-    pip3 install --upgrade django-mako-plus
+   .. group-tab:: Linux/Mac
 
-    # create a new project with a 'homepage' app
-    python3 -m django_mako_plus dmp_startproject mysite
-    cd mysite
-    python3 manage.py dmp_startapp homepage
+        .. code:: bash
 
-    # open mysite/settings.py and append 'homepage' to the INSTALLED_APPS list
-    INSTALLED_APPS = [
-        ...
-        'homepage',
-    ]
+            # install/upgrade django, mako, and DMP
+            pip3 install --upgrade django-mako-plus
 
-    # run initial migrations and run the server
-    python3 manage.py migrate
-    python3 manage.py runserver
+            # create a new project with a 'homepage' app
+            python3 -m django_mako_plus dmp_startproject mysite
+            cd mysite
+            python3 manage.py dmp_startapp homepage
 
-    # Open a browser to http://localhost:8000/
+            # open mysite/settings.py and append 'homepage' to the INSTALLED_APPS list
+            INSTALLED_APPS = [
+                ...
+                'homepage',
+            ]
 
-Note that on Windows, ``python3`` is ``python`` and ``pip3`` is ``pip``. Python 3.4+ is required.
+            # run initial migrations and run the server
+            python3 manage.py migrate
+            python3 manage.py runserver
+
+            # open a browser to http://localhost:8000/
+
+   .. group-tab:: Windows
+
+        .. code:: powershell
+
+            # install/upgrade django, mako, and DMP
+            pip install --upgrade django-mako-plus
+
+            # create a new project with a 'homepage' app
+            python -m django_mako_plus dmp_startproject mysite
+            cd mysite
+            python manage.py dmp_startapp homepage
+
+            # open mysite/settings.py and append 'homepage' to the INSTALLED_APPS list
+            INSTALLED_APPS = [
+                ...
+                'homepage',
+            ]
+
+            # run initial migrations and run the server
+            python manage.py migrate
+            python manage.py runserver
+
+            # open a browser to http://localhost:8000/
+
 
 Contents
 ------------
@@ -72,6 +99,7 @@ Contents
 .. toctree::
     :maxdepth: 2
 
+    Home <self>
     compare
     upgrade_notes
     install

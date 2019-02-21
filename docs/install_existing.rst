@@ -13,19 +13,26 @@ DMP works with Django 1.9+, including the 2.0 releases.
 
 The following will install all three dependencies:
 
-::
+.. tabs::
 
-    pip3 install --upgrade django-mako-plus
+   .. group-tab:: Linux/Mac
 
-(note that on Windows machines, ``pip3`` may need to be replaced with ``pip``)
+        .. code:: bash
+
+            pip3 install --upgrade django-mako-plus
+
+   .. group-tab:: Windows
+
+        .. code:: powershell
+
+            pip install --upgrade django-mako-plus
 
 If you need to add DMP to an existing Django project, you have two options:
 
-1. **Convert your project to the DMP structure.** This switches your
-   project over to the layout of a DMP-style project.
-2. **Keep your existing Django-style structure** with minimal changes.
+1. Convert your project to the DMP-style structure. This switches your project over to the layout of a DMP project.
+2. Keep your existing Django-style structure with minimal changes.
 
-This section describes Option 1, which gives you the full benefit of the automatic DMP routing and midleware. If you just need to render templates using the Mako language (e.g. Option 2), jump to `Rending Templates the Standard Way: ``render()`` <#rending-templates-the-standard-way-render>`__.
+This section describes Option 1, which gives you the full benefit of the automatic DMP routing and midleware. If you just need to render templates using the Mako language (e.g. Option 2), jump to XXXXXXXXXXX.
 
 Edit Your ``settings.py`` File:
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

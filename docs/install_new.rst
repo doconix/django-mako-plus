@@ -1,41 +1,93 @@
 New Project
 ======================
 
-Ensure you have Python 3.4+ installed (``python3 --version``), and check that you can run ``python3`` (or ``python``) at the command prompt.
+All of the commands in both Django and DMP are run at the command line. On Linux/Mac, this is usually a bash terminal. On Windows, this is the command prompt (cmd), PowerShell (powershell), or Git Bash.
 
-If you are using virtual environments, be sure to activate that first.
+Open a terminal, and check that Python 3.4 or later is active:
+
+.. tabs::
+
+   .. group-tab:: Linux/Mac
+
+        .. code:: bash
+
+            python3 --version
+
+   .. group-tab:: Windows
+
+        .. code:: powershell
+
+            python --version
+
+If an older Python (such as 2.7) is reported, you likely need to do one of the following:
+
+1. Install a `newer version of Python <https://www.python.org/downloads/>`_
+2. Activate a `different virtual environment <https://docs.python.org/3/tutorial/venv.html>`_.
+
 
 Install Django, Mako, and DMP
 ----------------------------------
 
-DMP works with Django 1.9+, including the 2.0 releases.
+DMP works with Django 1.9+, although most testing today happens on Django 2.x.
 
-The following will install all three dependencies:
+Install Django, Mako, and DMP with the following:
 
-::
+.. tabs::
 
-    pip3 install --upgrade django-mako-plus
+   .. group-tab:: Linux/Mac
 
-(note that on Windows machines, ``pip3`` may need to be replaced with ``pip``)
+        .. code:: bash
+
+            pip3 install --upgrade django-mako-plus
+
+   .. group-tab:: Windows
+
+        .. code:: powershell
+
+            pip install --upgrade django-mako-plus
+
+
 
 Create a Django project
 ----------------------------------
 
 Create a Django project, and specify that you want a DMP-style project layout:
 
-::
+.. tabs::
 
-    python3 -m django_mako_plus dmp_startproject mysite
+   .. group-tab:: Linux/Mac
+
+        .. code:: bash
+
+            python3 -m django_mako_plus dmp_startproject mysite
+
+   .. group-tab:: Windows
+
+        .. code:: powershell
+
+            python -m django_mako_plus dmp_startproject mysite
 
 You can, of course, name your project anything you want, but in the sections below, I'll assume you called your project ``mysite``.
 
-Don't forget to migrate to synchronize your database and create a superuser:
+Then migrate to synchronize your database and create a superuser:
 
-::
+.. tabs::
 
-    cd mysite
-    python3 manage.py migrate
-    python3 manage.py createsuperuser
+   .. group-tab:: Linux/Mac
+
+        .. code:: bash
+
+            cd mysite
+            python3 manage.py migrate
+            python3 manage.py createsuperuser
+
+   .. group-tab:: Windows
+
+        .. code:: powershell
+
+            cd mysite
+            python manage.py migrate
+            python manage.py createsuperuser
 
 
 Create a DMP-Style App
@@ -43,18 +95,42 @@ Create a DMP-Style App
 
 Change to your project directory in the terminal/console, then create a new Django-Mako-Plus app with the following:
 
-::
+.. tabs::
 
-    python3 manage.py dmp_startapp homepage
+   .. group-tab:: Linux/Mac
 
-**After** the new ``homepage`` app is created, add your new app to the ``INSTALLED_APPS`` list in ``settings.py``:
+        .. code:: bash
 
-.. code-block:: python
+            python3 manage.py dmp_startapp homepage
 
-    INSTALLED_APPS = [
-        ...
-        'homepage',
-    ]
+   .. group-tab:: Windows
+
+        .. code:: powershell
+
+            python manage.py dmp_startapp homepage
+
+**After** the new ``homepage`` app is created, open ``mysite/settings.py`` in your favorite editor and add to the ``INSTALLED_APPS`` list:
+
+.. tabs::
+
+   .. group-tab:: Linux/Mac
+
+        .. code:: bash
+
+            INSTALLED_APPS = [
+                ...
+                'homepage',
+            ]
+
+   .. group-tab:: Windows
+
+        .. code:: powershell
+
+            INSTALLED_APPS = [
+                ...
+                'homepage',
+            ]
+
 
 Congratulations. You're ready to go!
 
@@ -63,12 +139,23 @@ Load it Up!
 
 Start your web server with the following:
 
-::
+.. tabs::
 
-    python3 manage.py runserver
+   .. group-tab:: Linux/Mac
+
+        .. code:: bash
+
+            python3 manage.py runserver
+
+   .. group-tab:: Windows
+
+        .. code:: powershell
+
+            python manage.py runserver
+
 
 If you get a message about unapplied migrations, ignore it for now and continue.
 
 Open your web browser to http://localhost:8000/. You should see a message welcoming you to the homepage app.
 
-If everything is working, `skip ahead to the tutorial <tutorial.html>`_.
+Once everything is working, skip ahead to the :ref:`Tutorial`.
