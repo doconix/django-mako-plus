@@ -1,3 +1,5 @@
+.. _install_new:
+
 New Project
 ======================
 
@@ -93,7 +95,7 @@ Then migrate to synchronize your database and create a superuser:
 Create a DMP-Style App
 ----------------------------------
 
-Change to your project directory in the terminal/console, then create a new Django-Mako-Plus app with the following:
+Create a new Django-Mako-Plus app with the following:
 
 .. tabs::
 
@@ -111,25 +113,12 @@ Change to your project directory in the terminal/console, then create a new Djan
 
 **After** the new ``homepage`` app is created, open ``mysite/settings.py`` in your favorite editor and add to the ``INSTALLED_APPS`` list:
 
-.. tabs::
+.. code:: python
 
-   .. group-tab:: Linux/Mac
-
-        .. code:: bash
-
-            INSTALLED_APPS = [
-                ...
-                'homepage',
-            ]
-
-   .. group-tab:: Windows
-
-        .. code:: powershell
-
-            INSTALLED_APPS = [
-                ...
-                'homepage',
-            ]
+    INSTALLED_APPS = [
+        ...
+        'homepage',
+    ]
 
 
 Congratulations. You're ready to go!
@@ -158,4 +147,4 @@ If you get a message about unapplied migrations, ignore it for now and continue.
 
 Open your web browser to http://localhost:8000/. You should see a message welcoming you to the homepage app.
 
-Once everything is working, skip ahead to the :ref:`Tutorial`.
+Once everything is working, skip ahead to the :ref:`tutorial`.

@@ -1,3 +1,5 @@
+.. _tutorial_views:
+
 T2: .py View Files
 ===================================
 

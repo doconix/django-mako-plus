@@ -1,3 +1,5 @@
+.. _install_existing:
+
 Existing Project
 =========================
 
@@ -32,7 +34,7 @@ If you need to add DMP to an existing Django project, you have two options:
 1. Convert your project to the DMP-style structure. This switches your project over to the layout of a DMP project.
 2. Keep your existing Django-style structure with minimal changes.
 
-This section describes Option 1, which gives you the full benefit of the automatic DMP routing and midleware. If you just need to render templates using the Mako language (e.g. Option 2), jump to XXXXXXXXXXX.
+This section describes Option 1, which gives you the full benefit of the automatic DMP routing and midleware. If you just need to render templates using the Mako language (e.g. Option 2), jump to :ref:install_as_renderer.
 
 Edit Your ``settings.py`` File:
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -46,8 +48,7 @@ Add ``django_mako_plus`` to the end of your ``INSTALLED_APPS`` list:
         'django_mako_plus',
     ]
 
-Add ``django_mako_plus.RequestInitMiddleware`` to your ``MIDDLEWARE``
-list:
+Add ``django_mako_plus.RequestInitMiddleware`` to your ``MIDDLEWARE`` list:
 
 .. code-block:: python
 
@@ -56,6 +57,7 @@ list:
         'django_mako_plus.RequestInitMiddleware',
         ...
     ]
+
 
 Add a logger to help you debug (optional but highly recommended!):
 
@@ -106,6 +108,7 @@ standard Django project already has the ``TEMPLATES =`` line and the 'django' te
         },
     ]
 
+
 Add the following to serve your static files. Note that a standard Django project already has the first ``STATIC_URL =`` line.
 
 .. code-block:: python
@@ -119,9 +122,21 @@ Add the following to serve your static files. Note that a standard Django projec
 
 Clean out all the cached template files. This should be done **anytime you make a DMP change in settings.py**:
 
-::
+.. tabs::
 
-    python3 manage.py dmp_cleanup
+   .. group-tab:: Linux/Mac
+
+        .. code-block:: bash
+
+            python3 manage.py dmp_cleanup
+
+
+   .. group-tab:: Windows
+
+        .. code-block:: powershell
+
+            python manage.py dmp_cleanup
+
 
 Enable the Django-Mako-Plus Router
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -137,19 +152,49 @@ Add the Django-Mako-Plus router in your ``urls.py`` file (the default admin is a
     ]
 
 
-
 Create a DMP-Style App
 -----------------------------------
 
 Change to your project directory in the terminal/console, then create a new Django-Mako-Plus app with the following:
 
-.. code-block:: python
+.. tabs::
 
-    python3 manage.py dmp_startapp homepage
+   .. group-tab:: Linux/Mac
+
+        .. code-block:: bash
+
+            python3 manage.py dmp_startapp homepage
+
+   .. group-tab:: Windows
+
+        .. code-block:: powershell
+
+            python manage.py dmp_startapp homepage
 
 **After** the new ``homepage`` app is created, add your new app to the ``INSTALLED_APPS`` list in ``settings.py``:
 
-.. code-block:: python
+Create a DMP-Style App
+----------------------------------
+
+Create a new Django-Mako-Plus app with the following:
+
+.. tabs::
+
+   .. group-tab:: Linux/Mac
+
+        .. code:: bash
+
+            python3 manage.py dmp_startapp homepage
+
+   .. group-tab:: Windows
+
+        .. code:: powershell
+
+            python manage.py dmp_startapp homepage
+
+**After** the new ``homepage`` app is created, open ``mysite/settings.py`` in your favorite editor and add to the ``INSTALLED_APPS`` list:
+
+.. code:: python
 
     INSTALLED_APPS = [
         ...
@@ -158,23 +203,30 @@ Change to your project directory in the terminal/console, then create a new Djan
 
 Congratulations. You're ready to go!
 
-
 Load it Up!
------------------------------------
+----------------------------------
 
 Start your web server with the following:
 
-.. code-block:: python
+.. tabs::
 
-    python3 manage.py runserver
+   .. group-tab:: Linux/Mac
 
-If you get a message about unapplied migrations, ignore it for now and
-continue.
+        .. code:: bash
 
-Open your web browser to http://localhost:8000/. You should see a
-message welcoming you to the homepage app.
+            python3 manage.py runserver
 
-If everything is working, skip ahead to the tutorial.
+   .. group-tab:: Windows
+
+        .. code:: powershell
+
+            python manage.py runserver
+
+If you get a message about unapplied migrations, ignore it for now and continue.
+
+Open your web browser to http://localhost:8000/. You should see a message welcoming you to the homepage app.
+
+Once everything is working, skip ahead to the :ref:`tutorial`.
 
 
 Subdirectory: /mysite/
@@ -186,6 +238,6 @@ In other words, suppose your Django site isn't the only thing on your server. In
 
 This is accomplished in the normal Django way. Adjust your ``urls.py`` file to include the prefix:
 
-::
+.. code:: python
 
     url('^mysite/', include('django_mako_plus.urls')),

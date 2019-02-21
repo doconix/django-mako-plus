@@ -1,3 +1,5 @@
+.. _topics_third_party:
+
 Using Third-Party Apps
 =======================================================
 

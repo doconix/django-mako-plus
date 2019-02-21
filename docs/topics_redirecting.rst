@@ -1,3 +1,5 @@
+.. _topics_redirecting:
+
 Redirecting the Browser
 ==============================
 

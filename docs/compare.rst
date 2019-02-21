@@ -1,3 +1,5 @@
+.. _compare:
+
 Comparison with Django
 =====================================
 

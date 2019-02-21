@@ -1,3 +1,5 @@
+.. _topics_modules:
+
 Python Imports in Templates
 ====================================
 

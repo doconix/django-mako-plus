@@ -1,3 +1,5 @@
+.. _static_webpack:
+
 Webpack
 ================
 
@@ -26,8 +28,6 @@ This provider wraps each script inside a function inside the larger bundle.  Sin
    :align: center
 
 
-
-
 Tutorial
 ---------------------------------
 
@@ -40,15 +40,33 @@ Create a DMP project
 
 The installation steps for DMP are given elsewhere in these documents, so `take a detour if you need detailed instructions </install_new.html>`_. Here's a review for those need a quick summary:
 
-::
+.. tabs::
 
-    pip3 install --upgrade django-mako-plus
-    python3 -m django_mako_plus dmp_startproject mysite
-    cd mysite
-    python3 manage.py migrate
-    python3 manage.py createsuperuser
-    python3 manage.py dmp_startapp homepage
-    # Finally, open settings.py and add "homepage" to your INSTALLED_APPS
+   .. group-tab:: Linux/Mac
+
+        .. code:: bash
+
+            pip3 install --upgrade django-mako-plus
+            python3 -m django_mako_plus dmp_startproject mysite
+            cd mysite
+            python3 manage.py migrate
+            python3 manage.py createsuperuser
+            python3 manage.py dmp_startapp homepage
+            # Finally, open settings.py and add "homepage" to your INSTALLED_APPS
+
+   .. group-tab:: Windows
+
+        .. code:: powershell
+
+            pip install --upgrade django-mako-plus
+            python -m django_mako_plus dmp_startproject mysite
+            cd mysite
+            python manage.py migrate
+            python manage.py createsuperuser
+            python manage.py dmp_startapp homepage
+            # Finally, open settings.py and add "homepage" to your INSTALLED_APPS
+
+
 
 Run your project, and ensure the "Welcome to DMP" page comes up. If not, head over to the DMP installation pages for ideas.
 
@@ -79,19 +97,41 @@ Initialize Node
 
 Install Node from `https://nodejs.org <https://nodejs.org/>`_. After installation, open a terminal and ensure you can run ``npm`` from the command line.
 
-::
+.. tabs::
 
-    npm --version
+   .. group-tab:: Linux/Mac
+
+        .. code:: bash
+
+            npm --version
+
+   .. group-tab:: Windows
+
+        .. code:: powershell
+
+            npm --version
 
 Initialize the npm repository and install webpack. When asked, just accept the defaults for package name, version, etc.
 
-::
+.. tabs::
 
-    cd mysite/
-    npm init
-    npm install --save-dev webpack webpack-cli style-loader css-loader glob
-    # if using git, add "node_modules/" and ".cache" to your .gitignore file
+   .. group-tab:: Linux/Mac
 
+        .. code:: bash
+
+            cd mysite/
+            npm init
+            npm install --save-dev webpack webpack-cli style-loader css-loader glob
+            # if using git, add "node_modules/" and ".cache" to your .gitignore file
+
+   .. group-tab:: Windows
+
+        .. code:: powershell
+
+            cd mysite/
+            npm init
+            npm install --save-dev webpack webpack-cli style-loader css-loader glob
+            # if using git, add "node_modules/" and ".cache" to your .gitignore file
 
 The above commands changed your project a little:
 
@@ -124,9 +164,19 @@ That's where DMP comes in. DMP understands your project structure, including how
 
 Run the following to create the ``__entry__.js`` file:
 
-::
+.. tabs::
 
-    python3 manage.py dmp_webpack --overwrite
+   .. group-tab:: Linux/Mac
+
+        .. code:: bash
+
+            python3 manage.py dmp_webpack --overwrite
+
+   .. group-tab:: Windows
+
+        .. code:: powershell
+
+            python manage.py dmp_webpack --overwrite
 
 When the command finishes, you'll have a new file, ``homepage/scripts/__entry__.js``, that points to the scripts and styles in the app. Check out the file to see what DMP created.
 
@@ -134,7 +184,7 @@ Now that you've seen the result, let's rewind and detail the discovery process:
 
     1. DMP deep searches the templates directory ``homepage/templates/`` for all files (except those starting with double-underscores, like ``__dmpcache__``. DMP finds three files:
 
-    ::
+    .. code-block:: bash
 
         homepage/templates/base_ajax.htm
         homepage/templates/base.htm
@@ -144,7 +194,7 @@ Now that you've seen the result, let's rewind and detail the discovery process:
 
     Since providers are built to discover the script and style files that are associated with templates, DMP uses them to find the files needed for our bundle:
 
-    ::
+    .. code-block:: bash
 
         homepage/templates/base_ajax.htm    # has no scripts or styles, so DMP skips it
         homepage/templates/base.htm         # DMP finds base.js and base.css
@@ -217,9 +267,20 @@ Thanks to the magic of globs, the above config finds all entry files in your pro
 
 Let's run webpack in development (watch) mode. After creating our initial bundle, webpack continues watching the linked files for changes. Whenever we change the entry file, script files, or style files, webpack recreates the bundle automatically. Run the following:
 
-::
+.. tabs::
 
-    npm run watch
+   .. group-tab:: Linux/Mac
+
+        .. code:: bash
+
+            npm run watch
+
+   .. group-tab:: Windows
+
+        .. code:: powershell
+
+            npm run watch
+
 
 Assuming webpack runs successfully, you now have ``homepage/scripts/__bundle__.js``. If you open it up, you'll find our JS near the end of the file.
 
@@ -238,7 +299,7 @@ As you learned in other sections, DMP automatically creates ``<script>`` and ``<
 
 We need swap the default Providers with bundle-basd Providers link to ``homepage/scripts/__bundle__.js``. This is done by setting ``CONTENT_PROVIDERS`` in ``settings.py``:
 
-::
+.. code:: python
 
     TEMPLATES = [
         {
@@ -266,15 +327,27 @@ Test It!
 
 We've configured webpack, created the entry file and output bundle, and set DMP to link correctly. The only thing remaining is to run the Django server and see the benefits of your work!
 
-::
+.. tabs::
 
-    # in terminal 1:
-    npm run watch
+   .. group-tab:: Linux/Mac
 
-::
+        .. code:: bash
 
-    # in terminal 2:
-    python3 manage.py runserver
+            # in terminal 1:
+            python3 manage.py runserver
+
+            # in terminal 2:
+            npm run watch
+
+   .. group-tab:: Windows
+
+        .. code:: powershell
+
+            # in terminal 1:
+            python manage.py runserver
+
+            # in terminal 2:
+            npm run watch
 
 Grab some popcorn and a drink, and take your browser to ``http://localhost:8000/``. Be sure to check the following:
 
@@ -288,13 +361,23 @@ Building for Production
 
 To create a production bundle, issue webpack a build command:
 
-::
+.. tabs::
 
-    npm run build
+   .. group-tab:: Linux/Mac
+
+        .. code:: bash
+
+            npm run build
+
+   .. group-tab:: Windows
+
+        .. code:: powershell
+
+            npm run build
 
 If you look at the generated bundle file, you'll find it is minified and ready for deployment.
 
 Further Questions?
 -----------------------
 
-The `Provider FAQ </static_faq.html>`_ goes over several different situations.
+The :ref:`static_faq` goes over several different situations.

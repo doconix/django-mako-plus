@@ -1,3 +1,5 @@
+.. _topics_django:
+
 Using the Django API
 =====================================
 

@@ -1,3 +1,5 @@
+.. _install_as_renderer:
+
 Using DMP to Render Mako Templates
 =======================================
 
@@ -11,11 +13,19 @@ DMP works with Django 1.9+, including the 2.0 releases.
 
 The following will install all three dependencies:
 
-::
+.. tabs::
 
-    pip3 install --upgrade django-mako-plus
+   .. group-tab:: Linux/Mac
 
-(note that on Windows machines, ``pip3`` may need to be replaced with ``pip``)
+        .. code:: bash
+
+            pip3 install --upgrade django-mako-plus
+
+   .. group-tab:: Windows
+
+        .. code:: powershell
+
+            pip install --upgrade django-mako-plus
 
 
 Create a Vanilla Django Project
@@ -39,7 +49,7 @@ Create a Vanilla Django Project
 
 3. Create a template in ``polls/templates/polls/index.html``:
 
-::
+.. code-block:: html+mako
 
     <html>
     <body>
@@ -158,7 +168,7 @@ Let's create a new endpoint that uses the Mako engine.  We'll leave the ``index`
 
 2. Create a Mako-syntax template in ``polls/templates/another.html``:
 
-::
+.. code-block:: html+mako
 
     <html>
     <body>

@@ -1,3 +1,5 @@
+.. _upgrade_notes:
+
 Upgrade Notes
 ==============================
 

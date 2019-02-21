@@ -1,3 +1,5 @@
+.. _install_custom_urls:
+
 Custom URL Patterns
 ===========================
 

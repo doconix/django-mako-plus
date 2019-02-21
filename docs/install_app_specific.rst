@@ -1,3 +1,5 @@
+.. _install_app_specific:
+
 Limiting DMP to Specific Apps
 =======================================================
 

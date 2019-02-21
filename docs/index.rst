@@ -1,3 +1,5 @@
+.. _index:
+
 .. role::  raw-html(raw)
     :format: html
 

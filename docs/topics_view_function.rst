@@ -1,3 +1,5 @@
+.. _topics_view_function:
+
 Customizing ``@view_function``
 --------------------------------------
 

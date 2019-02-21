@@ -1,3 +1,5 @@
+.. _deploy_tutorials:
+
 Deployment Tutorials
 ======================
 

@@ -1,3 +1,5 @@
+.. _topics_signals:
+
 Signals in DMP
 ===================
 

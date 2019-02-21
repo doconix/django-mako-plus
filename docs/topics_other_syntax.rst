@@ -1,3 +1,5 @@
+.. _topics_other_syntax:
+
 Combining Django and Mako Templates
 =============================================================
 

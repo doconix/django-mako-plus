@@ -1,3 +1,5 @@
+.. _deploy_recommendations:
+
 Deployment Recommendations
 ==========================
 

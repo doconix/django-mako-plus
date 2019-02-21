@@ -1,3 +1,5 @@
+.. _topics_responses:
+
 Lazy Rendering with ``TemplateResponse``
 =======================================================
 

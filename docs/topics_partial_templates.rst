@@ -1,3 +1,5 @@
+.. _topics_partial_templates:
+
 Rendering Partial Templates for Ajax
 ======================================
 

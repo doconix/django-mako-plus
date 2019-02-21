@@ -1,3 +1,5 @@
+.. _static_compilers:
+
 Sass, Less, & More
 ======================================
 

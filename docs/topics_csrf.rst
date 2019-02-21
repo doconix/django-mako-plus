@@ -1,3 +1,5 @@
+.. _topics_csrf:
+
 CSRF Tokens
 ====================
 

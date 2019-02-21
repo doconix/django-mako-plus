@@ -1,3 +1,5 @@
+.. _topics_class_views:
+
 Class-Based Views
 =========================
 

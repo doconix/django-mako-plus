@@ -1,3 +1,5 @@
+.. _topics_escaping:
+
 Escaping Special Characters
 ===========================================
 

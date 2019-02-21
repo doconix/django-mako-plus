@@ -1,3 +1,5 @@
+.. _topics_settings:
+
 ``settings.py``
 ============================
 

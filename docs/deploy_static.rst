@@ -1,3 +1,5 @@
+.. _deploy_static:
+
 Collecting Static Files
 ============================================
 
@@ -8,7 +10,7 @@ In the Django documentation, **static files** are files linked into your html do
 
 Django-Mako-Plus works with static files the same basic way that traditional Django does -- with one difference: the folder structure is different in DMP.  DMP-enabled apps contain the following directories:
 
-::
+.. code:: bash
 
     app/
         media/
@@ -19,16 +21,37 @@ Django-Mako-Plus works with static files the same basic way that traditional Dja
 
 At deployment, collect static files out of these directories with the following command:
 
-::
+.. tabs::
 
-    python3 manage.py dmp_collectstatic
+   .. group-tab:: Linux/Mac
+
+        .. code:: bash
+
+            python3 manage.py dmp_collectstatic
+
+   .. group-tab:: Windows
+
+        .. code:: powershell
+
+            python manage.py dmp_collectstatic
 
 If your project contains both DMP and regular Django apps, you can collect static files with both commands:
 
-::
+.. tabs::
 
-    python3 manage.py collectstatic
-    python3 manage.py dmp_collectstatic --overwrite
+   .. group-tab:: Linux/Mac
+
+        .. code:: bash
+
+            python3 manage.py collectstatic
+            python3 manage.py dmp_collectstatic --overwrite
+
+   .. group-tab:: Windows
+
+        .. code:: powershell
+
+            python manage.py collectstatic
+            python manage.py dmp_collectstatic --overwrite
 
 Setup
 ---------------------------
@@ -84,14 +107,25 @@ At production/deployment, comment out ``BASE_DIR`` because it essentially makes 
 
 When you deploy to a web server, run ``dmp_collectstatic`` to collect your static files into a separate directory (called ``/static/`` in the settings above):
 
-::
+.. tabs::
 
-    python3 manage.py collectstatic
-    python3 manage.py dmp_collectstatic --overwrite
+   .. group-tab:: Linux/Mac
+
+        .. code:: bash
+
+            python3 manage.py collectstatic
+            python3 manage.py dmp_collectstatic --overwrite
+
+   .. group-tab:: Windows
+
+        .. code:: powershell
+
+            python manage.py collectstatic
+            python manage.py dmp_collectstatic --overwrite
 
 Point your web server (Apache, Nginx, IIS, etc.) to serve this folder directly to browsers. For example, in Nginx, you'd set the following:
 
-::
+.. code:: nginx
 
     location /static/ {
         alias /path/to/your/project/static/;
@@ -101,7 +135,7 @@ Point your web server (Apache, Nginx, IIS, etc.) to serve this folder directly t
 
 In Apache, you'd set the following:
 
-::
+.. code:: apache
 
     Alias /static/ /path/to/your/project/static/
     <Directory /path/to/your/project/static/>
@@ -109,12 +143,13 @@ In Apache, you'd set the following:
         Allow from all
     </Directory>
 
+
 ``dmp-common.js``
 ----------------------------------
 
 Open ``base.htm`` and look for the following line:
 
-::
+.. code:: html+mako
 
     <script src="/django_mako_plus/dmp-common.min.js"></script>
 
@@ -124,7 +159,7 @@ When running in production mode, your web server (IIS, Nginx, etc.) should serve
 
 The following is an example setting for Nginx:
 
-::
+.. code:: nginx
 
     location /django_mako_plus/dmp-common.min.js {
         alias /to/django_mako_plus/scripts/dmp-common.min.js;
@@ -132,9 +167,19 @@ The following is an example setting for Nginx:
 
 If you don't know the location of DMP_on your server, try this command:
 
-::
+.. tabs::
 
-    python3 -c 'import django_mako_plus; print(django_mako_plus.__file__)'
+   .. group-tab:: Linux/Mac
+
+        .. code:: bash
+
+            python3 -c 'import django_mako_plus; print(django_mako_plus.__file__)'
+
+   .. group-tab:: Windows
+
+        .. code:: powershell
+
+            python -c 'import django_mako_plus; print(django_mako_plus.__file__)'
 
 
 
@@ -143,24 +188,64 @@ Advanced Use
 
 ``dmp_collectstatic`` will refuse to overwrite an existing ``/static/`` directory. If you already have this directory (either from an earlier run or for another purpose), you can 1) delete it before collecting static files, or 2) specify the overwrite option as follows:
 
-::
+.. tabs::
 
-    python3 manage.py dmp_collectstatic --overwrite
+   .. group-tab:: Linux/Mac
+
+        .. code:: bash
+
+            python3 manage.py dmp_collectstatic --overwrite
+
+   .. group-tab:: Windows
+
+        .. code:: powershell
+
+            python manage.py dmp_collectstatic --overwrite
 
 If you need to ignore certain directories or filenames, specify them with the ``--skip-dir`` and ``--skip-file`` options. These can be specified more than once, and it accepts Unix-style wildcards.
 
-::
+.. tabs::
 
-    python3 manage.py dmp_collectstatic --skip-dir=.cached_templates --skip-file=*.txt --skip-file=*.md
+   .. group-tab:: Linux/Mac
+
+        .. code:: bash
+
+            python3 manage.py dmp_collectstatic --skip-dir=.cached_templates --skip-file=*.txt --skip-file=*.md
+
+   .. group-tab:: Windows
+
+        .. code:: powershell
+
+            python manage.py dmp_collectstatic --skip-dir=.cached_templates --skip-file=*.txt --skip-file=*.md
 
 If you need to include additional directories or files, specify them with the ``--include`` option. This can be specified more than once, and it accepts Unix-style wildcards:
 
-::
+.. tabs::
 
-    python3 manage.py dmp_collectstatic --include-dir=global-media --include-dir=global-styles --include-file=*.png
+   .. group-tab:: Linux/Mac
+
+        .. code:: bash
+
+            python3 manage.py dmp_collectstatic --include-dir=global-media --include-dir=global-styles --include-file=*.png
+
+   .. group-tab:: Windows
+
+        .. code:: powershell
+
+            python manage.py dmp_collectstatic --include-dir=global-media --include-dir=global-styles --include-file=*.png
 
 If you have ``rcssmin`` and ``rjsmin`` installed (via pip), DMP will minify your CSS and JS during the collection process.  If you are minifying with another tool (webpack, Google's minifier, etc.), disable minification with:
 
-::
+.. tabs::
 
-    python3 manage.py dmp_collectstatic --no-minify
+   .. group-tab:: Linux/Mac
+
+        .. code:: bash
+
+            python3 manage.py dmp_collectstatic --no-minify
+
+   .. group-tab:: Windows
+
+        .. code:: powershell
+
+            python manage.py dmp_collectstatic --no-minify

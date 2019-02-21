@@ -124,14 +124,14 @@ a:hover, a:focus {
 
 
 /* Tabs */
-.rst-content .sphinx-tabs > .sphinx-menu a.active.item {
-    border-bottom: 1px solid #EEEEEE !important;
-}
-.sphinx-tabs > .sphinx-tab {
+.rst-content .sphinx-tabs > .sphinx-tab {
     padding: .5em;
     background: #eeffcc;
 }
-.sphinx-tabs > .sphinx-tab .highlight {
+.rst-content .sphinx-tabs > .sphinx-menu a.active.item {
+    border-bottom: 1px solid #EEEEEE !important;
+}
+.rst-content .sphinx-tabs > .sphinx-tab div {
     border: none;
     border-radius: inherit;
     background: none;

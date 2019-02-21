@@ -1,3 +1,5 @@
+.. _install_as_router:
+
 Using DMP to Route by Convention
 ======================================
 
@@ -113,7 +115,7 @@ Create an Endpoint
 
 2. Create a template in ``polls/templates/polls/index.html``:
 
-::
+.. code-block:: html+mako
 
     <html>
     <body>

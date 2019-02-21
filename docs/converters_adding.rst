@@ -1,3 +1,5 @@
+.. _converters_adding:
+
 Adding a New Type
 =================================
 

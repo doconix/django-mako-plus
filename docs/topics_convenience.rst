@@ -1,3 +1,5 @@
+.. _topics_convenience:
+
 Convenience Functions
 ===========================================
 

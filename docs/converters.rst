@@ -1,3 +1,5 @@
+.. _converters:
+
 Parameter Conversion
 ==========================
 

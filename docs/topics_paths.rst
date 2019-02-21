@@ -1,3 +1,5 @@
+.. _topics_paths:
+
 Inheritance Paths and Template Location
 ===========================================
 
@@ -160,13 +162,28 @@ Cleaning Up
 
 DMP caches its compiled mako+templates in subdirectories of each app. The default locations for each app are ``app/templates/__dmpcache__``, ``app/scripts/__dmpcache__``, and ``app/styles/__dmpcache__``, although the exact name depends on your settings.py. Normally, these cache directories are hidden and warrant your utmost apathy. However, there are times when DMP fails to update a cached template as it should. Or you might just need a pristine project without these generated files. This can be done with a Unix find command or through DMP's ``dmp_cleanup`` management command:
 
-::
+.. tabs::
 
-    # see what would be be done without actually deleting any cache folders
-    python3 manage.py dmp_cleanup --trial-run
+   .. group-tab:: Linux/Mac
 
-    # really delete the folders
-    python3 manage.py dmp_cleanup
+        .. code:: bash
+
+            # see what would be be done without actually deleting any cache folders
+            python3 manage.py dmp_cleanup --trial-run
+
+            # really delete the folders
+            python3 manage.py dmp_cleanup
+
+   .. group-tab:: Windows
+
+        .. code:: powershell
+
+            # see what would be be done without actually deleting any cache folders
+            python manage.py dmp_cleanup --trial-run
+
+            # really delete the folders
+            python manage.py dmp_cleanup
+
 
 
 With this management command, add ``--verbose`` to the command to include messages about skipped files, and add ``--quiet`` to silence all messages (except errors).

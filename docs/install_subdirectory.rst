@@ -1,3 +1,5 @@
+.. _install_subdirectory:
+
 Installing in a Subdirectory: /mysite/
 ==========================================
 
@@ -7,6 +9,6 @@ In other words, suppose your Django site isn't the only thing on your server. In
 
 This is accomplished in the normal Django way. Adjust your ``urls.py`` file to include the prefix:
 
-::
+.. code-block:: python
 
     url('^mysite/', include('django_mako_plus.urls')),
