@@ -90,6 +90,8 @@ def walk2(parent):
 walk2(os.path.join(MODULE_NAME, 'app_template'))
 walk2(os.path.join(MODULE_NAME, 'project_template'))
 walk2(os.path.join(MODULE_NAME, 'webroot'))
+print('>>>>')
+print(package_data_files)
 
 # read the long description if sdist
 description = 'Django+Mako: Routing by Convention, Python-Centric Template Language'
