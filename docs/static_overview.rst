@@ -133,7 +133,7 @@ In your JS files, you can access your variables in a context dictionary provided
 +--------------------------------------------+-----------------------------------------------------------------------+-----------------------------------------------------------------------+
 | Run when page is ready (JQuery)            | .. code-block:: text                                                  | .. code-block:: text                                                  |
 |                                            |                                                                       |                                                                       |
-|                                            |     $(function(context) {                                             |     $((context => () => {                                             |
+|                                            |     $((function(context) {                                            |     $((context => () => {                                             |
 |                                            |         return function() {                                           |         # your JS code here                                           |
 |                                            |             # your JS code here                                       |         console.log(context['now'])                                   |
 |                                            |             console.log(context['now']);                              |     })(DMP_CONTEXT.get()))                                            |
@@ -148,7 +148,7 @@ In your JS files, you can access your variables in a context dictionary provided
 |                                            |             # your JS code here                                       |         console.log(context['now'])                                   |
 |                                            |             console.log(context['now']);                              |     })(DMP_CONTEXT.get()))                                            |
 |                                            |         }                                                             |                                                                       |
-|                                            |     }(DMP_CONTEXT.get()));                                            |                                                                       |
+|                                            |     })(DMP_CONTEXT.get()));                                           |                                                                       |
 |                                            |                                                                       |                                                                       |
 +--------------------------------------------+-----------------------------------------------------------------------+-----------------------------------------------------------------------+
 

@@ -116,7 +116,7 @@ Let's use the variable in ``index.js``.  Note this example uses a ``jQuery`` rea
 
 .. code-block:: javascript
 
-    $(function(context) {
+    $((function(context) {
         return function() {
             console.log(context)
             var serverTime = new Date(context.now)   // server time (from DMP_CONTEXT)
@@ -124,7 +124,7 @@ Let's use the variable in ``index.js``.  Note this example uses a ``jQuery`` rea
             var hours = Math.round(Math.abs(serverTime - browserTime) / 36e5)
             $('.browser-time').text('The current browser is ' + hours + ' hours off of the server time zone.')
         }
-    }(DMP_CONTEXT.get()))
+    })(DMP_CONTEXT.get()));
 
 Reload your browser, and you should see the calculation of hours.
 
