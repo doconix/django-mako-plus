@@ -134,7 +134,10 @@ Reload your browser page, and the button should still work. Press it a few times
 
 To repeat, a full DMP url is really ``/app/view.function/``. Using ``/app/view/`` is a shortcut, and the framework translates it as ``/app/view.process_request/`` internally.
 
-    Since ajax calls often return JSON, XML, or simple text, you often
-    only need to add a function to your view. At the end of the
-    function, simply ``return HttpResponse("json or xml or text")``. You
-    likely don't need full template, css, or js files.
+    Since ajax calls often return JSON, XML, or simple text, you often only need to add a function to your view. At the end of the function, simply ``return HttpResponse("json or xml or text")``. You likely don't need full template, css, or js files.
+
+
+Providers in Detail
+-------------------------
+
+Read more about providers in :ref:`static_overview`.

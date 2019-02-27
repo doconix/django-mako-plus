@@ -153,4 +153,8 @@ The calls to ``links(self)`` include the ``<link>`` and ``<script>`` tags for th
 
 This all works because the ``index.html`` template extends from the ``base.htm`` template. If you fail to inherit from ``base.htm`` or ``base_ajax.htm``, DMP won't be able to include the support files.
 
-Read more about providers in `Rendering CSS and JS <static.html>`_.
+
+Providers in Detail
+-------------------------
+
+Read more about providers in :ref:`static_overview`.

@@ -1,6 +1,6 @@
 .. _static_overview:
 
-Overview
+Static Files Overview
 ================================
 
     This page details how DMP supports traditional links. If you've moved on to bundling instead of direct links, these are not the droids you're looking for. Move along to the `bundling page </static_webpack.html>`_.
@@ -126,26 +126,26 @@ In your JS files, you can access your variables in a context dictionary provided
 | Run immediately                            | .. code-block:: text                                                  | .. code-block:: text                                                  |
 |                                            |                                                                       |                                                                       |
 |                                            |     (function(context) {                                              |     (context => {                                                     |
-|                                            |         # your JS code here                                           |         # your JS code here                                           |
-|                                            |         console.log(context['now']);                                  |         console.log(context['now'])                                   |
+|                                            |         // your JS code here                                          |         // your JS code here                                          |
+|                                            |         console.log(context.now);                                     |         console.log(context.now);                                     |
 |                                            |     })(DMP_CONTEXT.get());                                            |     })(DMP_CONTEXT.get())                                             |
 |                                            |                                                                       |                                                                       |
 +--------------------------------------------+-----------------------------------------------------------------------+-----------------------------------------------------------------------+
 | Run when page is ready (JQuery)            | .. code-block:: text                                                  | .. code-block:: text                                                  |
 |                                            |                                                                       |                                                                       |
 |                                            |     $((function(context) {                                            |     $((context => () => {                                             |
-|                                            |         return function() {                                           |         # your JS code here                                           |
-|                                            |             # your JS code here                                       |         console.log(context['now'])                                   |
-|                                            |             console.log(context['now']);                              |     })(DMP_CONTEXT.get()))                                            |
+|                                            |         return function() {                                           |         // your JS code here                                          |
+|                                            |             // your JS code here                                      |         console.log(context.now)                                      |
+|                                            |             console.log(context.now);                                 |     })(DMP_CONTEXT.get()))                                            |
 |                                            |         }                                                             |                                                                       |
-|                                            |     })(DMP_CONTEXT.get());                                            |                                                                       |
+|                                            |     })(DMP_CONTEXT.get()));                                           |                                                                       |
 |                                            |                                                                       |                                                                       |
 +--------------------------------------------+-----------------------------------------------------------------------+-----------------------------------------------------------------------+
 | Run when page is ready (vanilla JS)        | .. code-block:: text                                                  | .. code-block:: text                                                  |
 |                                            |                                                                       |                                                                       |
-|                                            |     document.addEventListener("DOMContentLoaded", function(context) { |     document.addEventListener("DOMContentLoaded", (context => () => { |
-|                                            |         return function() {                                           |         # your JS code here                                           |
-|                                            |             # your JS code here                                       |         console.log(context['now'])                                   |
+|                                            |     document.addEventListener("DOMContentLoaded", (function(context) {|     document.addEventListener("DOMContentLoaded", (context => () => { |
+|                                            |         return function() {                                           |         // your JS code here                                          |
+|                                            |             // your JS code here                                      |         console.log(context['now'])                                   |
 |                                            |             console.log(context['now']);                              |     })(DMP_CONTEXT.get()))                                            |
 |                                            |         }                                                             |                                                                       |
 |                                            |     })(DMP_CONTEXT.get()));                                           |                                                                       |
