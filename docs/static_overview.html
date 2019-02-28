@@ -1,0 +1,443 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Static Files Overview &mdash; Django-Mako-Plus  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/dmp.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="CSS and JS" href="static_links.html" />
+    <link rel="prev" title="Static Files" href="static.html" /> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> Django-Mako-Plus
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="compare.html">Comparison with Django</a></li>
+<li class="toctree-l1"><a class="reference internal" href="upgrade_notes.html">Upgrade Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="topics.html">Basic Concepts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="converters.html">Parameter Conversion</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="static.html">Static Files</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Static Files Overview</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#how-it-works">How It Works</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#dmp-common-js"><code class="docutils literal notranslate"><span class="pre">dmp-common.js</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#passing-data-view-rarr-json-rarr-js">Passing Data: View <span class="raw-html">&rarr;</span> JSON <span class="raw-html">&rarr;</span> JS</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#step-1-mark-variables">Step 1: Mark Variables</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#step-2-use-in-javascript">Step 2: Use in Javascript</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#limitations">Limitations</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#custom-json-encoding">Custom JSON Encoding</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="static_links.html">CSS and JS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="static_compilers.html">Sass, Less, &amp; More</a></li>
+<li class="toctree-l2"><a class="reference internal" href="static_webpack.html">Webpack</a></li>
+<li class="toctree-l2"><a class="reference internal" href="static_faq.html">FAQ</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="deploy.html">Deployment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="editors.html">Editors</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Django-Mako-Plus</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="static.html">Static Files</a> &raquo;</li>
+        
+      <li>Static Files Overview</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="static-files-overview">
+<span id="static-overview"></span><h1>Static Files Overview<a class="headerlink" href="#static-files-overview" title="Permalink to this headline">¶</a></h1>
+<blockquote>
+<div>This page details how DMP supports traditional links. If you’ve moved on to bundling instead of direct links, these are not the droids you’re looking for. Move along to the <a class="reference external" href="/static_webpack.html">bundling page</a>.</div></blockquote>
+<p>In the <a class="reference external" href="tutorial_css_js.html">tutorial</a>, you learned how to automatically include CSS and JS based on your page name .
+If your page is named <code class="docutils literal notranslate"><span class="pre">mypage.html</span></code>, DMP will automatically include <code class="docutils literal notranslate"><span class="pre">mypage.css</span></code> and <code class="docutils literal notranslate"><span class="pre">mypage.js</span></code> in the page content.  Skip back to the <a class="reference external" href="tutorial_css_js.html">tutorial</a> if you need a refresher.</p>
+<p>Here’s what DMP can do for your static files:</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Automatic Links:</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body"><p class="first">Suppose <code class="docutils literal notranslate"><span class="pre">index.html</span></code> inherits from two supertemplates, and you have a <code class="docutils literal notranslate"><span class="pre">.js</span></code> file and a <code class="docutils literal notranslate"><span class="pre">.css</span></code> file for each:</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>base.htm        <span class="o">(</span>base.js, base.css<span class="o">)</span>
+    <span class="p">|</span>
+homepage.htm    <span class="o">(</span>homepage.js, homepage.css<span class="o">)</span>
+    <span class="p">|</span>
+index.html      <span class="o">(</span>index.js, index.css<span class="o">)</span>
+</pre></div>
+</div>
+<p>Why so many files for a single web page? It’s a scoping issue. Since <code class="docutils literal notranslate"><span class="pre">base.htm</span></code> is the ancestor of <strong>every</strong> page on our site, its related JS and CSS link into every page. If a CSS style affects every page (such as the top menubar), it goes in <code class="docutils literal notranslate"><span class="pre">base.css</span></code>. In like manner, the static files for <code class="docutils literal notranslate"><span class="pre">homepage</span></code> link into the pages of the homepage app. Put the code in the level for its scope.</p>
+<p>When <code class="docutils literal notranslate"><span class="pre">index.html</span></code> renders, DMP automatically creates the links for its support pages. That’s all six files in this case!</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Inject Variables into Javascript:</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><p class="first">Custom variables are easy to send from view’s <code class="docutils literal notranslate"><span class="pre">process_request</span></code> function to the rendering template scope (just put it in <code class="docutils literal notranslate"><span class="pre">context</span></code> when calling render). But getting values from <code class="docutils literal notranslate"><span class="pre">process_request</span></code> to the browser’s Javascript scope is a bit more difficult. It requires encoding to JSON and html-based script tags. DMP makes it easy (just wrap the key with <code class="docutils literal notranslate"><span class="pre">jscontext(...)</span></code> when placing in the render context.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">Sass and Less Compiling:</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body"><p class="first">Just before DMP links the related CSS files into a page, it can run <code class="docutils literal notranslate"><span class="pre">sass</span></code> or <code class="docutils literal notranslate"><span class="pre">lessc</span></code> for you. I realize other options exist for this (editors, watchers), but personally, I prefer it because compilation happens via my project settings. If this benefits your workflow, it’s here waiting…</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Webpack Bundling:</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><p class="first last">Bundling vendor support files is pretty easy, but things get a little more difficult when page-specific code gets bundled. DMP allows appwide bundles, and it automatically runs the right bundle code for each page.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="section" id="how-it-works">
+<h2>How It Works<a class="headerlink" href="#how-it-works" title="Permalink to this headline">¶</a></h2>
+<p>Open <code class="docutils literal notranslate"><span class="pre">base.htm</span></code> and look at the following code:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>## render the static file links for this template
+${ django_mako_plus.links(self) }
+</pre></div>
+</div>
+<p>The call to <code class="docutils literal notranslate"><span class="pre">links(self)</span></code> triggers a number of “provider” classes to run. Each provider is responsible for adding specific types of links. For example, the <code class="docutils literal notranslate"><span class="pre">JsContextProvider</span></code> adds context variables to the rendered page; the <code class="docutils literal notranslate"><span class="pre">CssLinkProvider</span></code> adds <code class="docutils literal notranslate"><span class="pre">&lt;link</span> <span class="pre">rel=&quot;stylesheet&quot;...&gt;</span></code> links for CSS files related to the current page (and its ancestors).</p>
+<p>Since this call to <code class="docutils literal notranslate"><span class="pre">links(self)</span></code> exists in <code class="docutils literal notranslate"><span class="pre">base.htm</span></code> (and since all site pages extend from base), these providers trigger on every page of your site. Just be sure your pages extend from this supertemplate.</p>
+<blockquote>
+<div>DMP’s default app (homepage) contains two “base” files: <code class="docutils literal notranslate"><span class="pre">base.htm</span></code> and <code class="docutils literal notranslate"><span class="pre">base_ajax.htm</span></code>.  The first is for full pages (you know, the ones that start with <code class="docutils literal notranslate"><span class="pre">&lt;html&gt;</span></code> :).  The second is for page snippets like those created in ajax requests. Pretty much the only thing in <code class="docutils literal notranslate"><span class="pre">base_ajax.htm</span></code> is the call to links and a block for subpages to override.</div></blockquote>
+</div>
+<div class="section" id="dmp-common-js">
+<h2><code class="docutils literal notranslate"><span class="pre">dmp-common.js</span></code><a class="headerlink" href="#dmp-common-js" title="Permalink to this headline">¶</a></h2>
+<p>Lets go back to <code class="docutils literal notranslate"><span class="pre">base.htm</span></code>.  Just above the call to <code class="docutils literal notranslate"><span class="pre">links(self)</span></code> you’ll see the following:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">script</span> <span class="n">src</span><span class="o">=</span><span class="s2">&quot;/django_mako_plus/dmp-common.min.js&quot;</span><span class="o">&gt;&lt;/</span><span class="n">script</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>DMP uses this script to make everything work on the browser side. For example, this script injects values sent from your view.py into the client-side JS scope. It’s a small script (3K), and it’s written in old-school Javascript (for a wide browser audience).</p>
+<p>When running in production mode, your web server (IIS, Nginx, etc.) should serve this file (rather than Django).  Or it could be bundled with other vendor code. In any case, the file just needs to be included on every page of your site.</p>
+<p>The following is an example setting for Nginx:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">location</span> <span class="o">/</span><span class="n">django_mako_plus</span><span class="o">/</span><span class="n">dmp</span><span class="o">-</span><span class="n">common</span><span class="o">.</span><span class="n">min</span><span class="o">.</span><span class="n">js</span> <span class="p">{</span>
+    <span class="n">alias</span> <span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">django_mako_plus</span><span class="o">/</span><span class="n">scripts</span><span class="o">/</span><span class="n">dmp</span><span class="o">-</span><span class="n">common</span><span class="o">.</span><span class="n">min</span><span class="o">.</span><span class="n">js</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>If you don’t know the location of DMP on your server, try this command:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python3</span> <span class="o">-</span><span class="n">c</span> <span class="s1">&#39;import django_mako_plus; print(django_mako_plus.__file__)&#39;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="passing-data-view-rarr-json-rarr-js">
+<h2>Passing Data: View <span class="raw-html">&rarr;</span> JSON <span class="raw-html">&rarr;</span> JS<a class="headerlink" href="#passing-data-view-rarr-json-rarr-js" title="Permalink to this headline">¶</a></h2>
+<p>Getting data from server-side, Python view files (e.g. <code class="docutils literal notranslate"><span class="pre">process_request</span></code> functions) to the client-side, browser JS scope can be difficult. The <a class="reference external" href="tutorial_css_js.html">tutorial introduced this issue</a> with a simple example: accessing the server’s current time in your JS code.</p>
+<p>Normally, <code class="docutils literal notranslate"><span class="pre">.js</span></code> files are static, meaning they don’t change from one request to another. (We actually <strong>could</strong> render JS and CSS files the same way we render templates, but writing meta code that writes JS is reserved for special, unmentionable cases.)</p>
+<p>Since we can’t (aren’t willing) to change the JS itself, a workaround is writing small script sections inside templates. While this method is common, it has some drawbacks. First, it mixes JS into HTML code. Second, it creates variables in the global window scope (so JS files can get to them).</p>
+<div class="section" id="step-1-mark-variables">
+<h3>Step 1: Mark Variables<a class="headerlink" href="#step-1-mark-variables" title="Permalink to this headline">¶</a></h3>
+<p>We already have a mechanism to get values from <code class="docutils literal notranslate"><span class="pre">process_request</span></code> to templates: <strong>the context dictionary</strong>.  DMP just needs to know which keys/values you want pushed on to the browser scope. This is done by “marking” context keys with <code class="docutils literal notranslate"><span class="pre">jscontext</span></code>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.conf</span> <span class="kn">import</span> <span class="n">settings</span>
+<span class="kn">from</span> <span class="nn">django_mako_plus</span> <span class="kn">import</span> <span class="n">view_function</span><span class="p">,</span> <span class="n">jscontext</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+
+<span class="nd">@view_function</span>
+<span class="k">def</span> <span class="nf">process_request</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="n">context</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">jscontext</span><span class="p">(</span><span class="s1">&#39;now&#39;</span><span class="p">):</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">(),</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">request</span><span class="o">.</span><span class="n">dmp</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="s1">&#39;index.html&#39;</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>When your template calls DMP’s <code class="docutils literal notranslate"><span class="pre">links(self)</span></code> method (see <code class="docutils literal notranslate"><span class="pre">base.htm</span></code>), the first provider that goes to work is <code class="docutils literal notranslate"><span class="pre">JsContextProvider</span></code>. This provider inspects the context dictionary for keys marked with <code class="docutils literal notranslate"><span class="pre">jscontext</span></code>. It converts these values to JSON and inserts the first line below into your template. The next provider to run is <code class="docutils literal notranslate"><span class="pre">JsLinkProvider</span></code>, which creates the second line below:</p>
+<div class="highlight-html notranslate"><div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">script</span><span class="p">&gt;</span><span class="nx">DMP_CONTEXT</span><span class="p">.</span><span class="nx">set</span><span class="p">(...,</span> <span class="s2">&quot;ketkk4MY3rAXNipepsUrV&quot;</span><span class="p">,</span> <span class="p">{</span> <span class="s2">&quot;now&quot;</span><span class="o">:</span> <span class="s2">&quot;2020-02-11 09:32:35.41233&quot;</span><span class="p">},</span> <span class="p">...)&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">script</span> <span class="na">src</span><span class="o">=</span><span class="s">&quot;/static/homepage/scripts/index.js&quot;</span> <span class="na">data-context</span><span class="o">=</span><span class="s">&quot;ketkk4MY3rAXNipepsUrV&quot;</span><span class="p">&gt;&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="step-2-use-in-javascript">
+<h3>Step 2: Use in Javascript<a class="headerlink" href="#step-2-use-in-javascript" title="Permalink to this headline">¶</a></h3>
+<p>In your JS files, you can access your variables in a context dictionary provided by a closure. In layman’s terms, this means you should wrap the entire <code class="docutils literal notranslate"><span class="pre">index.js</span></code> file in an anonymous function with a parameter for the context dictionary. The following are three examples in ES5 and ES6:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="24%" />
+<col width="38%" />
+<col width="38%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">&#160;</th>
+<th class="head">ES5 Javascript (function style)</th>
+<th class="head">ES6 Javascript (fat-arrow style)</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>Run immediately</td>
+<td><div class="first last highlight-text notranslate"><div class="highlight"><pre><span></span>(function(context) {
+    // your JS code here
+    console.log(context.now);
+})(DMP_CONTEXT.get());
+</pre></div>
+</div>
+</td>
+<td><div class="first last highlight-text notranslate"><div class="highlight"><pre><span></span>(context =&gt; {
+    // your JS code here
+    console.log(context.now);
+})(DMP_CONTEXT.get())
+</pre></div>
+</div>
+</td>
+</tr>
+<tr class="row-odd"><td>Run when page is ready (JQuery)</td>
+<td><div class="first last highlight-text notranslate"><div class="highlight"><pre><span></span>$((function(context) {
+    return function() {
+        // your JS code here
+        console.log(context.now);
+    }
+})(DMP_CONTEXT.get()));
+</pre></div>
+</div>
+</td>
+<td><div class="first last highlight-text notranslate"><div class="highlight"><pre><span></span>$((context =&gt; () =&gt; {
+    // your JS code here
+    console.log(context.now)
+})(DMP_CONTEXT.get()))
+</pre></div>
+</div>
+</td>
+</tr>
+<tr class="row-even"><td>Run when page is ready (vanilla JS)</td>
+<td><div class="first last highlight-text notranslate"><div class="highlight"><pre><span></span>document.addEventListener(&quot;DOMContentLoaded&quot;, (function(context) {
+    return function() {
+        // your JS code here
+        console.log(context[&#39;now&#39;]);
+    }
+})(DMP_CONTEXT.get()));
+</pre></div>
+</div>
+</td>
+<td><div class="first last highlight-text notranslate"><div class="highlight"><pre><span></span>document.addEventListener(&quot;DOMContentLoaded&quot;, (context =&gt; () =&gt; {
+    // your JS code here
+    console.log(context[&#39;now&#39;])
+})(DMP_CONTEXT.get()))
+</pre></div>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="section" id="undefined-context">
+<h4>Undefined Context?<a class="headerlink" href="#undefined-context" title="Permalink to this headline">¶</a></h4>
+<p>If things aren’t working, open your browser console/inspector and see if JS is giving you any messages.  The following are a few reasons that the context might be undefined:</p>
+<ul class="simple">
+<li>Your JS code is running too late.  If you reverse the closure functions, the code doesn’t run in time to catch the context.  Compare your code with the examples below.</li>
+<li>You might be missing script lines <code class="docutils literal notranslate"><span class="pre">&lt;script</span> <span class="pre">src=&quot;/django_mako_plus/dmp-common.min.js&quot;&gt;&lt;/script&gt;</span></code> and <code class="docutils literal notranslate"><span class="pre">${</span> <span class="pre">django_mako_plus.links(self)</span> <span class="pre">}</span></code>, or these might be reversed.</li>
+<li><code class="docutils literal notranslate"><span class="pre">/django_mako_plus/dmp-common.min.js</span></code> might not be available.  Check for a 404 error in the Network tab of your browser’s inspector.</li>
+<li>In rare situations (JQuery, I’m looking at you!), JS returned via ajax may not be able to find the right context. See the FAQ for more info.</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="section" id="limitations">
+<h2>Limitations<a class="headerlink" href="#limitations" title="Permalink to this headline">¶</a></h2>
+<p>The context dictionary is sent to Javascript using JSON, which places limits on the types of objects you can mark with <code class="docutils literal notranslate"><span class="pre">jscontext</span></code>.  This normally means only strings, booleans, numbers, lists, and dictionaries work out of the box.</p>
+<div class="section" id="custom-json-encoding">
+<h3>Custom JSON Encoding<a class="headerlink" href="#custom-json-encoding" title="Permalink to this headline">¶</a></h3>
+<p>There may be times when you need to send “full” objects.  When preparing the JS object, DMP looks for a class method named <code class="docutils literal notranslate"><span class="pre">__jscontext__</span></code> in the context values.  If the method exists on a value, DMP calls it and includes the return as the reduced, “JSON-compatible” version of the object.  The following is an example:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">MyNonJsonObject</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># this is a complex, C-based structure</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">root</span> <span class="o">=</span> <span class="n">etree</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span><span class="s1">&#39;...&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__jscontext__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># this string is what DMP will place in the context</span>
+        <span class="k">return</span> <span class="n">etree</span><span class="o">.</span><span class="n">tostring</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="nb">str</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>When you add a <code class="docutils literal notranslate"><span class="pre">MyNonJsonObject</span></code> instance to the render context, you’ll still get the full <code class="docutils literal notranslate"><span class="pre">MyNonJsonObject</span></code> in your template code (since it’s running on the server side). But it’s reduced with <code class="docutils literal notranslate"><span class="pre">instance.__jscontext__()</span></code> to transit to the browser JS runtime:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">process_request</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="n">mnjo</span> <span class="o">=</span> <span class="n">MyNonJsonObject</span><span class="p">()</span>
+    <span class="n">context</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="c1"># DMP will call obj.__jscontext__() and send the result to JS</span>
+        <span class="n">jscontext</span><span class="p">(</span><span class="s1">&#39;mnjo&#39;</span><span class="p">):</span> <span class="n">mnjo</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">request</span><span class="o">.</span><span class="n">dmp</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="s1">&#39;template.html&#39;</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Now adjust your JS to parse the XML string, and you’re back in business.</p>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="static_links.html" class="btn btn-neutral float-right" title="CSS and JS" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="static.html" class="btn btn-neutral" title="Static Files" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Conan C. Albrecht
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+    
+
+  
+
+  <script type="text/javascript" src="_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

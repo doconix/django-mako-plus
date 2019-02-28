@@ -2,11 +2,14 @@
 #
 
 # You can set these variables from the command line.
+# 	-E :: don't use a saved environment, always read all files
+#   -a :: write all files (not just changed)
+#   -q :: no stdout, just stderr
 SPHINXOPTS    = -E -a -q
 SPHINXBUILD   = sphinx-build
 SPHINXPROJ    = Django-Mako-Plus
 SOURCEDIR     = .
-BUILDDIR      = _build
+BUILDDIR      = ../docs/
 
 # Put it first so that "make" without argument is like "make help".
 help:
@@ -14,8 +17,6 @@ help:
 
 .PHONY: help Makefile
 
-# Catch-all target: route all unknown targets to Sphinx using the new
-# "make mode" option.  $(O) is meant as a shortcut for $(SPHINXOPTS).
-%: Makefile
+html: Makefile
 	@python3 make_page_labels.py
-	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
+	@$(SPHINXBUILD) "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)

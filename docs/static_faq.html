@@ -1,0 +1,592 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>FAQ &mdash; Django-Mako-Plus  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/dmp.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Deployment" href="deploy.html" />
+    <link rel="prev" title="Webpack" href="static_webpack.html" /> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> Django-Mako-Plus
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="compare.html">Comparison with Django</a></li>
+<li class="toctree-l1"><a class="reference internal" href="upgrade_notes.html">Upgrade Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="topics.html">Basic Concepts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="converters.html">Parameter Conversion</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="static.html">Static Files</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="static_overview.html">Static Files Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="static_links.html">CSS and JS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="static_compilers.html">Sass, Less, &amp; More</a></li>
+<li class="toctree-l2"><a class="reference internal" href="static_webpack.html">Webpack</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">FAQ</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#why-aren-t-dmp-log-messages-showing-in-my-browser-console">Why aren’t DMP log messages showing in my browser console?</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#why-is-dmp-blowing-up-my-browser-console">Why is DMP blowing up my browser console?</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#can-dmp-provide-links-for-other-templates">Can DMP provide links for other templates?</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#what-if-i-need-links-but-don-t-need-a-template">What if I need links but don’t need a template?</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#dmp-is-linking-the-wrong-context-what-s-up">DMP is linking the wrong context. What’s up?</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#bundling-how-do-i-clear-the-generated-bundle-files">Bundling: How do I clear the generated bundle files?</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#bundling-how-do-i-recreate-entry-js-files">Bundling: How do I recreate <code class="docutils literal notranslate"><span class="pre">__entry__.js</span></code> files?</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#bundling-why-does-webpack-report-errors-whenever-i-add-or-delete-files">Bundling: Why does Webpack report errors whenever I add or delete files?</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#bundling-my-functions-are-loading-but-they-don-t-trigger-whaaaaat">Bundling: My functions are loading, but they don’t trigger. Whaaaaat?</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#bundling-how-do-i-use-sass-less-typescript-etc-with-dmp-webpack">Bundling: How do I use Sass (Less, TypeScript, etc.) with DMP Webpack?</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#bundling-can-i-bundle-dmp-webpack-js">Bundling: Can I bundle dmp-webpack.js?</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#bundling-how-do-i-create-a-vendor-bundle">Bundling: How do I create a vendor bundle?</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#bundling-how-do-i-create-a-single-sitewide-bundle">Bundling: How do I create a single, sitewide bundle?</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#bundling-how-do-i-create-multi-app-bundles">Bundling: How do I create multi-app bundles?</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="deploy.html">Deployment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="editors.html">Editors</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Django-Mako-Plus</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="static.html">Static Files</a> &raquo;</li>
+        
+      <li>FAQ</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="faq">
+<span id="static-faq"></span><h1>FAQ<a class="headerlink" href="#faq" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="why-aren-t-dmp-log-messages-showing-in-my-browser-console">
+<h2>Why aren’t DMP log messages showing in my browser console?<a class="headerlink" href="#why-aren-t-dmp-log-messages-showing-in-my-browser-console" title="Permalink to this headline">¶</a></h2>
+<p>DMP’s debug messages make bundling more transparent. They can be lifesavers at times, but they can be bothersome once things are working. For more background, read the previous question on how to turn off log messages.</p>
+<p>The following must happen for debug messages to show in the browser console:</p>
+<ul class="simple">
+<li>The <code class="docutils literal notranslate"><span class="pre">django_mako_plus</span></code> logger must be set to DEBUG.</li>
+<li>Very few messages show in the normal providers, so you won’t see many there. Since webpack provider is where transparency is needed, it’s where messages are printed.</li>
+<li>On Chromium browsers, <code class="docutils literal notranslate"><span class="pre">console.debug</span></code> messages only print when “Verbose” is selected in the console.</li>
+<li>If you still can’t get messages to print, try adding a few <code class="docutils literal notranslate"><span class="pre">console.log</span></code> lines to <code class="docutils literal notranslate"><span class="pre">dmp-common.js</span></code>, especially in its log method. Hopefully that sorts things out.</li>
+</ul>
+</div>
+<div class="section" id="why-is-dmp-blowing-up-my-browser-console">
+<h2>Why is DMP blowing up my browser console?<a class="headerlink" href="#why-is-dmp-blowing-up-my-browser-console" title="Permalink to this headline">¶</a></h2>
+<p>Tracing static file issues can be difficult, so DMP is written to make it as transparent as possible.  In particular, bundling is fraught with danger: functions might not link right, contexts may trigger before bundles fully load, and in extreme cases, the Killer Rabbit of Caerbannog can show up. The debug messages in your browser console help you see exactly what’s going on.</p>
+<p>To turn these messages off, adjust the DMP logger in your settings to any level above DEBUG:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">LOGGING</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="o">...</span>
+    <span class="s1">&#39;loggers&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="o">...</span>
+        <span class="s1">&#39;django_mako_plus&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s1">&#39;handlers&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;console_handler&#39;</span><span class="p">],</span>
+            <span class="s1">&#39;level&#39;</span><span class="p">:</span> <span class="s1">&#39;WARNING&#39;</span><span class="p">,</span>     <span class="c1"># DMP messages in browser console only show if DEBUG</span>
+        <span class="p">},</span>
+    <span class="p">},</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="can-dmp-provide-links-for-other-templates">
+<h2>Can DMP provide links for other templates?<a class="headerlink" href="#can-dmp-provide-links-for-other-templates" title="Permalink to this headline">¶</a></h2>
+<p>Suppose you need to autorender the JS or CSS from a page <em>other than the one currently rendering</em>?  For example, you need to include the CSS and JS for <code class="docutils literal notranslate"><span class="pre">otherpage.html</span></code> while <code class="docutils literal notranslate"><span class="pre">mypage.html</span></code> is rendering.  This is a bit of a special case, but it has been useful at times.</p>
+<p>To include CSS and JS by name, use the following within any template on your site (<code class="docutils literal notranslate"><span class="pre">mypage.html</span></code> in this example):</p>
+<div class="highlight-html+mako notranslate"><div class="highlight"><pre><span></span><span class="cp">## instead of using the normal:</span>
+<span class="cp">## ${ django_mako_plus.links(self) }</span>
+<span class="cp">##</span>
+<span class="cp">## specify the app and page name:</span>
+${ django_mako_plus.template_links(request, &#39;homepage&#39;, &#39;otherpage.html&#39;, context)
+</pre></div>
+</div>
+</div>
+<div class="section" id="what-if-i-need-links-but-don-t-need-a-template">
+<h2>What if I need links but don’t need a template?<a class="headerlink" href="#what-if-i-need-links-but-don-t-need-a-template" title="Permalink to this headline">¶</a></h2>
+<p>This special case is for times when you need the CSS and JS autorendered, but don’t need a template for HTML.  Use the same code as above, but add <code class="docutils literal notranslate"><span class="pre">force=True</span></code>. DMP will render the CSS and JS files for the given template name, whether or not the template actually exists.</p>
+<div class="highlight-html+mako notranslate"><div class="highlight"><pre><span></span><span class="cp">## renders links for `homepage/styles/otherpage.css` and `homepage/styles/otherpage.js`</span>
+${ django_mako_plus.template_links(request, &#39;homepage&#39;, &#39;otherpage.html&#39;, context, force=True)
+</pre></div>
+</div>
+<p>However, I should note that having links without a template will probably confuse readers of your code because it breaks the convention. Unless you really do have a special case, I’d recommend creating an (empty) template anyway.</p>
+</div>
+<div class="section" id="dmp-is-linking-the-wrong-context-what-s-up">
+<h2>DMP is linking the wrong context. What’s up?<a class="headerlink" href="#dmp-is-linking-the-wrong-context-what-s-up" title="Permalink to this headline">¶</a></h2>
+<p>When libraries play games with the loading process (JQuery, I’m looking at you!), the context can be difficult to find in some situations:</p>
+<p>Here’s an example of when this might occur:</p>
+<ol class="arabic simple">
+<li>Your code uses jQuery.ajax() to retrieve <code class="docutils literal notranslate"><span class="pre">snippet.html</span></code>, which has accompanying <code class="docutils literal notranslate"><span class="pre">snippet.js</span></code> and <code class="docutils literal notranslate"><span class="pre">another.js</span></code>.</li>
+<li>When jQuery receives the response, it strips the <code class="docutils literal notranslate"><span class="pre">&lt;script&gt;</span></code> element from the html.  The html is inserted in the DOM <strong>without</strong> the tag (this behavior is how jQuery is written – it avoids a security issue by doing this hack).</li>
+<li>jQuery executes the script code as a string, disconnected from the DOM.</li>
+<li>Since DMP can’t use the predictable <code class="docutils literal notranslate"><span class="pre">document.currentScript</span></code> variable, it defaults to the last-inserted context.  This is normally a good assumption.</li>
+<li>However, since two <code class="docutils literal notranslate"><span class="pre">.js</span></code> files were inserted, TWO context dictionaries are linked in DMP_CONTEXT. Only one of them will be the “last” one.</li>
+<li>Both scripts run with the same, incorrect context.  Do not pass Go. Do not collect $200. No context for you.</li>
+</ol>
+<p>The solution is to help DMP by specifying the context by its <code class="docutils literal notranslate"><span class="pre">app/template</span></code> key:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>// look away Ma -- being explicit here!
+(function(context) {
+    // your code here, such as
+    console.log(context);
+})(DMP_CONTEXT.get(&#39;homepage/index&#39;));
+</pre></div>
+</div>
+<p>In the above code, DMP retrieves correct context by template name.  Even if the given template has been loaded twice, the latest one will be active (thus giving the right context).  Problem solved.</p>
+<blockquote>
+<div>A third alternative is to get the context by using a <code class="docutils literal notranslate"><span class="pre">&lt;script&gt;</span></code> DOM object as the argument to <code class="docutils literal notranslate"><span class="pre">.get</span></code>. This approach always returns the correct context.</div></blockquote>
+</div>
+<div class="section" id="bundling-how-do-i-clear-the-generated-bundle-files">
+<h2>Bundling: How do I clear the generated bundle files?<a class="headerlink" href="#bundling-how-do-i-clear-the-generated-bundle-files" title="Permalink to this headline">¶</a></h2>
+<p>In a terminal (Mac, Linux, or Windows+GitBash), issue these commands:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># careful, this is recursive!</span>
+<span class="n">rm</span> <span class="o">**/</span><span class="n">__entry__</span><span class="o">.</span><span class="n">js</span>
+<span class="n">rm</span> <span class="o">**/</span><span class="n">__bundle__</span><span class="o">.</span><span class="n">js</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="bundling-how-do-i-recreate-entry-js-files">
+<h2>Bundling: How do I recreate <code class="docutils literal notranslate"><span class="pre">__entry__.js</span></code> files?<a class="headerlink" href="#bundling-how-do-i-recreate-entry-js-files" title="Permalink to this headline">¶</a></h2>
+<p>Webpack depends on the accuracy of your <code class="docutils literal notranslate"><span class="pre">__entry__.js</span></code> file, and it’s important to keep it in sync with the files in your projects. There are two ways to recreate your entry files:</p>
+<ol class="arabic simple">
+<li><strong>Manual:</strong> Run <code class="docutils literal notranslate"><span class="pre">python3</span> <span class="pre">manage.py</span> <span class="pre">dmp_webpack</span> <span class="pre">--overwrite</span></code> to recreate the entry files in all apps.</li>
+<li><strong>Automatic:</strong> Whenever you render a page, DMP automatically reruns the <code class="docutils literal notranslate"><span class="pre">dmp_webpack</span></code> command to check for needed updates.</li>
+</ol>
+<p>You can turn off automatic creation in the webpack provider options:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">TEMPLATES</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">{</span>
+        <span class="s1">&#39;NAME&#39;</span><span class="p">:</span> <span class="s1">&#39;django_mako_plus&#39;</span><span class="p">,</span>
+        <span class="o">...</span>
+        <span class="s1">&#39;OPTIONS&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="o">...</span>
+            <span class="s1">&#39;CONTENT_PROVIDERS&#39;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span> <span class="s1">&#39;provider&#39;</span><span class="p">:</span> <span class="s1">&#39;django_mako_plus.JsContextProvider&#39;</span> <span class="p">},</span>
+                <span class="p">{</span>
+                    <span class="s1">&#39;provider&#39;</span><span class="p">:</span> <span class="s1">&#39;django_mako_plus.WebpackJsLinkProvider&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;create_entry&#39;</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
+                <span class="p">}</span>
+            <span class="p">],</span>
+        <span class="p">},</span>
+    <span class="p">},</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="bundling-why-does-webpack-report-errors-whenever-i-add-or-delete-files">
+<h2>Bundling: Why does Webpack report errors whenever I add or delete files?<a class="headerlink" href="#bundling-why-does-webpack-report-errors-whenever-i-add-or-delete-files" title="Permalink to this headline">¶</a></h2>
+<p>During development, webpack is normally running in “watch” mode. When your entry file gets out of sync with your actual project files, webpack gets grumpy. Refreshing the page a couple times usually brings everything back into sync.</p>
+<p>For an example of why this is needed, consider this scenario:</p>
+<ol class="arabic">
+<li><p class="first">You have three related files in your homepage app: <code class="docutils literal notranslate"><span class="pre">homepage/templates/index.html</span></code>, <code class="docutils literal notranslate"><span class="pre">homepage/styles/index.css</span></code>, and <code class="docutils literal notranslate"><span class="pre">homepage/scripts/index.js</span></code>. You run the webpack management command, which creates <code class="docutils literal notranslate"><span class="pre">homepage/scripts/__entry__.js</span></code> with references to the two CSS and JS files.</p>
+</li>
+<li><p class="first">You run the webpack watcher daemon, and it creates <code class="docutils literal notranslate"><span class="pre">homepage/scripts/__bundle__.js</span></code>. Everything is in sync, and life is happy.</p>
+</li>
+<li><p class="first">You develop for a bit, and each time you change the support files, webpack recreates the bundle. You pat webpack on the head and give it a treat.</p>
+</li>
+<li><p class="first">You no longer need <code class="docutils literal notranslate"><span class="pre">homepage/styles/index.css</span></code>, so you delete the file. This is where things go wrong for a bit… Webpack sees the changes, and it complains that a required file in <code class="docutils literal notranslate"><span class="pre">homepage/scripts/__entry__.js</span></code> no longer exists. A red error yells at you in the webpack console. The solution is to recreate your entry file, but DMP hasn’t had a chance to do it. That chance comes when the index page gets rendered again.</p>
+</li>
+<li><p class="first">You reload the index page in your browser. During template rendering (specifically, the <code class="docutils literal notranslate"><span class="pre">WebpackJsLinkProvider</span></code> provider), DMP recreates any entry files that are out of sync. Webpack sees changed entry file, and rebuilds your bundle.</p>
+<blockquote>
+<div><p>On Step 5, your browser might load the bundle before the webpack watcher recreates it. When this happens, refresh the page one more time to pull the new bundle.</p>
+</div></blockquote>
+</li>
+</ol>
+</div>
+<div class="section" id="bundling-my-functions-are-loading-but-they-don-t-trigger-whaaaaat">
+<h2>Bundling: My functions are loading, but they don’t trigger. Whaaaaat?<a class="headerlink" href="#bundling-my-functions-are-loading-but-they-don-t-trigger-whaaaaat" title="Permalink to this headline">¶</a></h2>
+<p>The DMP client-side script, <code class="docutils literal notranslate"><span class="pre">dmp-common.min.js</span></code>, loads bundles using this process:</p>
+<ol class="arabic">
+<li><p class="first">set() is run, which creates a container for the context, template names, and inheritance.</p>
+</li>
+<li><p class="first">The browser reaches the bundle &lt;script&gt; tag and downloads the bundle file.</p>
+<ol class="loweralpha simple">
+<li>Once downloaded, the script runs and loads its template functions into the context container. We recheck if ready.</li>
+</ol>
+</li>
+<li><p class="first">checkContextReady() runs due to the script tag’s onLoad= event. The script checks:</p>
+<ol class="loweralpha">
+<li><p class="first">Are all template functions loaded?</p>
+<blockquote>
+<div><p>Suppose account/templates/login.html extends from homepage/templates/base.htm. Assuming app-based bundles, we’re dealing with two bundles: the login bundle (login.js and login.css), and the homepage bundle contains base.js and base.css.  When the account bundle loads, we still don’t have base.js or base.css, so we need to wait. When the homepage bundle loads, all four functions (login.js, login.css, base.js, and base.css) are loaded, so they can be called. Each time a template function loads, we recheck if ready.</p>
+</div></blockquote>
+</li>
+<li><p class="first">Are all template functions imports resolved?</p>
+<blockquote>
+<div><p>The body of each template function contains dynamic import statements. So we can’t just load the function itself, we need to run the function to and wait for the imports to resolve. It’s done this way because we don’t want ALL the imports on a given page – the bundle contains the imports for all the pages in the app, not just for the current page. Each time a template function resolves, we recheck if ready.</p>
+</div></blockquote>
+</li>
+<li><p class="first">Is context.pendingCalls &gt; 0?  This variable allows delayed execution of the functions (read on).</p>
+</li>
+</ol>
+</li>
+<li><p class="first">DMP_CONTEXT.callBundleContext() is called by a &lt;script&gt; tag in the template. This function increments context.pendingCalls and then rechecks if ready.</p>
+</li>
+</ol>
+<p>The constant rechecking allows #2, #3, and #4 to happen in any order–which supports async loading of scripts. If #4 occurs before #3, <code class="docutils literal notranslate"><span class="pre">pendingCalls</span></code> increments, but it doesn’t trigger because its still waiting on bundle functions. When the bundles finally load and resolve, the check happens again and the bundle functions finally run.</p>
+<p>With this understanding, here’s some ideas for debugging:</p>
+<ol class="arabic simple">
+<li>Assuming the DMP logger is at <code class="docutils literal notranslate"><span class="pre">DEBUG</span></code> level, the process above is reported in detail in the browser console. Follow these log messages to see where the process breaks down. Check that all needed bundle functions get loaded and resolved, and check the value of <code class="docutils literal notranslate"><span class="pre">pendingCalls</span></code>.</li>
+<li>Disable DMP’s automatic <code class="docutils literal notranslate"><span class="pre">__entry__.js</span></code> creation (<code class="docutils literal notranslate"><span class="pre">create_entry</span></code> in the provider options). You can then insert console.log messages in <code class="docutils literal notranslate"><span class="pre">__entry__.js</span></code> to test things within the bundle.</li>
+<li>Litter <code class="docutils literal notranslate"><span class="pre">dmp-common.js</span></code> (the unminified version) with console.log statements.</li>
+</ol>
+</div>
+<div class="section" id="bundling-how-do-i-use-sass-less-typescript-etc-with-dmp-webpack">
+<h2>Bundling: How do I use Sass (Less, TypeScript, etc.) with DMP Webpack?<a class="headerlink" href="#bundling-how-do-i-use-sass-less-typescript-etc-with-dmp-webpack" title="Permalink to this headline">¶</a></h2>
+<p>One benefit to bundling is the output files from compiles like <code class="docutils literal notranslate"><span class="pre">sass</span></code> are piped right into bundles instead of as extra files in your project. Here’s the steps:</p>
+<ol class="arabic simple">
+<li>Clear out existing entry and bundle files (see above).</li>
+<li>Install the Sass dependencies</li>
+</ol>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">npm</span> <span class="n">install</span> <span class="o">--</span><span class="n">save</span><span class="o">-</span><span class="n">dev</span> <span class="n">node</span><span class="o">-</span><span class="n">sass</span> <span class="n">sass</span><span class="o">-</span><span class="n">loader</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="3">
+<li>Modify <code class="docutils literal notranslate"><span class="pre">webpack.config.js</span></code> to find Sass files:</li>
+</ol>
+<div class="highlight-js notranslate"><div class="highlight"><pre><span></span><span class="nx">module</span><span class="p">.</span><span class="nx">exports</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="p">...</span>
+    <span class="nx">module</span><span class="o">:</span> <span class="p">{</span>
+        <span class="nx">rules</span><span class="o">:</span> <span class="p">[</span>
+            <span class="p">...</span>
+            <span class="p">{</span>
+                <span class="nx">test</span><span class="o">:</span> <span class="sr">/\.scss$/</span><span class="p">,</span>
+                <span class="nx">use</span><span class="o">:</span> <span class="p">[</span>
+                    <span class="p">{</span> <span class="nx">loader</span><span class="o">:</span> <span class="s1">&#39;style-loader&#39;</span> <span class="p">},</span>
+                    <span class="p">{</span> <span class="nx">loader</span><span class="o">:</span> <span class="s1">&#39;css-loader&#39;</span> <span class="p">},</span>
+                    <span class="p">{</span> <span class="nx">loader</span><span class="o">:</span> <span class="s1">&#39;sass-loader&#39;</span> <span class="p">},</span>
+                <span class="p">]</span>
+            <span class="p">}</span>
+        <span class="p">]</span>
+    <span class="p">},</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="4">
+<li>Configure <code class="docutils literal notranslate"><span class="pre">settings.py</span></code> to include <code class="docutils literal notranslate"><span class="pre">app/styles/*.scss</span></code> files wherever they match template names.</li>
+</ol>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">TEMPLATES</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">{</span>
+        <span class="s1">&#39;NAME&#39;</span><span class="p">:</span> <span class="s1">&#39;django_mako_plus&#39;</span><span class="p">,</span>
+        <span class="o">...</span>
+        <span class="s1">&#39;OPTIONS&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="o">...</span>
+            <span class="s1">&#39;WEBPACK_PROVIDERS&#39;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span> <span class="s1">&#39;provider&#39;</span><span class="p">:</span> <span class="s1">&#39;django_mako_plus.CssLinkProvider&#39;</span> <span class="p">},</span>
+                <span class="p">{</span>
+                    <span class="s1">&#39;provider&#39;</span><span class="p">:</span> <span class="s1">&#39;django_mako_plus.CssLinkProvider&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;filepath&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">app_config</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s1">&#39;styles&#39;</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">template_relpath</span> <span class="o">+</span> <span class="s1">&#39;.scss&#39;</span><span class="p">),</span>
+                <span class="p">},</span>
+                <span class="p">{</span> <span class="s1">&#39;provider&#39;</span><span class="p">:</span> <span class="s1">&#39;django_mako_plus.JsLinkProvider&#39;</span> <span class="p">},</span>
+            <span class="p">],</span>
+        <span class="p">},</span>
+    <span class="p">},</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+<p>Note in the above options, we’re including <code class="docutils literal notranslate"><span class="pre">.scss</span></code> and <code class="docutils literal notranslate"><span class="pre">.css</span></code> (whenever they exist), so be sure to erase any generated <code class="docutils literal notranslate"><span class="pre">.css</span></code> files from previous runs of Sass. We only need the source <code class="docutils literal notranslate"><span class="pre">.scss</span></code> files in the <code class="docutils literal notranslate"><span class="pre">styles</span></code> subdir.</p>
+<ol class="arabic simple" start="3">
+<li>Recreate the entry files and compile the bundles:</li>
+</ol>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python3</span> <span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">dmp_webpack</span> <span class="o">--</span><span class="n">overwrite</span>
+<span class="n">npm</span> <span class="n">run</span> <span class="n">watch</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="bundling-can-i-bundle-dmp-webpack-js">
+<h2>Bundling: Can I bundle dmp-webpack.js?<a class="headerlink" href="#bundling-can-i-bundle-dmp-webpack-js" title="Permalink to this headline">¶</a></h2>
+<p>Short answer:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">npm</span> <span class="n">install</span> <span class="n">django</span><span class="o">-</span><span class="n">mako</span><span class="o">-</span><span class="n">plus</span>
+</pre></div>
+</div>
+<p>Long answer: there’s a few gotchas you need to watch for:</p>
+<ol class="arabic">
+<li><p class="first">Even when dmp-common is bundled, <code class="docutils literal notranslate"><span class="pre">DMP_CONTEXT</span></code> still needs to be available in the window object. It can’t live entirely within the bundle scope because <code class="docutils literal notranslate"><span class="pre">&lt;script&gt;</span></code> context tags in the template need it. Hoisting to the window scope happens automatically, so just bundle away. This point is just an FYI when you see the variable still attached to the global scope. Hopefully we’ll get around this at some point so it does live entirely within the bundle, but there are still some issues to work out.</p>
+</li>
+<li><p class="first">The bundle containing <code class="docutils literal notranslate"><span class="pre">DMP_CONTEXT</span></code> must load <strong>before</strong> the <code class="docutils literal notranslate"><span class="pre">&lt;script&gt;</span></code> context tags run.  If you view the source of the rendered HTML page, you can see where the bundle should load in relation to the <code class="docutils literal notranslate"><span class="pre">&lt;script&gt;</span></code> tags DMP injects into the page. Make sure the order is right.</p>
+</li>
+<li><p class="first">You can choose between two possible files to import:</p>
+<ol class="loweralpha">
+<li><p class="first">The transpiled, browser-compatible, ES5 file. It has no external dependencies and should work anywhere. It’s the default export on npm:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="s1">&#39;django-mako-plus&#39;</span><span class="p">;</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">The original ES6 source, before any webpack/babel modification. If you’d like to include the original file, this one’s for you:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="s1">&#39;django-mako-plus/django_mako_plus/webroot/dmp-common.src.js&#39;</span><span class="p">;</span>
+</pre></div>
+</div>
+</li>
+</ol>
+</li>
+</ol>
+</div>
+<div class="section" id="bundling-how-do-i-create-a-vendor-bundle">
+<h2>Bundling: How do I create a vendor bundle?<a class="headerlink" href="#bundling-how-do-i-create-a-vendor-bundle" title="Permalink to this headline">¶</a></h2>
+<p>In the <a class="reference external" href="/static_webpack.html">tutorial</a>, we created one bundle per app.  These bundles can grow large as you enjoy the convenience of <code class="docutils literal notranslate"><span class="pre">npm</span> <span class="pre">init</span></code> and link to more and more things in <code class="docutils literal notranslate"><span class="pre">node_modules/</span></code>. Since each bundle is self-contained, there will be a lot of duplication between bundles. For example, the webpack bootstrapping JS will be in every one of your bundles–even if you don’t specifically import any extra modules. At some point, and usually sooner than later, you should probably make a vendor bundle.</p>
+<p>A vendor bundle combines the common code into a shared bundle, allowing the per-app bundles to lose quite a bit of weight. To enable a vendor bundle, do the following:</p>
+<ol class="arabic simple">
+<li>Clear out existing entry and bundle files (see above).</li>
+<li>Adjust your <code class="docutils literal notranslate"><span class="pre">webpack.config.js</span></code> file with a <code class="docutils literal notranslate"><span class="pre">chunkFilename</span></code> output and <code class="docutils literal notranslate"><span class="pre">optimization</span></code> section.</li>
+</ol>
+<div class="highlight-js notranslate"><div class="highlight"><pre><span></span><span class="nx">module</span><span class="p">.</span><span class="nx">exports</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="nx">output</span><span class="o">:</span> <span class="p">{</span>
+        <span class="p">...</span>
+        <span class="nx">chunkFilename</span><span class="o">:</span> <span class="s1">&#39;homepage/scripts/__bundle__.[name].js&#39;</span>
+    <span class="p">},</span>
+    <span class="p">...</span>
+    <span class="nx">optimization</span><span class="o">:</span> <span class="p">{</span>
+        <span class="nx">splitChunks</span><span class="o">:</span> <span class="p">{</span>
+            <span class="nx">cacheGroups</span><span class="o">:</span> <span class="p">{</span>
+                <span class="nx">vendor</span><span class="o">:</span> <span class="p">{</span>
+                    <span class="nx">chunks</span><span class="o">:</span> <span class="s1">&#39;all&#39;</span><span class="p">,</span>
+                    <span class="nx">name</span><span class="o">:</span> <span class="s1">&#39;vendor&#39;</span><span class="p">,</span>
+                    <span class="nx">test</span><span class="o">:</span> <span class="sr">/[\\/]node_modules[\\/]/</span><span class="p">,</span>
+                    <span class="nx">enforce</span><span class="o">:</span> <span class="kc">true</span><span class="p">,</span>
+                <span class="p">},</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+<p>The above config creates a single bundle file in <code class="docutils literal notranslate"><span class="pre">homepage/scripts/__bundle__.vendor.js</span></code>. Any import coming from <code class="docutils literal notranslate"><span class="pre">node_modules</span></code> goes into this common bundle.</p>
+<blockquote>
+<div>The web is filled with exotic recipes for code splitting and even more SO questions regarding splitting bundles into chunks. This configuration is a basic one, and you may want to split the vendor file into more than one chunk. Enter at your own risk…there be dragons here but also some rewards.</div></blockquote>
+<ol class="arabic simple" start="3">
+<li>Recreate the entry files and compile the bundles:</li>
+</ol>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python3</span> <span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">dmp_webpack</span> <span class="o">--</span><span class="n">overwrite</span>
+<span class="n">npm</span> <span class="n">run</span> <span class="n">watch</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="4">
+<li>Reference your vendor bundle in <code class="docutils literal notranslate"><span class="pre">base.htm</span></code> <em>before</em> the <code class="docutils literal notranslate"><span class="pre">links(self)</span></code> call.</li>
+</ol>
+<div class="highlight-html+mako notranslate"><div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">script</span> <span class="na">src</span><span class="o">=</span><span class="s">&quot;/django_mako_plus/dmp-common.js&quot;</span><span class="p">&gt;&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">script</span> <span class="na">src</span><span class="o">=</span><span class="s">&quot;</span><span class="cp">${</span><span class="n">STATIC_URL</span><span class="cp">}</span><span class="s">homepage/scripts/__bundle__.vendor.js&quot;</span><span class="p">&gt;&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+<span class="cp">${</span> <span class="n">django_mako_plus</span><span class="o">.</span><span class="n">links</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="cp">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="bundling-how-do-i-create-a-single-sitewide-bundle">
+<h2>Bundling: How do I create a single, sitewide bundle?<a class="headerlink" href="#bundling-how-do-i-create-a-single-sitewide-bundle" title="Permalink to this headline">¶</a></h2>
+<p>In some situations, it might make sense to create a single monstrosity that includes the scripts for every DMP app on your site.   Let’s create a single <code class="docutils literal notranslate"><span class="pre">__entry__.js</span></code> file for your entire site</p>
+<ol class="arabic simple">
+<li>Clear out existing entry and bundle files (see above).</li>
+<li>Modify <code class="docutils literal notranslate"><span class="pre">webpack.config.js</span></code> for this single entry.</li>
+</ol>
+<div class="highlight-js notranslate"><div class="highlight"><pre><span></span><span class="nx">module</span><span class="p">.</span><span class="nx">exports</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="nx">entry</span><span class="o">:</span> <span class="s1">&#39;homepage/scripts/__bundle__.js&#39;</span><span class="p">,</span>
+    <span class="p">...</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="3">
+<li>Create a single entry file and compile the bundle:</li>
+</ol>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python3</span> <span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">dmp_webpack</span> <span class="o">--</span><span class="n">overwrite</span> <span class="o">--</span><span class="n">single</span> <span class="n">homepage</span><span class="o">/</span><span class="n">scripts</span><span class="o">/</span><span class="n">__entry__</span><span class="o">.</span><span class="n">js</span>
+<span class="n">npm</span> <span class="n">run</span> <span class="n">watch</span>
+</pre></div>
+</div>
+<p>The above command will place the sitewide entry file in the homepage app, but it could be located anywhere.</p>
+<ol class="arabic simple" start="4">
+<li>Specify the bundle as the JS link for all pages:</li>
+</ol>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="s1">&#39;CONTENT_PROVIDERS&#39;</span><span class="p">:</span> <span class="p">[</span>
+    <span class="p">{</span> <span class="s1">&#39;provider&#39;</span><span class="p">:</span> <span class="s1">&#39;django_mako_plus.JsContextProvider&#39;</span> <span class="p">},</span>
+    <span class="p">{</span> <span class="s1">&#39;provider&#39;</span><span class="p">:</span> <span class="s1">&#39;django_mako_plus.WebpackJsLinkProvider&#39;</span><span class="p">,</span>
+      <span class="s1">&#39;filepath&#39;</span><span class="p">:</span> <span class="s1">&#39;homepage/scripts/__bundle__.js&#39;</span><span class="p">,</span>
+      <span class="s1">&#39;duplicates&#39;</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
+    <span class="p">},</span>
+<span class="p">],</span>
+</pre></div>
+</div>
+<p>The above settings hard code the bundle location for all apps. Since ‘duplicates’ is False, the bundle will be included once per request, even if your base template (the <code class="docutils literal notranslate"><span class="pre">links(self)</span></code> call) is run multiple times by subtemplates.</p>
+<p>See also the question (below) regarding creating links manually.</p>
+</div>
+<div class="section" id="bundling-how-do-i-create-multi-app-bundles">
+<h2>Bundling: How do I create multi-app bundles?<a class="headerlink" href="#bundling-how-do-i-create-multi-app-bundles" title="Permalink to this headline">¶</a></h2>
+<p>Somewhere in between a sitewide bundle and app-specific bundles lives the multi-app bundle.  Suppose you want app1 and app2 in one bundle and app3, app4, and app5 in another.  The following commands create the two needed entry files:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python3</span> <span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">dmp_webpack</span> <span class="o">--</span><span class="n">overwrite</span> <span class="o">--</span><span class="n">single</span> <span class="n">homepage</span><span class="o">/</span><span class="n">scripts</span><span class="o">/</span><span class="n">__entry_1__</span><span class="o">.</span><span class="n">js</span> <span class="n">app1</span> <span class="n">app2</span>
+<span class="n">python3</span> <span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">dmp_webpack</span> <span class="o">--</span><span class="n">overwrite</span> <span class="o">--</span><span class="n">single</span> <span class="n">homepage</span><span class="o">/</span><span class="n">scripts</span><span class="o">/</span><span class="n">__entry_2__</span><span class="o">.</span><span class="n">js</span> <span class="n">app3</span> <span class="n">app4</span> <span class="n">app5</span>
+</pre></div>
+</div>
+<p>Then follow the same logic as the previous question (sitewide bundle) to include them in webpack’s config and in the provider run.</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="deploy.html" class="btn btn-neutral float-right" title="Deployment" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="static_webpack.html" class="btn btn-neutral" title="Webpack" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Conan C. Albrecht
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+    
+
+  
+
+  <script type="text/javascript" src="_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

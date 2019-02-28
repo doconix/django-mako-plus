@@ -1,0 +1,235 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Installing in a Subdirectory: /mysite/ &mdash; Django-Mako-Plus  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/dmp.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Tutorial" href="tutorial.html" />
+    <link rel="prev" title="Custom URL Patterns" href="install_custom_urls.html" /> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> Django-Mako-Plus
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="compare.html">Comparison with Django</a></li>
+<li class="toctree-l1"><a class="reference internal" href="upgrade_notes.html">Upgrade Notes</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="install.html">Installation</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="install_new.html">New Project</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install_existing.html">Existing Project</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install.html#minimal-dmp">Minimal DMP</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="install.html#customizations">Customizations</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="install_custom_urls.html">Custom URL Patterns</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Installing in a Subdirectory: /mysite/</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="topics.html">Basic Concepts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="converters.html">Parameter Conversion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="static.html">Static Files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="deploy.html">Deployment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="editors.html">Editors</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Django-Mako-Plus</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="install.html">Installation</a> &raquo;</li>
+        
+      <li>Installing in a Subdirectory: /mysite/</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="installing-in-a-subdirectory-mysite">
+<span id="install-subdirectory"></span><h1>Installing in a Subdirectory: /mysite/<a class="headerlink" href="#installing-in-a-subdirectory-mysite" title="Permalink to this headline">¶</a></h1>
+<p>This section is for those that need Django is a subdirectory, such as <code class="docutils literal notranslate"><span class="pre">/mysite</span></code>. If your Django installation is at the root of your domain, skip this section.</p>
+<p>In other words, suppose your Django site isn’t the only thing on your server. Instead of the normal url pattern, <code class="docutils literal notranslate"><span class="pre">http://www.yourdomain.com/</span></code>, your Django installation is at <code class="docutils literal notranslate"><span class="pre">http://www.yourdomain.com/mysite/</span></code>. All apps are contained within this <code class="docutils literal notranslate"><span class="pre">mysite/</span></code> directory.</p>
+<p>This is accomplished in the normal Django way. Adjust your <code class="docutils literal notranslate"><span class="pre">urls.py</span></code> file to include the prefix:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">url</span><span class="p">(</span><span class="s1">&#39;^mysite/&#39;</span><span class="p">,</span> <span class="n">include</span><span class="p">(</span><span class="s1">&#39;django_mako_plus.urls&#39;</span><span class="p">)),</span>
+</pre></div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="tutorial.html" class="btn btn-neutral float-right" title="Tutorial" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="install_custom_urls.html" class="btn btn-neutral" title="Custom URL Patterns" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Conan C. Albrecht
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+    
+
+  
+
+  <script type="text/javascript" src="_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

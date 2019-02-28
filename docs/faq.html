@@ -1,0 +1,351 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>FAQ &mdash; Django-Mako-Plus  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/dmp.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Basic Concepts" href="topics.html" />
+    <link rel="prev" title="T5: Ajax" href="tutorial_ajax.html" /> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> Django-Mako-Plus
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="compare.html">Comparison with Django</a></li>
+<li class="toctree-l1"><a class="reference internal" href="upgrade_notes.html">Upgrade Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">FAQ</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#general">General</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#where-is-dmp-used">Where Is DMP Used?</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#what-s-wrong-with-django-s-built-in-template-language">What’s wrong with Django’s built-in template language?</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#why-mako-instead-django-or-jinja2">Why Mako instead Django or Jinja2?</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#will-it-bundle">Will it bundle?</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#using-third-party-apps">Using Third-Party Apps</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#does-dmp-work-alonside-third-party-django-apps">Does DMP work alonside third-party Django apps?</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#how-do-i-call-a-tag-from-a-third-party-app">How do I call a tag from a third-party app?</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#can-i-use-both-mako-and-django-jinja2-syntax">Can I use both Mako and Django/Jinja2 syntax?</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#technical-details">Technical Details</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#why-am-i-getting-page-not-found">Why am I getting Page Not Found?</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#why-is-dmp-is-logging-to-the-browser-console">Why is DMP is logging to the browser console?</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#is-dmp-common-min-js-really-necessary">Is <code class="docutils literal notranslate"><span class="pre">dmp-common.min.js</span></code> really necessary?</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#i-updated-dmp-but-browsers-report-the-old-dmp-common-min-js">I updated DMP, but browsers report the old <code class="docutils literal notranslate"><span class="pre">dmp-common.min.js</span></code>.</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="topics.html">Basic Concepts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="converters.html">Parameter Conversion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="static.html">Static Files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="deploy.html">Deployment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="editors.html">Editors</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Django-Mako-Plus</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>FAQ</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="faq">
+<span id="id1"></span><h1>FAQ<a class="headerlink" href="#faq" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="general">
+<h2>General<a class="headerlink" href="#general" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="where-is-dmp-used">
+<h3>Where Is DMP Used?<a class="headerlink" href="#where-is-dmp-used" title="Permalink to this headline">¶</a></h3>
+<p>This app was developed at MyEducator.com, primarily by <a class="reference external" href="mailto:doconix&#37;&#52;&#48;gmail&#46;com">Dr<span>&#46;</span> Conan C<span>&#46;</span> Albrecht</a>. Please email me if you find errors with this tutorial or have suggestions/fixes. In addition to several production web sites, I use the framework in my Django classes at BYU. 120+ students use the framework each year, and many have taken it to their companies upon graduation. At this point, the framework is quite mature and robust. It is fast and stable.</p>
+<p>I’ve been told by some that DMP has a lot in common with Rails. When I developed DMP, I had never used RoR, but good ideas are good ideas wherever they are found, right? :)</p>
+</div>
+<div class="section" id="what-s-wrong-with-django-s-built-in-template-language">
+<h3>What’s wrong with Django’s built-in template language?<a class="headerlink" href="#what-s-wrong-with-django-s-built-in-template-language" title="Permalink to this headline">¶</a></h3>
+<p>Django comes with its own template system, but it’s fairly weak (by design). Mako, on the other hand, is a fantastic template system that allows full Python code within HTML pages.</p>
+<p>The primary reason Django doesn’t allow full Python in its templates is the designers want to encourage you and I to keep template logic simple. I fully agree with this philosophy. I just don’t agree with the “forced” part of this philosophy. The Python way is rather to give freedom to the developer but train in the correct way of doing things. Even though I fully like Python in my templates, I still keep them fairly simple. Views are where your logic goes.</p>
+</div>
+<div class="section" id="why-mako-instead-django-or-jinja2">
+<h3>Why Mako instead Django or Jinja2?<a class="headerlink" href="#why-mako-instead-django-or-jinja2" title="Permalink to this headline">¶</a></h3>
+<p>Python has several mature, excellent templating languages. Both Django and Jinja2 are fairly recent yet mature systems. Both are screaming fast.</p>
+<p>Mako itself is very stable, both in terms of “lack of bugs” and in “completed feature set”. Today, the Mako API almost never changes because it does exactly what it needs to do and does it well. This make it an excellent candidate for server use.</p>
+<p>The short answer is I liked Mako’s approach the best. It felt the most Pythonic to me. Jinja2 may feel more like Django’s built-in template system, but Mako won out because it looked more like Python–and the point of DMP is to include Python in templates.</p>
+</div>
+<div class="section" id="will-it-bundle">
+<h3>Will it bundle?<a class="headerlink" href="#will-it-bundle" title="Permalink to this headline">¶</a></h3>
+<p>Yes. DMP’s providers automatically create entry files for template-related JS and CSS. See the <a class="reference external" href="/tutorial_css_js.html">Tutorial</a> for how templates relate to their JS and CSS and <a class="reference external" href="/static_webpack.html">Webpack Providers</a> for webpack-specific information.</p>
+</div>
+</div>
+<div class="section" id="using-third-party-apps">
+<h2>Using Third-Party Apps<a class="headerlink" href="#using-third-party-apps" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="does-dmp-work-alonside-third-party-django-apps">
+<h3>Does DMP work alonside third-party Django apps?<a class="headerlink" href="#does-dmp-work-alonside-third-party-django-apps" title="Permalink to this headline">¶</a></h3>
+<p>Yes. DMP plugs in as a regular templating engine per the standard Django API.  You can use both DMP and regular Django simultaneously in the same project.</p>
+<p>When you include DMP’s <code class="docutils literal notranslate"><span class="pre">urls.py</span></code> module in your project, patterns for each DMP-enabled app in your project are linked to our convention-based router.  Other apps won’t match these patterns, so other apps route the normal Django way. This means third-party apps work just fine with DMP.</p>
+</div>
+<div class="section" id="how-do-i-call-a-tag-from-a-third-party-app">
+<h3>How do I call a tag from a third-party app?<a class="headerlink" href="#how-do-i-call-a-tag-from-a-third-party-app" title="Permalink to this headline">¶</a></h3>
+<p>See the <a class="reference external" href="/install_third_party">integration docs</a> for examples.</p>
+</div>
+<div class="section" id="can-i-use-both-mako-and-django-jinja2-syntax">
+<h3>Can I use both Mako and Django/Jinja2 syntax?<a class="headerlink" href="#can-i-use-both-mako-and-django-jinja2-syntax" title="Permalink to this headline">¶</a></h3>
+<p>Yes.  Django officially supports having two or more template engines active at the same time.  Third party apps likely use Django’s templating system rather than Mako. The two templating systems work fine side by side.</p>
+<p>If you temporarily need to switch to Django templating syntax (even within a Mako file), <a class="reference external" href="#using-django-and-jinja2-tags-and-syntax">you can do that too</a>.</p>
+</div>
+</div>
+<div class="section" id="technical-details">
+<h2>Technical Details<a class="headerlink" href="#technical-details" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="why-am-i-getting-page-not-found">
+<h3>Why am I getting Page Not Found?<a class="headerlink" href="#why-am-i-getting-page-not-found" title="Permalink to this headline">¶</a></h3>
+<p>Check your console logs. Assuming you have DMP logging at DEBUG level (see next question), your terminal should be blowing up with lots of messages that should make the process transparent and debuggable.</p>
+<p>Another possibility is that you have the right url, but your view module has syntax or import errors and isn’t compiling. In this case, you’ll get Django’s yellow and white “404 Not Found” page. If a url matches but DMP still can’t resolve it, the reason will be listed on this page.</p>
+<p>DMP adds a text emoji to help you spot these. In the following example, the sad face <code class="docutils literal notranslate"><span class="pre">◉︵◉</span></code> is followed by the reason url reslution failed.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>Page not found (404)
+Request Method:     GET
+Request URL:        http://localhost:8000/...
+
+Using the URLconf defined in project.urls, Django tried these URL patterns, in this order:
+
+    ^admin/
+    ...
+    ^(?P&lt;dmp_page&gt;[_a-zA-Z0-9\-]+)/(?P&lt;dmp_urlparams&gt;.+?)/?$ ◉︵◉ Pattern matched, but discovery failed: module &quot;homepage.views.process_request&quot; could not be imported: cannot import name &#39;...&#39; from &#39;...&#39;
+
+The current path, ..., didn&#39;t match any of these.
+
+You&#39;re seeing this error because you have DEBUG = True in your Django settings file. Change that to False, and Django will display a standard 404 page.
+</pre></div>
+</div>
+</div>
+<div class="section" id="why-is-dmp-is-logging-to-the-browser-console">
+<h3>Why is DMP is logging to the browser console?<a class="headerlink" href="#why-is-dmp-is-logging-to-the-browser-console" title="Permalink to this headline">¶</a></h3>
+<p>The automatic inclusion of JS and CSS is a common trouble spot for new users of DMP, so we log debug information to both the Python and browser consoles.</p>
+<p>To turn these messages off, adjust the DMP logger in your settings to any level above DEBUG:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">LOGGING</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="o">...</span>
+    <span class="s1">&#39;loggers&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="o">...</span>
+        <span class="s1">&#39;django_mako_plus&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s1">&#39;handlers&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;console_handler&#39;</span><span class="p">],</span>
+            <span class="s1">&#39;level&#39;</span><span class="p">:</span> <span class="s1">&#39;WARNING&#39;</span><span class="p">,</span>     <span class="c1"># DMP messages in browser console only show if DEBUG</span>
+        <span class="p">},</span>
+    <span class="p">},</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="is-dmp-common-min-js-really-necessary">
+<h3>Is <code class="docutils literal notranslate"><span class="pre">dmp-common.min.js</span></code> really necessary?<a class="headerlink" href="#is-dmp-common-min-js-really-necessary" title="Permalink to this headline">¶</a></h3>
+<p>Normally, yes. It supports DMP’s providers (automatic JS/CSS links). The file is only 3K, but yeah, I get it. 3K here, 2K there, and pretty soon we have lots of K.</p>
+<p>You CAN move it into your codebase or bundle, though. Just be sure you always match the version of this file with the version of DMP you’re using. DMP will display a warning (in the browser console) if the version is mismatched between the server DMP and client DMP file.</p>
+<p>To move it into your codebase:</p>
+<ol class="arabic simple">
+<li>Copy the file from DMP’s source code to a web-accessible location in your codebase. You can find DMP’s local directory with: <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">-c</span> <span class="pre">'import</span> <span class="pre">django_mako_plus;</span> <span class="pre">print(django_mako_plus.__file__)'</span></code></li>
+<li>Open <code class="docutils literal notranslate"><span class="pre">base.htm</span></code> and adjust <code class="docutils literal notranslate"><span class="pre">&lt;script</span> <span class="pre">src=&quot;/django_mako_plus/dmp-common.min.js&quot;&gt;&lt;/script&gt;</span></code> for the new location.</li>
+<li>Be sure this script is loaded before the call to <code class="docutils literal notranslate"><span class="pre">django_mako_plus.links()</span></code>.</li>
+</ol>
+<p>If you don’t need the auto-link-creation feature of DMP, you can entirely remove it. Just open <code class="docutils literal notranslate"><span class="pre">base.htm</span></code> and remove these lines:</p>
+<div class="highlight-html notranslate"><div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">script</span> <span class="na">src</span><span class="o">=</span><span class="s">&quot;/django_mako_plus/dmp-common.min.js&quot;</span><span class="p">&gt;&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+${ django_mako_plus.links(self) }
+</pre></div>
+</div>
+</div>
+<div class="section" id="i-updated-dmp-but-browsers-report-the-old-dmp-common-min-js">
+<h3>I updated DMP, but browsers report the old <code class="docutils literal notranslate"><span class="pre">dmp-common.min.js</span></code>.<a class="headerlink" href="#i-updated-dmp-but-browsers-report-the-old-dmp-common-min-js" title="Permalink to this headline">¶</a></h3>
+<p>This is a caching issue, and it can occur with any of your static files (.js, .css, .png, others). Once browsers download the file from your server, they don’t check for new versions for a few days (or even weeks). Your server might have a new version of a file, but the browser doesn’t know to get it!</p>
+<p>A common solution is to add the server start time to all of your links. Since the server start time changes each time you update/bounce the server, the filename changes. Browsers see the new filename in your HTML and think it’s an entirely new file being linked. This is called “busting the cache”.</p>
+<p>One way to implement this is to add the server time to your settings. In <code class="docutils literal notranslate"><span class="pre">settings.py</span></code>, add the following:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">time</span>
+<span class="n">SERVER_START</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">*</span> <span class="mf">1000.0</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Then in your HTML files, add the server start time to your static file links:</p>
+<div class="highlight-html notranslate"><div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">script</span> <span class="na">src</span><span class="o">=</span><span class="s">&quot;/django_mako_plus/dmp-common.js?${ settings.SERVER_START }&quot;</span><span class="p">&gt;&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+</pre></div>
+</div>
+<p>The links created by DMP automatically bust the cache in a similar way by adding a CRC32 hash of file contents. That hash code changes whenever you make changes to the files.</p>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="topics.html" class="btn btn-neutral float-right" title="Basic Concepts" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="tutorial_ajax.html" class="btn btn-neutral" title="T5: Ajax" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Conan C. Albrecht
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+    
+
+  
+
+  <script type="text/javascript" src="_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

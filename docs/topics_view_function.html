@@ -1,0 +1,312 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Customizing @view_function &mdash; Django-Mako-Plus  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/dmp.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Rendering Partial Templates for Ajax" href="topics_partial_templates.html" />
+    <link rel="prev" title="Lazy Rendering with TemplateResponse" href="topics_responses.html" /> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> Django-Mako-Plus
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="compare.html">Comparison with Django</a></li>
+<li class="toctree-l1"><a class="reference internal" href="upgrade_notes.html">Upgrade Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">FAQ</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="topics.html">Basic Concepts</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="topics_settings.html"><code class="docutils literal notranslate"><span class="pre">settings.py</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_escaping.html">Escaping Special Characters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_variables.html">Metadata about the Request</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_modules.html">Python Imports in Templates</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_third_party.html">Using Third-Party Apps</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_paths.html">Inheritance Paths and Template Location</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_convenience.html">Convenience Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_redirecting.html">Redirecting the Browser</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_csrf.html">CSRF Tokens</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_class_views.html">Class-Based Views</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_django.html">Using the Django API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_responses.html">Lazy Rendering with <code class="docutils literal notranslate"><span class="pre">TemplateResponse</span></code></a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Customizing <code class="docutils literal notranslate"><span class="pre">&#64;view_function</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#using-keyword-arguments">Using Keyword Arguments</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#example-authenticated-endpoints">Example: Authenticated Endpoints</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="topics_partial_templates.html">Rendering Partial Templates for Ajax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_other_syntax.html">Combining Django and Mako Templates</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_signals.html">Signals in DMP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_translation.html">Internationalization</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="converters.html">Parameter Conversion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="static.html">Static Files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="deploy.html">Deployment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="editors.html">Editors</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Django-Mako-Plus</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="topics.html">Basic Concepts</a> &raquo;</li>
+        
+      <li>Customizing <code class="docutils literal notranslate"><span class="pre">&#64;view_function</span></code></li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="customizing-view-function">
+<span id="topics-view-function"></span><h1>Customizing <code class="docutils literal notranslate"><span class="pre">&#64;view_function</span></code><a class="headerlink" href="#customizing-view-function" title="Permalink to this headline">¶</a></h1>
+<p>Since the <code class="docutils literal notranslate"><span class="pre">&#64;view_function</span></code> decorator must be placed on all view functions in your system, it’s a great place to do pre-endpoint logic.  The decorator was intentionally programmed as a class-based decorator so you can extend it.</p>
+<blockquote>
+<div>Django provide several ways to insert logic into the request process, so be sure to consider which is the cleanest approach for your situation: the approach here, middleware, signals, or another method.</div></blockquote>
+<div class="section" id="using-keyword-arguments">
+<h2>Using Keyword Arguments<a class="headerlink" href="#using-keyword-arguments" title="Permalink to this headline">¶</a></h2>
+<p>Although we normally specify <code class="docutils literal notranslate"><span class="pre">&#64;view_function</span></code> without any arguments, it can take an arbitrary number of keyword arguments. The following are some examples:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># the normal decorator</span>
+<span class="nd">@view_function</span>
+
+<span class="c1"># ensure the user has a role of &quot;mentor&quot;</span>
+<span class="nd">@view_function</span><span class="p">(</span><span class="n">role</span><span class="o">=</span><span class="s1">&#39;mentors&#39;</span><span class="p">)</span>
+
+<span class="c1"># require authenticated access, set response type to text/html</span>
+<span class="nd">@view_function</span><span class="p">(</span><span class="n">auth_required</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">mimetype</span><span class="o">=</span><span class="s1">&#39;text/html&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Through a simple extension, you can access the parameters above and do custom logic–just before process_request is called.</p>
+</div>
+<div class="section" id="example-authenticated-endpoints">
+<h2>Example: Authenticated Endpoints<a class="headerlink" href="#example-authenticated-endpoints" title="Permalink to this headline">¶</a></h2>
+<p>Suppose your site requires authentication on nearly every endpoint in the system. Normally, you’d add Django’s <code class="docutils literal notranslate"><span class="pre">&#64;login_required</span></code> decorator to endpoints, like this:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.contrib.auth.decorators</span> <span class="kn">import</span> <span class="n">login_required</span>
+<span class="kn">from</span> <span class="nn">django_mako_plus</span> <span class="kn">import</span> <span class="n">view_function</span>
+
+<span class="nd">@login_required</span>
+<span class="nd">@view_function</span>
+<span class="k">def</span> <span class="nf">process_request</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="o">...</span>
+</pre></div>
+</div>
+<p>Rather than hope every endpoint gets marked with the decorator, let’s modify DMP’s view function decorator to require access by default. Create the following in a file called <code class="docutils literal notranslate"><span class="pre">lib/router.py</span></code>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.conf</span> <span class="kn">import</span> <span class="n">settings</span>
+<span class="kn">from</span> <span class="nn">django.http</span> <span class="kn">import</span> <span class="n">HttpResponseRedirect</span>
+<span class="kn">from</span> <span class="nn">django_mako_plus</span> <span class="kn">import</span> <span class="n">view_function</span>
+<span class="kn">import</span> <span class="nn">inspect</span>
+
+
+<span class="k">class</span> <span class="nc">web_endpoint</span><span class="p">(</span><span class="n">view_function</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Marks a view function in the system (with auth required by default)&#39;&#39;&#39;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">decorated_func</span><span class="p">,</span> <span class="n">auth_required</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">auth_required</span> <span class="o">=</span> <span class="n">auth_required</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">decorated_func</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="c1"># ensure authenticated</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">auth_required</span> <span class="ow">and</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">is_anonymous</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">HttpResponseRedirect</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">LOGIN_URL</span><span class="p">)</span>
+
+        <span class="c1"># allow the call to continue</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__call__</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Then, use this decorator <strong>instead</strong> of the normal view function decorator. In fact, do a global search and replace of <code class="docutils literal notranslate"><span class="pre">&#64;view_function</span></code>, and replace it with <code class="docutils literal notranslate"><span class="pre">&#64;secure_function</span></code>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">lib.router</span> <span class="kn">import</span> <span class="n">secure_function</span>
+
+<span class="nd">@secure_function</span>
+<span class="k">def</span> <span class="nf">process_request</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="o">...</span>
+</pre></div>
+</div>
+<p>When DMP calls your view functions, it now runs <code class="docutils literal notranslate"><span class="pre">lib.router.secure_function.__call__</span></code>. Our function redirects if the current user isn’t authenticated yet. If the user is authenticated, we call the super’s <code class="docutils literal notranslate"><span class="pre">__call__</span></code> method, which runs the view function. Just like that, every endpoint in the system is protected by default. Yeah, you know you rock!</p>
+<p>For endpoints that need to allow anonymous access, the <code class="docutils literal notranslate"><span class="pre">auth_required</span></code> parameter signals that anyone can access the endpoint:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">lib.router</span> <span class="kn">import</span> <span class="n">secure_function</span>
+
+<span class="nd">@secure_function</span><span class="p">(</span><span class="n">auth_required</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">process_request</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="c1"># even balrogs allowed to pass!</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="topics_partial_templates.html" class="btn btn-neutral float-right" title="Rendering Partial Templates for Ajax" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="topics_responses.html" class="btn btn-neutral" title="Lazy Rendering with TemplateResponse" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Conan C. Albrecht
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+    
+
+  
+
+  <script type="text/javascript" src="_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

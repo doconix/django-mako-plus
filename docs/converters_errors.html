@@ -1,0 +1,290 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Errors During Conversion &mdash; Django-Mako-Plus  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/dmp.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Raw Parameter Values" href="converters_raw.html" />
+    <link rel="prev" title="Customizing the Converter" href="converters_replacing.html" /> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> Django-Mako-Plus
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="compare.html">Comparison with Django</a></li>
+<li class="toctree-l1"><a class="reference internal" href="upgrade_notes.html">Upgrade Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="topics.html">Basic Concepts</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="converters.html">Parameter Conversion</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="converters_types.html">Supported Types</a></li>
+<li class="toctree-l2"><a class="reference internal" href="converters_adding.html">Adding a New Type</a></li>
+<li class="toctree-l2"><a class="reference internal" href="converters_replacing.html">Customizing the Converter</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Errors During Conversion</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#customizing">Customizing</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="converters_raw.html">Raw Parameter Values</a></li>
+<li class="toctree-l2"><a class="reference internal" href="converters_decorators.html">Non-Wrapping Decorators</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="static.html">Static Files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="deploy.html">Deployment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="editors.html">Editors</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Django-Mako-Plus</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="converters.html">Parameter Conversion</a> &raquo;</li>
+        
+      <li>Errors During Conversion</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="errors-during-conversion">
+<span id="converters-errors"></span><h1>Errors During Conversion<a class="headerlink" href="#errors-during-conversion" title="Permalink to this headline">¶</a></h1>
+<p>When conversion fails, the default behavior of DMP is to raise an <code class="docutils literal notranslate"><span class="pre">Http404</span></code> exception, indicating to the browser that the given url does not exist. Most of the time, this makes sense because it is, in effect, an invalid URL.</p>
+<p>Resolution is as follows:</p>
+<ul class="simple">
+<li>If a converter function raises <code class="docutils literal notranslate"><span class="pre">ValueError</span></code> on any parameter, an Http 404 response is returned to the browser, indicating that the conversion failed for “normal” reasons.</li>
+<li>If a converter function raises any other type of exception, a <code class="docutils literal notranslate"><span class="pre">ConverterException</span></code> is raised, indicating that an unexpected error occurred during conversion. This generally returns an Http 500 server error to the browser.</li>
+</ul>
+<div class="section" id="customizing">
+<h2>Customizing<a class="headerlink" href="#customizing" title="Permalink to this headline">¶</a></h2>
+<p>Enough of this 404 rudeness! Suppose we want to be more forgiving of converter failures. When converter functions raise <code class="docutils literal notranslate"><span class="pre">ValueError</span></code>, we’ll use the view function defaults and let processing continue normally.</p>
+<p>For example, consider the following view function in <code class="docutils literal notranslate"><span class="pre">index.py</span></code>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django_mako_plus</span> <span class="kn">import</span> <span class="n">view_function</span>
+
+<span class="nd">@view_function</span>
+<span class="k">def</span> <span class="nf">process_request</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">age</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="o">...</span>
+</pre></div>
+</div>
+<p>With this view function:</p>
+<ul class="simple">
+<li><code class="docutils literal notranslate"><span class="pre">/homepage/index/5/</span></code> works perfectly: the function is called with <code class="docutils literal notranslate"><span class="pre">age=5</span></code>.</li>
+<li><code class="docutils literal notranslate"><span class="pre">/homepage/index/asdf/</span></code> fails the conversion to integer: the Http 404 page is returned.</li>
+</ul>
+<p>Let’s extend the <code class="docutils literal notranslate"><span class="pre">ParameterConverter</span></code> class to catch the 404 and return the default. Add the following to <code class="docutils literal notranslate"><span class="pre">/homepage/apps.py</span></code>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.apps</span> <span class="kn">import</span> <span class="n">AppConfig</span>
+<span class="kn">from</span> <span class="nn">django.http</span> <span class="kn">import</span> <span class="n">Http404</span>
+<span class="kn">from</span> <span class="nn">django_mako_plus</span> <span class="kn">import</span> <span class="n">ParameterConverter</span>
+<span class="kn">import</span> <span class="nn">inspect</span>
+
+<span class="k">class</span> <span class="nc">HomepageConfig</span><span class="p">(</span><span class="n">AppConfig</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;homepage&#39;</span>
+
+
+<span class="k">class</span> <span class="nc">ForgivingConverter</span><span class="p">(</span><span class="n">ParameterConverter</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Uses defaults for values that cannot be converted (instead of the usual 404)&#39;&#39;&#39;</span>
+
+    <span class="k">def</span> <span class="nf">convert_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">parameter</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>                                <span class="c1"># try the normal conversion process</span>
+            <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">convert_value</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">parameter</span><span class="p">,</span> <span class="n">request</span><span class="p">)</span>
+
+        <span class="k">except</span> <span class="n">Http404</span><span class="p">:</span>                     <span class="c1"># converter function raised a ValueError</span>
+            <span class="k">if</span> <span class="n">parameter</span><span class="o">.</span><span class="n">default</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">inspect</span><span class="o">.</span><span class="n">Parameter</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">parameter</span><span class="o">.</span><span class="n">default</span>    <span class="c1"># return the default specified in process_request() signature</span>
+            <span class="k">return</span> <span class="bp">None</span>                     <span class="c1"># return None if signature has no default</span>
+</pre></div>
+</div>
+<p>Activate the custom converter in <code class="docutils literal notranslate"><span class="pre">settings.py</span></code>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">TEMPLATES</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">{</span>
+        <span class="s1">&#39;NAME&#39;</span><span class="p">:</span> <span class="s1">&#39;django_mako_plus&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;BACKEND&#39;</span><span class="p">:</span> <span class="s1">&#39;django_mako_plus.MakoTemplates&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;OPTIONS&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s1">&#39;PARAMETER_CONVERTER&#39;</span><span class="p">:</span> <span class="s1">&#39;homepage.apps.ForgivingConverter&#39;</span><span class="p">,</span>
+            <span class="o">...</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+<p>With the above setup, converter failures will no longer trigger a 404. Instead, the default value is used anytime a conversion fails.</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="converters_raw.html" class="btn btn-neutral float-right" title="Raw Parameter Values" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="converters_replacing.html" class="btn btn-neutral" title="Customizing the Converter" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Conan C. Albrecht
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+    
+
+  
+
+  <script type="text/javascript" src="_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

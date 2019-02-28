@@ -1,0 +1,387 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>T1: Meet DMP &mdash; Django-Mako-Plus  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/dmp.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="T2: .py View Files" href="tutorial_views.html" />
+    <link rel="prev" title="Tutorial" href="tutorial.html" /> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> Django-Mako-Plus
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="compare.html">Comparison with Django</a></li>
+<li class="toctree-l1"><a class="reference internal" href="upgrade_notes.html">Upgrade Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="tutorial.html">Tutorial</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">T1: Meet DMP</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#for-the-impatient">For the Impatient</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#your-new-app">Your New App</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#your-first-pages">Your First Pages</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#possible-errors">Possible Errors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#goodbye-urls-py">Goodbye, urls.py</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial_views.html">T2: .py View Files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial_parameters.html">T3: URL Parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial_css_js.html">T4: zip(HTML, JS, CSS)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial_ajax.html">T5: Ajax</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="topics.html">Basic Concepts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="converters.html">Parameter Conversion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="static.html">Static Files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="deploy.html">Deployment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="editors.html">Editors</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Django-Mako-Plus</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="tutorial.html">Tutorial</a> &raquo;</li>
+        
+      <li>T1: Meet DMP</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="t1-meet-dmp">
+<span id="tutorial-meet-dmp"></span><h1><a class="toc-backref" href="#id1">T1: Meet DMP</a><a class="headerlink" href="#t1-meet-dmp" title="Permalink to this headline">¶</a></h1>
+<div class="contents topic" id="contents">
+<p class="topic-title first">Contents</p>
+<ul class="simple">
+<li><a class="reference internal" href="#t1-meet-dmp" id="id1">T1: Meet DMP</a><ul>
+<li><a class="reference internal" href="#for-the-impatient" id="id2">For the Impatient</a></li>
+<li><a class="reference internal" href="#your-new-app" id="id3">Your New App</a></li>
+<li><a class="reference internal" href="#your-first-pages" id="id4">Your First Pages</a></li>
+<li><a class="reference internal" href="#possible-errors" id="id5">Possible Errors</a></li>
+<li><a class="reference internal" href="#goodbye-urls-py" id="id6">Goodbye, urls.py</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<p>I’ll assume you’ve just installed Django-Mako-Plus according to the <a class="reference external" href="installation.html">installation instructions</a>. You should have a <code class="docutils literal notranslate"><span class="pre">mysite</span></code> project directory that contains a <code class="docutils literal notranslate"><span class="pre">homepage</span></code> app. I’ll further assume you know how to open a terminal/console and <code class="docutils literal notranslate"><span class="pre">cd</span></code> to the <code class="docutils literal notranslate"><span class="pre">mysite</span></code> directory. Most of the commands below are typed into the terminal in this directory.</p>
+<p><strong>Quick Start:</strong> You already have a default page in the new app, so fire up your server with <code class="docutils literal notranslate"><span class="pre">python3</span> <span class="pre">manage.py</span> <span class="pre">runserver</span></code> and go to <a class="reference external" href="http://localhost:8000/homepage/index/">http://localhost:8000/homepage/index/</a>.</p>
+<p>You should see a congratulations page. If you don’t, go back to the installation section and walk through the steps again. Your console might have valuable error messages to help troubleshoot things.</p>
+<div class="section" id="for-the-impatient">
+<h2><a class="toc-backref" href="#id2">For the Impatient</a><a class="headerlink" href="#for-the-impatient" title="Permalink to this headline">¶</a></h2>
+<p>If you are an experienced web developer and just want to get going, check out the example files in your new app:</p>
+<ul class="simple">
+<li><code class="docutils literal notranslate"><span class="pre">homepage/template/base.htm</span></code></li>
+<li><code class="docutils literal notranslate"><span class="pre">homepage/template/index.htm</span></code></li>
+<li><code class="docutils literal notranslate"><span class="pre">homepage/styles/index.css</span></code></li>
+<li><code class="docutils literal notranslate"><span class="pre">homepage/scripts/index.js</span></code></li>
+</ul>
+<p>These files contain example code that follows the primary patterns of DMP.</p>
+</div>
+<div class="section" id="your-new-app">
+<h2><a class="toc-backref" href="#id3">Your New App</a><a class="headerlink" href="#your-new-app" title="Permalink to this headline">¶</a></h2>
+<p>Let’s explore the directory structure of your new app:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">homepage</span><span class="o">/</span>
+    <span class="n">media</span><span class="o">/</span>
+    <span class="n">scripts</span><span class="o">/</span>
+        <span class="n">index</span><span class="o">.</span><span class="n">js</span>
+    <span class="n">styles</span><span class="o">/</span>
+        <span class="n">base</span><span class="o">.</span><span class="n">css</span>
+        <span class="n">index</span><span class="o">.</span><span class="n">css</span>
+    <span class="n">templates</span><span class="o">/</span>
+        <span class="n">base_ajax</span><span class="o">.</span><span class="n">htm</span>
+        <span class="n">base</span><span class="o">.</span><span class="n">htm</span>
+        <span class="n">index</span><span class="o">.</span><span class="n">html</span>
+    <span class="n">views</span><span class="o">/</span>
+        <span class="fm">__init__</span><span class="o">.</span><span class="n">py</span>
+    <span class="fm">__init__</span><span class="o">.</span><span class="n">py</span>
+    <span class="n">apps</span><span class="o">.</span><span class="n">py</span>
+    <span class="n">models</span><span class="o">.</span><span class="n">py</span>
+    <span class="n">tests</span><span class="o">.</span><span class="n">py</span>
+</pre></div>
+</div>
+<p>The directories should be fairly self-explanatory. Note they are <strong>different</strong> than a traditional Django app structure.  In short, put images and other support files in media/, Javascript in scripts/, CSS in styles/, html files in templates/, and Django views in views/.</p>
+<blockquote>
+<div>Note that a common pattern among Django developers is converting several files to directories: <code class="docutils literal notranslate"><span class="pre">models.py</span></code> to <code class="docutils literal notranslate"><span class="pre">models/</span></code> and <code class="docutils literal notranslate"><span class="pre">tests.py</span></code> to <code class="docutils literal notranslate"><span class="pre">tests/</span></code>, but that’s a discussion outside of DMP.</div></blockquote>
+</div>
+<div class="section" id="your-first-pages">
+<h2><a class="toc-backref" href="#id4">Your First Pages</a><a class="headerlink" href="#your-first-pages" title="Permalink to this headline">¶</a></h2>
+<p>Let’s start with the two primary html template files: <code class="docutils literal notranslate"><span class="pre">base.htm</span></code> and <code class="docutils literal notranslate"><span class="pre">index.html</span></code>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">index.html</span></code> is pretty simple:</p>
+<div class="highlight-html+mako notranslate"><div class="highlight"><pre><span></span><span class="cp">&lt;%</span><span class="nb">inherit</span> <span class="na">file=</span><span class="s">&quot;base.htm&quot;</span> <span class="cp">/&gt;</span>
+
+<span class="cp">&lt;%</span><span class="nb">block</span> <span class="na">name=</span><span class="s">&quot;content&quot;</span><span class="cp">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">div</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;content&quot;</span><span class="p">&gt;</span>
+      <span class="p">&lt;</span><span class="nt">h3</span><span class="p">&gt;</span>Congratulations -- you&#39;ve successfully created a new django-mako-plus app!<span class="p">&lt;/</span><span class="nt">h3</span><span class="p">&gt;</span>
+      <span class="p">&lt;</span><span class="nt">h4</span><span class="p">&gt;</span>Next Up: Go through the django-mako-plus tutorial and add Javascript, CSS, and urlparams to this page.<span class="p">&lt;/</span><span class="nt">h4</span><span class="p">&gt;</span>
+      <span class="p">&lt;</span><span class="nt">h4</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;utc-time&quot;</span><span class="p">&gt;</span>Current time in UTC: <span class="cp">${</span> <span class="n">utc_time</span> <span class="cp">}</span><span class="p">&lt;/</span><span class="nt">h4</span><span class="p">&gt;</span>
+    <span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+<span class="cp">&lt;/%</span><span class="nb">block</span><span class="cp">&gt;</span>
+</pre></div>
+</div>
+<p>If you are familiar with Django templates, you’ll recognize the template inheritance in the <code class="docutils literal notranslate"><span class="pre">&lt;%inherit/&gt;</span></code> tag. However, this is Mako code, not Django code, so the syntax is a little different. The file defines a single block, called <code class="docutils literal notranslate"><span class="pre">content</span></code>, that is plugged into the block by the same name in the code below.</p>
+<p>The real HTML is kept in the <code class="docutils literal notranslate"><span class="pre">base.htm</span></code> file. It looks like this:</p>
+<div class="highlight-html+mako notranslate"><div class="highlight"><pre><span></span><span class="cp">## this is the skeleton of all pages on in this app - it defines the basic html tags</span>
+<span class="cp">&lt;!DOCTYPE html&gt;</span>
+<span class="p">&lt;</span><span class="nt">html</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">meta</span> <span class="na">charset</span><span class="o">=</span><span class="s">&quot;UTF-8&quot;</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">head</span><span class="p">&gt;</span>
+
+        <span class="p">&lt;</span><span class="nt">title</span><span class="p">&gt;</span>homepage<span class="p">&lt;/</span><span class="nt">title</span><span class="p">&gt;</span>
+
+        ## add any site-wide scripts or CSS here; for example, jquery:
+        <span class="p">&lt;</span><span class="nt">script</span> <span class="na">src</span><span class="o">=</span><span class="s">&quot;http://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js&quot;</span><span class="p">&gt;&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+
+        ## render the static file links with the same name as this template
+        <span class="p">&lt;</span><span class="nt">script</span> <span class="na">src</span><span class="o">=</span><span class="s">&quot;/django_mako_plus/dmp-common.min.js&quot;</span><span class="p">&gt;&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+        <span class="cp">${</span> <span class="n">django_mako_plus</span><span class="o">.</span><span class="n">links</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="cp">}</span>
+
+    <span class="p">&lt;/</span><span class="nt">head</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">body</span><span class="p">&gt;</span>
+
+        <span class="p">&lt;</span><span class="nt">header</span><span class="p">&gt;</span>
+            <span class="p">&lt;</span><span class="nt">h1</span><span class="p">&gt;</span>Welcome to the homepage app!<span class="p">&lt;</span><span class="nt">h1</span><span class="p">&gt;</span>
+        <span class="p">&lt;/</span><span class="nt">header</span><span class="p">&gt;</span>
+
+        <span class="p">&lt;</span><span class="nt">main</span><span class="p">&gt;</span>
+            <span class="cp">&lt;%</span><span class="nb">block</span> <span class="na">name=</span><span class="s">&quot;content&quot;</span><span class="cp">&gt;</span>
+                Site content goes here in sub-templates.
+            <span class="cp">&lt;/%</span><span class="nb">block</span><span class="cp">&gt;</span>
+        <span class="p">&lt;/</span><span class="nt">main</span><span class="p">&gt;</span>
+
+    <span class="p">&lt;/</span><span class="nt">body</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">html</span><span class="p">&gt;</span>
+</pre></div>
+</div>
+<p>Pay special attention to the <code class="docutils literal notranslate"><span class="pre">&lt;%block</span> <span class="pre">name=&quot;content&quot;&gt;</span></code> section, which is overridden in <code class="docutils literal notranslate"><span class="pre">index.html</span></code>. The page given to the browser will look exactly like <code class="docutils literal notranslate"><span class="pre">base.htm</span></code>, but the <code class="docutils literal notranslate"><span class="pre">content</span></code> block will come from <code class="docutils literal notranslate"><span class="pre">index.html</span></code> rather than the one defined in the supertemplate.</p>
+<p>The purpose of the inheritance from <code class="docutils literal notranslate"><span class="pre">base.htm</span></code> is to get a consistent look, menu, etc. across all pages of your site. When you create additional pages, simply override the <code class="docutils literal notranslate"><span class="pre">content</span></code> block, similar to the way <code class="docutils literal notranslate"><span class="pre">index.html</span></code> does it.</p>
+</div>
+<div class="section" id="possible-errors">
+<h2><a class="toc-backref" href="#id5">Possible Errors</a><a class="headerlink" href="#possible-errors" title="Permalink to this headline">¶</a></h2>
+<p>First, don’t erase anything in the base.htm file. In particular, <code class="docutils literal notranslate"><span class="pre">django_mako_plus.links(self)</span></code> and the <code class="docutils literal notranslate"><span class="pre">dmp-common.min.js</span></code> script are important. As much as you probably want to clean up the mess, try your best to leave these alone.</p>
+<p><strong>‘Undefined’ object has no attribute ‘get_static’</strong></p>
+<p>If you get this error, you might need to update a setting in <code class="docutils literal notranslate"><span class="pre">settings.py</span></code>. Ensure that DMP is imported in the <code class="docutils literal notranslate"><span class="pre">DEFAULT_TEMPLATE_IMPORTS</span></code> list:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="s1">&#39;DEFAULT_TEMPLATE_IMPORTS&#39;</span><span class="p">:</span> <span class="p">[</span>
+    <span class="s1">&#39;import django_mako_plus&#39;</span><span class="p">,</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+<p>Then clear out the compiled templates caches:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python3</span> <span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">dmp_cleanup</span>
+</pre></div>
+</div>
+<p><strong>DMP_CONTEXT is not defined</strong></p>
+<p>If you get this error, the <code class="docutils literal notranslate"><span class="pre">/django_mako_plus/dmp-common.min.js</span></code> script is not being loaded.  Check the following:</p>
+<ul class="simple">
+<li>Is the <code class="docutils literal notranslate"><span class="pre">&lt;script&gt;</span></code> tag for this file in your <code class="docutils literal notranslate"><span class="pre">base.htm</span></code>?  If there, did it get moved below the <code class="docutils literal notranslate"><span class="pre">links(self)</span></code> call?  This script must be loaded on every page of your site (i.e. in the base template), and it must be loaded before DMP calls are made.</li>
+<li>Is the url pattern for this file working?  Check your <code class="docutils literal notranslate"><span class="pre">urls.py</span></code> file for <code class="docutils literal notranslate"><span class="pre">include('django_mako_plus.urls')</span></code>.  The DMP <code class="docutils literal notranslate"><span class="pre">urls.py</span></code> file contains a direct pattern for this file that allows Django to find it.</li>
+</ul>
+</div>
+<div class="section" id="goodbye-urls-py">
+<h2><a class="toc-backref" href="#id6">Goodbye, urls.py</a><a class="headerlink" href="#goodbye-urls-py" title="Permalink to this headline">¶</a></h2>
+<p>In the installation procedures above, you set your urls.py file to look something like the following:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.conf.urls</span> <span class="kn">import</span> <span class="n">url</span><span class="p">,</span> <span class="n">include</span>
+<span class="kn">from</span> <span class="nn">django.contrib</span> <span class="kn">import</span> <span class="n">admin</span>
+
+<span class="n">urlpatterns</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="c1"># the built-in Django administrator</span>
+    <span class="n">url</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;^admin/&#39;</span><span class="p">,</span> <span class="n">admin</span><span class="o">.</span><span class="n">site</span><span class="o">.</span><span class="n">urls</span><span class="p">),</span>
+
+    <span class="c1"># urls for any third-party apps go here</span>
+
+    <span class="c1"># adds all DMP-enabled apps</span>
+    <span class="n">url</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">include</span><span class="p">(</span><span class="s1">&#39;django_mako_plus.urls&#39;</span><span class="p">)),</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+<p>Rather than listing every. single. page. on. your. site. in the <code class="docutils literal notranslate"><span class="pre">urls.py</span></code> file, the router figures out the destination via a convention. The first url part is taken as the app to go to, and the second url part is taken as the view to call. See the advanced topics if you want to customize this behavior.</p>
+<p>For example, the url <code class="docutils literal notranslate"><span class="pre">/homepage/index/</span></code> routes as follows:</p>
+<ul class="simple">
+<li>The first url part <code class="docutils literal notranslate"><span class="pre">homepage</span></code> specifies the app that will be used.</li>
+<li>The second url part <code class="docutils literal notranslate"><span class="pre">index</span></code> specifies the view or html page within the app. In our example:</li>
+<li>The router first looks for <code class="docutils literal notranslate"><span class="pre">homepage/views/index.py</span></code>. In this case, it fails because we haven’t created it yet.</li>
+<li>It then looks for <code class="docutils literal notranslate"><span class="pre">homepage/templates/index.html</span></code>. It finds the file, so it renders the html through the Mako templating engine and returns it to the browser.</li>
+</ul>
+<p>The above illustrates the easiest way to show pages: simply place .html files in your templates/ directory. This is useful for pages that don’t have any “work” to do. Examples might be the “About Us” and “Terms of Service” pages. There’s usually no functionality or permissions issues with these pages, so no view function is required.</p>
+<p>You might be wondering about default URLs, such as <code class="docutils literal notranslate"><span class="pre">http://www.yourserver.com/</span></code>.  When the url doesn’t contain the app and the page, DMP uses the default app and page specified in your settings. Search for <code class="docutils literal notranslate"><span class="pre">DEFAULT_APP</span></code> and <code class="docutils literal notranslate"><span class="pre">DEFAULT_PAGE</span></code> in the full <a class="reference external" href="/basics_settings.html">settings documentation</a> for more information.</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="tutorial_views.html" class="btn btn-neutral float-right" title="T2: .py View Files" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="tutorial.html" class="btn btn-neutral" title="Tutorial" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Conan C. Albrecht
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+    
+
+  
+
+  <script type="text/javascript" src="_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

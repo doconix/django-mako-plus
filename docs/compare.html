@@ -1,0 +1,445 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Comparison with Django &mdash; Django-Mako-Plus  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/dmp.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Upgrade Notes" href="upgrade_notes.html" />
+    <link rel="prev" title="Django-Mako-Plus" href="index.html" /> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> Django-Mako-Plus
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">Home</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Comparison with Django</a></li>
+<li class="toctree-l1"><a class="reference internal" href="upgrade_notes.html">Upgrade Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="topics.html">Basic Concepts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="converters.html">Parameter Conversion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="static.html">Static Files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="deploy.html">Deployment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="editors.html">Editors</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Django-Mako-Plus</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Comparison with Django</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="comparison-with-django">
+<span id="compare"></span><h1>Comparison with Django<a class="headerlink" href="#comparison-with-django" title="Permalink to this headline">¶</a></h1>
+<p>If you have read through the Django Tutorial, you’ve seen examples for templating in Django. While the rest of Django, such as models, settings, migrations, etc., is the same with or without DMP, the way you do templates will obviously change with DMP. The following examples should help you understand the different between two template systems.</p>
+<blockquote>
+<div>Note that, for the most part, the right column uses standard Python syntax.  That’s why Mako rocks.</div></blockquote>
+<table border="1" class="docutils">
+<colgroup>
+<col width="51%" />
+<col width="49%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Django</th>
+<th class="head">DMP (Mako)</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td colspan="2"><strong>Output the value of the question variable:</strong></td>
+</tr>
+<tr class="row-odd"><td><div class="first last highlight-django notranslate"><div class="highlight"><pre><span></span><span class="cp">{{</span> <span class="nv">question</span> <span class="cp">}}</span><span class="x"></span>
+</pre></div>
+</div>
+</td>
+<td><div class="first last highlight-html+mako notranslate"><div class="highlight"><pre><span></span><span class="cp">${</span> <span class="n">question</span> <span class="cp">}</span>
+</pre></div>
+</div>
+</td>
+</tr>
+<tr class="row-even"><td colspan="2"><strong>Call a method on the User object:</strong></td>
+</tr>
+<tr class="row-odd"><td><div class="first last highlight-django notranslate"><div class="highlight"><pre><span></span><span class="cp">{{</span> <span class="nv">user.get_full_name</span> <span class="cp">}}</span><span class="x"></span>
+</pre></div>
+</div>
+</td>
+<td><div class="first last highlight-html+mako notranslate"><div class="highlight"><pre><span></span><span class="cp">${</span> <span class="n">user</span><span class="o">.</span><span class="n">get_full_name</span><span class="p">()</span> <span class="cp">}</span>
+</pre></div>
+</div>
+</td>
+</tr>
+<tr class="row-even"><td colspan="2"><strong>Call a method with parameters on the User object:</strong></td>
+</tr>
+<tr class="row-odd"><td><div class="first last highlight-django notranslate"><div class="highlight"><pre><span></span><span class="c">{# Requires a custom tag #}</span><span class="x"></span>
+</pre></div>
+</div>
+</td>
+<td><div class="first last highlight-html+mako notranslate"><div class="highlight"><pre><span></span><span class="cp">${</span> <span class="n">user</span><span class="o">.</span><span class="n">has_perm</span><span class="p">(</span><span class="s1">&#39;app.get_main_view&#39;</span><span class="p">)</span> <span class="cp">}</span>
+</pre></div>
+</div>
+</td>
+</tr>
+<tr class="row-even"><td colspan="2"><strong>Iterate through a relationship:</strong></td>
+</tr>
+<tr class="row-odd"><td><div class="first last highlight-django notranslate"><div class="highlight"><pre><span></span><span class="x">&lt;ul&gt;</span>
+<span class="x">    </span><span class="cp">{%</span> <span class="k">for</span> <span class="nv">choice</span> <span class="k">in</span> <span class="nv">question.choice_set.all</span> <span class="cp">%}</span><span class="x"></span>
+<span class="x">        &lt;li&gt;</span><span class="cp">{{</span> <span class="nv">choice.choice_text</span> <span class="cp">}}</span><span class="x">&lt;/li&gt;</span>
+<span class="x">    </span><span class="cp">{%</span> <span class="k">endfor</span> <span class="cp">%}</span><span class="x"></span>
+<span class="x">&lt;/ul&gt;</span>
+</pre></div>
+</div>
+</td>
+<td><div class="first last highlight-html+mako notranslate"><div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">ul</span><span class="p">&gt;</span>
+    <span class="cp">%</span><span class="k">for</span> <span class="n">choice</span> <span class="ow">in</span> <span class="n">question</span><span class="o">.</span><span class="n">choice_set</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+        <span class="p">&lt;</span><span class="nt">li</span><span class="p">&gt;</span><span class="cp">${</span> <span class="n">choice</span><span class="o">.</span><span class="n">choice_text</span> <span class="cp">}</span><span class="p">&lt;/</span><span class="nt">li</span><span class="p">&gt;</span>
+    <span class="cp">%</span><span class="k">endfor</span>
+<span class="p">&lt;/</span><span class="nt">ul</span><span class="p">&gt;</span>
+</pre></div>
+</div>
+</td>
+</tr>
+<tr class="row-even"><td colspan="2"><strong>Set a variable:</strong></td>
+</tr>
+<tr class="row-odd"><td><div class="first last highlight-django notranslate"><div class="highlight"><pre><span></span><span class="cp">{%</span> <span class="k">with</span> <span class="nv">name</span><span class="o">=</span><span class="s2">&quot;Sam&quot;</span> <span class="cp">%}</span><span class="x"></span>
+</pre></div>
+</div>
+</td>
+<td><div class="first last highlight-html+mako notranslate"><div class="highlight"><pre><span></span><span class="cp">&lt;%</span> <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;Sam&quot;</span> <span class="cp">%&gt;</span>
+</pre></div>
+</div>
+</td>
+</tr>
+<tr class="row-even"><td colspan="2"><strong>Format a date:</strong></td>
+</tr>
+<tr class="row-odd"><td><div class="first last highlight-django notranslate"><div class="highlight"><pre><span></span><span class="cp">{{</span> <span class="nv">value</span><span class="o">|</span><span class="nf">date</span><span class="s2">:&quot;D d M Y&quot;</span> <span class="cp">}}</span><span class="x"></span>
+</pre></div>
+</div>
+</td>
+<td><div class="first last highlight-html+mako notranslate"><div class="highlight"><pre><span></span><span class="cp">${</span> <span class="n">value</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%D </span><span class="si">%d</span><span class="s1"> %M %Y&#39;</span><span class="p">)</span> <span class="cp">}</span>
+</pre></div>
+</div>
+</td>
+</tr>
+<tr class="row-even"><td colspan="2"><strong>Join a list:</strong></td>
+</tr>
+<tr class="row-odd"><td><div class="first last highlight-django notranslate"><div class="highlight"><pre><span></span><span class="cp">{{</span> <span class="nv">mylist</span> <span class="o">|</span> <span class="nf">join</span><span class="s1">:&#39;, &#39;</span> <span class="cp">}}</span><span class="x"></span>
+</pre></div>
+</div>
+</td>
+<td><div class="first last highlight-html+mako notranslate"><div class="highlight"><pre><span></span><span class="cp">${</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">mylist</span><span class="p">)</span> <span class="cp">}</span>
+</pre></div>
+</div>
+</td>
+</tr>
+<tr class="row-even"><td colspan="2"><strong>Use the /static prefix:</strong></td>
+</tr>
+<tr class="row-odd"><td><div class="first last highlight-django notranslate"><div class="highlight"><pre><span></span><span class="cp">{%</span> <span class="k">load</span> <span class="nv">static</span> <span class="cp">%}</span><span class="x"></span>
+<span class="x">&lt;img src=&quot;</span><span class="cp">{%</span> <span class="k">get_static_prefix</span> <span class="cp">%}</span><span class="x">images/hi.jpg&quot;/&gt;</span>
+</pre></div>
+</div>
+</td>
+<td><div class="first last highlight-html+mako notranslate"><div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">img</span> <span class="na">src</span><span class="o">=</span><span class="s">&quot;</span><span class="cp">${</span> <span class="n">STATIC_ROOT</span> <span class="cp">}</span><span class="s">images/hi.jpg&quot;</span><span class="p">/&gt;</span>
+</pre></div>
+</div>
+</td>
+</tr>
+<tr class="row-even"><td colspan="2"><strong>Call a Python method:</strong></td>
+</tr>
+<tr class="row-odd"><td><div class="first last highlight-django notranslate"><div class="highlight"><pre><span></span><span class="cp">{%</span> <span class="k">Requires</span> <span class="nv">a</span> <span class="nv">custom</span> <span class="nv">tag</span><span class="o">,</span> <span class="nv">unless</span> <span class="nv">a</span>    <span class="cp">%}</span><span class="x"></span>
+<span class="cp">{%</span> <span class="k">built</span><span class="o">-</span><span class="k">in</span> <span class="nv">tag</span> <span class="nv">provides</span> <span class="nv">the</span> <span class="nv">behavior</span> <span class="cp">%}</span><span class="x"></span>
+</pre></div>
+</div>
+</td>
+<td><div class="first last highlight-html+mako notranslate"><div class="highlight"><pre><span></span><span class="cp">## Any Python method can be called:</span>
+<span class="cp">&lt;%!</span> <span class="kn">import</span> <span class="nn">random</span> <span class="cp">%&gt;</span>
+<span class="cp">${</span> <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span> <span class="cp">}</span>
+</pre></div>
+</div>
+</td>
+</tr>
+<tr class="row-even"><td colspan="2"><strong>Print a Django form:</strong></td>
+</tr>
+<tr class="row-odd"><td><div class="first last highlight-django notranslate"><div class="highlight"><pre><span></span><span class="x">&lt;form action=&quot;/your-name/&quot; method=&quot;post&quot;&gt;</span>
+<span class="x">    </span><span class="cp">{%</span> <span class="k">csrf_token</span> <span class="cp">%}</span><span class="x"></span>
+<span class="x">    </span><span class="cp">{{</span> <span class="nv">form</span> <span class="cp">}}</span><span class="x"></span>
+<span class="x">    &lt;input type=&quot;submit&quot; value=&quot;Submit&quot; /&gt;</span>
+<span class="x">&lt;/form&gt;</span>
+</pre></div>
+</div>
+</td>
+<td><div class="first last highlight-html+mako notranslate"><div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">form</span> <span class="na">action</span><span class="o">=</span><span class="s">&quot;/your-name/&quot;</span> <span class="na">method</span><span class="o">=</span><span class="s">&quot;post&quot;</span><span class="p">&gt;</span>
+    <span class="cp">${</span> <span class="n">csrf_input</span> <span class="cp">}</span>
+    <span class="cp">${</span> <span class="n">form</span> <span class="cp">}</span>
+    <span class="p">&lt;</span><span class="nt">input</span> <span class="na">type</span><span class="o">=</span><span class="s">&quot;submit&quot;</span> <span class="na">value</span><span class="o">=</span><span class="s">&quot;Submit&quot;</span> <span class="p">/&gt;</span>
+<span class="p">&lt;/</span><span class="nt">form</span><span class="p">&gt;</span>
+</pre></div>
+</div>
+</td>
+</tr>
+<tr class="row-even"><td colspan="2"><strong>Output a default if empty:</strong></td>
+</tr>
+<tr class="row-odd"><td><div class="first last highlight-django notranslate"><div class="highlight"><pre><span></span><span class="cp">{{</span> <span class="nv">value</span> <span class="o">|</span> <span class="nf">default</span><span class="s2">:&quot;nothing&quot;</span> <span class="cp">}}</span><span class="x"></span>
+</pre></div>
+</div>
+</td>
+<td><div class="first last highlight-html+mako notranslate"><div class="highlight"><pre><span></span><span class="cp">## Use a boolean:</span>
+<span class="cp">${</span> <span class="n">value</span> <span class="ow">or</span> <span class="s2">&quot;nothing&quot;</span> <span class="cp">}</span>
+
+<span class="cp">## or use a Python if statement:</span>
+<span class="cp">${</span> <span class="n">value</span> <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="k">else</span> <span class="s2">&quot;nothing&quot;</span> <span class="cp">}</span>
+</pre></div>
+</div>
+</td>
+</tr>
+<tr class="row-even"><td colspan="2">Run arbitrary Python:</td>
+</tr>
+<tr class="row-odd"><td><div class="first last highlight-django notranslate"><div class="highlight"><pre><span></span><span class="c">{# Requires a custom tag  #}</span><span class="x"></span>
+</pre></div>
+</div>
+</td>
+<td><div class="first last highlight-html+mako notranslate"><div class="highlight"><pre><span></span><span class="cp">## Keep it simple, Tex!</span>
+<span class="cp">&lt;%</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">while</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">10</span><span class="p">:</span>
+        <span class="n">context</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;&lt;p&gt;Testing {0}&lt;/p&gt;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+    <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+<span class="cp">%&gt;</span>
+</pre></div>
+</div>
+</td>
+</tr>
+<tr class="row-even"><td colspan="2"><strong>Inherit another template:</strong></td>
+</tr>
+<tr class="row-odd"><td><div class="first last highlight-django notranslate"><div class="highlight"><pre><span></span><span class="cp">{%</span> <span class="k">extends</span> <span class="s2">&quot;base.html&quot;</span> <span class="cp">%}</span><span class="x"></span>
+</pre></div>
+</div>
+</td>
+<td><div class="first last highlight-html+mako notranslate"><div class="highlight"><pre><span></span><span class="cp">&lt;%</span><span class="nb">inherit</span> <span class="na">file=</span><span class="s">&quot;base.htm&quot;</span> <span class="cp">/&gt;</span>
+</pre></div>
+</div>
+</td>
+</tr>
+<tr class="row-even"><td colspan="2"><strong>Override a block:</strong></td>
+</tr>
+<tr class="row-odd"><td><div class="first last highlight-django notranslate"><div class="highlight"><pre><span></span><span class="cp">{%</span> <span class="k">block</span> <span class="nv">title</span> <span class="cp">%}</span><span class="x"></span>
+<span class="x">    My amazing blog</span>
+<span class="cp">{%</span> <span class="k">endblock</span> <span class="cp">%}</span><span class="x"></span>
+</pre></div>
+</div>
+</td>
+<td><div class="first last highlight-html+mako notranslate"><div class="highlight"><pre><span></span><span class="cp">&lt;%</span><span class="nb">block</span> <span class="na">name=</span><span class="s">&quot;title&quot;</span><span class="cp">&gt;</span>
+    My amazing blog
+<span class="cp">&lt;/%</span><span class="nb">block</span><span class="cp">&gt;</span>
+</pre></div>
+</div>
+</td>
+</tr>
+<tr class="row-even"><td colspan="2"><strong>Link to a CSS file:</strong></td>
+</tr>
+<tr class="row-odd"><td><div class="first last highlight-django notranslate"><div class="highlight"><pre><span></span><span class="c">{# Place in template #}</span><span class="x"></span>
+<span class="x">&lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;...&quot;&gt;</span>
+</pre></div>
+</div>
+</td>
+<td><div class="first last highlight-html+mako notranslate"><div class="highlight"><pre><span></span><span class="cp">## Automatically done by DMP (by name convention)</span>
+</pre></div>
+</div>
+</td>
+</tr>
+<tr class="row-even"><td colspan="2"><strong>Perform per-request logic in JS files:</strong></td>
+</tr>
+<tr class="row-odd"><td><div class="first last highlight-django notranslate"><div class="highlight"><pre><span></span><span class="c">{# Difficult, young padwan...very difficult #}</span><span class="x"></span>
+</pre></div>
+</div>
+</td>
+<td><div class="first last highlight-html+mako notranslate"><div class="highlight"><pre><span></span><span class="cp">## Wrap context keys with ``jscontext()``, and DMP will</span>
+<span class="cp">## make the variable available in your JS file.</span>
+</pre></div>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="upgrade_notes.html" class="btn btn-neutral float-right" title="Upgrade Notes" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="index.html" class="btn btn-neutral" title="Django-Mako-Plus" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Conan C. Albrecht
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+    
+
+  
+
+  <script type="text/javascript" src="_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

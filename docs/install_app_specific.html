@@ -1,0 +1,265 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Limiting DMP to Specific Apps &mdash; Django-Mako-Plus  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/dmp.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Custom URL Patterns" href="install_custom_urls.html" />
+    <link rel="prev" title="Using DMP to Route by Convention" href="install_as_router.html" /> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> Django-Mako-Plus
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="compare.html">Comparison with Django</a></li>
+<li class="toctree-l1"><a class="reference internal" href="upgrade_notes.html">Upgrade Notes</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="install.html">Installation</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="install_new.html">New Project</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install_existing.html">Existing Project</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="install.html#minimal-dmp">Minimal DMP</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="install_as_renderer.html">Using DMP to Render Mako Templates</a></li>
+<li class="toctree-l3"><a class="reference internal" href="install_as_router.html">Using DMP to Route by Convention</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Limiting DMP to Specific Apps</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#an-example">An Example</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="install.html#customizations">Customizations</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="topics.html">Basic Concepts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="converters.html">Parameter Conversion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="static.html">Static Files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="deploy.html">Deployment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="editors.html">Editors</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Django-Mako-Plus</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="install.html">Installation</a> &raquo;</li>
+        
+      <li>Limiting DMP to Specific Apps</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="limiting-dmp-to-specific-apps">
+<span id="install-app-specific"></span><h1>Limiting DMP to Specific Apps<a class="headerlink" href="#limiting-dmp-to-specific-apps" title="Permalink to this headline">¶</a></h1>
+<p>DMP normally registers patterns for all “local” apps in your project.  That’s the apps that are located beneath your project root.</p>
+<p>This happens when you include DMP’s URL file in your project. DMP iterates your local apps, and it adds patterns for each using <code class="docutils literal notranslate"><span class="pre">app_resolver()</span></code>.  See these <a class="reference external" href="http://github.com/doconix/django-mako-plus/blob/master/django_mako_plus/router/resolver.py">methods (especially _dmp_paths_for_app()) in the source</a>.</p>
+<p>You can disable the automatic registration of apps with DMP by removing the <code class="docutils literal notranslate"><span class="pre">include('',</span> <span class="pre">'django_mako_plus')</span></code> line from <code class="docutils literal notranslate"><span class="pre">urls.py</span></code>.  With this line removed, DMP won’t inject any convention-based patterns into your project.</p>
+<p>Now register specific apps by calling <code class="docutils literal notranslate"><span class="pre">app_resolver()</span></code> directly.</p>
+<div class="section" id="an-example">
+<h2>An Example<a class="headerlink" href="#an-example" title="Permalink to this headline">¶</a></h2>
+<p>The following <code class="docutils literal notranslate"><span class="pre">urls.py</span></code> file enables DMP-style patterns on just two apps: <code class="docutils literal notranslate"><span class="pre">polls</span></code> and <code class="docutils literal notranslate"><span class="pre">account</span></code>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.apps</span> <span class="kn">import</span> <span class="n">apps</span>
+<span class="kn">from</span> <span class="nn">django.conf.urls</span> <span class="kn">import</span> <span class="n">url</span><span class="p">,</span> <span class="n">include</span>
+<span class="kn">from</span> <span class="nn">django.views.static</span> <span class="kn">import</span> <span class="n">serve</span>
+<span class="kn">from</span> <span class="nn">django_mako_plus</span> <span class="kn">import</span> <span class="n">app_resolver</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="n">urlpatterns</span> <span class="o">=</span> <span class="p">[</span>
+
+    <span class="c1"># dmp JS file (for DEBUG mode)</span>
+    <span class="n">url</span><span class="p">(</span>
+        <span class="sa">r</span><span class="s1">&#39;^django_mako_plus/(?P&lt;path&gt;[^/]+)&#39;</span><span class="p">,</span>
+        <span class="n">serve</span><span class="p">,</span>
+        <span class="p">{</span> <span class="s1">&#39;document_root&#39;</span><span class="p">:</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">apps</span><span class="o">.</span><span class="n">get_app_config</span><span class="p">(</span><span class="s1">&#39;django_mako_plus&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="s1">&#39;webroot&#39;</span><span class="p">)</span> <span class="p">},</span>
+        <span class="n">name</span><span class="o">=</span><span class="s1">&#39;DMP webroot (for devel)&#39;</span><span class="p">,</span>
+    <span class="p">),</span>
+
+    <span class="c1"># manually register the polls and account apps</span>
+    <span class="n">app_resolver</span><span class="p">(</span><span class="s1">&#39;polls&#39;</span><span class="p">),</span>
+    <span class="n">app_resolver</span><span class="p">(</span><span class="s1">&#39;account&#39;</span><span class="p">),</span>
+
+<span class="p">]</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="install_custom_urls.html" class="btn btn-neutral float-right" title="Custom URL Patterns" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="install_as_router.html" class="btn btn-neutral" title="Using DMP to Route by Convention" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Conan C. Albrecht
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+    
+
+  
+
+  <script type="text/javascript" src="_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

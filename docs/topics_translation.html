@@ -1,0 +1,258 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Internationalization &mdash; Django-Mako-Plus  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/dmp.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Parameter Conversion" href="converters.html" />
+    <link rel="prev" title="Signals in DMP" href="topics_signals.html" /> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> Django-Mako-Plus
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="compare.html">Comparison with Django</a></li>
+<li class="toctree-l1"><a class="reference internal" href="upgrade_notes.html">Upgrade Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">FAQ</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="topics.html">Basic Concepts</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="topics_settings.html"><code class="docutils literal notranslate"><span class="pre">settings.py</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_escaping.html">Escaping Special Characters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_variables.html">Metadata about the Request</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_modules.html">Python Imports in Templates</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_third_party.html">Using Third-Party Apps</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_paths.html">Inheritance Paths and Template Location</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_convenience.html">Convenience Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_redirecting.html">Redirecting the Browser</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_csrf.html">CSRF Tokens</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_class_views.html">Class-Based Views</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_django.html">Using the Django API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_responses.html">Lazy Rendering with <code class="docutils literal notranslate"><span class="pre">TemplateResponse</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_view_function.html">Customizing <code class="docutils literal notranslate"><span class="pre">&#64;view_function</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_partial_templates.html">Rendering Partial Templates for Ajax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_other_syntax.html">Combining Django and Mako Templates</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_signals.html">Signals in DMP</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Internationalization</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="converters.html">Parameter Conversion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="static.html">Static Files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="deploy.html">Deployment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="editors.html">Editors</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Django-Mako-Plus</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="topics.html">Basic Concepts</a> &raquo;</li>
+        
+      <li>Internationalization</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="internationalization">
+<span id="topics-translation"></span><h1>Internationalization<a class="headerlink" href="#internationalization" title="Permalink to this headline">¶</a></h1>
+<p>If your site needs to be translated into other languages, this section is for you. I’m sure you are aware that Django has full support for translation to other languages. If not, you should first read the standard Translation documentation at <a class="reference external" href="http://docs.djangoproject.com/en/dev/topics/i18n/translation/">http://docs.djangoproject.com/en/dev/topics/i18n/translation/</a>.</p>
+<p>DMP supports Django’s translation functions–with one caveat. Since Django doesn’t know about Mako, it can’t translate strings in your Mako files. DMP fixes this with the <code class="docutils literal notranslate"><span class="pre">dmp_makemessages</span></code> command. Instead of running <code class="docutils literal notranslate"><span class="pre">python3</span> <span class="pre">manage.py</span> <span class="pre">makemessages</span></code> like the Django tutorial shows, run <code class="docutils literal notranslate"><span class="pre">python3</span> <span class="pre">manage.py</span> <span class="pre">dmp_makemessages</span></code>. Since the DMP version is an extension of the standard version, the same command line options apply to both.</p>
+<blockquote>
+<div>Internally, <code class="docutils literal notranslate"><span class="pre">dmp_makemessages</span></code> literally extends the <code class="docutils literal notranslate"><span class="pre">makemessages</span></code> class. Since Mako templates are compiled into .py files at runtime (which makes them discoverable by <code class="docutils literal notranslate"><span class="pre">makemessages</span></code>), the DMP version of the command simply finds all your templates, compiles them, and calls the standard command. Django finds your translatable strings within the cached_templates directory (which holds the compiled Mako templates).</div></blockquote>
+<p>Suppose you have a template with a header you want translated. Simply use the following in your template:</p>
+<div class="highlight-html+mako notranslate"><div class="highlight"><pre><span></span><span class="cp">&lt;%!</span> <span class="kn">from</span> <span class="nn">django.utils.translation</span> <span class="kn">import</span> <span class="n">ugettext</span> <span class="k">as</span> <span class="n">_</span> <span class="cp">%&gt;</span>
+<span class="p">&lt;</span><span class="nt">p</span><span class="p">&gt;</span><span class="cp">${</span> <span class="n">_</span><span class="p">(</span><span class="s2">&quot;World History&quot;</span><span class="p">)</span> <span class="cp">}</span><span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
+</pre></div>
+</div>
+<p>Run the following at the command line:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python3</span> <span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">dmp_makemessages</span>
+</pre></div>
+</div>
+<p>Assuming you have translations set up the way Django’s documentation tells you to, you’ll get a new language.po file. Edit this file and add the translation. Then compile your translations:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python3</span> <span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">compilemessages</span>
+</pre></div>
+</div>
+<p>Your translation file (language.mo) is now ready, and assuming you’ve set the language in your session, you’ll now see the translations in your template.</p>
+<blockquote>
+<div>FYI, the <code class="docutils literal notranslate"><span class="pre">dmp_makemessages</span></code> command does everything the regular command does, so it will also find translatable strings in your regular view files as well. You don’t need to run both <code class="docutils literal notranslate"><span class="pre">dmp_makemessages</span></code> and <code class="docutils literal notranslate"><span class="pre">makemessages</span></code>.</div></blockquote>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="converters.html" class="btn btn-neutral float-right" title="Parameter Conversion" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="topics_signals.html" class="btn btn-neutral" title="Signals in DMP" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Conan C. Albrecht
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+    
+
+  
+
+  <script type="text/javascript" src="_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

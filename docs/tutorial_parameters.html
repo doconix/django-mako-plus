@@ -1,0 +1,521 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>T3: URL Parameters &mdash; Django-Mako-Plus  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/dmp.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="T4: zip(HTML, JS, CSS)" href="tutorial_css_js.html" />
+    <link rel="prev" title="T2: .py View Files" href="tutorial_views.html" /> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> Django-Mako-Plus
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="compare.html">Comparison with Django</a></li>
+<li class="toctree-l1"><a class="reference internal" href="upgrade_notes.html">Upgrade Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="tutorial.html">Tutorial</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="tutorial_meet_dmp.html">T1: Meet DMP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial_views.html">T2: .py View Files</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">T3: URL Parameters</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#at-a-glance">At a Glance</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#a-new-view-function-signature">A New View Function Signature</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#automatic-type-converters">Automatic Type Converters</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#adding-type-hints">Adding Type Hints</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#automatic-model-conversion">Automatic Model Conversion</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#for-more-information">For More Information</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial_css_js.html">T4: zip(HTML, JS, CSS)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial_ajax.html">T5: Ajax</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="topics.html">Basic Concepts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="converters.html">Parameter Conversion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="static.html">Static Files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="deploy.html">Deployment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="editors.html">Editors</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Django-Mako-Plus</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="tutorial.html">Tutorial</a> &raquo;</li>
+        
+      <li>T3: URL Parameters</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="t3-url-parameters">
+<span id="tutorial-parameters"></span><h1><a class="toc-backref" href="#id1">T3: URL Parameters</a><a class="headerlink" href="#t3-url-parameters" title="Permalink to this headline">¶</a></h1>
+<div class="contents topic" id="contents">
+<p class="topic-title first">Contents</p>
+<ul class="simple">
+<li><a class="reference internal" href="#t3-url-parameters" id="id1">T3: URL Parameters</a><ul>
+<li><a class="reference internal" href="#at-a-glance" id="id2">At a Glance</a></li>
+<li><a class="reference internal" href="#a-new-view-function-signature" id="id3">A New View Function Signature</a></li>
+<li><a class="reference internal" href="#automatic-type-converters" id="id4">Automatic Type Converters</a></li>
+<li><a class="reference internal" href="#for-more-information" id="id5">For More Information</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<p>Django is <a class="reference external" href="https://docs.djangoproject.com/en/dev/topics/http/urls/">a little vain about pretty URLs</a>. In keeping with that philosophy, we present <strong>URL parameters</strong>. You’ve already used the beginning parts of the URL: the first specifies the app, the second specifies the view/template. <strong>URL parameters are the third part, fourth part, and so on.</strong></p>
+<p>In traditional web links, we specify parameters using key=value pairs, as in <code class="docutils literal notranslate"><span class="pre">/homepage/index?product=144&amp;model=A58UX</span></code>. That’s not the Django way.</p>
+<p>This isn’t just about pretty URLs. It’s functional: DMP automatically converts URL-coded data into view function parameters. Mmmm. Parameter conversion, right out of the box.</p>
+<dl class="docutils">
+<dt>What About Django Path Converters?</dt>
+<dd><p class="first">One of the big changes in Django 2.0 (late 2017) is <a class="reference external" href="https://docs.djangoproject.com/en/dev/topics/http/urls">simplified URLs and path converters</a>. You might be wondering how the two are related. DMP first included automatic parameter conversion in early 2017, and it wasn’t influenced by Django’s design; the two developed separately.  DMP’s parameter conversion is different in the following ways:</p>
+<ul class="last simple">
+<li>DMP discovers parameters and type hints from your view function signatures; Django uses your patterns in <code class="docutils literal notranslate"><span class="pre">urls.py</span></code>.</li>
+<li>Type hints and parameter defaults in DMP are specified the <a class="reference external" href="https://docs.python.org/3/library/typing.html">standard Python way</a>.  Django uses a custom format.</li>
+<li>DMP has more built-in converters: DateTime, Decimal, all Django models, etc.</li>
+<li>Converters in DMP match using <code class="docutils literal notranslate"><span class="pre">isinstance</span></code>; converters in Django match by regex.</li>
+</ul>
+</dd>
+</dl>
+<p>The conversion method in DMP matches well with its goal of convention-over-configuration.  Django’s method matches well with its “enumerate all urls” design.  You can use both in the same project; DMP apps do it the DMP way, other apps do it the Django way.</p>
+<div class="section" id="at-a-glance">
+<h2><a class="toc-backref" href="#id2">At a Glance</a><a class="headerlink" href="#at-a-glance" title="Permalink to this headline">¶</a></h2>
+<p>Compare the old vs. the new:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="54%" />
+<col width="46%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">This:</th>
+<th class="head">Becomes This:</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td><p class="first"><code class="docutils literal notranslate"><span class="pre">/homepage/index?product=144&amp;model=A58UX</span></code></p>
+<ul class="last simple">
+<li>Longer</li>
+<li>More difficult to text or email</li>
+<li>Less search engine friendly</li>
+<li>A face only a mother could love…</li>
+</ul>
+</td>
+<td><p class="first"><code class="docutils literal notranslate"><span class="pre">/homepage/index/144/A58UX/</span></code></p>
+<ul class="last simple">
+<li>Shorter</li>
+<li>Easier to bookmark and copy</li>
+<li>More search engine friendly</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>DMP sends “extra” parameters (<code class="docutils literal notranslate"><span class="pre">411</span></code> and <code class="docutils literal notranslate"><span class="pre">A58UX</span></code> above) to your view function.  Just modify your view function signature and drop the mic.  In addition, DMP converts values into <code class="docutils literal notranslate"><span class="pre">ints</span></code>, <code class="docutils literal notranslate"><span class="pre">booleans</span></code>, and even into <code class="docutils literal notranslate"><span class="pre">Model</span></code> objects.</p>
+<blockquote>
+<div>URL parameters don’t take the place of form parameters. You’ll still use GET and POST parameters to submit forms.  You’ll still use name/value pairs when it makes sense, such as on a search page.  URL parameters are best used for object ids and other simple items that pages need to display, such as the product id in the previous example.</div></blockquote>
+</div>
+<div class="section" id="a-new-view-function-signature">
+<h2><a class="toc-backref" href="#id3">A New View Function Signature</a><a class="headerlink" href="#a-new-view-function-signature" title="Permalink to this headline">¶</a></h2>
+<p>Let’s modify <code class="docutils literal notranslate"><span class="pre">homepage/views/index.py</span></code> to support adjusting the current date by a certain amount of time.  We’ll specify the hours, minutes, and direction in the URL:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.conf</span> <span class="kn">import</span> <span class="n">settings</span>
+<span class="kn">from</span> <span class="nn">django_mako_plus</span> <span class="kn">import</span> <span class="n">view_function</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timedelta</span>
+
+<span class="nd">@view_function</span>
+<span class="k">def</span> <span class="nf">process_request</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">hrs</span><span class="p">,</span> <span class="n">mins</span><span class="p">,</span> <span class="n">forward</span><span class="o">=</span><span class="s1">&#39;+&#39;</span><span class="p">):</span>
+    <span class="n">delta</span> <span class="o">=</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">hours</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">hrs</span><span class="p">),</span> <span class="n">minutes</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">mins</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">forward</span> <span class="o">==</span> <span class="s1">&#39;+&#39;</span><span class="p">:</span>
+        <span class="n">now</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span> <span class="o">+</span> <span class="n">delta</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">now</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span> <span class="o">-</span> <span class="n">delta</span>
+    <span class="n">context</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;now&#39;</span><span class="p">:</span> <span class="n">now</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">request</span><span class="o">.</span><span class="n">dmp</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="s1">&#39;index.html&#39;</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>We’ll use the <code class="docutils literal notranslate"><span class="pre">homepage/templates/index.html</span></code> file we created in previous tutorial parts:</p>
+<div class="highlight-html+mako notranslate"><div class="highlight"><pre><span></span><span class="cp">&lt;%</span><span class="nb">inherit</span> <span class="na">file=</span><span class="s">&quot;base.htm&quot;</span> <span class="cp">/&gt;</span>
+
+<span class="cp">&lt;%</span><span class="nb">block</span> <span class="na">name=</span><span class="s">&quot;content&quot;</span><span class="cp">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">div</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;content&quot;</span><span class="p">&gt;</span>
+      <span class="p">&lt;</span><span class="nt">p</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;server-time&quot;</span><span class="p">&gt;</span>The current server time is <span class="cp">${</span> <span class="n">now</span> <span class="cp">}</span>.<span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
+    <span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+<span class="cp">&lt;/%</span><span class="nb">block</span><span class="cp">&gt;</span>
+</pre></div>
+</div>
+<p>Take your browser to <a class="reference external" href="http://localhost:8000/homepage/index/6/30/+">http://localhost:8000/homepage/index/6/30/+</a>.  It shows a time 6:30 in the future by evaluating the values in the URL.  Try different values to adjust the hours, minutes, and direction.</p>
+<p>Since <code class="docutils literal notranslate"><span class="pre">forward</span></code> has a default value, it can be omitted: <a class="reference external" href="http://localhost:8000/homepage/index/6/30">http://localhost:8000/homepage/index/6/30</a>.</p>
+<p>This first example shows how DMP sends URL parts into view functions.  It separates the URL parts by the slash <code class="docutils literal notranslate"><span class="pre">/</span></code>, and positionally matches them to functions.  In this simplest of view function signatures, the parameters are strings.</p>
+<blockquote>
+<div>If you are using multiple decorators on your endpoints, you can save a lot of trouble by checking that your decorators <a class="reference external" href="converters_decorators.html">are wrapping correctly</a>.</div></blockquote>
+</div>
+<div class="section" id="automatic-type-converters">
+<h2><a class="toc-backref" href="#id4">Automatic Type Converters</a><a class="headerlink" href="#automatic-type-converters" title="Permalink to this headline">¶</a></h2>
+<p>DMP can also typecast the values in the URL.  The following table shows the built-in types to DMP:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="16%" />
+<col width="41%" />
+<col width="20%" />
+<col width="22%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Type</th>
+<th class="head">Example view.py functions</th>
+<th class="head">Example URLs</th>
+<th class="head">Notes</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>String (default type)</td>
+<td><div class="first last line-block">
+<div class="line">def process_request(request, foo):</div>
+<div class="line"><br /></div>
+<div class="line">def process_request(request, foo=”bar”):</div>
+<div class="line"><br /></div>
+<div class="line">def process_request(request, foo:str):</div>
+<div class="line"><br /></div>
+<div class="line">def process_request(request, foo:str=”bar”):</div>
+</div>
+</td>
+<td>/homepage/index/hello+world/</td>
+<td>No preset empty values on strings;
+default is only used when parameter is
+missing (e.g. /homepage/index/)</td>
+</tr>
+<tr class="row-odd"><td>Integer</td>
+<td><div class="first last line-block">
+<div class="line">def process_request(request, foo:int):</div>
+<div class="line"><br /></div>
+<div class="line">def process_request(request, foo:int=13):</div>
+<div class="line"><br /></div>
+<div class="line">def process_request(request, foo:int=”13”):</div>
+</div>
+</td>
+<td>/homepage/index/42/</td>
+<td>“empty” values are ‘’, ‘-‘ (uses default)</td>
+</tr>
+<tr class="row-even"><td>Float</td>
+<td><div class="first last line-block">
+<div class="line">def process_request(request, foo:float):</div>
+<div class="line"><br /></div>
+<div class="line">def process_request(request, foo:float=3.14):</div>
+<div class="line"><br /></div>
+<div class="line">def process_request(request, foo:float=”3.14”):</div>
+</div>
+</td>
+<td>/homepage/index/32.275/</td>
+<td>“empty” values are ‘’, ‘-‘ (uses default)</td>
+</tr>
+<tr class="row-odd"><td>Boolean</td>
+<td><div class="first last line-block">
+<div class="line">def process_request(request, foo:bool):</div>
+<div class="line"><br /></div>
+<div class="line">def process_request(request, foo:bool=True)</div>
+<div class="line"><br /></div>
+<div class="line">def process_request(request, foo:bool=’t’)</div>
+</div>
+</td>
+<td>/homepage/index/1/</td>
+<td>False values are ‘f’, ‘F’, ‘0’;
+“empty” values are ‘’, ‘-‘ (uses default);
+True is anything else</td>
+</tr>
+<tr class="row-even"><td>Decimal</td>
+<td><div class="first last line-block">
+<div class="line">from decimal import Decimal</div>
+<div class="line">def process_request(request, foo:Decimal):</div>
+<div class="line"><br /></div>
+<div class="line">from decimal import Decimal</div>
+<div class="line">def process_request(request, foo:Decimal=Decimal(‘3.14’)):</div>
+<div class="line"><br /></div>
+<div class="line">from decimal import Decimal</div>
+<div class="line">def process_request(request, foo:Decimal=‘3.14’):</div>
+</div>
+</td>
+<td>/homepage/index/32.275/</td>
+<td>“empty” values are ‘’, ‘-‘ (uses default)</td>
+</tr>
+<tr class="row-odd"><td>DateTime</td>
+<td><div class="first last line-block">
+<div class="line">from datetime import datetime</div>
+<div class="line">def process_request(request, foo:datetime):</div>
+<div class="line"><br /></div>
+<div class="line">from datetime import datetime</div>
+<div class="line">def process_request(request, foo:datetime=datetime(1993, 04, 30, 6, 0, 0)):</div>
+<div class="line"><br /></div>
+<div class="line">from datetime import datetime</div>
+<div class="line">def process_request(request, foo:datetime=‘1993-04-30+06:00:00’):</div>
+</div>
+</td>
+<td>/homepage/index/1993-04-30+06:00:00/</td>
+<td>Uses formats listed in
+DATETIME_INPUT_FORMATS from settings.py;
+“empty” values are ‘’, ‘-‘ (uses default)</td>
+</tr>
+<tr class="row-even"><td>Date</td>
+<td><div class="first last line-block">
+<div class="line">from datetime import date</div>
+<div class="line">def process_request(request, foo:date):</div>
+<div class="line"><br /></div>
+<div class="line">from datetime import date</div>
+<div class="line">def process_request(request, foo:date=date(1983, 1, 1)):</div>
+<div class="line"><br /></div>
+<div class="line">from datetime import date</div>
+<div class="line">def process_request(request, foo:date=‘1983-01-01’):</div>
+</div>
+</td>
+<td>/homepage/index/1983-01-01/</td>
+<td>Uses formats listed in
+DATE_INPUT_FORMATS from settings.py
+“empty” values are ‘’, ‘-‘ (uses default)</td>
+</tr>
+<tr class="row-odd"><td>All model.Model subclasses
+(see below)</td>
+<td><div class="first last line-block">
+<div class="line">from django.contrib.auth.models import User</div>
+<div class="line">def process_request(request, user:User):</div>
+<div class="line"><br /></div>
+<div class="line">from polls.models import Question</div>
+<div class="line">def process_request(request, question:Question):</div>
+<div class="line"><br /></div>
+<div class="line">from polls.models import Choice</div>
+<div class="line">def process_request(request, choice:Choice=None):</div>
+</div>
+</td>
+<td>/homepage/index/5/</td>
+<td>Value is the id of the model object;
+Http404 raised if not found;
+“empty” values are ‘’, ‘-‘, ‘0’
+(uses default)</td>
+</tr>
+</tbody>
+</table>
+<div class="section" id="adding-type-hints">
+<h3>Adding Type Hints<a class="headerlink" href="#adding-type-hints" title="Permalink to this headline">¶</a></h3>
+<p>In your example code, add the following type hints to your <code class="docutils literal notranslate"><span class="pre">process_request</span></code> function, and remove the typecasting calls:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.conf</span> <span class="kn">import</span> <span class="n">settings</span>
+<span class="kn">from</span> <span class="nn">django_mako_plus</span> <span class="kn">import</span> <span class="n">view_function</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timedelta</span>
+
+<span class="nd">@view_function</span>
+<span class="k">def</span> <span class="nf">process_request</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">hrs</span><span class="p">:</span><span class="nb">int</span><span class="p">,</span> <span class="n">mins</span><span class="p">:</span><span class="nb">int</span><span class="p">,</span> <span class="n">forward</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+    <span class="n">delta</span> <span class="o">=</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">hours</span><span class="o">=</span><span class="n">hrs</span><span class="p">,</span> <span class="n">minutes</span><span class="o">=</span><span class="n">mins</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">forward</span><span class="p">:</span>
+        <span class="n">now</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span> <span class="o">+</span> <span class="n">delta</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">now</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span> <span class="o">-</span> <span class="n">delta</span>
+    <span class="n">context</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;now&#39;</span><span class="p">:</span> <span class="n">now</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">request</span><span class="o">.</span><span class="n">dmp</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="s1">&#39;index.html&#39;</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>DMP casts the parameters by inspecting the method signature of <code class="docutils literal notranslate"><span class="pre">process_request</span></code> which specifies the parameter name, a color, and the type.  If a conversion error occurs, the default converter raises Http404.  All of this is configurable and extensible (read on).</p>
+</div>
+<div class="section" id="automatic-model-conversion">
+<h3>Automatic Model Conversion<a class="headerlink" href="#automatic-model-conversion" title="Permalink to this headline">¶</a></h3>
+<p>DMP converts all of the Model classes in your project.   Suppose we have an model called <code class="docutils literal notranslate"><span class="pre">storefront.Purchase</span></code>.  If we list this type as the type hint, DMP will pull the object from the database automatically:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django_mako_plus</span> <span class="kn">import</span> <span class="n">view_function</span>
+<span class="kn">from</span> <span class="nn">storefront.models</span> <span class="kn">import</span> <span class="n">Purchase</span>
+
+<span class="nd">@view_function</span>
+<span class="k">def</span> <span class="nf">process_request</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">purchase</span><span class="p">:</span><span class="n">Purchase</span><span class="p">):</span>
+    <span class="c1"># the `purchase` variable has already been pulled from the database</span>
+</pre></div>
+</div>
+<p>In the above code, one of two outcomes will occur:</p>
+<ul class="simple">
+<li>If a Purchase record with primary key 1501 exists in the database, <code class="docutils literal notranslate"><span class="pre">Purchase.objects.get(id=...)</span></code> is called automatically, and the purchase is sent into the view function.</li>
+<li>If it doesn’t exist, DMP raises Http404.</li>
+</ul>
+</div>
+</div>
+<div class="section" id="for-more-information">
+<h2><a class="toc-backref" href="#id5">For More Information</a><a class="headerlink" href="#for-more-information" title="Permalink to this headline">¶</a></h2>
+<p>There’s lots more to discover at <a class="reference external" href="converters.html">the pages on conversion</a>.</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="tutorial_css_js.html" class="btn btn-neutral float-right" title="T4: zip(HTML, JS, CSS)" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="tutorial_views.html" class="btn btn-neutral" title="T2: .py View Files" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Conan C. Albrecht
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+    
+
+  
+
+  <script type="text/javascript" src="_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

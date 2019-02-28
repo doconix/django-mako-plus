@@ -1,0 +1,410 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>New Project &mdash; Django-Mako-Plus  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/sphinx_tabs/tabs.css" type="text/css" />
+  <link rel="stylesheet" href="_static/sphinx_tabs/semantic-ui-2.2.10/segment.min.css" type="text/css" />
+  <link rel="stylesheet" href="_static/sphinx_tabs/semantic-ui-2.2.10/menu.min.css" type="text/css" />
+  <link rel="stylesheet" href="_static/sphinx_tabs/semantic-ui-2.2.10/tab.min.css" type="text/css" />
+  <link rel="stylesheet" href="_static/dmp.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Existing Project" href="install_existing.html" />
+    <link rel="prev" title="Installation" href="install.html" /> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> Django-Mako-Plus
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="compare.html">Comparison with Django</a></li>
+<li class="toctree-l1"><a class="reference internal" href="upgrade_notes.html">Upgrade Notes</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="install.html">Installation</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">New Project</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#install-django-mako-and-dmp">Install Django, Mako, and DMP</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#create-a-django-project">Create a Django project</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#create-a-dmp-style-app">Create a DMP-Style App</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#load-it-up">Load it Up!</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="install_existing.html">Existing Project</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install.html#minimal-dmp">Minimal DMP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install.html#customizations">Customizations</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="topics.html">Basic Concepts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="converters.html">Parameter Conversion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="static.html">Static Files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="deploy.html">Deployment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="editors.html">Editors</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Django-Mako-Plus</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="install.html">Installation</a> &raquo;</li>
+        
+      <li>New Project</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="new-project">
+<span id="install-new"></span><h1>New Project<a class="headerlink" href="#new-project" title="Permalink to this headline">¶</a></h1>
+<p>All of the commands in both Django and DMP are run at the command line. On Linux/Mac, this is usually a bash terminal. On Windows, this is the command prompt (cmd), PowerShell (powershell), or Git Bash.</p>
+<p>Open a terminal, and check that Python 3.4 or later is active:</p>
+<div class="sphinx-tabs docutils container">
+<div class="ui top attached tabular menu sphinx-menu docutils container">
+<div class="active item sphinx-data-tab-TGludXgvTWFj docutils container">
+<div class="docutils container">
+Linux/Mac</div>
+</div>
+<div class="item sphinx-data-tab-V2luZG93cw== docutils container">
+<div class="docutils container">
+Windows</div>
+</div>
+</div>
+<div class="ui bottom attached sphinx-tab tab segment sphinx-data-tab-TGludXgvTWFj active docutils container">
+<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python3</span> <span class="o">--</span><span class="n">version</span>
+</pre></div>
+</div>
+</div>
+<div class="ui bottom attached sphinx-tab tab segment sphinx-data-tab-V2luZG93cw== docutils container">
+<div class="code powershell highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="o">--</span><span class="n">version</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>If an older Python (such as 2.7) is reported, you likely need to do one of the following:</p>
+<ol class="arabic simple">
+<li>Install a <a class="reference external" href="https://www.python.org/downloads/">newer version of Python</a></li>
+<li>Activate a <a class="reference external" href="https://docs.python.org/3/tutorial/venv.html">different virtual environment</a>.</li>
+</ol>
+<div class="section" id="install-django-mako-and-dmp">
+<h2>Install Django, Mako, and DMP<a class="headerlink" href="#install-django-mako-and-dmp" title="Permalink to this headline">¶</a></h2>
+<p>DMP works with Django 1.9+, although most testing today happens on Django 2.x.</p>
+<p>Install Django, Mako, and DMP with the following:</p>
+<div class="sphinx-tabs docutils container">
+<div class="ui top attached tabular menu sphinx-menu docutils container">
+<div class="active item sphinx-data-tab-TGludXgvTWFj docutils container">
+<div class="docutils container">
+Linux/Mac</div>
+</div>
+<div class="item sphinx-data-tab-V2luZG93cw== docutils container">
+<div class="docutils container">
+Windows</div>
+</div>
+</div>
+<div class="ui bottom attached sphinx-tab tab segment sphinx-data-tab-TGludXgvTWFj active docutils container">
+<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip3</span> <span class="n">install</span> <span class="o">--</span><span class="n">upgrade</span> <span class="n">django</span><span class="o">-</span><span class="n">mako</span><span class="o">-</span><span class="n">plus</span>
+</pre></div>
+</div>
+</div>
+<div class="ui bottom attached sphinx-tab tab segment sphinx-data-tab-V2luZG93cw== docutils container">
+<div class="code powershell highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="o">--</span><span class="n">upgrade</span> <span class="n">django</span><span class="o">-</span><span class="n">mako</span><span class="o">-</span><span class="n">plus</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="create-a-django-project">
+<h2>Create a Django project<a class="headerlink" href="#create-a-django-project" title="Permalink to this headline">¶</a></h2>
+<p>Create a Django project, and specify that you want a DMP-style project layout:</p>
+<div class="sphinx-tabs docutils container">
+<div class="ui top attached tabular menu sphinx-menu docutils container">
+<div class="active item sphinx-data-tab-TGludXgvTWFj docutils container">
+<div class="docutils container">
+Linux/Mac</div>
+</div>
+<div class="item sphinx-data-tab-V2luZG93cw== docutils container">
+<div class="docutils container">
+Windows</div>
+</div>
+</div>
+<div class="ui bottom attached sphinx-tab tab segment sphinx-data-tab-TGludXgvTWFj active docutils container">
+<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python3</span> <span class="o">-</span><span class="n">m</span> <span class="n">django_mako_plus</span> <span class="n">dmp_startproject</span> <span class="n">mysite</span>
+</pre></div>
+</div>
+</div>
+<div class="ui bottom attached sphinx-tab tab segment sphinx-data-tab-V2luZG93cw== docutils container">
+<div class="code powershell highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">django_mako_plus</span> <span class="n">dmp_startproject</span> <span class="n">mysite</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>You can, of course, name your project anything you want, but in the sections below, I’ll assume you called your project <code class="docutils literal notranslate"><span class="pre">mysite</span></code>.</p>
+<p>Then migrate to synchronize your database and create a superuser:</p>
+<div class="sphinx-tabs docutils container">
+<div class="ui top attached tabular menu sphinx-menu docutils container">
+<div class="active item sphinx-data-tab-TGludXgvTWFj docutils container">
+<div class="docutils container">
+Linux/Mac</div>
+</div>
+<div class="item sphinx-data-tab-V2luZG93cw== docutils container">
+<div class="docutils container">
+Windows</div>
+</div>
+</div>
+<div class="ui bottom attached sphinx-tab tab segment sphinx-data-tab-TGludXgvTWFj active docutils container">
+<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="n">mysite</span>
+<span class="n">python3</span> <span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">migrate</span>
+<span class="n">python3</span> <span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">createsuperuser</span>
+</pre></div>
+</div>
+</div>
+<div class="ui bottom attached sphinx-tab tab segment sphinx-data-tab-V2luZG93cw== docutils container">
+<div class="code powershell highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="n">mysite</span>
+<span class="n">python</span> <span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">migrate</span>
+<span class="n">python</span> <span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">createsuperuser</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="create-a-dmp-style-app">
+<h2>Create a DMP-Style App<a class="headerlink" href="#create-a-dmp-style-app" title="Permalink to this headline">¶</a></h2>
+<p>Create a new Django-Mako-Plus app with the following:</p>
+<div class="sphinx-tabs docutils container">
+<div class="ui top attached tabular menu sphinx-menu docutils container">
+<div class="active item sphinx-data-tab-TGludXgvTWFj docutils container">
+<div class="docutils container">
+Linux/Mac</div>
+</div>
+<div class="item sphinx-data-tab-V2luZG93cw== docutils container">
+<div class="docutils container">
+Windows</div>
+</div>
+</div>
+<div class="ui bottom attached sphinx-tab tab segment sphinx-data-tab-TGludXgvTWFj active docutils container">
+<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python3</span> <span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">dmp_startapp</span> <span class="n">homepage</span>
+</pre></div>
+</div>
+</div>
+<div class="ui bottom attached sphinx-tab tab segment sphinx-data-tab-V2luZG93cw== docutils container">
+<div class="code powershell highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">dmp_startapp</span> <span class="n">homepage</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p><strong>After</strong> the new <code class="docutils literal notranslate"><span class="pre">homepage</span></code> app is created, open <code class="docutils literal notranslate"><span class="pre">mysite/settings.py</span></code> in your favorite editor and add to the <code class="docutils literal notranslate"><span class="pre">INSTALLED_APPS</span></code> list:</p>
+<div class="code python highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">INSTALLED_APPS</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="o">...</span>
+    <span class="s1">&#39;homepage&#39;</span><span class="p">,</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+<p>Congratulations. You’re ready to go!</p>
+</div>
+<div class="section" id="load-it-up">
+<h2>Load it Up!<a class="headerlink" href="#load-it-up" title="Permalink to this headline">¶</a></h2>
+<p>Start your web server with the following:</p>
+<div class="sphinx-tabs docutils container">
+<div class="ui top attached tabular menu sphinx-menu docutils container">
+<div class="active item sphinx-data-tab-TGludXgvTWFj docutils container">
+<div class="docutils container">
+Linux/Mac</div>
+</div>
+<div class="item sphinx-data-tab-V2luZG93cw== docutils container">
+<div class="docutils container">
+Windows</div>
+</div>
+</div>
+<div class="ui bottom attached sphinx-tab tab segment sphinx-data-tab-TGludXgvTWFj active docutils container">
+<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python3</span> <span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">runserver</span>
+</pre></div>
+</div>
+</div>
+<div class="ui bottom attached sphinx-tab tab segment sphinx-data-tab-V2luZG93cw== docutils container">
+<div class="code powershell highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">runserver</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>If you get a message about unapplied migrations, ignore it for now and continue.</p>
+<p>Open your web browser to <a class="reference external" href="http://localhost:8000/">http://localhost:8000/</a>. You should see a message welcoming you to the homepage app.</p>
+<p>Once everything is working, skip ahead to the <a class="reference internal" href="tutorial.html#tutorial"><span class="std std-ref">Tutorial</span></a>.</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="install_existing.html" class="btn btn-neutral float-right" title="Existing Project" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="install.html" class="btn btn-neutral" title="Installation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Conan C. Albrecht
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/sphinx_tabs/tabs.js"></script>
+        <script type="text/javascript" src="_static/sphinx_tabs/semantic-ui-2.2.10/tab.min.js"></script>
+    
+
+  
+
+  <script type="text/javascript" src="_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,285 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Class-Based Views &mdash; Django-Mako-Plus  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/dmp.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Using the Django API" href="topics_django.html" />
+    <link rel="prev" title="CSRF Tokens" href="topics_csrf.html" /> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> Django-Mako-Plus
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="compare.html">Comparison with Django</a></li>
+<li class="toctree-l1"><a class="reference internal" href="upgrade_notes.html">Upgrade Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">FAQ</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="topics.html">Basic Concepts</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="topics_settings.html"><code class="docutils literal notranslate"><span class="pre">settings.py</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_escaping.html">Escaping Special Characters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_variables.html">Metadata about the Request</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_modules.html">Python Imports in Templates</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_third_party.html">Using Third-Party Apps</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_paths.html">Inheritance Paths and Template Location</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_convenience.html">Convenience Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_redirecting.html">Redirecting the Browser</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_csrf.html">CSRF Tokens</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Class-Based Views</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#hey-where-s-view-function">Hey! Where’s &#64;view_function?</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#naming-conventions">Naming Conventions</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="topics_django.html">Using the Django API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_responses.html">Lazy Rendering with <code class="docutils literal notranslate"><span class="pre">TemplateResponse</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_view_function.html">Customizing <code class="docutils literal notranslate"><span class="pre">&#64;view_function</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_partial_templates.html">Rendering Partial Templates for Ajax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_other_syntax.html">Combining Django and Mako Templates</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_signals.html">Signals in DMP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_translation.html">Internationalization</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="converters.html">Parameter Conversion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="static.html">Static Files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="deploy.html">Deployment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="editors.html">Editors</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Django-Mako-Plus</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="topics.html">Basic Concepts</a> &raquo;</li>
+        
+      <li>Class-Based Views</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="class-based-views">
+<span id="topics-class-views"></span><h1>Class-Based Views<a class="headerlink" href="#class-based-views" title="Permalink to this headline">¶</a></h1>
+<p>Django-Mako-Plus supports Django’s class-based view concept. You can read more about this pattern in the Django documentation. If you are using view classes, DMP automatically detects and adjusts accordingly. If you are using regular function-based views, skip this section for now.</p>
+<p>With DMP, your class-based view will be discovered via request url, so you have to name your class accordingly. In keeping with the rest of DMP, the default class name in a file should be named <code class="docutils literal notranslate"><span class="pre">class</span> <span class="pre">process_request()</span></code>. Consider the following <code class="docutils literal notranslate"><span class="pre">index.py</span></code> file:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.conf</span> <span class="kn">import</span> <span class="n">settings</span>
+<span class="kn">from</span> <span class="nn">django.http</span> <span class="kn">import</span> <span class="n">HttpResponse</span>
+<span class="kn">from</span> <span class="nn">django.views.generic</span> <span class="kn">import</span> <span class="n">View</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+
+<span class="k">class</span> <span class="nc">process_request</span><span class="p">(</span><span class="n">View</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+        <span class="n">context</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;now&#39;</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">dmp</span><span class="o">.</span><span class="n">urlparams</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">dmp</span><span class="o">.</span><span class="n">urlparams</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">else</span> <span class="s1">&#39;%H:%M&#39;</span><span class="p">),</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">request</span><span class="o">.</span><span class="n">dmp</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="s1">&#39;index.html&#39;</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
+
+<span class="k">class</span> <span class="nc">discovery_section</span><span class="p">(</span><span class="n">View</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">HttpResponse</span><span class="p">(</span><span class="s1">&#39;Get was called.&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">post</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">HttpResponse</span><span class="p">(</span><span class="s1">&#39;Post was called.&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>In the above <code class="docutils literal notranslate"><span class="pre">index.py</span></code> file, two class-based views are defined. The first is called with the url <code class="docutils literal notranslate"><span class="pre">/homepage/index/</span></code>. The second is called with the url <code class="docutils literal notranslate"><span class="pre">/homepage/index.discovery_section/</span></code>.</p>
+<div class="section" id="hey-where-s-view-function">
+<h2>Hey! Where’s &#64;view_function?<a class="headerlink" href="#hey-where-s-view-function" title="Permalink to this headline">¶</a></h2>
+<p>In contrast with normal function-based routing, class-based views do not require the <code class="docutils literal notranslate"><span class="pre">&#64;view_function</span></code> decorator, which provides security on which functions are web-accessible. Since class-based views must extend django.views.generic.View, the security provided by the decorator is already provided. DMP assumes that <strong>any extension of View will be accessible</strong>.</p>
+<p>One case where you might want to decorate your class-based endpoints is when using <a class="reference external" href="topics_view_function.html">keyword arguments</a>.  Here’s an example of what that might look like:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.views.generic</span> <span class="kn">import</span> <span class="n">View</span>
+
+<span class="k">class</span> <span class="nc">process_request</span><span class="p">(</span><span class="n">View</span><span class="p">):</span>
+
+    <span class="nd">@view_function</span><span class="p">(</span><span class="n">vogon</span><span class="o">=</span><span class="s2">&quot;Poetry&quot;</span><span class="p">,</span> <span class="n">answer</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">request</span><span class="o">.</span><span class="n">dmp</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="s1">&#39;index.html&#39;</span><span class="p">,</span> <span class="p">{})</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="naming-conventions">
+<h2>Naming Conventions<a class="headerlink" href="#naming-conventions" title="Permalink to this headline">¶</a></h2>
+<p>Python programmers usually use TitleCaseClassName (capitalized words) for class names. In the above classes, I’m instead using all lowercase (which is the style for function and  ariable names) so my URL doesn’t have uppercase characters in it. If you’d rather use TitleCaseClassName, such as <code class="docutils literal notranslate"><span class="pre">class</span> <span class="pre">DiscoverySection</span></code>, be sure your URL matches it, such as <code class="docutils literal notranslate"><span class="pre">http://yourserver.com/homepage/index.DiscoverySection/</span></code>.</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="topics_django.html" class="btn btn-neutral float-right" title="Using the Django API" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="topics_csrf.html" class="btn btn-neutral" title="CSRF Tokens" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Conan C. Albrecht
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+    
+
+  
+
+  <script type="text/javascript" src="_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

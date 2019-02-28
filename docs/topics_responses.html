@@ -1,0 +1,273 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Lazy Rendering with TemplateResponse &mdash; Django-Mako-Plus  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/dmp.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Customizing @view_function" href="topics_view_function.html" />
+    <link rel="prev" title="Using the Django API" href="topics_django.html" /> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> Django-Mako-Plus
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="compare.html">Comparison with Django</a></li>
+<li class="toctree-l1"><a class="reference internal" href="upgrade_notes.html">Upgrade Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">FAQ</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="topics.html">Basic Concepts</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="topics_settings.html"><code class="docutils literal notranslate"><span class="pre">settings.py</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_escaping.html">Escaping Special Characters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_variables.html">Metadata about the Request</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_modules.html">Python Imports in Templates</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_third_party.html">Using Third-Party Apps</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_paths.html">Inheritance Paths and Template Location</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_convenience.html">Convenience Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_redirecting.html">Redirecting the Browser</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_csrf.html">CSRF Tokens</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_class_views.html">Class-Based Views</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_django.html">Using the Django API</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Lazy Rendering with <code class="docutils literal notranslate"><span class="pre">TemplateResponse</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#method-1-template-string">Method 1: Template String</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#method-2-template-object">Method 2: Template Object</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="topics_view_function.html">Customizing <code class="docutils literal notranslate"><span class="pre">&#64;view_function</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_partial_templates.html">Rendering Partial Templates for Ajax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_other_syntax.html">Combining Django and Mako Templates</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_signals.html">Signals in DMP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_translation.html">Internationalization</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="converters.html">Parameter Conversion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="static.html">Static Files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="deploy.html">Deployment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="editors.html">Editors</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Django-Mako-Plus</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="topics.html">Basic Concepts</a> &raquo;</li>
+        
+      <li>Lazy Rendering with <code class="docutils literal notranslate"><span class="pre">TemplateResponse</span></code></li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="lazy-rendering-with-templateresponse">
+<span id="topics-responses"></span><h1>Lazy Rendering with <code class="docutils literal notranslate"><span class="pre">TemplateResponse</span></code><a class="headerlink" href="#lazy-rendering-with-templateresponse" title="Permalink to this headline">¶</a></h1>
+<p>The Django documentation describes two template-oriented responses: <a class="reference external" href="https://docs.djangoproject.com/en/dev/ref/template-response/">TemplateResponse</a> and  <a class="reference external" href="https://docs.djangoproject.com/en/dev/ref/template-response/">SimpleTemplateResponse</a>. These specialized responses support lazy rendering at the last possible moment. This allows decorators or middleware to modify the response after creating but before template rendering.</p>
+<p>DMP can be used with template responses, just like any other template engine.</p>
+<div class="section" id="method-1-template-string">
+<h2>Method 1: Template String<a class="headerlink" href="#method-1-template-string" title="Permalink to this headline">¶</a></h2>
+<p>Specify the DMP template using <code class="docutils literal notranslate"><span class="pre">app/template</span></code> format. This method uses <a class="reference external" href="/basics_django.html">Django-style format</a>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django_mako_plus</span> <span class="kn">import</span> <span class="n">view_function</span>
+<span class="kn">from</span> <span class="nn">django.template.response</span> <span class="kn">import</span> <span class="n">TemplateResponse</span>
+
+<span class="nd">@view_function</span>
+<span class="k">def</span> <span class="nf">process_request</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="o">...</span>
+    <span class="n">context</span> <span class="o">=</span> <span class="p">{</span><span class="o">...</span><span class="p">}</span>
+    <span class="k">return</span> <span class="n">TemplateResponse</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;homepage/index.html&#39;</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="method-2-template-object">
+<h2>Method 2: Template Object<a class="headerlink" href="#method-2-template-object" title="Permalink to this headline">¶</a></h2>
+<p>Alternatively, use a template object in the current app. This method uses DMP-style format:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django_mako_plus</span> <span class="kn">import</span> <span class="n">view_function</span>
+<span class="kn">from</span> <span class="nn">django.template.response</span> <span class="kn">import</span> <span class="n">TemplateResponse</span>
+
+<span class="nd">@view_function</span>
+<span class="k">def</span> <span class="nf">process_request</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="o">...</span>
+    <span class="n">context</span> <span class="o">=</span> <span class="p">{</span><span class="o">...</span><span class="p">}</span>
+    <span class="n">template</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">dmp</span><span class="o">.</span><span class="n">get_template</span><span class="p">(</span><span class="s1">&#39;index.html&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">TemplateResponse</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">template</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="topics_view_function.html" class="btn btn-neutral float-right" title="Customizing @view_function" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="topics_django.html" class="btn btn-neutral" title="Using the Django API" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Conan C. Albrecht
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+    
+
+  
+
+  <script type="text/javascript" src="_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

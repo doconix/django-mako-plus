@@ -1,0 +1,260 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Raw Parameter Values &mdash; Django-Mako-Plus  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/dmp.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Non-Wrapping Decorators" href="converters_decorators.html" />
+    <link rel="prev" title="Errors During Conversion" href="converters_errors.html" /> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> Django-Mako-Plus
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="compare.html">Comparison with Django</a></li>
+<li class="toctree-l1"><a class="reference internal" href="upgrade_notes.html">Upgrade Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="topics.html">Basic Concepts</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="converters.html">Parameter Conversion</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="converters_types.html">Supported Types</a></li>
+<li class="toctree-l2"><a class="reference internal" href="converters_adding.html">Adding a New Type</a></li>
+<li class="toctree-l2"><a class="reference internal" href="converters_replacing.html">Customizing the Converter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="converters_errors.html">Errors During Conversion</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Raw Parameter Values</a></li>
+<li class="toctree-l2"><a class="reference internal" href="converters_decorators.html">Non-Wrapping Decorators</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="static.html">Static Files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="deploy.html">Deployment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="editors.html">Editors</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Django-Mako-Plus</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="converters.html">Parameter Conversion</a> &raquo;</li>
+        
+      <li>Raw Parameter Values</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="raw-parameter-values">
+<span id="converters-raw"></span><h1>Raw Parameter Values<a class="headerlink" href="#raw-parameter-values" title="Permalink to this headline">¶</a></h1>
+<p>During URL resolution, DMP populates the <code class="docutils literal notranslate"><span class="pre">request.dmp.urlparams[</span> <span class="pre">]</span></code> list with all URL parts <em>after</em> the first two parts (<code class="docutils literal notranslate"><span class="pre">/homepage/index/</span></code>), up to the <code class="docutils literal notranslate"><span class="pre">?</span></code> (query string).  For example, the URL <code class="docutils literal notranslate"><span class="pre">/homepage/index/144/A58UX/</span></code> has two urlparams: <code class="docutils literal notranslate"><span class="pre">144</span></code> and <code class="docutils literal notranslate"><span class="pre">A58UX</span></code>.  These can be accessed as <code class="docutils literal notranslate"><span class="pre">request.dmp.urlparams[0]</span></code> and <code class="docutils literal notranslate"><span class="pre">request.dmp.urlparams[1]</span></code> throughout your view function.</p>
+<p>Empty parameters and trailing slashes are handled in a specific way.  The following table gives examples:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="46%" />
+<col width="54%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">/homepage/index/first/second/</span></code></td>
+<td><code class="docutils literal notranslate"><span class="pre">request.urlparam</span> <span class="pre">=</span> <span class="pre">[</span> <span class="pre">'first',</span> <span class="pre">'second'</span> <span class="pre">]</span></code></td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">/homepage/index/first/second</span></code></td>
+<td><code class="docutils literal notranslate"><span class="pre">request.urlparam</span> <span class="pre">=</span> <span class="pre">[</span> <span class="pre">'first',</span> <span class="pre">'second'</span> <span class="pre">]</span></code></td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">/homepage/index/first//</span></code></td>
+<td><code class="docutils literal notranslate"><span class="pre">request.urlparam</span> <span class="pre">=</span> <span class="pre">[</span> <span class="pre">'first',</span> <span class="pre">''</span> <span class="pre">]</span></code></td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">/homepage/index</span></code></td>
+<td><code class="docutils literal notranslate"><span class="pre">request.urlparam</span> <span class="pre">=</span> <span class="pre">[</span> <span class="pre">]</span></code></td>
+</tr>
+</tbody>
+</table>
+<p>In the examples above, the first and second URL result in the <em>same</em> list, even though the first URL has an ending slash.  The ending slash is optional and can be used to make the URL prettier.</p>
+<blockquote>
+<div>The ending slash is optional because DMP’s default <code class="docutils literal notranslate"><span class="pre">urls.py</span></code> patterns ignore it.  If you define custom URL patterns instead of including the default ones, be sure to add the ending <code class="docutils literal notranslate"><span class="pre">/?</span></code> (unless you explicitly want the slash to be explicitly counted).</div></blockquote>
+<p>In the Python language, the empty string and None have a special relationship.  The two are separate concepts with different meanings, but both evaluate to False, acting the same in the truthy statement: <code class="docutils literal notranslate"><span class="pre">if</span> <span class="pre">not</span> <span class="pre">mystr:</span></code>.</p>
+<p>Denoting “empty” parameters in the url is uncertain because:</p>
+<ol class="arabic simple">
+<li>Unless told otherwise, many web servers compact double slashes into single slashes. <code class="docutils literal notranslate"><span class="pre">http://localhost:8000/storefront/receipt//second/</span></code> becomes <code class="docutils literal notranslate"><span class="pre">http://localhost:8000/storefront/receipt/second/</span></code>, preventing you from ever seeing the empty first paramter.</li>
+<li>There is no real concept of “None” in a URL, only an empty string or some character <em>denoting</em> the absence of value.</li>
+</ol>
+<p>Because of these difficulties, the urlparams list is programmed to never return None and never raise IndexError.  Even in a short URL with only a few parameters, accessing <code class="docutils literal notranslate"><span class="pre">request.dmp.urlparams[50]</span></code> returns an empty string.</p>
+<p>For this reason, the default converters for booleans and Models objects equate the empty string <em>and</em> dash ‘-‘ as the token for False and None, respectively.  The single dash is especially useful because it provides a character in the URL (so your web server doesn’t compact that position) and explicitly states the value.  Your custom converters can override this behavior, but be sure to check for the empty string in <code class="docutils literal notranslate"><span class="pre">request.dmp.urlparams</span></code> instead of <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="converters_decorators.html" class="btn btn-neutral float-right" title="Non-Wrapping Decorators" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="converters_errors.html" class="btn btn-neutral" title="Errors During Conversion" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Conan C. Albrecht
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+    
+
+  
+
+  <script type="text/javascript" src="_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

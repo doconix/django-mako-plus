@@ -1,0 +1,271 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Editors &mdash; Django-Mako-Plus  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/dmp.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Deployment Tutorials" href="deploy_tutorials.html" /> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> Django-Mako-Plus
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="compare.html">Comparison with Django</a></li>
+<li class="toctree-l1"><a class="reference internal" href="upgrade_notes.html">Upgrade Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="topics.html">Basic Concepts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="converters.html">Parameter Conversion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="static.html">Static Files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="deploy.html">Deployment</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Editors</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#vscode">VSCode</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#atom">Atom</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Django-Mako-Plus</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Editors</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="editors">
+<span id="id1"></span><h1>Editors<a class="headerlink" href="#editors" title="Permalink to this headline">¶</a></h1>
+<p>This page contains ideas for customizing your favorite editor for DMP and Django development. If your editor isn’t listed here, please contribute ideas for it!</p>
+<p>Note that templates can use any file extension. For example, if you prefer <code class="docutils literal notranslate"><span class="pre">.mako</span></code> instead of the conventional <code class="docutils literal notranslate"><span class="pre">.html</span></code>, simply use this extension in view functions:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@view_function</span>
+<span class="k">def</span> <span class="nf">process_request</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="o">...</span>
+    <span class="k">return</span> <span class="n">request</span><span class="o">.</span><span class="n">dmp</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="s1">&#39;mypage.mako&#39;</span><span class="p">,</span> <span class="p">{</span><span class="o">...</span><span class="p">})</span>
+</pre></div>
+</div>
+<div class="section" id="vscode">
+<h2>VSCode<a class="headerlink" href="#vscode" title="Permalink to this headline">¶</a></h2>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Code Highlighting:</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body"><p class="first">A VSCode extension for Mako exists in the marketplace. Search “Mako” on the extensions tab and install.</p>
+<p>To activate highlighting, click the language in the bottom right of the vscode window (or type “Change Language Mode” in the command dropdown) and select Mako.</p>
+<p>If you want to make the association permanent, add the following to the vscode settings file. Open the command Command Palette and type <code class="docutils literal notranslate"><span class="pre">Open</span> <span class="pre">settings</span> <span class="pre">(JSON)</span></code> for the settings file.</p>
+<div class="last highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s2">&quot;files.associations&quot;</span><span class="p">:</span> <span class="p">{</span>
+    <span class="s2">&quot;*.htm&quot;</span><span class="p">:</span> <span class="s2">&quot;mako&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;*.html&quot;</span><span class="p">:</span> <span class="s2">&quot;mako&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="atom">
+<h2>Atom<a class="headerlink" href="#atom" title="Permalink to this headline">¶</a></h2>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Code Highlighting:</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body"><p class="first">An Atom package for Mako can be downloaded from within the editor. Open Settings and search for “Mako” on the Install tab. Install the <code class="docutils literal notranslate"><span class="pre">language-mako</span></code> package. Once installed, click on it if you want to customize its settings.</p>
+<p>To activate highlighting, click the language in the bottom right of the atom window and select <code class="docutils literal notranslate"><span class="pre">HTML</span> <span class="pre">(Mako)</span></code>.</p>
+<p>If you want to make the association stick, open the Atom <code class="docutils literal notranslate"><span class="pre">config.cson</span></code> and add the following:</p>
+<div class="last highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s2">&quot;*&quot;</span><span class="p">:</span>
+    <span class="n">core</span><span class="p">:</span>
+        <span class="n">customFileTypes</span><span class="p">:</span>
+        <span class="s1">&#39;text.html.mako&#39;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="s1">&#39;html&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;htm&#39;</span>
+        <span class="p">]</span>
+</pre></div>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="deploy_tutorials.html" class="btn btn-neutral" title="Deployment Tutorials" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Conan C. Albrecht
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+    
+
+  
+
+  <script type="text/javascript" src="_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,427 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Inheritance Paths and Template Location &mdash; Django-Mako-Plus  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/sphinx_tabs/tabs.css" type="text/css" />
+  <link rel="stylesheet" href="_static/sphinx_tabs/semantic-ui-2.2.10/segment.min.css" type="text/css" />
+  <link rel="stylesheet" href="_static/sphinx_tabs/semantic-ui-2.2.10/menu.min.css" type="text/css" />
+  <link rel="stylesheet" href="_static/sphinx_tabs/semantic-ui-2.2.10/tab.min.css" type="text/css" />
+  <link rel="stylesheet" href="_static/dmp.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Convenience Functions" href="topics_convenience.html" />
+    <link rel="prev" title="Using Third-Party Apps" href="topics_third_party.html" /> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> Django-Mako-Plus
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="compare.html">Comparison with Django</a></li>
+<li class="toctree-l1"><a class="reference internal" href="upgrade_notes.html">Upgrade Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">FAQ</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="topics.html">Basic Concepts</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="topics_settings.html"><code class="docutils literal notranslate"><span class="pre">settings.py</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_escaping.html">Escaping Special Characters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_variables.html">Metadata about the Request</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_modules.html">Python Imports in Templates</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_third_party.html">Using Third-Party Apps</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Inheritance Paths and Template Location</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#template-inheritance-across-apps">Template Inheritance Across Apps</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#templates-in-other-apps">Templates in Other Apps</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#content-types-and-status-codes">Content Types and Status Codes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#changing-the-template-location-globally">Changing the Template Location (globally)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#case-1-templates-within-your-project-directory">Case 1: Templates Within Your Project Directory</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#case-2-templates-outside-your-project-directory">Case 2: Templates Outside Your Project Directory</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#cleaning-up">Cleaning Up</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="topics_convenience.html">Convenience Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_redirecting.html">Redirecting the Browser</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_csrf.html">CSRF Tokens</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_class_views.html">Class-Based Views</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_django.html">Using the Django API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_responses.html">Lazy Rendering with <code class="docutils literal notranslate"><span class="pre">TemplateResponse</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_view_function.html">Customizing <code class="docutils literal notranslate"><span class="pre">&#64;view_function</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_partial_templates.html">Rendering Partial Templates for Ajax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_other_syntax.html">Combining Django and Mako Templates</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_signals.html">Signals in DMP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_translation.html">Internationalization</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="converters.html">Parameter Conversion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="static.html">Static Files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="deploy.html">Deployment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="editors.html">Editors</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Django-Mako-Plus</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="topics.html">Basic Concepts</a> &raquo;</li>
+        
+      <li>Inheritance Paths and Template Location</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="inheritance-paths-and-template-location">
+<span id="topics-paths"></span><h1><a class="toc-backref" href="#id1">Inheritance Paths and Template Location</a><a class="headerlink" href="#inheritance-paths-and-template-location" title="Permalink to this headline">¶</a></h1>
+<div class="contents topic" id="contents">
+<p class="topic-title first">Contents</p>
+<ul class="simple">
+<li><a class="reference internal" href="#inheritance-paths-and-template-location" id="id1">Inheritance Paths and Template Location</a><ul>
+<li><a class="reference internal" href="#template-inheritance-across-apps" id="id2">Template Inheritance Across Apps</a></li>
+<li><a class="reference internal" href="#templates-in-other-apps" id="id3">Templates in Other Apps</a></li>
+<li><a class="reference internal" href="#content-types-and-status-codes" id="id4">Content Types and Status Codes</a></li>
+<li><a class="reference internal" href="#changing-the-template-location-globally" id="id5">Changing the Template Location (globally)</a></li>
+<li><a class="reference internal" href="#cleaning-up" id="id6">Cleaning Up</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<p>In addition, you can also render the <a class="reference external" href="basics_django.html">normal Django API way</a>.</p>
+<div class="section" id="template-inheritance-across-apps">
+<h2><a class="toc-backref" href="#id2">Template Inheritance Across Apps</a><a class="headerlink" href="#template-inheritance-across-apps" title="Permalink to this headline">¶</a></h2>
+<p>You may have noticed that this tutorial has focused on a single app. Most projects consist of many apps. For example, a sales site might have an app for user management, an app for product management, and an app for the catalog and sales/shopping-cart experience. All of these apps probably want the same look and feel, and all of them likely want to extend from the <strong>same</strong> <code class="docutils literal notranslate"><span class="pre">base.htm</span></code> file.</p>
+<p>When you run <code class="docutils literal notranslate"><span class="pre">python3</span> <span class="pre">manage.py</span> <span class="pre">dmp_startapp</span> <span class="pre">&lt;appname&gt;</span></code>, you get <strong>new</strong> <code class="docutils literal notranslate"><span class="pre">base.htm</span></code> and <code class="docutils literal notranslate"><span class="pre">base_ajax.htm</span></code> files each time. This is done to get you started on your first app. On your second, third, and subsequent apps, you probably want to delete these starter files and instead extend your templates from the <code class="docutils literal notranslate"><span class="pre">base.htm</span></code> and <code class="docutils literal notranslate"><span class="pre">base_ajax.htm</span></code> files in your first app.</p>
+<p>In my projects, I usually place all the common files in the <code class="docutils literal notranslate"><span class="pre">homepage</span></code> app. I delete <code class="docutils literal notranslate"><span class="pre">base.htm</span></code> and <code class="docutils literal notranslate"><span class="pre">base_ajax.htm</span></code> from all other apps. Homepage contains the common html code, site-wide CSS, and site-wide Javascript.</p>
+<p>DMP supports cross-app inheritance by including your project root (e.g. <code class="docutils literal notranslate"><span class="pre">settings.BASE_DIR</span></code>) in the template lookup path. All you need to do is use the full path (relative to the project root) to the template in the inherits statement.</p>
+<p>Suppose I have the following app structure:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">myproject</span><span class="o">/</span>
+    <span class="n">account</span><span class="o">/</span>
+        <span class="fm">__init__</span><span class="o">.</span><span class="n">py</span>
+        <span class="n">media</span><span class="o">/</span>
+        <span class="n">scripts</span><span class="o">/</span>
+        <span class="n">styles</span><span class="o">/</span>
+        <span class="n">templates</span><span class="o">/</span>
+            <span class="n">login</span><span class="o">.</span><span class="n">html</span>
+        <span class="n">views</span><span class="o">/</span>
+            <span class="fm">__init__</span><span class="o">.</span><span class="n">py</span>
+    <span class="n">homepage</span><span class="o">/</span>
+        <span class="fm">__init__</span><span class="o">.</span><span class="n">py</span>
+        <span class="n">media</span><span class="o">/</span>
+        <span class="n">scripts</span><span class="o">/</span>
+        <span class="n">styles</span><span class="o">/</span>
+        <span class="n">templates</span><span class="o">/</span>
+            <span class="n">base_ajax</span><span class="o">.</span><span class="n">htm</span>
+            <span class="n">base</span><span class="o">.</span><span class="n">htm</span>
+            <span class="n">index</span><span class="o">.</span><span class="n">html</span>
+        <span class="n">views</span><span class="o">/</span>
+            <span class="fm">__init__</span><span class="o">.</span><span class="n">py</span>
+</pre></div>
+</div>
+<p>I set <code class="docutils literal notranslate"><span class="pre">account/templates/login.html</span></code> to extend from <code class="docutils literal notranslate"><span class="pre">homepage/templates/base.htm</span></code> using the following code at the top of the template:</p>
+<div class="highlight-html+mako notranslate"><div class="highlight"><pre><span></span><span class="cp">&lt;%</span><span class="nb">inherit</span> <span class="na">file=</span><span class="s">&quot;/homepage/templates/site_base.htm&quot;</span> <span class="cp">/&gt;</span>
+</pre></div>
+</div>
+<p>Again, the front slash in the name above tells DMP to start the lookup at the project root.</p>
+<blockquote>
+<div>In fact, my pages are often three inheritance levels deep:
+<code class="docutils literal notranslate"><span class="pre">homepage/templates/base.htm</span> <span class="pre">-&gt;</span> <span class="pre">account/templates/app_base.htm</span> <span class="pre">-&gt;</span> <span class="pre">account/templates/index.html</span></code>
+to provide for site-wide page code, app-general page code, and specific
+page code.</div></blockquote>
+</div>
+<div class="section" id="templates-in-other-apps">
+<h2><a class="toc-backref" href="#id3">Templates in Other Apps</a><a class="headerlink" href="#templates-in-other-apps" title="Permalink to this headline">¶</a></h2>
+<p>Most of the time, you’ll render templates in the request’s current app. This is easy with <code class="docutils literal notranslate"><span class="pre">request.dmp.render(...)</span></code>.</p>
+<p>Infrequently, you’ll likely need to render templates in apps other than the current one. There’s two ways to do it:</p>
+<dl class="docutils">
+<dt>Method 1: Use the <code class="docutils literal notranslate"><span class="pre">render_template</span></code> convenience function:</dt>
+<dd><div class="first last highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.conf</span> <span class="kn">import</span> <span class="n">settings</span>
+<span class="kn">from</span> <span class="nn">django.http</span> <span class="kn">import</span> <span class="n">HttpResponse</span>
+<span class="kn">from</span> <span class="nn">django_mako_plus</span> <span class="kn">import</span> <span class="n">view_function</span><span class="p">,</span> <span class="n">render_template</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+
+<span class="nd">@view_function</span>
+<span class="k">def</span> <span class="nf">process_request</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="n">context</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;now&#39;</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">(),</span>
+    <span class="p">}</span>
+    <span class="c1"># replace &#39;homepage&#39; with the name of any DMP-enabled app:</span>
+    <span class="k">return</span> <span class="n">HttpResponse</span><span class="p">(</span><span class="n">render_template</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;homepage&#39;</span><span class="p">,</span> <span class="s1">&#39;index.html&#39;</span><span class="p">,</span> <span class="n">context</span><span class="p">))</span>
+</pre></div>
+</div>
+</dd>
+<dt>Method 2: Use the standard Django API:</dt>
+<dd><div class="first last highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.conf</span> <span class="kn">import</span> <span class="n">settings</span>
+<span class="kn">from</span> <span class="nn">django.shortcuts</span> <span class="kn">import</span> <span class="n">render</span>
+<span class="kn">from</span> <span class="nn">django_mako_plus</span> <span class="kn">import</span> <span class="n">view_function</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+
+<span class="nd">@view_function</span>
+<span class="k">def</span> <span class="nf">process_request</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="n">context</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;now&#39;</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">(),</span>
+    <span class="p">}</span>
+    <span class="c1"># replace &#39;homepage&#39; with the name of any DMP-enabled app:</span>
+    <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;homepage/index.html&#39;</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+</div>
+<div class="section" id="content-types-and-status-codes">
+<h2><a class="toc-backref" href="#id4">Content Types and Status Codes</a><a class="headerlink" href="#content-types-and-status-codes" title="Permalink to this headline">¶</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">request.dmp.render()</span></code> function determines the mime type from the template extension and returns a <em>200</em> status code. What if you need to return JSON, CSV, or a 404 not found?  The function takes these parameters too. A few examples:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.http</span> <span class="kn">import</span> <span class="n">HttpResponse</span>
+
+<span class="c1"># return CSV</span>
+<span class="k">return</span> <span class="n">request</span><span class="o">.</span><span class="n">dmp</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="s1">&#39;my_csv.html&#39;</span><span class="p">,</span> <span class="p">{},</span> <span class="n">content_type</span><span class="o">=</span><span class="s1">&#39;text/csv&#39;</span><span class="p">)</span>
+
+<span class="c1"># return a custom error page</span>
+<span class="k">return</span> <span class="n">request</span><span class="o">.</span><span class="n">dmp</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="s1">&#39;custom_error_page.html&#39;</span><span class="p">,</span> <span class="p">{},</span> <span class="n">status</span><span class="o">=</span><span class="mi">404</span><span class="p">)</span>
+
+<span class="c1"># specify a different template charset (or set globally in settings.py)</span>
+<span class="k">return</span> <span class="n">request</span><span class="o">.</span><span class="n">dmp</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="s1">&#39;im_old.html&#39;</span><span class="p">,</span> <span class="p">{},</span> <span class="n">content_type</span><span class="o">=</span><span class="s1">&#39;cp1252&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="changing-the-template-location-globally">
+<h2><a class="toc-backref" href="#id5">Changing the Template Location (globally)</a><a class="headerlink" href="#changing-the-template-location-globally" title="Permalink to this headline">¶</a></h2>
+<p>Suppose your templates are located in a directory outside your normal project root. For whatever reason, you don’t want to put your templates in the app/templates directory.</p>
+<div class="section" id="case-1-templates-within-your-project-directory">
+<h3>Case 1: Templates Within Your Project Directory<a class="headerlink" href="#case-1-templates-within-your-project-directory" title="Permalink to this headline">¶</a></h3>
+<p>If the templates you need to access are within your project directory, no extra setup is required. Simply reference those templates relative to the root project directory. For example, to access a template located at BASE_DIR/homepage/mytemplates/sub1/page.html, use the following:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">return</span> <span class="n">request</span><span class="o">.</span><span class="n">dmp</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="s1">&#39;/homepage/mytemplates/sub1/page.html&#39;</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Note the starting slash on the path. That tells DMP to start searching at your project root.</p>
+<p>Don’t confuse the slashes in the above call with the slash used in Django’s <code class="docutils literal notranslate"><span class="pre">render</span></code> function. When you call <code class="docutils literal notranslate"><span class="pre">render</span></code>, the slash separates the app and filename. The above call uses <code class="docutils literal notranslate"><span class="pre">request.dmp.render</span></code>, which is a different function. You should really standardize on one or the other throughout your project.</p>
+</div>
+<div class="section" id="case-2-templates-outside-your-project-directory">
+<h3>Case 2: Templates Outside Your Project Directory<a class="headerlink" href="#case-2-templates-outside-your-project-directory" title="Permalink to this headline">¶</a></h3>
+<p>Suppose your templates are located on a different disk or entirely different directory from your project. DMP allows you to add extra directories to the template search path through the <code class="docutils literal notranslate"><span class="pre">TEMPLATES_DIRS</span></code> setting. This setting contains a list of directories that are searched by DMP regardless of the app being referenced. To include the <code class="docutils literal notranslate"><span class="pre">/var/templates/</span></code> directory in the search path, set this variable as follows:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="s1">&#39;TEMPLATES_DIRS&#39;</span><span class="p">:</span> <span class="p">[</span>
+   <span class="s1">&#39;/var/templates/&#39;</span><span class="p">,</span>
+<span class="p">],</span>
+</pre></div>
+</div>
+<p>Suppose, after making the above change, you need to render the ‘/var/templates/page1.html’ template:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">return</span> <span class="n">request</span><span class="o">.</span><span class="n">dmp</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="s1">&#39;page1.html&#39;</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>DMP will first search the current app’s <code class="docutils literal notranslate"><span class="pre">templates</span></code> directory (i.e. the normal way), then it will search the <code class="docutils literal notranslate"><span class="pre">TEMPLATES_DIRS</span></code> list, which in this case contains <code class="docutils literal notranslate"><span class="pre">/var/templates/</span></code>. Your <code class="docutils literal notranslate"><span class="pre">page1.html</span></code> template will be found and rendered.</p>
+</div>
+</div>
+<div class="section" id="cleaning-up">
+<h2><a class="toc-backref" href="#id6">Cleaning Up</a><a class="headerlink" href="#cleaning-up" title="Permalink to this headline">¶</a></h2>
+<p>DMP caches its compiled mako+templates in subdirectories of each app. The default locations for each app are <code class="docutils literal notranslate"><span class="pre">app/templates/__dmpcache__</span></code>, <code class="docutils literal notranslate"><span class="pre">app/scripts/__dmpcache__</span></code>, and <code class="docutils literal notranslate"><span class="pre">app/styles/__dmpcache__</span></code>, although the exact name depends on your settings.py. Normally, these cache directories are hidden and warrant your utmost apathy. However, there are times when DMP fails to update a cached template as it should. Or you might just need a pristine project without these generated files. This can be done with a Unix find command or through DMP’s <code class="docutils literal notranslate"><span class="pre">dmp_cleanup</span></code> management command:</p>
+<div class="sphinx-tabs docutils container">
+<div class="ui top attached tabular menu sphinx-menu docutils container">
+<div class="active item sphinx-data-tab-TGludXgvTWFj docutils container">
+<div class="docutils container">
+Linux/Mac</div>
+</div>
+<div class="item sphinx-data-tab-V2luZG93cw== docutils container">
+<div class="docutils container">
+Windows</div>
+</div>
+</div>
+<div class="ui bottom attached sphinx-tab tab segment sphinx-data-tab-TGludXgvTWFj active docutils container">
+<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># see what would be be done without actually deleting any cache folders</span>
+<span class="n">python3</span> <span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">dmp_cleanup</span> <span class="o">--</span><span class="n">trial</span><span class="o">-</span><span class="n">run</span>
+
+<span class="c1"># really delete the folders</span>
+<span class="n">python3</span> <span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">dmp_cleanup</span>
+</pre></div>
+</div>
+</div>
+<div class="ui bottom attached sphinx-tab tab segment sphinx-data-tab-V2luZG93cw== docutils container">
+<div class="code powershell highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># see what would be be done without actually deleting any cache folders</span>
+<span class="n">python</span> <span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">dmp_cleanup</span> <span class="o">--</span><span class="n">trial</span><span class="o">-</span><span class="n">run</span>
+
+<span class="c1"># really delete the folders</span>
+<span class="n">python</span> <span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">dmp_cleanup</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>With this management command, add <code class="docutils literal notranslate"><span class="pre">--verbose</span></code> to the command to include messages about skipped files, and add <code class="docutils literal notranslate"><span class="pre">--quiet</span></code> to silence all messages (except errors).</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="topics_convenience.html" class="btn btn-neutral float-right" title="Convenience Functions" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="topics_third_party.html" class="btn btn-neutral" title="Using Third-Party Apps" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Conan C. Albrecht
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/sphinx_tabs/tabs.js"></script>
+        <script type="text/javascript" src="_static/sphinx_tabs/semantic-ui-2.2.10/tab.min.js"></script>
+    
+
+  
+
+  <script type="text/javascript" src="_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

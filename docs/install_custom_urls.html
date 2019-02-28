@@ -1,0 +1,334 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Custom URL Patterns &mdash; Django-Mako-Plus  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/dmp.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Installing in a Subdirectory: /mysite/" href="install_subdirectory.html" />
+    <link rel="prev" title="Limiting DMP to Specific Apps" href="install_app_specific.html" /> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> Django-Mako-Plus
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="compare.html">Comparison with Django</a></li>
+<li class="toctree-l1"><a class="reference internal" href="upgrade_notes.html">Upgrade Notes</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="install.html">Installation</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="install_new.html">New Project</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install_existing.html">Existing Project</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install.html#minimal-dmp">Minimal DMP</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="install.html#customizations">Customizations</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Custom URL Patterns</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#project-patterns">Project Patterns</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#patterns-for-the-homepage-app">Patterns for the <code class="docutils literal notranslate"><span class="pre">homepage</span></code> App</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#view-function">View Function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#next-steps">Next Steps</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="install_subdirectory.html">Installing in a Subdirectory: /mysite/</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="topics.html">Basic Concepts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="converters.html">Parameter Conversion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="static.html">Static Files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="deploy.html">Deployment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="editors.html">Editors</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Django-Mako-Plus</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="install.html">Installation</a> &raquo;</li>
+        
+      <li>Custom URL Patterns</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="custom-url-patterns">
+<span id="install-custom-urls"></span><h1>Custom URL Patterns<a class="headerlink" href="#custom-url-patterns" title="Permalink to this headline">¶</a></h1>
+<p>Suppose your project requires a different URL convention than the normal <code class="docutils literal notranslate"><span class="pre">/app/page/</span></code>. For example, you might need the user id in between the app and page: e.g. <code class="docutils literal notranslate"><span class="pre">/app/userid/page/</span></code>.</p>
+<p>DMP’s default patterns are added when you include DMP’s <code class="docutils literal notranslate"><span class="pre">urls.py</span></code> in your project. DMP iterates your local apps, and it adds a custom resolver for each one using <code class="docutils literal notranslate"><span class="pre">app_resolver()</span></code>.  In turn, each resolver adds a number of patterns using <code class="docutils literal notranslate"><span class="pre">dmp_path()</span></code>.  See these <a class="reference external" href="http://github.com/doconix/django-mako-plus/blob/master/django_mako_plus/router/resolver.py">methods and _dmp_paths_for_app() in the source</a>.</p>
+<p>You can disable the automatic registration of apps with DMP by removing the <code class="docutils literal notranslate"><span class="pre">include('',</span> <span class="pre">'django_mako_plus')</span></code> line from <code class="docutils literal notranslate"><span class="pre">urls.py</span></code>.  With this line removed, DMP won’t inject any convention-based patterns into your project.</p>
+<div class="section" id="project-patterns">
+<h2>Project Patterns<a class="headerlink" href="#project-patterns" title="Permalink to this headline">¶</a></h2>
+<p>Per Django best practices, we’ll split the patterns into a main include for the app and another file for the app. First modify your project URL file: <code class="docutils literal notranslate"><span class="pre">mysite/urls.py</span></code>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.apps</span> <span class="kn">import</span> <span class="n">apps</span>
+<span class="kn">from</span> <span class="nn">django.conf.urls</span> <span class="kn">import</span> <span class="n">url</span><span class="p">,</span> <span class="n">include</span>
+<span class="kn">from</span> <span class="nn">django.views.static</span> <span class="kn">import</span> <span class="n">serve</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="n">urlpatterns</span> <span class="o">=</span> <span class="p">[</span>
+
+    <span class="c1"># DMP&#39;s JS file (for DEBUG mode)</span>
+    <span class="n">url</span><span class="p">(</span>
+        <span class="sa">r</span><span class="s1">&#39;^django_mako_plus/(?P&lt;path&gt;[^/]+)&#39;</span><span class="p">,</span>
+        <span class="n">serve</span><span class="p">,</span>
+        <span class="p">{</span> <span class="s1">&#39;document_root&#39;</span><span class="p">:</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">apps</span><span class="o">.</span><span class="n">get_app_config</span><span class="p">(</span><span class="s1">&#39;django_mako_plus&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="s1">&#39;webroot&#39;</span><span class="p">)</span> <span class="p">},</span>
+        <span class="n">name</span><span class="o">=</span><span class="s1">&#39;DMP webroot (for devel)&#39;</span><span class="p">,</span>
+    <span class="p">),</span>
+
+    <span class="c1"># include the homepage app urls.py file</span>
+    <span class="n">url</span><span class="p">(</span><span class="s1">&#39;^homepage/?&#39;</span><span class="p">,</span> <span class="n">include</span><span class="p">(</span><span class="s1">&#39;homepage.urls&#39;</span><span class="p">)),</span>
+
+<span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="patterns-for-the-homepage-app">
+<h2>Patterns for the <code class="docutils literal notranslate"><span class="pre">homepage</span></code> App<a class="headerlink" href="#patterns-for-the-homepage-app" title="Permalink to this headline">¶</a></h2>
+<p>Create an app-specific file for the homepage app: <code class="docutils literal notranslate"><span class="pre">homepage/urls.py</span></code>.  These patterns are adapted from <a class="reference external" href="http://github.com/doconix/django-mako-plus/blob/master/django_mako_plus/urls.py">DMP’s default urls.py file</a>.  Each call to <code class="docutils literal notranslate"><span class="pre">dmp_path</span></code> includes the four routing variables in either the pattern or the kwargs.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django_mako_plus</span> <span class="kn">import</span> <span class="n">dmp_path</span>
+
+<span class="n">urlpatterns</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="c1"># Because these patterns are subpatterns within the app&#39;s resolver,</span>
+    <span class="c1"># we don&#39;t include the /app/ in the pattern -- it&#39;s already been</span>
+    <span class="c1"># handled by the app&#39;s resolver.</span>
+    <span class="c1">#</span>
+    <span class="c1"># Also note how the each pattern below defines the four kwargs--</span>
+    <span class="c1"># either as 1) a regex named group or 2) in kwargs.</span>
+    <span class="n">dmp_path</span><span class="p">(</span>
+        <span class="sa">r</span><span class="s1">&#39;^(?P&lt;userid&gt;[0-9-]+)/(?P&lt;dmp_page&gt;[_a-zA-Z0-9\-]+)\.(?P&lt;dmp_function&gt;[_a-zA-Z0-9\.\-]+)/(?P&lt;dmp_urlparams&gt;.+?)/?$&#39;</span><span class="p">,</span>
+        <span class="p">{</span> <span class="s1">&#39;dmp_app&#39;</span><span class="p">:</span> <span class="s1">&#39;homepage&#39;</span> <span class="p">},</span>
+        <span class="n">name</span><span class="o">=</span><span class="s1">&#39;/homepage/userid/page.function/urlparams&#39;</span><span class="p">,</span>
+    <span class="p">),</span>
+    <span class="n">dmp_path</span><span class="p">(</span>
+        <span class="sa">r</span><span class="s1">&#39;^(?P&lt;userid&gt;[0-9-]+)/(?P&lt;dmp_page&gt;[_a-zA-Z0-9\-]+)\.(?P&lt;dmp_function&gt;[_a-zA-Z0-9\.\-]+)/?$&#39;</span><span class="p">,</span>
+        <span class="p">{</span> <span class="s1">&#39;dmp_app&#39;</span><span class="p">:</span> <span class="s1">&#39;homepage&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;dmp_urlparams&#39;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span> <span class="p">},</span>
+        <span class="n">name</span><span class="o">=</span><span class="s1">&#39;/homepage/userid/page.function&#39;</span><span class="p">,</span>
+    <span class="p">),</span>
+    <span class="n">dmp_path</span><span class="p">(</span>
+        <span class="sa">r</span><span class="s1">&#39;^(?P&lt;userid&gt;[0-9-]+)/(?P&lt;dmp_page&gt;[_a-zA-Z0-9\-]+)/(?P&lt;dmp_urlparams&gt;.+?)/?$&#39;</span><span class="p">,</span>
+        <span class="p">{</span> <span class="s1">&#39;dmp_app&#39;</span><span class="p">:</span> <span class="s1">&#39;homepage&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;dmp_function&#39;</span><span class="p">:</span> <span class="s1">&#39;process_request&#39;</span> <span class="p">},</span>
+        <span class="s1">&#39;/homepage/userid/page/urlparams&#39;</span><span class="p">,</span>
+    <span class="p">),</span>
+    <span class="n">dmp_path</span><span class="p">(</span>
+        <span class="sa">r</span><span class="s1">&#39;^(?P&lt;userid&gt;[0-9-]+)/(?P&lt;dmp_page&gt;[_a-zA-Z0-9\-]+)/?$&#39;</span><span class="p">,</span>
+        <span class="p">{</span> <span class="s1">&#39;dmp_app&#39;</span><span class="p">:</span> <span class="s1">&#39;homepage&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;dmp_function&#39;</span><span class="p">:</span> <span class="s1">&#39;process_request&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;dmp_urlparams&#39;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span> <span class="p">},</span>
+        <span class="n">name</span><span class="o">=</span><span class="s1">&#39;/homepage/userid/page&#39;</span><span class="p">,</span>
+    <span class="p">),</span>
+    <span class="n">dmp_path</span><span class="p">(</span>
+        <span class="sa">r</span><span class="s1">&#39;^(?P&lt;userid&gt;[0-9-]+)/?$&#39;</span><span class="p">,</span>
+        <span class="p">{</span> <span class="s1">&#39;dmp_app&#39;</span><span class="p">:</span> <span class="s1">&#39;homepage&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;dmp_page&#39;</span><span class="p">:</span> <span class="s1">&#39;index&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;dmp_function&#39;</span><span class="p">:</span> <span class="s1">&#39;process_request&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;dmp_urlparams&#39;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span> <span class="p">},</span>
+        <span class="n">name</span><span class="o">=</span><span class="s1">&#39;/homepage/userid&#39;</span><span class="p">,</span>
+    <span class="p">),</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">userid</span></code> group in the patterns above accepts any number, plus a dash.  The dash is the DMP value for “empty”.  Our pattern could actually be improved, but it’ll work for this example.</p>
+</div>
+<div class="section" id="view-function">
+<h2>View Function<a class="headerlink" href="#view-function" title="Permalink to this headline">¶</a></h2>
+<p>Your view function needs to change because we have an additional named group in our patternns: <code class="docutils literal notranslate"><span class="pre">userid</span></code>.  We’ll have DMP convert this parameter to an int, with a default value of 0.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.http</span> <span class="kn">import</span> <span class="n">HttpResponse</span>
+<span class="kn">from</span> <span class="nn">django_mako_plus</span> <span class="kn">import</span> <span class="n">view_function</span>
+
+<span class="nd">@view_function</span>
+<span class="k">def</span> <span class="nf">process_request</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">userid</span><span class="p">:</span><span class="mi">0</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">HttpResponse</span><span class="p">(</span><span class="s1">&#39;The userid was </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">userid</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>All view functions in the <code class="docutils literal notranslate"><span class="pre">homepage</span></code> need this function signature.</p>
+<p>Test with the following urls:</p>
+<ul class="simple">
+<li><a class="reference external" href="http://localhost:8000/homepage/-/index">http://localhost:8000/homepage/42/index</a></li>
+<li><a class="reference external" href="http://localhost:8000/homepage/-/index">http://localhost:8000/homepage/-/index</a></li>
+</ul>
+</div>
+<div class="section" id="next-steps">
+<h2>Next Steps<a class="headerlink" href="#next-steps" title="Permalink to this headline">¶</a></h2>
+<p>We haven’t added any patterns for the default app.  If <code class="docutils literal notranslate"><span class="pre">homepage</span></code> is our default app, we need additional patterns in the main <code class="docutils literal notranslate"><span class="pre">urls.py</span></code> file that don’t have an app.</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="install_subdirectory.html" class="btn btn-neutral float-right" title="Installing in a Subdirectory: /mysite/" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="install_app_specific.html" class="btn btn-neutral" title="Limiting DMP to Specific Apps" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Conan C. Albrecht
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+    
+
+  
+
+  <script type="text/javascript" src="_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

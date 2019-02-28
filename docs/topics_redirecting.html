@@ -1,0 +1,282 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Redirecting the Browser &mdash; Django-Mako-Plus  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/dmp.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="CSRF Tokens" href="topics_csrf.html" />
+    <link rel="prev" title="Convenience Functions" href="topics_convenience.html" /> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> Django-Mako-Plus
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="compare.html">Comparison with Django</a></li>
+<li class="toctree-l1"><a class="reference internal" href="upgrade_notes.html">Upgrade Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">FAQ</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="topics.html">Basic Concepts</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="topics_settings.html"><code class="docutils literal notranslate"><span class="pre">settings.py</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_escaping.html">Escaping Special Characters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_variables.html">Metadata about the Request</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_modules.html">Python Imports in Templates</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_third_party.html">Using Third-Party Apps</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_paths.html">Inheritance Paths and Template Location</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_convenience.html">Convenience Functions</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Redirecting the Browser</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#why-not-use-django-s-httpresponseredirect">Why not use Django’s HttpResponseRedirect?</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#examples">Examples</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="topics_csrf.html">CSRF Tokens</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_class_views.html">Class-Based Views</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_django.html">Using the Django API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_responses.html">Lazy Rendering with <code class="docutils literal notranslate"><span class="pre">TemplateResponse</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_view_function.html">Customizing <code class="docutils literal notranslate"><span class="pre">&#64;view_function</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_partial_templates.html">Rendering Partial Templates for Ajax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_other_syntax.html">Combining Django and Mako Templates</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_signals.html">Signals in DMP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_translation.html">Internationalization</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="converters.html">Parameter Conversion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="static.html">Static Files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="deploy.html">Deployment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="editors.html">Editors</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Django-Mako-Plus</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="topics.html">Basic Concepts</a> &raquo;</li>
+        
+      <li>Redirecting the Browser</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="redirecting-the-browser">
+<span id="topics-redirecting"></span><h1>Redirecting the Browser<a class="headerlink" href="#redirecting-the-browser" title="Permalink to this headline">¶</a></h1>
+<p>Redirecting the browser is common in today’s sites. For example, during form submissions, web applications often redirect the browser to the <em>same</em> page after a form submission (and handling with a view)–effectively switching the browser from its current POST to a regular GET. If the user hits the refresh button within his or her browser, the page simply gets refreshed without the form being submitted again. It prevents users from being confused when the browser opens a popup asking if the post data should be submitted again.</p>
+<p>DMP provides four exceptions that redirect processing from anywhere in your codebase:</p>
+<ol class="arabic simple">
+<li><code class="docutils literal notranslate"><span class="pre">RedirectException</span></code>: Stops request processing and returns an HTTP 302 (temporary redirect) to the browser.</li>
+<li><code class="docutils literal notranslate"><span class="pre">PermanentRedirectException</span></code>: Stops request processing and returns an HTTP 301 (permanent redirect) to the browser.</li>
+<li><code class="docutils literal notranslate"><span class="pre">JavascriptRedirectException</span></code>: Stops request processing and returns a script-based redirect (<code class="docutils literal notranslate"><span class="pre">&lt;script&gt;window.location.href=&quot;...&quot;;&lt;/script&gt;</span></code>). This is useful for times when a normal 302 doesn’t work right, such as redirecting the overall browser during ajax calls.</li>
+<li><code class="docutils literal notranslate"><span class="pre">InternalRedirectException</span></code>: Restarts the request internally with a new view function. This is the fastest way to redirect because it doesn’t round trip back to the browser. In fact, the browser doesn’t even know about the redirect, and the browser url does not change. The redirect happens directly within DMP’s router.</li>
+</ol>
+<div class="section" id="why-not-use-django-s-httpresponseredirect">
+<h2>Why not use Django’s HttpResponseRedirect?<a class="headerlink" href="#why-not-use-django-s-httpresponseredirect" title="Permalink to this headline">¶</a></h2>
+<p>Please do!  <code class="docutils literal notranslate"><span class="pre">django.http.HttpResponseRedirect</span></code> should be your primary method of redirection.</p>
+<p>Then what’s the point?  It’s a difference in object type: Django’s redirects are <strong>HttpResponses</strong>, while DMP’s are <strong>Exceptions</strong>. In short, DMP’s redirects are more versatile because <strong>they can be raised anywhere in your code</strong>. Django’s redirects can only be returned from view functions.</p>
+<p>When you raise one of the redirect exceptions, the exception bubbles up and is caught by the DMP router. DMP then converts the exception into the appropriate <code class="docutils literal notranslate"><span class="pre">HttpResponse</span></code> and returns to the browser.</p>
+<blockquote>
+<div><strong>Isn’t this an abuse of exceptions?</strong> In the Python world, it’s common to direct program flow using exceptions: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#StopIteration">StopIteration</a> is a great example. Just be judicious and don’t overuse the priviledge.</div></blockquote>
+</div>
+<div class="section" id="examples">
+<h2>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django_mako_plus</span> <span class="kn">import</span> <span class="n">RedirectException</span><span class="p">,</span> <span class="n">PermanentRedirectException</span><span class="p">,</span> <span class="n">JavascriptRedirectException</span><span class="p">,</span> <span class="n">InternalRedirectException</span>
+
+<span class="c1"># raise a normal redirect from anywhere in your code</span>
+<span class="k">raise</span> <span class="n">RedirectException</span><span class="p">(</span><span class="s1">&#39;/some/new/url&#39;</span><span class="p">)</span>
+
+<span class="c1"># raise a permanent redirect from anywhere in your code</span>
+<span class="k">raise</span> <span class="n">PermanentRedirectException</span><span class="p">(</span><span class="s1">&#39;/some/new/url&#39;</span><span class="p">)</span>
+
+<span class="c1"># raise a Javascript-based redirect from anywhere in your code</span>
+<span class="k">raise</span> <span class="n">JavascriptRedirectException</span><span class="p">(</span><span class="s1">&#39;/some/new/url&#39;</span><span class="p">)</span>
+
+<span class="c1"># restart the routing process with a new view without returning to the browser.</span>
+<span class="c1"># the browser keeps the same url and doesn&#39;t know a redirect has happened.</span>
+<span class="c1"># the request.dmp.module and request.dmp.function variables are updated</span>
+<span class="c1"># to reflect the new values, but all other variables, such as request.dmp.urlparams,</span>
+<span class="c1"># request.GET, and request.POST remain the same as before.</span>
+<span class="c1"># the next line is as if the browser went to /homepage/upgrade/</span>
+<span class="k">raise</span> <span class="n">InternalRedirectException</span><span class="p">(</span><span class="s1">&#39;homepage.views.upgrade&#39;</span><span class="p">,</span> <span class="s1">&#39;process_request&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>DMP adds a custom header, <code class="docutils literal notranslate"><span class="pre">Redirect-Exception</span></code>, to all exception-based redirects. Although you’ll probably ignore this most of the time, the header allows you to further act on exception redirects in response middleware, your web server, or calling Javascript code.</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="topics_csrf.html" class="btn btn-neutral float-right" title="CSRF Tokens" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="topics_convenience.html" class="btn btn-neutral" title="Convenience Functions" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Conan C. Albrecht
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+    
+
+  
+
+  <script type="text/javascript" src="_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

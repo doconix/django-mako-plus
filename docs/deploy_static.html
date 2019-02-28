@@ -1,0 +1,522 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Collecting Static Files &mdash; Django-Mako-Plus  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/sphinx_tabs/tabs.css" type="text/css" />
+  <link rel="stylesheet" href="_static/sphinx_tabs/semantic-ui-2.2.10/segment.min.css" type="text/css" />
+  <link rel="stylesheet" href="_static/sphinx_tabs/semantic-ui-2.2.10/menu.min.css" type="text/css" />
+  <link rel="stylesheet" href="_static/sphinx_tabs/semantic-ui-2.2.10/tab.min.css" type="text/css" />
+  <link rel="stylesheet" href="_static/dmp.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Deployment Recommendations" href="deploy_recommendations.html" />
+    <link rel="prev" title="Deployment" href="deploy.html" /> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> Django-Mako-Plus
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="compare.html">Comparison with Django</a></li>
+<li class="toctree-l1"><a class="reference internal" href="upgrade_notes.html">Upgrade Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="topics.html">Basic Concepts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="converters.html">Parameter Conversion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="static.html">Static Files</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="deploy.html">Deployment</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Collecting Static Files</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#setup">Setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#linking-to-static-files">Linking to Static Files</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#deployment">Deployment</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#dmp-common-js"><code class="docutils literal notranslate"><span class="pre">dmp-common.js</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#advanced-use">Advanced Use</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="deploy_recommendations.html">Deployment Recommendations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="deploy_tutorials.html">Deployment Tutorials</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="editors.html">Editors</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Django-Mako-Plus</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="deploy.html">Deployment</a> &raquo;</li>
+        
+      <li>Collecting Static Files</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="collecting-static-files">
+<span id="deploy-static"></span><h1><a class="toc-backref" href="#id1">Collecting Static Files</a><a class="headerlink" href="#collecting-static-files" title="Permalink to this headline">¶</a></h1>
+<div class="contents topic" id="contents">
+<p class="topic-title first">Contents</p>
+<ul class="simple">
+<li><a class="reference internal" href="#collecting-static-files" id="id1">Collecting Static Files</a><ul>
+<li><a class="reference internal" href="#setup" id="id2">Setup</a></li>
+<li><a class="reference internal" href="#linking-to-static-files" id="id3">Linking to Static Files</a></li>
+<li><a class="reference internal" href="#deployment" id="id4">Deployment</a></li>
+<li><a class="reference internal" href="#dmp-common-js" id="id5"><code class="docutils literal notranslate"><span class="pre">dmp-common.js</span></code></a></li>
+<li><a class="reference internal" href="#advanced-use" id="id6">Advanced Use</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<p>In the Django documentation, <strong>static files</strong> are files linked into your html documents like <code class="docutils literal notranslate"><span class="pre">.css</span></code> and <code class="docutils literal notranslate"><span class="pre">.js</span></code> as well as images files like <code class="docutils literal notranslate"><span class="pre">.png</span></code> and <code class="docutils literal notranslate"><span class="pre">.jpg</span></code>. These are served directly by your web server (Apache, Nginx, etc.) rather than by Django because they don’t require any processing. Their contents are just copied to the browser. Serving static files is what web servers were written for.</p>
+<p>Django-Mako-Plus works with static files the same basic way that traditional Django does – with one difference: the folder structure is different in DMP.  DMP-enabled apps contain the following directories:</p>
+<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">app</span><span class="o">/</span>
+    <span class="n">media</span><span class="o">/</span>
+    <span class="n">scripts</span><span class="o">/</span>
+    <span class="n">styles</span><span class="o">/</span>
+    <span class="n">templates</span><span class="o">/</span>
+    <span class="n">views</span><span class="o">/</span>
+</pre></div>
+</div>
+<p>At deployment, collect static files out of these directories with the following command:</p>
+<div class="sphinx-tabs docutils container">
+<div class="ui top attached tabular menu sphinx-menu docutils container">
+<div class="active item sphinx-data-tab-TGludXgvTWFj docutils container">
+<div class="docutils container">
+Linux/Mac</div>
+</div>
+<div class="item sphinx-data-tab-V2luZG93cw== docutils container">
+<div class="docutils container">
+Windows</div>
+</div>
+</div>
+<div class="ui bottom attached sphinx-tab tab segment sphinx-data-tab-TGludXgvTWFj active docutils container">
+<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python3</span> <span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">dmp_collectstatic</span>
+</pre></div>
+</div>
+</div>
+<div class="ui bottom attached sphinx-tab tab segment sphinx-data-tab-V2luZG93cw== docutils container">
+<div class="code powershell highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">dmp_collectstatic</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>If your project contains both DMP and regular Django apps, you can collect static files with both commands:</p>
+<div class="sphinx-tabs docutils container">
+<div class="ui top attached tabular menu sphinx-menu docutils container">
+<div class="active item sphinx-data-tab-TGludXgvTWFj docutils container">
+<div class="docutils container">
+Linux/Mac</div>
+</div>
+<div class="item sphinx-data-tab-V2luZG93cw== docutils container">
+<div class="docutils container">
+Windows</div>
+</div>
+</div>
+<div class="ui bottom attached sphinx-tab tab segment sphinx-data-tab-TGludXgvTWFj active docutils container">
+<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python3</span> <span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">collectstatic</span>
+<span class="n">python3</span> <span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">dmp_collectstatic</span> <span class="o">--</span><span class="n">overwrite</span>
+</pre></div>
+</div>
+</div>
+<div class="ui bottom attached sphinx-tab tab segment sphinx-data-tab-V2luZG93cw== docutils container">
+<div class="code powershell highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">collectstatic</span>
+<span class="n">python</span> <span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">dmp_collectstatic</span> <span class="o">--</span><span class="n">overwrite</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="setup">
+<h2><a class="toc-backref" href="#id2">Setup</a><a class="headerlink" href="#setup" title="Permalink to this headline">¶</a></h2>
+<p>In your project’s settings.py file, you should have the following.  These settings are not specific to DMP, and they are described in the <a class="reference external" href="https://docs.djangoproject.com/en/dev/howto/static-files/">Django documentation</a>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">STATIC_URL</span> <span class="o">=</span> <span class="s1">&#39;/static/&#39;</span>
+<span class="n">STATICFILES_DIRS</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">BASE_DIR</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">STATIC_ROOT</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">BASE_DIR</span><span class="p">,</span> <span class="s1">&#39;static&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>Note that the last line is a serious security issue if you go to production with it</strong> (although Django disables it as long as <code class="docutils literal notranslate"><span class="pre">DEBUG=False</span></code>). More on that later.</p>
+<p>Also in settings.py, ensure you have Django’s static files app enabled:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">INSTALLED_APPS</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="o">...</span>
+    <span class="s1">&#39;django.contrib.staticfiles&#39;</span><span class="p">,</span>
+    <span class="o">...</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="linking-to-static-files">
+<h2><a class="toc-backref" href="#id3">Linking to Static Files</a><a class="headerlink" href="#linking-to-static-files" title="Permalink to this headline">¶</a></h2>
+<p>During development, place media files for the homepage app in the homepage/media/ folder. This includes images, videos, PDF files, etc. – any static files that aren’t Javascript or CSS files.</p>
+<p>Reference static files using the <code class="docutils literal notranslate"><span class="pre">${</span> <span class="pre">STATIC_URL</span> <span class="pre">}</span></code> variable. For example, reference images in your html pages like this:</p>
+<div class="highlight-html+mako notranslate"><div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">img</span> <span class="na">src</span><span class="o">=</span><span class="s">&quot;</span><span class="cp">${</span> <span class="n">STATIC_URL</span> <span class="cp">}</span><span class="s">homepage/media/image.png&quot;</span> <span class="p">/&gt;</span>
+</pre></div>
+</div>
+<p>By using the <code class="docutils literal notranslate"><span class="pre">STATIC_URL</span></code> variable from settings in your urls rather than hard-coding the <code class="docutils literal notranslate"><span class="pre">/static/</span></code> directory location, you can change the url to your static files easily in the future.</p>
+</div>
+<div class="section" id="deployment">
+<h2><a class="toc-backref" href="#id4">Deployment</a><a class="headerlink" href="#deployment" title="Permalink to this headline">¶</a></h2>
+<p>At production/deployment, comment out <code class="docutils literal notranslate"><span class="pre">BASE_DIR</span></code> because it essentially makes your entire project available via your static url (a serious security concern):</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">STATIC_URL</span> <span class="o">=</span> <span class="s1">&#39;/static/&#39;</span>
+<span class="n">STATICFILES_DIRS</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="c1"># BASE_DIR,</span>
+<span class="p">)</span>
+<span class="n">STATIC_ROOT</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">BASE_DIR</span><span class="p">,</span> <span class="s1">&#39;static&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>When you deploy to a web server, run <code class="docutils literal notranslate"><span class="pre">dmp_collectstatic</span></code> to collect your static files into a separate directory (called <code class="docutils literal notranslate"><span class="pre">/static/</span></code> in the settings above):</p>
+<div class="sphinx-tabs docutils container">
+<div class="ui top attached tabular menu sphinx-menu docutils container">
+<div class="active item sphinx-data-tab-TGludXgvTWFj docutils container">
+<div class="docutils container">
+Linux/Mac</div>
+</div>
+<div class="item sphinx-data-tab-V2luZG93cw== docutils container">
+<div class="docutils container">
+Windows</div>
+</div>
+</div>
+<div class="ui bottom attached sphinx-tab tab segment sphinx-data-tab-TGludXgvTWFj active docutils container">
+<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python3</span> <span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">collectstatic</span>
+<span class="n">python3</span> <span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">dmp_collectstatic</span> <span class="o">--</span><span class="n">overwrite</span>
+</pre></div>
+</div>
+</div>
+<div class="ui bottom attached sphinx-tab tab segment sphinx-data-tab-V2luZG93cw== docutils container">
+<div class="code powershell highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">collectstatic</span>
+<span class="n">python</span> <span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">dmp_collectstatic</span> <span class="o">--</span><span class="n">overwrite</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Point your web server (Apache, Nginx, IIS, etc.) to serve this folder directly to browsers. For example, in Nginx, you’d set the following:</p>
+<div class="code nginx highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">location</span> <span class="o">/</span><span class="n">static</span><span class="o">/</span> <span class="p">{</span>
+    <span class="n">alias</span> <span class="o">/</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">your</span><span class="o">/</span><span class="n">project</span><span class="o">/</span><span class="n">static</span><span class="o">/</span><span class="p">;</span>
+    <span class="n">access_log</span> <span class="n">off</span><span class="p">;</span>
+    <span class="n">expires</span> <span class="mi">30</span><span class="n">d</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>In Apache, you’d set the following:</p>
+<div class="code apache highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Alias</span> <span class="o">/</span><span class="n">static</span><span class="o">/</span> <span class="o">/</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">your</span><span class="o">/</span><span class="n">project</span><span class="o">/</span><span class="n">static</span><span class="o">/</span>
+<span class="o">&lt;</span><span class="n">Directory</span> <span class="o">/</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">your</span><span class="o">/</span><span class="n">project</span><span class="o">/</span><span class="n">static</span><span class="o">/&gt;</span>
+    <span class="n">Order</span> <span class="n">deny</span><span class="p">,</span><span class="n">allow</span>
+    <span class="n">Allow</span> <span class="kn">from</span> <span class="nn">all</span>
+<span class="o">&lt;/</span><span class="n">Directory</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="dmp-common-js">
+<h2><a class="toc-backref" href="#id5"><code class="docutils literal notranslate"><span class="pre">dmp-common.js</span></code></a><a class="headerlink" href="#dmp-common-js" title="Permalink to this headline">¶</a></h2>
+<p>Open <code class="docutils literal notranslate"><span class="pre">base.htm</span></code> and look for the following line:</p>
+<div class="code html+mako highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">script</span> <span class="n">src</span><span class="o">=</span><span class="s2">&quot;/django_mako_plus/dmp-common.min.js&quot;</span><span class="o">&gt;&lt;/</span><span class="n">script</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>DMP uses this script to make everything work on the browser side. For example, this script injects values sent from your view.py into the client-side JS scope. It’s a small script (3K), and it’s written in old-school Javascript (for a wide browser audience).</p>
+<p>When running in production mode, your web server (IIS, Nginx, etc.) should serve this file (rather than Django).  Or it could be bundled with other vendor code. In any case, the file just needs to be included on every page of your site.</p>
+<p>The following is an example setting for Nginx:</p>
+<div class="code nginx highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">location</span> <span class="o">/</span><span class="n">django_mako_plus</span><span class="o">/</span><span class="n">dmp</span><span class="o">-</span><span class="n">common</span><span class="o">.</span><span class="n">min</span><span class="o">.</span><span class="n">js</span> <span class="p">{</span>
+    <span class="n">alias</span> <span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">django_mako_plus</span><span class="o">/</span><span class="n">scripts</span><span class="o">/</span><span class="n">dmp</span><span class="o">-</span><span class="n">common</span><span class="o">.</span><span class="n">min</span><span class="o">.</span><span class="n">js</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>If you don’t know the location of DMP_on your server, try this command:</p>
+<div class="sphinx-tabs docutils container">
+<div class="ui top attached tabular menu sphinx-menu docutils container">
+<div class="active item sphinx-data-tab-TGludXgvTWFj docutils container">
+<div class="docutils container">
+Linux/Mac</div>
+</div>
+<div class="item sphinx-data-tab-V2luZG93cw== docutils container">
+<div class="docutils container">
+Windows</div>
+</div>
+</div>
+<div class="ui bottom attached sphinx-tab tab segment sphinx-data-tab-TGludXgvTWFj active docutils container">
+<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python3</span> <span class="o">-</span><span class="n">c</span> <span class="s1">&#39;import django_mako_plus; print(django_mako_plus.__file__)&#39;</span>
+</pre></div>
+</div>
+</div>
+<div class="ui bottom attached sphinx-tab tab segment sphinx-data-tab-V2luZG93cw== docutils container">
+<div class="code powershell highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="o">-</span><span class="n">c</span> <span class="s1">&#39;import django_mako_plus; print(django_mako_plus.__file__)&#39;</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="advanced-use">
+<h2><a class="toc-backref" href="#id6">Advanced Use</a><a class="headerlink" href="#advanced-use" title="Permalink to this headline">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">dmp_collectstatic</span></code> will refuse to overwrite an existing <code class="docutils literal notranslate"><span class="pre">/static/</span></code> directory. If you already have this directory (either from an earlier run or for another purpose), you can 1) delete it before collecting static files, or 2) specify the overwrite option as follows:</p>
+<div class="sphinx-tabs docutils container">
+<div class="ui top attached tabular menu sphinx-menu docutils container">
+<div class="active item sphinx-data-tab-TGludXgvTWFj docutils container">
+<div class="docutils container">
+Linux/Mac</div>
+</div>
+<div class="item sphinx-data-tab-V2luZG93cw== docutils container">
+<div class="docutils container">
+Windows</div>
+</div>
+</div>
+<div class="ui bottom attached sphinx-tab tab segment sphinx-data-tab-TGludXgvTWFj active docutils container">
+<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python3</span> <span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">dmp_collectstatic</span> <span class="o">--</span><span class="n">overwrite</span>
+</pre></div>
+</div>
+</div>
+<div class="ui bottom attached sphinx-tab tab segment sphinx-data-tab-V2luZG93cw== docutils container">
+<div class="code powershell highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">dmp_collectstatic</span> <span class="o">--</span><span class="n">overwrite</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>If you need to ignore certain directories or filenames, specify them with the <code class="docutils literal notranslate"><span class="pre">--skip-dir</span></code> and <code class="docutils literal notranslate"><span class="pre">--skip-file</span></code> options. These can be specified more than once, and it accepts Unix-style wildcards.</p>
+<div class="sphinx-tabs docutils container">
+<div class="ui top attached tabular menu sphinx-menu docutils container">
+<div class="active item sphinx-data-tab-TGludXgvTWFj docutils container">
+<div class="docutils container">
+Linux/Mac</div>
+</div>
+<div class="item sphinx-data-tab-V2luZG93cw== docutils container">
+<div class="docutils container">
+Windows</div>
+</div>
+</div>
+<div class="ui bottom attached sphinx-tab tab segment sphinx-data-tab-TGludXgvTWFj active docutils container">
+<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python3</span> <span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">dmp_collectstatic</span> <span class="o">--</span><span class="n">skip</span><span class="o">-</span><span class="nb">dir</span><span class="o">=.</span><span class="n">cached_templates</span> <span class="o">--</span><span class="n">skip</span><span class="o">-</span><span class="n">file</span><span class="o">=*.</span><span class="n">txt</span> <span class="o">--</span><span class="n">skip</span><span class="o">-</span><span class="n">file</span><span class="o">=*.</span><span class="n">md</span>
+</pre></div>
+</div>
+</div>
+<div class="ui bottom attached sphinx-tab tab segment sphinx-data-tab-V2luZG93cw== docutils container">
+<div class="code powershell highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">dmp_collectstatic</span> <span class="o">--</span><span class="n">skip</span><span class="o">-</span><span class="nb">dir</span><span class="o">=.</span><span class="n">cached_templates</span> <span class="o">--</span><span class="n">skip</span><span class="o">-</span><span class="n">file</span><span class="o">=*.</span><span class="n">txt</span> <span class="o">--</span><span class="n">skip</span><span class="o">-</span><span class="n">file</span><span class="o">=*.</span><span class="n">md</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>If you need to include additional directories or files, specify them with the <code class="docutils literal notranslate"><span class="pre">--include</span></code> option. This can be specified more than once, and it accepts Unix-style wildcards:</p>
+<div class="sphinx-tabs docutils container">
+<div class="ui top attached tabular menu sphinx-menu docutils container">
+<div class="active item sphinx-data-tab-TGludXgvTWFj docutils container">
+<div class="docutils container">
+Linux/Mac</div>
+</div>
+<div class="item sphinx-data-tab-V2luZG93cw== docutils container">
+<div class="docutils container">
+Windows</div>
+</div>
+</div>
+<div class="ui bottom attached sphinx-tab tab segment sphinx-data-tab-TGludXgvTWFj active docutils container">
+<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python3</span> <span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">dmp_collectstatic</span> <span class="o">--</span><span class="n">include</span><span class="o">-</span><span class="nb">dir</span><span class="o">=</span><span class="k">global</span><span class="o">-</span><span class="n">media</span> <span class="o">--</span><span class="n">include</span><span class="o">-</span><span class="nb">dir</span><span class="o">=</span><span class="k">global</span><span class="o">-</span><span class="n">styles</span> <span class="o">--</span><span class="n">include</span><span class="o">-</span><span class="n">file</span><span class="o">=*.</span><span class="n">png</span>
+</pre></div>
+</div>
+</div>
+<div class="ui bottom attached sphinx-tab tab segment sphinx-data-tab-V2luZG93cw== docutils container">
+<div class="code powershell highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">dmp_collectstatic</span> <span class="o">--</span><span class="n">include</span><span class="o">-</span><span class="nb">dir</span><span class="o">=</span><span class="k">global</span><span class="o">-</span><span class="n">media</span> <span class="o">--</span><span class="n">include</span><span class="o">-</span><span class="nb">dir</span><span class="o">=</span><span class="k">global</span><span class="o">-</span><span class="n">styles</span> <span class="o">--</span><span class="n">include</span><span class="o">-</span><span class="n">file</span><span class="o">=*.</span><span class="n">png</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>If you have <code class="docutils literal notranslate"><span class="pre">rcssmin</span></code> and <code class="docutils literal notranslate"><span class="pre">rjsmin</span></code> installed (via pip), DMP will minify your CSS and JS during the collection process.  If you are minifying with another tool (webpack, Google’s minifier, etc.), disable minification with:</p>
+<div class="sphinx-tabs docutils container">
+<div class="ui top attached tabular menu sphinx-menu docutils container">
+<div class="active item sphinx-data-tab-TGludXgvTWFj docutils container">
+<div class="docutils container">
+Linux/Mac</div>
+</div>
+<div class="item sphinx-data-tab-V2luZG93cw== docutils container">
+<div class="docutils container">
+Windows</div>
+</div>
+</div>
+<div class="ui bottom attached sphinx-tab tab segment sphinx-data-tab-TGludXgvTWFj active docutils container">
+<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python3</span> <span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">dmp_collectstatic</span> <span class="o">--</span><span class="n">no</span><span class="o">-</span><span class="n">minify</span>
+</pre></div>
+</div>
+</div>
+<div class="ui bottom attached sphinx-tab tab segment sphinx-data-tab-V2luZG93cw== docutils container">
+<div class="code powershell highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">dmp_collectstatic</span> <span class="o">--</span><span class="n">no</span><span class="o">-</span><span class="n">minify</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="deploy_recommendations.html" class="btn btn-neutral float-right" title="Deployment Recommendations" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="deploy.html" class="btn btn-neutral" title="Deployment" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Conan C. Albrecht
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/sphinx_tabs/tabs.js"></script>
+        <script type="text/javascript" src="_static/sphinx_tabs/semantic-ui-2.2.10/tab.min.js"></script>
+    
+
+  
+
+  <script type="text/javascript" src="_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

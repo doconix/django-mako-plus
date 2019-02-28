@@ -1,0 +1,360 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Escaping Special Characters &mdash; Django-Mako-Plus  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/dmp.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Metadata about the Request" href="topics_variables.html" />
+    <link rel="prev" title="settings.py" href="topics_settings.html" /> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> Django-Mako-Plus
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="compare.html">Comparison with Django</a></li>
+<li class="toctree-l1"><a class="reference internal" href="upgrade_notes.html">Upgrade Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">FAQ</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="topics.html">Basic Concepts</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="topics_settings.html"><code class="docutils literal notranslate"><span class="pre">settings.py</span></code></a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Escaping Special Characters</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#a-little-background">A Little Background</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#python-blocks">Python Blocks</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#disabling-per-expression">Disabling per Expression</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#disabling-per-block">Disabling per Block</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#disabling-by-marking-safe">Disabling by Marking Safe</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#disabling-globally">Disabling Globally</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="topics_variables.html">Metadata about the Request</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_modules.html">Python Imports in Templates</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_third_party.html">Using Third-Party Apps</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_paths.html">Inheritance Paths and Template Location</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_convenience.html">Convenience Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_redirecting.html">Redirecting the Browser</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_csrf.html">CSRF Tokens</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_class_views.html">Class-Based Views</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_django.html">Using the Django API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_responses.html">Lazy Rendering with <code class="docutils literal notranslate"><span class="pre">TemplateResponse</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_view_function.html">Customizing <code class="docutils literal notranslate"><span class="pre">&#64;view_function</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_partial_templates.html">Rendering Partial Templates for Ajax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_other_syntax.html">Combining Django and Mako Templates</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_signals.html">Signals in DMP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_translation.html">Internationalization</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="converters.html">Parameter Conversion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="static.html">Static Files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="deploy.html">Deployment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="editors.html">Editors</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Django-Mako-Plus</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="topics.html">Basic Concepts</a> &raquo;</li>
+        
+      <li>Escaping Special Characters</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="escaping-special-characters">
+<span id="topics-escaping"></span><h1><a class="toc-backref" href="#id1">Escaping Special Characters</a><a class="headerlink" href="#escaping-special-characters" title="Permalink to this headline">¶</a></h1>
+<div class="contents topic" id="contents">
+<p class="topic-title first">Contents</p>
+<ul class="simple">
+<li><a class="reference internal" href="#escaping-special-characters" id="id1">Escaping Special Characters</a><ul>
+<li><a class="reference internal" href="#a-little-background" id="id2">A Little Background</a></li>
+<li><a class="reference internal" href="#python-blocks" id="id3">Python Blocks</a></li>
+<li><a class="reference internal" href="#disabling-per-expression" id="id4">Disabling per Expression</a></li>
+<li><a class="reference internal" href="#disabling-per-block" id="id5">Disabling per Block</a></li>
+<li><a class="reference internal" href="#disabling-by-marking-safe" id="id6">Disabling by Marking Safe</a></li>
+<li><a class="reference internal" href="#disabling-globally" id="id7">Disabling Globally</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<p>Mako expressions are the simplest way to include a variable in a template, and they are autoescaped for HTML by default:</p>
+<div class="highlight-html+mako notranslate"><div class="highlight"><pre><span></span>This is x: <span class="cp">${</span> <span class="n">x</span> <span class="cp">}</span>
+</pre></div>
+</div>
+<p><strong>Autoescaping of expressions in DMP is consistent with Django rather than Mako.</strong>  Django autoescapes; Mako does not. Since Mako is the template engine, DMP converts the above expression to the following:</p>
+<div class="highlight-html+mako notranslate"><div class="highlight"><pre><span></span>This is x: <span class="cp">${</span> <span class="n">x</span> <span class="o">|</span> <span class="n">h</span> <span class="cp">}</span>
+</pre></div>
+</div>
+<p>If <code class="docutils literal notranslate"><span class="pre">x</span></code> is the string <code class="docutils literal notranslate"><span class="pre">'&lt;div&gt;'</span></code>, the rendered template will contain <code class="docutils literal notranslate"><span class="pre">&amp;lt;div&amp;gt;</span></code>.</p>
+<div class="section" id="a-little-background">
+<h2><a class="toc-backref" href="#id2">A Little Background</a><a class="headerlink" href="#a-little-background" title="Permalink to this headline">¶</a></h2>
+<p>As described in <a class="reference external" href="http://docs.makotemplates.org/en/latest/filtering.html">Mako Filtering</a>, expressions can be filtered using modifer tokens like the following:</p>
+<div class="highlight-html+mako notranslate"><div class="highlight"><pre><span></span><span class="cp">## html escaped (automatic in DMP)</span>
+<span class="cp">${</span> <span class="n">x</span> <span class="o">|</span> <span class="n">h</span> <span class="cp">}</span>
+
+<span class="cp">## url escaped:</span>
+<span class="cp">${</span> <span class="n">someurl</span> <span class="o">|</span> <span class="n">u</span> <span class="cp">}</span>
+
+<span class="cp">## using django syntax in the expression</span>
+<span class="cp">&lt;%!</span> <span class="kn">from</span> <span class="nn">django_mako_plus</span> <span class="kn">import</span> <span class="n">django_syntax</span> <span class="cp">%&gt;</span>
+<span class="cp">${</span> <span class="s1">&#39;{{ name </span><span class="cp">}</span>}&#39; | django_syntax(local) }
+</pre></div>
+</div>
+</div>
+<div class="section" id="python-blocks">
+<h2><a class="toc-backref" href="#id3">Python Blocks</a><a class="headerlink" href="#python-blocks" title="Permalink to this headline">¶</a></h2>
+<p>Python blocks, denoted with <code class="docutils literal notranslate"><span class="pre">&lt;%</span> <span class="pre">...</span> <span class="pre">%&gt;</span></code>, are not escaped automatically.  Since you are directly writing code with this method, DMP doesn’t modify things.</p>
+<p>If you need to html escape some outupt in your block, use something like the following:</p>
+<div class="highlight-html+mako notranslate"><div class="highlight"><pre><span></span><span class="cp">&lt;%!</span> <span class="kn">from</span> <span class="nn">django.utils.html</span> <span class="kn">import</span> <span class="n">conditional_escape</span> <span class="cp">%&gt;</span>
+<span class="cp">&lt;%</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="s1">&#39;{} &lt; 5 is {}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">5</span><span class="p">)</span>
+        <span class="n">context</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">conditional_escape</span><span class="p">(</span><span class="n">s</span><span class="p">))</span>
+<span class="cp">%&gt;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="disabling-per-expression">
+<h2><a class="toc-backref" href="#id4">Disabling per Expression</a><a class="headerlink" href="#disabling-per-expression" title="Permalink to this headline">¶</a></h2>
+<p>You can stop all filtering/autoescaping for any expression with the <code class="docutils literal notranslate"><span class="pre">n</span></code> token:</p>
+<div class="highlight-html+mako notranslate"><div class="highlight"><pre><span></span><span class="cp">## autoescaping disabled</span>
+<span class="cp">${</span> <span class="n">x</span> <span class="o">|</span> <span class="n">n</span> <span class="cp">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="disabling-per-block">
+<h2><a class="toc-backref" href="#id5">Disabling per Block</a><a class="headerlink" href="#disabling-per-block" title="Permalink to this headline">¶</a></h2>
+<p>This method of disabling is patterned after the Django <code class="docutils literal notranslate"><span class="pre">autoescape</span> <span class="pre">off</span></code> tag.  It enables/disables escaping within a template block.</p>
+<p>The code below first aliases the name <code class="docutils literal notranslate"><span class="pre">dmp</span></code> to DMP’s tag module, which contains both <code class="docutils literal notranslate"><span class="pre">autoescape_on</span></code> and <code class="docutils literal notranslate"><span class="pre">autoescape_off</span></code>.  For more information about using tag modules, see the <a class="reference external" href="http://docs.makotemplates.org/en/latest/defs.html">Mako documentation</a>.</p>
+<div class="highlight-html+mako notranslate"><div class="highlight"><pre><span></span><span class="cp">&lt;%</span><span class="nb">namespace</span> <span class="na">name=</span><span class="s">&quot;dmp&quot;</span> <span class="na">module=</span><span class="s">&quot;django_mako_plus.tags&quot;</span><span class="cp">/&gt;</span>
+
+<span class="cp">&lt;%</span><span class="nb">dmp:autoescape_off</span><span class="cp">&gt;</span>
+    <span class="cp">${</span> <span class="s1">&#39;&lt;b&gt;This will be bolded. It will not be escaped.&lt;/b&gt;&#39;</span> <span class="cp">}</span>
+
+    <span class="cp">&lt;%</span><span class="nb">dmp:autoescape_on</span><span class="cp">&gt;</span>
+        You can turn autoescaping back on, too.
+        <span class="cp">${</span> <span class="s1">&#39;&lt;b&gt;This will not be bolded.  It will be escaped like normal.&lt;/b&gt;&#39;</span> <span class="cp">}</span>
+    <span class="cp">&lt;/%</span><span class="nb">dmp:autoescape_on</span><span class="cp">&gt;</span>
+
+    <span class="cp">${</span> <span class="s1">&#39;&lt;b&gt;Back to bold!&lt;/b&gt;&#39;</span> <span class="cp">}</span>
+<span class="cp">&lt;/%</span><span class="nb">dmp:autoescape_off</span><span class="cp">&gt;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="disabling-by-marking-safe">
+<h2><a class="toc-backref" href="#id6">Disabling by Marking Safe</a><a class="headerlink" href="#disabling-by-marking-safe" title="Permalink to this headline">¶</a></h2>
+<p>Just like in Django, any string can be marked as “safe” for html with <code class="docutils literal notranslate"><span class="pre">mark_safe()</span></code>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django_mako_plus</span> <span class="kn">import</span> <span class="n">view_function</span>
+<span class="kn">from</span> <span class="nn">django.utils.html</span> <span class="kn">import</span> <span class="n">mark_safe</span>
+
+<span class="nd">@view_function</span>
+<span class="k">def</span> <span class="nf">process_request</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="n">context</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;escapemenot&#39;</span><span class="p">:</span> <span class="n">mark_safe</span><span class="p">(</span><span class="s1">&#39;&lt;b&gt;This will be bolded. It will not be escaped.&lt;/b&gt;&#39;</span><span class="p">),</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">request</span><span class="o">.</span><span class="n">dmp</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="s1">&#39;index.html&#39;</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>In your template (<code class="docutils literal notranslate"><span class="pre">index.html</span></code>):</p>
+<div class="highlight-html+mako notranslate"><div class="highlight"><pre><span></span>This will display directly, even though autoescaping is otherwise enabled:
+<span class="cp">${</span> <span class="n">escapemenot</span> <span class="cp">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="disabling-globally">
+<h2><a class="toc-backref" href="#id7">Disabling Globally</a><a class="headerlink" href="#disabling-globally" title="Permalink to this headline">¶</a></h2>
+<p>You can disable autoescaping project-wide by changing a DMP setting in <code class="docutils literal notranslate"><span class="pre">settings.py</span></code>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">TEMPLATES</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">{</span>
+        <span class="s1">&#39;NAME&#39;</span><span class="p">:</span> <span class="s1">&#39;django_mako_plus&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;BACKEND&#39;</span><span class="p">:</span> <span class="s1">&#39;django_mako_plus.MakoTemplates&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;OPTIONS&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s1">&#39;AUTOESCAPE&#39;</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
+            <span class="o">...</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="topics_variables.html" class="btn btn-neutral float-right" title="Metadata about the Request" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="topics_settings.html" class="btn btn-neutral" title="settings.py" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Conan C. Albrecht
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+    
+
+  
+
+  <script type="text/javascript" src="_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,349 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Using DMP to Route by Convention &mdash; Django-Mako-Plus  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/dmp.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Limiting DMP to Specific Apps" href="install_app_specific.html" />
+    <link rel="prev" title="Using DMP to Render Mako Templates" href="install_as_renderer.html" /> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> Django-Mako-Plus
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="compare.html">Comparison with Django</a></li>
+<li class="toctree-l1"><a class="reference internal" href="upgrade_notes.html">Upgrade Notes</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="install.html">Installation</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="install_new.html">New Project</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install_existing.html">Existing Project</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="install.html#minimal-dmp">Minimal DMP</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="install_as_renderer.html">Using DMP to Render Mako Templates</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Using DMP to Route by Convention</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#install-django-mako-and-dmp">Install Django, Mako, and DMP</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#create-a-vanilla-django-project">Create a Vanilla Django Project</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#create-an-endpoint">Create an Endpoint</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="install_app_specific.html">Limiting DMP to Specific Apps</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="install.html#customizations">Customizations</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="topics.html">Basic Concepts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="converters.html">Parameter Conversion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="static.html">Static Files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="deploy.html">Deployment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="editors.html">Editors</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Django-Mako-Plus</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="install.html">Installation</a> &raquo;</li>
+        
+      <li>Using DMP to Route by Convention</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="using-dmp-to-route-by-convention">
+<span id="install-as-router"></span><h1>Using DMP to Route by Convention<a class="headerlink" href="#using-dmp-to-route-by-convention" title="Permalink to this headline">¶</a></h1>
+<p>One of DMP’s primary missions is to fix Django’s need to have every. endpoint. in. your. system. listed. in. urls.py.  The following shows how to use DMP to route by convention – essentially shrinking your <code class="docutils literal notranslate"><span class="pre">urls.py</span></code> file to only a few lines.</p>
+<p>DMP still uses <code class="docutils literal notranslate"><span class="pre">urls.py</span></code>, but it adds another URL resolver to Django’s built in ones (such as the regex and path resolvers).  As explained in the tutorial, DMP resolves a url like <code class="docutils literal notranslate"><span class="pre">/homepage/index/</span></code> as follows:</p>
+<ul class="simple">
+<li>The first url part <code class="docutils literal notranslate"><span class="pre">homepage</span></code> specifies the app that will be used.</li>
+<li>The second url part <code class="docutils literal notranslate"><span class="pre">index</span></code> specifies the view or html page within the app. In our example:</li>
+<li>The router first looks for <code class="docutils literal notranslate"><span class="pre">homepage/views/index.py</span></code>. If it exists, it calls the <code class="docutils literal notranslate"><span class="pre">process_request</span></code> method in the file.</li>
+<li>If <code class="docutils literal notranslate"><span class="pre">index.py</span></code> is not found, DMP looks for <code class="docutils literal notranslate"><span class="pre">homepage/templates/index.html</span></code>.  If it exists, it renders the template directly using the Mako template system.</li>
+</ul>
+<div class="section" id="install-django-mako-and-dmp">
+<h2>Install Django, Mako, and DMP<a class="headerlink" href="#install-django-mako-and-dmp" title="Permalink to this headline">¶</a></h2>
+<p>DMP works with Django 1.9+, including the 2.0 releases.</p>
+<p>The following will install all three dependencies:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip3</span> <span class="n">install</span> <span class="o">--</span><span class="n">upgrade</span> <span class="n">django</span><span class="o">-</span><span class="n">mako</span><span class="o">-</span><span class="n">plus</span>
+</pre></div>
+</div>
+<p>(note that on Windows machines, <code class="docutils literal notranslate"><span class="pre">pip3</span></code> may need to be replaced with <code class="docutils literal notranslate"><span class="pre">pip</span></code>)</p>
+</div>
+<div class="section" id="create-a-vanilla-django-project">
+<h2>Create a Vanilla Django Project<a class="headerlink" href="#create-a-vanilla-django-project" title="Permalink to this headline">¶</a></h2>
+<ol class="arabic simple">
+<li>Create a DMP project.  You may want to follow the <a class="reference external" href="https://docs.djangoproject.com/en/dev/intro/tutorial01/">standard Django Tutorial</a> to create a <code class="docutils literal notranslate"><span class="pre">mysite</span></code> project.  Follow the tutorial through the section creating templates.</li>
+<li>In your app directory (<code class="docutils literal notranslate"><span class="pre">/polls</span></code> in the tutorial), switch from using a single views file to a package directory with the same name (DMP’s router expects your views module to be a folder).</li>
+</ol>
+<ul class="simple">
+<li>Delete the <code class="docutils literal notranslate"><span class="pre">views.py</span></code> file.</li>
+<li>Create a new directory at <code class="docutils literal notranslate"><span class="pre">/polls/views/</span></code>.</li>
+<li>Create a new file called <code class="docutils literal notranslate"><span class="pre">/polls/views/__init__.py</span></code>.  The file can be empty (it doesn’t need any content).</li>
+</ul>
+<ol class="arabic simple" start="3">
+<li>Add DMP to your installed apps in <code class="docutils literal notranslate"><span class="pre">settings.py</span></code>:</li>
+</ol>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">INSTALLED_APPS</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="o">...</span>
+    <span class="s1">&#39;django_mako_plus&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;polls&#39;</span><span class="p">,</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="4">
+<li>Enable a logger in <code class="docutils literal notranslate"><span class="pre">settings.py</span></code>. Routing problems can be solved much easier with DMP’s debug messages:</li>
+</ol>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">LOGGING</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;version&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="s1">&#39;disable_existing_loggers&#39;</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+    <span class="s1">&#39;loggers&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;django_mako_plus&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s1">&#39;handlers&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;console_handler&#39;</span><span class="p">],</span>
+            <span class="s1">&#39;level&#39;</span><span class="p">:</span> <span class="n">DEBUG</span> <span class="ow">and</span> <span class="s1">&#39;DEBUG&#39;</span> <span class="ow">or</span> <span class="s1">&#39;WARNING&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;propagate&#39;</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
+        <span class="p">},</span>
+        <span class="s1">&#39;django&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s1">&#39;handlers&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;console_handler&#39;</span><span class="p">],</span>
+            <span class="s1">&#39;level&#39;</span><span class="p">:</span> <span class="s1">&#39;INFO&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;propagate&#39;</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">},</span>
+    <span class="s1">&#39;handlers&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;console_handler&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s1">&#39;level&#39;</span><span class="p">:</span> <span class="s1">&#39;DEBUG&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;class&#39;</span><span class="p">:</span> <span class="s1">&#39;logging.StreamHandler&#39;</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">},</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="5">
+<li>Add DMP’s router to <code class="docutils literal notranslate"><span class="pre">urls.py</span></code>:</li>
+</ol>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.conf.urls</span> <span class="kn">import</span> <span class="n">path</span><span class="p">,</span> <span class="n">include</span>
+
+<span class="c1"># this is Django 2.0 syntax</span>
+<span class="n">urlpatterns</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="n">path</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">include</span><span class="p">(</span><span class="s1">&#39;django_mako_plus.urls&#39;</span><span class="p">)),</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="create-an-endpoint">
+<h2>Create an Endpoint<a class="headerlink" href="#create-an-endpoint" title="Permalink to this headline">¶</a></h2>
+<ol class="arabic simple">
+<li>Create a new file called <code class="docutils literal notranslate"><span class="pre">polls/views/index.py</span></code>.  In this file, add the following content:</li>
+</ol>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.shortcuts</span> <span class="kn">import</span> <span class="n">render</span>
+<span class="kn">from</span> <span class="nn">django_mako_plus</span> <span class="kn">import</span> <span class="n">view_function</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+
+<span class="nd">@view_function</span>
+<span class="k">def</span> <span class="nf">process_request</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="n">context</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;now&#39;</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">(),</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;polls/index.html&#39;</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<blockquote>
+<div><p>Note the function is named <code class="docutils literal notranslate"><span class="pre">process_request</span></code> – this is the default function that DMP looks for within the view file.</p>
+<p>Note also the <code class="docutils literal notranslate"><span class="pre">&#64;view_function</span></code> decorator – this security measure is required on every view function routed by DMP.</p>
+</div></blockquote>
+<ol class="arabic simple" start="2">
+<li>Create a template in <code class="docutils literal notranslate"><span class="pre">polls/templates/polls/index.html</span></code>:</li>
+</ol>
+<div class="highlight-html+mako notranslate"><div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">html</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">body</span><span class="p">&gt;</span>
+    The current time is {{ now|date:&#39;c&#39; }}
+<span class="p">&lt;/</span><span class="nt">body</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">html</span><span class="p">&gt;</span>
+</pre></div>
+</div>
+<p>Run the project and go to <a class="reference external" href="http://localhost:8000/polls/index/">http://localhost:8000/polls/index/</a>.</p>
+<p>Congratulations.  You’ve got a standard Django project that routes automagically using DMP’s convention-based resolver.</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="install_app_specific.html" class="btn btn-neutral float-right" title="Limiting DMP to Specific Apps" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="install_as_renderer.html" class="btn btn-neutral" title="Using DMP to Render Mako Templates" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Conan C. Albrecht
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+    
+
+  
+
+  <script type="text/javascript" src="_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

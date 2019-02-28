@@ -1,0 +1,366 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>T4: zip(HTML, JS, CSS) &mdash; Django-Mako-Plus  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/dmp.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="T5: Ajax" href="tutorial_ajax.html" />
+    <link rel="prev" title="T3: URL Parameters" href="tutorial_parameters.html" /> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> Django-Mako-Plus
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="compare.html">Comparison with Django</a></li>
+<li class="toctree-l1"><a class="reference internal" href="upgrade_notes.html">Upgrade Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="tutorial.html">Tutorial</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="tutorial_meet_dmp.html">T1: Meet DMP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial_views.html">T2: .py View Files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial_parameters.html">T3: URL Parameters</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">T4: zip(HTML, JS, CSS)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#a-bit-of-style">A Bit of Style</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#javascript">Javascript</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#javascript-in-context">Javascript in Context</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#bundlers-like-webpack-browserify-etc">Bundlers like Webpack, Browserify, etc.</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#behind-the-css-and-js-curtain">Behind the CSS and JS Curtain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#providers-in-detail">Providers in Detail</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial_ajax.html">T5: Ajax</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="topics.html">Basic Concepts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="converters.html">Parameter Conversion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="static.html">Static Files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="deploy.html">Deployment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="editors.html">Editors</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Django-Mako-Plus</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="tutorial.html">Tutorial</a> &raquo;</li>
+        
+      <li>T4: zip(HTML, JS, CSS)</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="t4-zip-html-js-css">
+<span id="tutorial-css-js"></span><h1><a class="toc-backref" href="#id2">T4: zip(HTML, JS, CSS)</a><a class="headerlink" href="#t4-zip-html-js-css" title="Permalink to this headline">¶</a></h1>
+<div class="contents topic" id="contents">
+<p class="topic-title first">Contents</p>
+<ul class="simple">
+<li><a class="reference internal" href="#t4-zip-html-js-css" id="id2">T4: zip(HTML, JS, CSS)</a><ul>
+<li><a class="reference internal" href="#a-bit-of-style" id="id3">A Bit of Style</a></li>
+<li><a class="reference internal" href="#javascript" id="id4">Javascript</a></li>
+<li><a class="reference internal" href="#javascript-in-context" id="id5">Javascript in Context</a></li>
+<li><a class="reference internal" href="#bundlers-like-webpack-browserify-etc" id="id6">Bundlers like Webpack, Browserify, etc.</a></li>
+<li><a class="reference internal" href="#behind-the-css-and-js-curtain" id="id7">Behind the CSS and JS Curtain</a></li>
+<li><a class="reference internal" href="#providers-in-detail" id="id8">Providers in Detail</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<p>Modern web pages are made up of three primary parts: HTML, CSS, and Javascript (media might be a fourth, but we’ll go with three for now). Since all of your pages need these three components, this framework combines them intelligently for you. All you have to do is name the .html, the css., and the .js files correctly, and DMP will insert the <code class="docutils literal notranslate"><span class="pre">&lt;link&gt;</span></code> and <code class="docutils literal notranslate"><span class="pre">&lt;script&gt;</span></code> tags automatically for you.</p>
+<p>Convention over configuration.  Just like a slice of home-baked apple pie.</p>
+<blockquote>
+<div>If you are using a bundler like <a class="reference external" href="https://webpack.js.org/">webpack</a>, be sure to read <a class="reference external" href="static_webpack.html">JS Bundling with Webpack</a>.</div></blockquote>
+<div class="section" id="a-bit-of-style">
+<h2><a class="toc-backref" href="#id3">A Bit of Style</a><a class="headerlink" href="#a-bit-of-style" title="Permalink to this headline">¶</a></h2>
+<p>To style our index.html file, open <code class="docutils literal notranslate"><span class="pre">homepage/styles/index.css</span></code> and copy the following into it:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="o">.</span><span class="n">server</span><span class="o">-</span><span class="n">time</span> <span class="p">{</span>
+    <span class="n">font</span><span class="o">-</span><span class="n">size</span><span class="p">:</span> <span class="mi">2</span><span class="n">em</span><span class="p">;</span>
+    <span class="n">color</span><span class="p">:</span> <span class="n">red</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>When you refresh your page, the server time should be styled with large, red text. If you view the html source in your browser, you’ll see a new <code class="docutils literal notranslate"><span class="pre">&lt;link...&gt;</span></code> near the top of your file. It’s as easy as naming the files the same and placing the .css file in the styles/ directory.</p>
+<p>The framework knows how to follow template inheritance. For example, since <code class="docutils literal notranslate"><span class="pre">index.html</span></code> extends from <code class="docutils literal notranslate"><span class="pre">base.htm</span></code>, we can actually put our CSS in <strong>either</strong>: <code class="docutils literal notranslate"><span class="pre">index.css</span></code> or <code class="docutils literal notranslate"><span class="pre">base.css</span></code>.  Place your CSS styles in the appropriate file, depending on where the HTML elements are located. For example, let’s style our header a little. Since the <code class="docutils literal notranslate"><span class="pre">&lt;header&gt;</span></code> element is in <code class="docutils literal notranslate"><span class="pre">base.htm</span></code>, open <code class="docutils literal notranslate"><span class="pre">homepage/styles/base.css</span></code> and check for the following:</p>
+<div class="code css highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">html</span><span class="p">,</span> <span class="n">body</span> <span class="p">{</span>
+    <span class="n">margin</span><span class="p">:</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="n">padding</span><span class="p">:</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="n">header</span> <span class="p">{</span>
+    <span class="n">background</span><span class="o">-</span><span class="n">color</span><span class="p">:</span> <span class="c1">#147871;</span>
+    <span class="n">padding</span><span class="p">:</span> <span class="mi">15</span><span class="n">px</span> <span class="mi">20</span><span class="n">px</span><span class="p">;</span>
+    <span class="n">border</span><span class="o">-</span><span class="n">top</span><span class="p">:</span> <span class="mi">4</span><span class="n">px</span> <span class="n">solid</span> <span class="c1">#606060;</span>
+    <span class="n">border</span><span class="o">-</span><span class="n">bottom</span><span class="p">:</span> <span class="mi">4</span><span class="n">px</span> <span class="n">solid</span> <span class="c1">#606060;</span>
+<span class="p">}</span>
+
+<span class="n">header</span> <span class="n">h1</span> <span class="p">{</span>
+    <span class="n">color</span><span class="p">:</span> <span class="c1">#FFFFFF;</span>
+    <span class="n">margin</span><span class="p">:</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="n">padding</span><span class="p">:</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="n">main</span> <span class="p">{</span>
+    <span class="n">margin</span><span class="p">:</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="n">padding</span><span class="p">:</span> <span class="mi">15</span><span class="n">px</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Since base.htm will be the parent page of nearly every HTML page on your site, these common styles will apply to all pages. If you view source in the browser, you’ll see the CSS files were included as follows:</p>
+<div class="highlight-html+mako notranslate"><div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">link</span> <span class="na">rel</span><span class="o">=</span><span class="s">&quot;stylesheet&quot;</span> <span class="na">type</span><span class="o">=</span><span class="s">&quot;text/css&quot;</span> <span class="na">href</span><span class="o">=</span><span class="s">&quot;/static/homepage/styles/base.css?v=5a8931aee4c59dee&quot;</span> <span class="p">/&gt;</span>
+<span class="p">&lt;</span><span class="nt">link</span> <span class="na">rel</span><span class="o">=</span><span class="s">&quot;stylesheet&quot;</span> <span class="na">type</span><span class="o">=</span><span class="s">&quot;text/css&quot;</span> <span class="na">href</span><span class="o">=</span><span class="s">&quot;/static/homepage/styles/index.css?v=5aac6c929d3401a1&quot;</span> <span class="p">/&gt;</span>
+</pre></div>
+</div>
+<p>Note that <code class="docutils literal notranslate"><span class="pre">base.css</span></code> is included first because it’s at the top of the hierarchy. Styles from <code class="docutils literal notranslate"><span class="pre">index.css</span></code> override any conflicting styles from <code class="docutils literal notranslate"><span class="pre">base.css</span></code>, which makes sense because <code class="docutils literal notranslate"><span class="pre">index.html</span></code> is the final template in the inheritance chain.</p>
+<blockquote>
+<div>You might be wondering about <code class="docutils literal notranslate"><span class="pre">?v=5a8931aee4c59dee</span></code> in the link.  That’s the file modification time and content checksum for the file. This is included because browsers don’t automatically download new static files. They use their cached versions until a specified date, often far in the future. By adding a number to the end of the file, browsers think the CSS files are “new” because the “filename” changes whenever you change the file.  Trixy browserses…</div></blockquote>
+</div>
+<div class="section" id="javascript">
+<h2><a class="toc-backref" href="#id4">Javascript</a><a class="headerlink" href="#javascript" title="Permalink to this headline">¶</a></h2>
+<p>Javascript files work the same way as CSS files, so if you skipped the CSS sections above, you might want to go read through them. Javascript files are placed in the <code class="docutils literal notranslate"><span class="pre">scripts/</span></code> directory and, of course, end with <code class="docutils literal notranslate"><span class="pre">*.js</span></code> extension.</p>
+<p>Let’s add a client-side, Javascript-based timer. Create the file <code class="docutils literal notranslate"><span class="pre">homepage/scripts/index.js</span></code> and place the following JQuery code into it:</p>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="nx">$</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+    <span class="c1">// update the time every 1 seconds</span>
+    <span class="nb">window</span><span class="p">.</span><span class="nx">setInterval</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+        <span class="nx">$</span><span class="p">(</span><span class="s1">&#39;.browser-time&#39;</span><span class="p">).</span><span class="nx">text</span><span class="p">(</span><span class="s1">&#39;The current browser time is &#39;</span> <span class="o">+</span> <span class="k">new</span> <span class="nb">Date</span><span class="p">()</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span><span class="p">);</span>
+    <span class="p">},</span> <span class="mi">1000</span><span class="p">);</span>
+<span class="p">});</span>
+</pre></div>
+</div>
+<p>Refresh your browser page, and you should see the browser time updating each second. Congratulations, you’ve now got a modern, HTML5 web page.</p>
+</div>
+<div class="section" id="javascript-in-context">
+<h2><a class="toc-backref" href="#id5">Javascript in Context</a><a class="headerlink" href="#javascript-in-context" title="Permalink to this headline">¶</a></h2>
+<p>What if we need to get a value from our Python view code, such as the server time, into the <code class="docutils literal notranslate"><span class="pre">index.js</span></code> file?  DMP handles this too.</p>
+<p>Lets compare the server time with the browser time allows us to calculate the time zone difference between the two. To send a variable to the JS environment, tag it with <code class="docutils literal notranslate"><span class="pre">jscontext()</span></code>.  Change your <code class="docutils literal notranslate"><span class="pre">index.py</span></code> file to the following:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.conf</span> <span class="kn">import</span> <span class="n">settings</span>
+<span class="kn">from</span> <span class="nn">django_mako_plus</span> <span class="kn">import</span> <span class="n">view_function</span><span class="p">,</span> <span class="n">jscontext</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+
+<span class="nd">@view_function</span>
+<span class="k">def</span> <span class="nf">process_request</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="n">context</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">jscontext</span><span class="p">(</span><span class="s1">&#39;now&#39;</span><span class="p">):</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">(),</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">request</span><span class="o">.</span><span class="n">dmp</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="s1">&#39;index.html&#39;</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Reload your browser, and then right-click and “Inspect” to see your DOM.  The <code class="docutils literal notranslate"><span class="pre">&lt;script&gt;</span></code> tag now looks like this:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">script</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;text/javascript&quot;</span> <span class="n">src</span><span class="o">=</span><span class="s2">&quot;/static/homepage/scripts/index.js?1509480811&quot;</span> <span class="n">data</span><span class="o">-</span><span class="n">context</span><span class="o">=</span><span class="s2">&quot;u5a8240023befacbc327df447012720&quot;</span><span class="o">&gt;&lt;/</span><span class="n">script</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>When you tag a context key with <code class="docutils literal notranslate"><span class="pre">jscontext('now')</span></code>, DMP adds it to a context object and connects it via <code class="docutils literal notranslate"><span class="pre">data-context</span></code>.  Note that variables sent via <code class="docutils literal notranslate"><span class="pre">jscontext</span></code> must be serializable by Django’s <code class="docutils literal notranslate"><span class="pre">django.core.serializers.json.DjangoJSONEncoder</span></code> (although you can set a custom encoder if needed).  The default encoder includes all the typical types, plus datetime, date, time, timedelta, Decimal, and UUID.</p>
+<p>Let’s use the variable in <code class="docutils literal notranslate"><span class="pre">index.js</span></code>.  Note this example uses a <code class="docutils literal notranslate"><span class="pre">jQuery</span></code> ready function, but <a class="reference external" href="static_context.html#referencing-the-context">regular JS works too</a>.</p>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="nx">$</span><span class="p">((</span><span class="kd">function</span><span class="p">(</span><span class="nx">context</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">context</span><span class="p">)</span>
+        <span class="kd">var</span> <span class="nx">serverTime</span> <span class="o">=</span> <span class="k">new</span> <span class="nb">Date</span><span class="p">(</span><span class="nx">context</span><span class="p">.</span><span class="nx">now</span><span class="p">)</span>   <span class="c1">// server time (from DMP_CONTEXT)</span>
+        <span class="kd">var</span> <span class="nx">browserTime</span> <span class="o">=</span> <span class="k">new</span> <span class="nb">Date</span><span class="p">()</span>             <span class="c1">// browser time</span>
+        <span class="kd">var</span> <span class="nx">hours</span> <span class="o">=</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">round</span><span class="p">(</span><span class="nb">Math</span><span class="p">.</span><span class="nx">abs</span><span class="p">(</span><span class="nx">serverTime</span> <span class="o">-</span> <span class="nx">browserTime</span><span class="p">)</span> <span class="o">/</span> <span class="mi">36</span><span class="nx">e5</span><span class="p">)</span>
+        <span class="nx">$</span><span class="p">(</span><span class="s1">&#39;.browser-time&#39;</span><span class="p">).</span><span class="nx">text</span><span class="p">(</span><span class="s1">&#39;The current browser is &#39;</span> <span class="o">+</span> <span class="nx">hours</span> <span class="o">+</span> <span class="s1">&#39; hours off of the server time zone.&#39;</span><span class="p">)</span>
+    <span class="p">}</span>
+<span class="p">})(</span><span class="nx">DMP_CONTEXT</span><span class="p">.</span><span class="nx">get</span><span class="p">()));</span>
+</pre></div>
+</div>
+<p>Reload your browser, and you should see the calculation of hours.</p>
+<blockquote>
+<div>The context is sent to the script via a data attribute on the <code class="docutils literal notranslate"><span class="pre">&lt;script&gt;</span></code> element.  The closure surrounding everything keeps the variable local to this script.  <a class="reference external" href="static_webpack.html#examples">Read more about this</a>.</div></blockquote>
+</div>
+<div class="section" id="bundlers-like-webpack-browserify-etc">
+<h2><a class="toc-backref" href="#id6">Bundlers like Webpack, Browserify, etc.</a><a class="headerlink" href="#bundlers-like-webpack-browserify-etc" title="Permalink to this headline">¶</a></h2>
+<p>If you are using JS bundles, DMP fits right in.  See bundling in <a class="reference external" href="static_webpack.html">JS Bundling with Webpack</a> for more information.</p>
+</div>
+<div class="section" id="behind-the-css-and-js-curtain">
+<h2><a class="toc-backref" href="#id7">Behind the CSS and JS Curtain</a><a class="headerlink" href="#behind-the-css-and-js-curtain" title="Permalink to this headline">¶</a></h2>
+<p>After reading about automatic CSS and JS inclusion, you might want to know how it works. It’s all done in the templates (base.htm now, and base_ajax.htm in a later section below) you are inheriting from. Open <code class="docutils literal notranslate"><span class="pre">base.htm</span></code> and look at the following code:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>## render the static file links for this template
+&lt;script src=&quot;/django_mako_plus/dmp-common.min.js&quot;&gt;&lt;/script&gt;
+${ django_mako_plus.links(self) }
+</pre></div>
+</div>
+<p>The calls to <code class="docutils literal notranslate"><span class="pre">links(self)</span></code> include the <code class="docutils literal notranslate"><span class="pre">&lt;link&gt;</span></code> and <code class="docutils literal notranslate"><span class="pre">&lt;script&gt;</span></code> tags for the template name and all of its supertemplates. These links are placed at the end of your <code class="docutils literal notranslate"><span class="pre">&lt;head&gt;</span></code> section.  (Just a few years ago, common practice was to place script tags at the end of the body, but modern browsers with asyncronous and deferred scripts have put them back in the body.)</p>
+<p>This all works because the <code class="docutils literal notranslate"><span class="pre">index.html</span></code> template extends from the <code class="docutils literal notranslate"><span class="pre">base.htm</span></code> template. If you fail to inherit from <code class="docutils literal notranslate"><span class="pre">base.htm</span></code> or <code class="docutils literal notranslate"><span class="pre">base_ajax.htm</span></code>, DMP won’t be able to include the support files.</p>
+</div>
+<div class="section" id="providers-in-detail">
+<h2><a class="toc-backref" href="#id8">Providers in Detail</a><a class="headerlink" href="#providers-in-detail" title="Permalink to this headline">¶</a></h2>
+<p>Read more about providers in <a class="reference internal" href="static_overview.html#static-overview"><span class="std std-ref">Static Files Overview</span></a>.</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="tutorial_ajax.html" class="btn btn-neutral float-right" title="T5: Ajax" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="tutorial_parameters.html" class="btn btn-neutral" title="T3: URL Parameters" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Conan C. Albrecht
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+    
+
+  
+
+  <script type="text/javascript" src="_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

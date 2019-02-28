@@ -1,0 +1,455 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>CSS and JS &mdash; Django-Mako-Plus  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/dmp.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Sass, Less, &amp; More" href="static_compilers.html" />
+    <link rel="prev" title="Static Files Overview" href="static_overview.html" /> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> Django-Mako-Plus
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="compare.html">Comparison with Django</a></li>
+<li class="toctree-l1"><a class="reference internal" href="upgrade_notes.html">Upgrade Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="topics.html">Basic Concepts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="converters.html">Parameter Conversion</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="static.html">Static Files</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="static_overview.html">Static Files Overview</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">CSS and JS</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#detailed-options">Detailed Options</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#example-custom-paths">Example: Custom Paths</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#example-custom-links">Example: Custom Links</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="static_compilers.html">Sass, Less, &amp; More</a></li>
+<li class="toctree-l2"><a class="reference internal" href="static_webpack.html">Webpack</a></li>
+<li class="toctree-l2"><a class="reference internal" href="static_faq.html">FAQ</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="deploy.html">Deployment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="editors.html">Editors</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Django-Mako-Plus</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="static.html">Static Files</a> &raquo;</li>
+        
+      <li>CSS and JS</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="css-and-js">
+<span id="static-links"></span><h1>CSS and JS<a class="headerlink" href="#css-and-js" title="Permalink to this headline">¶</a></h1>
+<p>Out of the box, DMP is configured to serve regular JS and CSS files.  The default provider options are set as follows (you can override these in <code class="docutils literal notranslate"><span class="pre">settings.py</span></code>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">TEMPLATES</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">{</span>
+        <span class="s1">&#39;NAME&#39;</span><span class="p">:</span> <span class="s1">&#39;django_mako_plus&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;BACKEND&#39;</span><span class="p">:</span> <span class="s1">&#39;django_mako_plus.MakoTemplates&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;OPTIONS&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s1">&#39;CONTENT_PROVIDERS&#39;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span> <span class="s1">&#39;provider&#39;</span><span class="p">:</span> <span class="s1">&#39;django_mako_plus.JsContextProvider&#39;</span> <span class="p">},</span>  <span class="c1"># adds JS context - this should normally be listed FIRST</span>
+                <span class="p">{</span> <span class="s1">&#39;provider&#39;</span><span class="p">:</span> <span class="s1">&#39;django_mako_plus.CssLinkProvider&#39;</span> <span class="p">},</span>    <span class="c1"># generates links for app/styles/template.css</span>
+                <span class="p">{</span> <span class="s1">&#39;provider&#39;</span><span class="p">:</span> <span class="s1">&#39;django_mako_plus.JsLinkProvider&#39;</span> <span class="p">},</span>     <span class="c1"># generates links for app/scripts/template.js</span>
+            <span class="p">],</span>
+        <span class="p">},</span>
+    <span class="p">},</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+<p>We described the first provider, <code class="docutils literal notranslate"><span class="pre">JsContextProvider</span></code> in the previous page. Providers are run in order, so be sure it’s always the first one listed. It sets up the context and adds variables from your view function.</p>
+<p>The other two providers, <code class="docutils literal notranslate"><span class="pre">CssLinkProvider</span></code> and <code class="docutils literal notranslate"><span class="pre">JsLinkProvider</span></code> generate <code class="docutils literal notranslate"><span class="pre">&lt;link&gt;</span></code> and <code class="docutils literal notranslate"><span class="pre">&lt;script&gt;</span></code> tags, respectively. As we discussed earlier, these not only create links for the current template (e.g. <code class="docutils literal notranslate"><span class="pre">index.html</span></code>), but they also create links for supertemplates of the current page (e.g. <code class="docutils literal notranslate"><span class="pre">base.htm</span></code>).</p>
+<p>This mechanism provides several spots to put CSS and JS, depending on the scope you want affected. If the <code class="docutils literal notranslate"><span class="pre">&lt;footer&gt;</span></code> tag is in <code class="docutils literal notranslate"><span class="pre">base.htm</span></code>, any CSS and/or JS related to it should probably be in <code class="docutils literal notranslate"><span class="pre">base.css</span></code> and <code class="docutils literal notranslate"><span class="pre">base.js</span></code>.</p>
+<div class="section" id="detailed-options">
+<h2>Detailed Options<a class="headerlink" href="#detailed-options" title="Permalink to this headline">¶</a></h2>
+<p>Specify the source paths and link format by overriding default options in settings. DMP merges <code class="docutils literal notranslate"><span class="pre">CONTENT_PROVIDERS</span></code> in your settings file wuth its defaults, so you can override a single option or many options. The following is the full set of options for these providers:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">TEMPLATES</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">{</span>
+        <span class="s1">&#39;NAME&#39;</span><span class="p">:</span> <span class="s1">&#39;django_mako_plus&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;BACKEND&#39;</span><span class="p">:</span> <span class="s1">&#39;django_mako_plus.MakoTemplates&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;OPTIONS&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s1">&#39;CONTENT_PROVIDERS&#39;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span>   <span class="s1">&#39;provider&#39;</span><span class="p">:</span> <span class="s1">&#39;django_mako_plus.JsContextProvider&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;group&#39;</span><span class="p">:</span> <span class="s1">&#39;styles&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;enabled&#39;</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+                    <span class="s1">&#39;encoder&#39;</span><span class="p">:</span> <span class="s1">&#39;django.core.serializers.json.DjangoJSONEncoder&#39;</span><span class="p">,</span>
+                <span class="p">},</span>
+                <span class="p">{</span>   <span class="s1">&#39;provider&#39;</span><span class="p">:</span> <span class="s1">&#39;django_mako_plus.CssLinkProvider&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;group&#39;</span><span class="p">:</span> <span class="s1">&#39;styles&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;enabled&#39;</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+                    <span class="s1">&#39;filepath&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+                    <span class="s1">&#39;link&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+                    <span class="s1">&#39;link_attrs&#39;</span><span class="p">:</span> <span class="p">{},</span>
+                    <span class="s1">&#39;skip_duplicates&#39;</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+                <span class="p">},</span>
+                <span class="p">{</span>   <span class="s1">&#39;provider&#39;</span><span class="p">:</span> <span class="s1">&#39;django_mako_plus.JsLinkProvider&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;group&#39;</span><span class="p">:</span> <span class="s1">&#39;styles&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;enabled&#39;</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+                    <span class="s1">&#39;filepath&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+                    <span class="s1">&#39;link&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+                    <span class="s1">&#39;link_attrs&#39;</span><span class="p">:</span> <span class="p">{},</span>
+                    <span class="s1">&#39;skip_duplicates&#39;</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
+                <span class="p">},</span>
+            <span class="p">],</span>
+        <span class="p">},</span>
+    <span class="p">},</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+<p>Primary options:</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">filepath:</th><td class="field-body"><p class="first">Specifies the search path DMP uses to find the static file for a given template.  The possible values are:</p>
+<ul class="simple">
+<li>If <code class="docutils literal notranslate"><span class="pre">None</span></code>, the providers call a built-in method that returns the pattern you saw in the tutorial: <code class="docutils literal notranslate"><span class="pre">&lt;app&gt;/styles/&lt;template&gt;.css</span></code> and <code class="docutils literal notranslate"><span class="pre">&lt;app&gt;/styles/&lt;template&gt;.js</span></code>.</li>
+<li>If a <em>function or lambda</em>, the function is called: <code class="docutils literal notranslate"><span class="pre">func(provider)</span></code>. The <code class="docutils literal notranslate"><span class="pre">provider</span></code> object contains useful information, such as template name, extension, app name and config object, various paths, and options. Specifying a lambda is the typical way to customize the filepath. See the examples below for more on this.</li>
+<li>If a <em>string</em>, it is used directly. This is useful when you want to hard code a file path.</li>
+</ul>
+<p>See the examples below for specifying custom file paths.</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">link:</th><td class="field-body"><p class="first">Generates the link to be inserted into the rendering template. The possible values are:</p>
+<ul class="simple">
+<li>If <code class="docutils literal notranslate"><span class="pre">None</span></code>, the providers call a built-in method that generates the links: <code class="docutils literal notranslate"><span class="pre">&lt;link</span> <span class="pre">rel=&quot;stylesheet&quot;</span> <span class="pre">.../&gt;</span></code> and <code class="docutils literal notranslate"><span class="pre">&lt;script</span> <span class="pre">src=&quot;...&quot;</span> <span class="pre">...&gt;&lt;/script&gt;</span></code>.</li>
+<li>If a <em>function or lambda</em>, the function is called: <code class="docutils literal notranslate"><span class="pre">func(provider)</span></code>. The <code class="docutils literal notranslate"><span class="pre">provider</span></code> object contains useful information, such as template name, extension, app name and config object, various paths, and options. Specifying a lambda is the typical way to customize the link. See the examples below for more on this.</li>
+<li>If a <em>string</em>, it is used directly. This is useful when you want to hard code a link.</li>
+</ul>
+<p>See the examples below for specifying custom link elements.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">link_attrs:</th><td class="field-body"><p class="first">Specifies additional attributes for the link tag, such as <code class="docutils literal notranslate"><span class="pre">async</span></code>, <code class="docutils literal notranslate"><span class="pre">type</span></code>, <code class="docutils literal notranslate"><span class="pre">rel</span></code>, etc.</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">skip_duplicates:</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><p class="first last">Specifies how DMP should act when duplicate links are created by two providers (or two runs of the same provider). In the case of CSS files, the second link is unnecessary. In the case of JS files, a second link usually means the script should run a second time.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Less used options:</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">group:</th><td class="field-body">Allows you to separate the printing of links into two or more groups. For example, if you need half the providers to run at the top of your template and half at the bottom, you could specify two groups: “top” and “bottom”. To run only the top links, include this: <code class="docutils literal notranslate"><span class="pre">${</span> <span class="pre">django_mako_plus.links(self,</span> <span class="pre">group=&quot;top&quot;)</span> <span class="pre">}</span></code>.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">enabled:</th><td class="field-body">Specifies whether a provider is enabled or disabled (skipped). For example, if you specify <code class="docutils literal notranslate"><span class="pre">'enabled':</span> <span class="pre">DEBUG</span></code>, a provider will run during development but be skipped at production.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="example-custom-paths">
+<h2>Example: Custom Paths<a class="headerlink" href="#example-custom-paths" title="Permalink to this headline">¶</a></h2>
+<p>Suppose we want to use a traditional Django project structure (different from DMP convention):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">project</span><span class="o">/</span>
+    <span class="n">homepage</span><span class="o">/</span>
+        <span class="n">templates</span><span class="o">/</span>
+            <span class="n">homepage</span><span class="o">/</span>
+                <span class="n">base</span><span class="o">.</span><span class="n">html</span>
+                <span class="n">index</span><span class="o">.</span><span class="n">html</span>
+        <span class="n">models</span><span class="o">.</span><span class="n">py</span>
+        <span class="n">views</span><span class="o">.</span><span class="n">py</span>
+    <span class="n">static</span><span class="o">/</span>
+        <span class="n">css</span><span class="o">/</span>
+            <span class="n">homepage</span><span class="o">/</span>
+                <span class="n">base</span><span class="o">.</span><span class="n">css</span>
+                <span class="n">index</span><span class="o">.</span><span class="n">css</span>
+        <span class="n">js</span><span class="o">/</span>
+            <span class="n">homepage</span><span class="o">/</span>
+                <span class="n">base</span><span class="o">.</span><span class="n">js</span>
+                <span class="n">index</span><span class="o">.</span><span class="n">js</span>
+</pre></div>
+</div>
+<p>The provider options in <code class="docutils literal notranslate"><span class="pre">settings.py</span></code> look like this:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">TEMPLATES</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">{</span>
+        <span class="s1">&#39;NAME&#39;</span><span class="p">:</span> <span class="s1">&#39;django_mako_plus&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;BACKEND&#39;</span><span class="p">:</span> <span class="s1">&#39;django_mako_plus.MakoTemplates&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;OPTIONS&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s1">&#39;CONTENT_PROVIDERS&#39;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span>   <span class="s1">&#39;provider&#39;</span><span class="p">:</span> <span class="s1">&#39;django_mako_plus.JsContextProvider&#39;</span> <span class="p">},</span>
+                <span class="p">{</span>   <span class="s1">&#39;provider&#39;</span><span class="p">:</span> <span class="s1">&#39;django_mako_plus.CssLinkProvider&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;filepath&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;static&#39;</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">app_config</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s1">&#39;css&#39;</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">template_relpath</span> <span class="o">+</span> <span class="s1">&#39;.css&#39;</span><span class="p">),</span>
+                <span class="p">},</span>
+                <span class="p">{</span>   <span class="s1">&#39;provider&#39;</span><span class="p">:</span> <span class="s1">&#39;django_mako_plus.JsLinkProvider&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;filepath&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;static&#39;</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">app_config</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s1">&#39;js&#39;</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">template_relpath</span> <span class="o">+</span> <span class="s1">&#39;.js&#39;</span><span class="p">),</span>
+                <span class="p">},</span>
+            <span class="p">],</span>
+        <span class="p">},</span>
+    <span class="p">},</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+<p>Also, since DMP looks for templates in the app directory, be sure to write the render call to the new structure:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@view_function</span>
+<span class="k">def</span> <span class="nf">process_request</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="o">...</span>
+    <span class="k">return</span> <span class="n">request</span><span class="o">.</span><span class="n">dmp</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="s1">&#39;homepage/index.html&#39;</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>By specifying the filepath with a lambda function, we can use the following attributes of the provider objects:</p>
+<ul class="simple">
+<li><code class="docutils literal notranslate"><span class="pre">p.template_name</span></code> - the name of the template, without extension</li>
+<li><code class="docutils literal notranslate"><span class="pre">p.template_relpath</span></code> - the path of the template, relative to the <code class="docutils literal notranslate"><span class="pre">app/templates</span></code> directory. This is usually the same as <code class="docutils literal notranslate"><span class="pre">template_name</span></code>, but it can be different if in a subdir of templates (e.g. <code class="docutils literal notranslate"><span class="pre">homepage/templates/forms/login.html</span></code> -&gt; <code class="docutils literal notranslate"><span class="pre">forms/login</span></code>.</li>
+<li><code class="docutils literal notranslate"><span class="pre">p.template_ext</span></code> - the extension of the template filename</li>
+<li><code class="docutils literal notranslate"><span class="pre">p.app_config</span></code> - the AppConfig the template resides in</li>
+<li><code class="docutils literal notranslate"><span class="pre">p.app_config.name</span></code> - the name of the app</li>
+<li><code class="docutils literal notranslate"><span class="pre">p.template</span></code> - the Mako template object</li>
+<li><code class="docutils literal notranslate"><span class="pre">p.template.filename</span></code> - full path to template file</li>
+<li><code class="docutils literal notranslate"><span class="pre">p.options</span></code> - the options for this provider (defaults + settings.py)</li>
+<li><code class="docutils literal notranslate"><span class="pre">p.provider_run.uid</span></code> - the unique context id (needed when creating links)</li>
+<li><code class="docutils literal notranslate"><span class="pre">p.provider_run.request</span></code> - the request object</li>
+</ul>
+<p><em>Hints:</em></p>
+<ol class="arabic simple">
+<li>Be sure DMP’s logging is set to “DEBUG” level (in settings). Then check the server logs; DMP’s providers print a lot of useful information to help you troubleshoot. The file paths printed should be especially useful.</li>
+<li>If the command is failing, you can copy the exact command being run from your server logs. Try running this command manually at a new terminal.</li>
+<li>Open the browser source (not the parsed DOM in the console, but the actual content being sent from the server). Inspect the link elements and paths for problems.</li>
+</ol>
+</div>
+<div class="section" id="example-custom-links">
+<h2>Example: Custom Links<a class="headerlink" href="#example-custom-links" title="Permalink to this headline">¶</a></h2>
+<p>Suppose we need a dynamic onLoad event to run with each template-related CSS file. In short, we want to generate custom CSS link elements.</p>
+<blockquote>
+<div>If the event were the same across all CSS link elements, we could simply override the <code class="docutils literal notranslate"><span class="pre">link_attrs</span></code> value in the options. But for a truly unique tag for each template, we’ll need to generate the full link.</div></blockquote>
+<p>The provider options in <code class="docutils literal notranslate"><span class="pre">settings.py</span></code> look like this:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">TEMPLATES</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">{</span>
+        <span class="s1">&#39;NAME&#39;</span><span class="p">:</span> <span class="s1">&#39;django_mako_plus&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;BACKEND&#39;</span><span class="p">:</span> <span class="s1">&#39;django_mako_plus.MakoTemplates&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;OPTIONS&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s1">&#39;CONTENT_PROVIDERS&#39;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span>   <span class="s1">&#39;provider&#39;</span><span class="p">:</span> <span class="s1">&#39;django_mako_plus.JsContextProvider&#39;</span> <span class="p">},</span>
+                <span class="p">{</span>   <span class="s1">&#39;provider&#39;</span><span class="p">:</span> <span class="s1">&#39;django_mako_plus.CssLinkProvider&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;filepath&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">app_config</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s1">&#39;styles&#39;</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">template_relpath</span> <span class="o">+</span> <span class="s1">&#39;.css&#39;</span><span class="p">),</span>
+                    <span class="s1">&#39;link&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="s2">&quot;&quot;&quot;&lt;link rel=&quot;stylesheet&quot; onLoad=&quot;custFunc(&#39;{app}/{tmpl}&#39;)&quot; data-context=&quot;{uid}&quot; href=&quot;{path}?{vid}&quot; /&gt;&quot;&quot;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                        <span class="n">app</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">app_config</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                        <span class="n">tmpl</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">template_name</span><span class="p">,</span>
+                        <span class="n">uid</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">provider_run</span><span class="o">.</span><span class="n">uid</span><span class="p">,</span>
+                        <span class="n">path</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">STATIC_URL</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">filepath</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">sep</span><span class="p">,</span> <span class="s1">&#39;/&#39;</span><span class="p">),</span>
+                        <span class="n">vid</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">version_id</span><span class="p">,</span>
+                    <span class="p">),</span>
+                <span class="p">},</span>
+                <span class="p">{</span>   <span class="s1">&#39;provider&#39;</span><span class="p">:</span> <span class="s1">&#39;django_mako_plus.JsLinkProvider&#39;</span> <span class="p">},</span>
+            <span class="p">],</span>
+        <span class="p">},</span>
+    <span class="p">},</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+<p>Not the following in the above link.</p>
+<ul class="simple">
+<li>The <code class="docutils literal notranslate"><span class="pre">data-context</span></code> attribute is set to the context (provider run) uid. Be sure to include this in any custom links so the client-side DMP script can find the element.</li>
+<li>The <code class="docutils literal notranslate"><span class="pre">p.version_id</span></code> variable is used as a cache buster. This id is calculated from the file “last modified” time and a hash of the file contents. When you change the file, the changed version_id will force client browsers to download the new file.</li>
+</ul>
+<p>By specifying the link with a lambda function, we can use the following attributes of the provider objects:</p>
+<ul class="simple">
+<li><code class="docutils literal notranslate"><span class="pre">p.template_name</span></code> - the name of the template, without extension</li>
+<li><code class="docutils literal notranslate"><span class="pre">p.template_relpath</span></code> - the path of the template, relative to the <code class="docutils literal notranslate"><span class="pre">app/templates</span></code> directory. This is usually the same as <code class="docutils literal notranslate"><span class="pre">template_name</span></code>, but it can be different if in a subdir of templates (e.g. <code class="docutils literal notranslate"><span class="pre">homepage/templates/forms/login.html</span></code> -&gt; <code class="docutils literal notranslate"><span class="pre">forms/login</span></code>.</li>
+<li><code class="docutils literal notranslate"><span class="pre">p.template_ext</span></code> - the extension of the template filename</li>
+<li><code class="docutils literal notranslate"><span class="pre">p.app_config</span></code> - the AppConfig the template resides in</li>
+<li><code class="docutils literal notranslate"><span class="pre">p.app_config.name</span></code> - the name of the app</li>
+<li><code class="docutils literal notranslate"><span class="pre">p.template</span></code> - the Mako template object</li>
+<li><code class="docutils literal notranslate"><span class="pre">p.template.filename</span></code> - full path to template file</li>
+<li><code class="docutils literal notranslate"><span class="pre">p.options</span></code> - the options for this provider (defaults + settings.py)</li>
+<li><code class="docutils literal notranslate"><span class="pre">p.provider_run.uid</span></code> - the unique context id (needed when creating links)</li>
+<li><code class="docutils literal notranslate"><span class="pre">p.provider_run.request</span></code> - the request object</li>
+<li><code class="docutils literal notranslate"><span class="pre">p.version_id</span></code> - the unique id calculated from the file modified time and contents</li>
+</ul>
+<p><em>Hints:</em></p>
+<ol class="arabic simple">
+<li>Be sure DMP’s logging is set to “DEBUG” level (in settings). Then check the server logs; DMP’s providers print a lot of useful information to help you troubleshoot. The file paths printed should be especially useful.</li>
+<li>If the command is failing, you can copy the exact command being run from your server logs. Try running this command manually at a new terminal.</li>
+<li>Open the browser source (not the parsed DOM in the console, but the actual content being sent from the server). Inspect the link elements and paths for problems.</li>
+</ol>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="static_compilers.html" class="btn btn-neutral float-right" title="Sass, Less, &amp; More" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="static_overview.html" class="btn btn-neutral" title="Static Files Overview" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Conan C. Albrecht
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+    
+
+  
+
+  <script type="text/javascript" src="_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

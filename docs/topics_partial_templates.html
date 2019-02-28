@@ -1,0 +1,364 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Rendering Partial Templates for Ajax &mdash; Django-Mako-Plus  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/dmp.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Combining Django and Mako Templates" href="topics_other_syntax.html" />
+    <link rel="prev" title="Customizing @view_function" href="topics_view_function.html" /> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> Django-Mako-Plus
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="compare.html">Comparison with Django</a></li>
+<li class="toctree-l1"><a class="reference internal" href="upgrade_notes.html">Upgrade Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">FAQ</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="topics.html">Basic Concepts</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="topics_settings.html"><code class="docutils literal notranslate"><span class="pre">settings.py</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_escaping.html">Escaping Special Characters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_variables.html">Metadata about the Request</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_modules.html">Python Imports in Templates</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_third_party.html">Using Third-Party Apps</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_paths.html">Inheritance Paths and Template Location</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_convenience.html">Convenience Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_redirecting.html">Redirecting the Browser</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_csrf.html">CSRF Tokens</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_class_views.html">Class-Based Views</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_django.html">Using the Django API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_responses.html">Lazy Rendering with <code class="docutils literal notranslate"><span class="pre">TemplateResponse</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_view_function.html">Customizing <code class="docutils literal notranslate"><span class="pre">&#64;view_function</span></code></a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Rendering Partial Templates for Ajax</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#why-should-i-care">Why Should I Care?</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#an-example">An Example</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#variable-scope">Variable Scope</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="topics_other_syntax.html">Combining Django and Mako Templates</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_signals.html">Signals in DMP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_translation.html">Internationalization</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="converters.html">Parameter Conversion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="static.html">Static Files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="deploy.html">Deployment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="editors.html">Editors</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Django-Mako-Plus</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="topics.html">Basic Concepts</a> &raquo;</li>
+        
+      <li>Rendering Partial Templates for Ajax</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="rendering-partial-templates-for-ajax">
+<span id="topics-partial-templates"></span><h1><a class="toc-backref" href="#id1">Rendering Partial Templates for Ajax</a><a class="headerlink" href="#rendering-partial-templates-for-ajax" title="Permalink to this headline">¶</a></h1>
+<div class="contents topic" id="contents">
+<p class="topic-title first">Contents</p>
+<ul class="simple">
+<li><a class="reference internal" href="#rendering-partial-templates-for-ajax" id="id1">Rendering Partial Templates for Ajax</a><ul>
+<li><a class="reference internal" href="#why-should-i-care" id="id2">Why Should I Care?</a></li>
+<li><a class="reference internal" href="#an-example" id="id3">An Example</a></li>
+<li><a class="reference internal" href="#variable-scope" id="id4">Variable Scope</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<p>One of the hidden easter eggs of Mako is its ability to render individual blocks of a template, and this feature can be used to make reloading parts of a page quick and easy. Are you thinking Ajax here? The trick is done by specifying the <code class="docutils literal notranslate"><span class="pre">def_name</span></code> parameters in <code class="docutils literal notranslate"><span class="pre">render()</span></code>. You may want to start by reading about <code class="docutils literal notranslate"><span class="pre">&lt;%block&gt;</span></code> and <code class="docutils literal notranslate"><span class="pre">&lt;%def&gt;</span></code> tags in the <a class="reference external" href="http://docs.makotemplates.org/en/latest/defs.html">Mako documentation</a>.</p>
+<div class="section" id="why-should-i-care">
+<h2><a class="toc-backref" href="#id2">Why Should I Care?</a><a class="headerlink" href="#why-should-i-care" title="Permalink to this headline">¶</a></h2>
+<p><strong>Partial templates rock because:</strong></p>
+<ol class="arabic">
+<li><p class="first">We serve both the initial page <em>and</em> the Ajax call with the same code. Write once, debug once, maintain once. Single templates, FTW!</p>
+</li>
+<li><p class="first">The same logic, <code class="docutils literal notranslate"><span class="pre">index.py</span></code>, is run for both the initial call and the Ajax call. While this example is really simplistic, more complex views may have significant work to do (form handling, table creation, object retrieval) before the page or the Ajax can be rendered.</p>
+</li>
+<li><p class="first">By splitting the template into many different blocks, a single view/template can serve many different Ajax calls throughout the page.</p>
+<blockquote>
+<div><p>Note that, in the Ajax call, your view will likely perform more logic than is needed (i.e. generate data for skipped parts of the template outside the block). Often, this additional processing is minimal and is outweighed by the benefits above. When additional processing is not desirable, simply create new <code class="docutils literal notranslate"><span class="pre">&#64;view_function</span></code> functions, one for each Ajax call. You can still use the single template by having the Ajax endpoints render specific blocks.</p>
+</div></blockquote>
+</li>
+</ol>
+</div>
+<div class="section" id="an-example">
+<h2><a class="toc-backref" href="#id3">An Example</a><a class="headerlink" href="#an-example" title="Permalink to this headline">¶</a></h2>
+<p>Suppose you have the following template, view, and JS files:</p>
+<p><strong>``index.html``</strong> with a <code class="docutils literal notranslate"><span class="pre">server_time</span></code> block:</p>
+<div class="highlight-html+mako notranslate"><div class="highlight"><pre><span></span><span class="cp">&lt;%</span><span class="nb">inherit</span> <span class="na">file=</span><span class="s">&quot;base.htm&quot;</span> <span class="cp">/&gt;</span>
+
+<span class="cp">&lt;%</span><span class="nb">block</span> <span class="na">name=</span><span class="s">&quot;content&quot;</span><span class="cp">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">div</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;content&quot;</span><span class="p">&gt;</span>
+      <span class="p">&lt;</span><span class="nt">h3</span><span class="p">&gt;</span>Congratulations -- you&#39;ve successfully created a new django-mako-plus app!<span class="p">&lt;/</span><span class="nt">h3</span><span class="p">&gt;</span>
+      <span class="p">&lt;</span><span class="nt">h4</span><span class="p">&gt;</span>Next Up: Go through the django-mako-plus tutorial and add Javascript, CSS, and urlparams to this page.<span class="p">&lt;/</span><span class="nt">h4</span><span class="p">&gt;</span>
+      <span class="p">&lt;</span><span class="nt">p</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;server-time&quot;</span><span class="p">&gt;</span>
+          <span class="cp">&lt;%</span><span class="nb">block</span> <span class="na">name=</span><span class="s">&quot;server_time&quot;</span><span class="cp">&gt;</span>
+             The current server time is <span class="cp">${</span> <span class="n">now</span> <span class="cp">}</span>.
+          <span class="cp">&lt;/%</span><span class="nb">block</span><span class="cp">&gt;</span>
+      <span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
+      <span class="p">&lt;</span><span class="nt">button</span> <span class="na">id</span><span class="o">=</span><span class="s">&quot;server-time-button&quot;</span><span class="p">&gt;</span>Refresh Server Time<span class="p">&lt;/</span><span class="nt">button</span><span class="p">&gt;</span>
+      <span class="p">&lt;</span><span class="nt">p</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;browser-time&quot;</span><span class="p">&gt;</span>The current browser time is .<span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
+    <span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+<span class="cp">&lt;/%</span><span class="nb">block</span><span class="cp">&gt;</span>
+</pre></div>
+</div>
+<p><strong>``index.py``</strong> with an <code class="docutils literal notranslate"><span class="pre">if</span></code> statement and two <code class="docutils literal notranslate"><span class="pre">request.dmp.render</span></code> calls:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.conf</span> <span class="kn">import</span> <span class="n">settings</span>
+<span class="kn">from</span> <span class="nn">django_mako_plus</span> <span class="kn">import</span> <span class="n">view_function</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">import</span> <span class="nn">random</span>
+
+<span class="nd">@view_function</span>
+<span class="k">def</span> <span class="nf">process_request</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">mode</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="n">context</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;now&#39;</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%H:%M&#39;</span><span class="p">),</span>
+    <span class="p">}</span>
+    <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;gettime&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">request</span><span class="o">.</span><span class="n">dmp</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="s1">&#39;index.html&#39;</span><span class="p">,</span> <span class="n">context</span><span class="p">,</span> <span class="n">def_name</span><span class="o">=</span><span class="s1">&#39;server_time&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">request</span><span class="o">.</span><span class="n">dmp</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="s1">&#39;index.html&#39;</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>``index.js``</strong>:</p>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="c1">// update button</span>
+<span class="nx">$</span><span class="p">(</span><span class="s1">&#39;#server-time-button&#39;</span><span class="p">).</span><span class="nx">click</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+    <span class="nx">$</span><span class="p">(</span><span class="s1">&#39;.server-time&#39;</span><span class="p">).</span><span class="nx">load</span><span class="p">(</span><span class="s1">&#39;/homepage/index/gettime/&#39;</span><span class="p">);</span>
+<span class="p">});</span>
+</pre></div>
+</div>
+<p>On initial page load, <code class="docutils literal notranslate"><span class="pre">mode</span> <span class="pre">==</span> <span class="pre">'gettime'</span></code> is False, so the full <code class="docutils literal notranslate"><span class="pre">index.html</span></code> file is rendered. However, when the update button’s click event is run, the statement is <strong>true</strong> because <code class="docutils literal notranslate"><span class="pre">/gettime</span></code> is added as the first url parameter. This is just one way to switch the <code class="docutils literal notranslate"><span class="pre">request.dmp.render</span></code> call. We could also have used a regular CGI parameter, request method (GET or POST), or any other way to perform the logic.</p>
+<p>When the <code class="docutils literal notranslate"><span class="pre">if</span></code> statement goes <strong>True</strong>, DMP renders the <code class="docutils literal notranslate"><span class="pre">server_time</span></code> block of the template instead of the entire template. This corresponds nicely to the way the Ajax call was made: <code class="docutils literal notranslate"><span class="pre">$('.server-time').load()</span></code>.</p>
+</div>
+<div class="section" id="variable-scope">
+<h2><a class="toc-backref" href="#id4">Variable Scope</a><a class="headerlink" href="#variable-scope" title="Permalink to this headline">¶</a></h2>
+<p>The tricky part of block rendering is ensuring your variables are accessible. You can read more about namespaces on the Mako web site, but here’s the tl;dr version:</p>
+<ul class="simple">
+<li>Variables sent from the view in the context dictionary are available throughout the page, regardless of the block. If your variables are part of the context, you’re golden.</li>
+<li>Variables created within your template but <strong>outside the block</strong> have to be explicitly defined in the block declaration. This is a Mako thing, and it’s a consequence of the way Mako turns blocks and defs into Python methods. If you need a variable defined outside a block, be sure to define your template with a comma-separated list of <code class="docutils literal notranslate"><span class="pre">args</span></code>. Again, <a class="reference external" href="http://docs.makotemplates.org/en/latest/namespaces.html">the Mako documentation</a> gives more information on these fine details.</li>
+</ul>
+<p><strong>``index.html``</strong> with a <code class="docutils literal notranslate"><span class="pre">counter</span></code> variable defined in the template:</p>
+<div class="highlight-html+mako notranslate"><div class="highlight"><pre><span></span><span class="cp">&lt;%</span><span class="nb">inherit</span> <span class="na">file=</span><span class="s">&quot;base.htm&quot;</span> <span class="cp">/&gt;</span>
+
+<span class="cp">&lt;%</span><span class="nb">block</span> <span class="na">name=</span><span class="s">&quot;content&quot;</span><span class="cp">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">div</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;content&quot;</span><span class="p">&gt;</span>
+      <span class="p">&lt;</span><span class="nt">h3</span><span class="p">&gt;</span>Congratulations -- you&#39;ve successfully created a new django-mako-plus app!<span class="p">&lt;/</span><span class="nt">h3</span><span class="p">&gt;</span>
+      <span class="p">&lt;</span><span class="nt">h4</span><span class="p">&gt;</span>Next Up: Go through the django-mako-plus tutorial and add Javascript, CSS, and urlparams to this page.<span class="p">&lt;/</span><span class="nt">h4</span><span class="p">&gt;</span>
+      <span class="cp">%</span><span class="k">for</span> <span class="n">counter</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
+          <span class="p">&lt;</span><span class="nt">p</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;server-time&quot;</span><span class="p">&gt;</span>
+              <span class="cp">&lt;%</span><span class="nb">block</span> <span class="na">name=</span><span class="s">&quot;server_time&quot;</span> <span class="na">args=</span><span class="s">&quot;counter&quot;</span><span class="cp">&gt;</span>
+                 <span class="cp">${</span> <span class="n">counter</span> <span class="cp">}</span>: The current server time is <span class="cp">${</span> <span class="n">now</span> <span class="cp">}</span>.
+              <span class="cp">&lt;/%</span><span class="nb">block</span><span class="cp">&gt;</span>
+          <span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
+      <span class="cp">%</span><span class="k">endfor</span>
+      <span class="p">&lt;</span><span class="nt">button</span> <span class="na">id</span><span class="o">=</span><span class="s">&quot;server-time-button&quot;</span><span class="p">&gt;</span>Refresh Server Time<span class="p">&lt;/</span><span class="nt">button</span><span class="p">&gt;</span>
+      <span class="p">&lt;</span><span class="nt">p</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;browser-time&quot;</span><span class="p">&gt;</span>The current browser time is .<span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
+    <span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+<span class="cp">&lt;/%</span><span class="nb">block</span><span class="cp">&gt;</span>
+</pre></div>
+</div>
+<p>Since <code class="docutils literal notranslate"><span class="pre">counter</span></code> won’t get defined when <code class="docutils literal notranslate"><span class="pre">def_name='server_time'</span></code>, <strong>``index.py``</strong> must add it to the <code class="docutils literal notranslate"><span class="pre">context</span></code> (but only for the Ajax-oriented <code class="docutils literal notranslate"><span class="pre">request.dmp.render</span></code> function):</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.conf</span> <span class="kn">import</span> <span class="n">settings</span>
+<span class="kn">from</span> <span class="nn">django_mako_plus</span> <span class="kn">import</span> <span class="n">view_function</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">import</span> <span class="nn">random</span>
+
+<span class="nd">@view_function</span>
+<span class="k">def</span> <span class="nf">process_request</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">mode</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="n">context</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;now&#39;</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%H:%M:%S&#39;</span><span class="p">),</span>
+    <span class="p">}</span>
+    <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;gettime&#39;</span><span class="p">:</span>
+        <span class="n">context</span><span class="p">[</span><span class="s1">&#39;counter&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">100</span>
+        <span class="k">return</span> <span class="n">request</span><span class="o">.</span><span class="n">dmp</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="s1">&#39;index.html&#39;</span><span class="p">,</span> <span class="n">context</span><span class="p">,</span> <span class="n">def_name</span><span class="o">=</span><span class="s1">&#39;server_time&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">request</span><span class="o">.</span><span class="n">dmp</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="s1">&#39;index.html&#39;</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
+
+<span class="n">The</span> <span class="sb">``</span><span class="n">def_name</span><span class="sb">``</span> <span class="n">parameter</span> <span class="n">can</span> <span class="n">be</span> <span class="n">used</span> <span class="n">to</span> <span class="n">call</span> <span class="n">both</span> <span class="sb">``</span><span class="o">&lt;%</span><span class="n">block</span><span class="o">&gt;</span><span class="sb">``</span> <span class="ow">and</span> <span class="sb">``</span><span class="o">&lt;%</span><span class="n">def</span><span class="o">&gt;</span><span class="sb">``</span> <span class="n">tags</span> <span class="ow">in</span> <span class="n">your</span> <span class="n">templates</span><span class="o">.</span> <span class="n">The</span> <span class="n">two</span> <span class="n">are</span> <span class="n">very</span> <span class="n">similar</span> <span class="n">within</span> <span class="n">the</span> <span class="n">Mako</span> <span class="n">engine</span><span class="o">.</span> <span class="n">The</span> <span class="n">primary</span> <span class="n">difference</span> <span class="ow">is</span> <span class="n">the</span> <span class="sb">``</span><span class="o">&lt;%</span><span class="n">def</span><span class="o">&gt;</span><span class="sb">``</span> <span class="n">tag</span> <span class="n">can</span> <span class="n">define</span> <span class="n">parameters</span><span class="o">.</span> <span class="n">When</span> <span class="n">calling</span> <span class="n">these</span> <span class="n">defs</span> <span class="n">directly</span><span class="p">,</span> <span class="n">be</span> <span class="n">sure</span> <span class="n">each</span> <span class="n">of</span> <span class="n">the</span> <span class="n">parameter</span> <span class="n">names</span> <span class="ow">is</span> <span class="ow">in</span> <span class="n">your</span> <span class="sb">``</span><span class="n">context</span><span class="sb">``</span> <span class="n">dictionary</span><span class="o">.</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="topics_other_syntax.html" class="btn btn-neutral float-right" title="Combining Django and Mako Templates" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="topics_view_function.html" class="btn btn-neutral" title="Customizing @view_function" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Conan C. Albrecht
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+    
+
+  
+
+  <script type="text/javascript" src="_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

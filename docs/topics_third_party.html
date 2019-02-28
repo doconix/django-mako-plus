@@ -1,0 +1,331 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Using Third-Party Apps &mdash; Django-Mako-Plus  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/dmp.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Inheritance Paths and Template Location" href="topics_paths.html" />
+    <link rel="prev" title="Python Imports in Templates" href="topics_modules.html" /> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> Django-Mako-Plus
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="compare.html">Comparison with Django</a></li>
+<li class="toctree-l1"><a class="reference internal" href="upgrade_notes.html">Upgrade Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">FAQ</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="topics.html">Basic Concepts</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="topics_settings.html"><code class="docutils literal notranslate"><span class="pre">settings.py</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_escaping.html">Escaping Special Characters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_variables.html">Metadata about the Request</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_modules.html">Python Imports in Templates</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Using Third-Party Apps</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#third-party-url-patterns">Third-Party URL Patterns</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#third-party-tags">Third-Party Tags</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#method-1-call-the-tag-directly">Method 1: Call the Tag Directly</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#method-2-skip-the-tag-altogether">Method 2: Skip the Tag Altogether</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#method-3-use-as-directed-django-syntax">Method 3: Use as Directed…Django Syntax</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="topics_paths.html">Inheritance Paths and Template Location</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_convenience.html">Convenience Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_redirecting.html">Redirecting the Browser</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_csrf.html">CSRF Tokens</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_class_views.html">Class-Based Views</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_django.html">Using the Django API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_responses.html">Lazy Rendering with <code class="docutils literal notranslate"><span class="pre">TemplateResponse</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_view_function.html">Customizing <code class="docutils literal notranslate"><span class="pre">&#64;view_function</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_partial_templates.html">Rendering Partial Templates for Ajax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_other_syntax.html">Combining Django and Mako Templates</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_signals.html">Signals in DMP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_translation.html">Internationalization</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="converters.html">Parameter Conversion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="static.html">Static Files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="deploy.html">Deployment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="editors.html">Editors</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Django-Mako-Plus</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="topics.html">Basic Concepts</a> &raquo;</li>
+        
+      <li>Using Third-Party Apps</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="using-third-party-apps">
+<span id="topics-third-party"></span><h1>Using Third-Party Apps<a class="headerlink" href="#using-third-party-apps" title="Permalink to this headline">¶</a></h1>
+<p>One of the greatest strengths of Django is the wealth of third-party apps available through <code class="docutils literal notranslate"><span class="pre">pip</span></code>. A few examples of popular apps are:</p>
+<ul class="simple">
+<li><a class="reference external" href="https://django-extensions.readthedocs.io/en/latest/">django-extensions</a></li>
+<li><a class="reference external" href="https://www.django-rest-framework.org/">Django Rest Framework</a></li>
+<li><a class="reference external" href="http://django-crispy-forms.readthedocs.io/">Crispy Forms</a></li>
+<li><a class="reference external" href="https://wagtail.io/">Wagtail CMS</a></li>
+<li><a class="reference external" href="https://djangopackages.org/">Many, many more</a></li>
+</ul>
+<p>Have no fear, DMP works together with them just like an integration of Windows and Linux!  (just kidding, they work fine together.)  Read on for a few things to watch for.</p>
+<div class="section" id="third-party-url-patterns">
+<h2>Third-Party URL Patterns<a class="headerlink" href="#third-party-url-patterns" title="Permalink to this headline">¶</a></h2>
+<p>It is important to include <em>third-party url patterns/includes first</em> in <code class="docutils literal notranslate"><span class="pre">urls.py</span></code>. DMP’s url patterns are wildcards, so they need to be listed last or they’ll take over everything.</p>
+<p>But be assurred that DMP’s url patterns follow the standards, so they play nicely with the other apps in <code class="docutils literal notranslate"><span class="pre">urls.py</span></code>.</p>
+</div>
+<div class="section" id="third-party-tags">
+<h2>Third-Party Tags<a class="headerlink" href="#third-party-tags" title="Permalink to this headline">¶</a></h2>
+<p>Third-party apps often come with custom Django tags that you include in templates.  Since those tags are likely in Django format (and not Mako), you’ll have to slightly translate the documentation for each library.</p>
+<div class="section" id="method-1-call-the-tag-directly">
+<h3>Method 1: Call the Tag Directly<a class="headerlink" href="#method-1-call-the-tag-directly" title="Permalink to this headline">¶</a></h3>
+<p>In most cases, third-party tags are just functions within the third-party library. Just call the function directly.</p>
+<p>For example, here’s how to use the custom form tag in the <a class="reference external" href="http://django-paypal.readthedocs.io/">Django Paypal App</a>:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="51%" />
+<col width="49%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>Django Paypal App in a Django template</td>
+<td>Django Paypal App in a DMP template</td>
+</tr>
+<tr class="row-even"><td><div class="first last highlight-django notranslate"><div class="highlight"><pre><span></span><span class="cp">{{</span> <span class="nv">form.render</span> <span class="cp">}}</span><span class="x"></span>
+</pre></div>
+</div>
+</td>
+<td><div class="first last highlight-html+mako notranslate"><div class="highlight"><pre><span></span><span class="cp">${</span> <span class="n">form</span><span class="o">.</span><span class="n">render</span><span class="p">()</span> <span class="cp">}</span>
+</pre></div>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Note the parenthases in the DMP code (it’s a function call, after all).</p>
+</div>
+<div class="section" id="method-2-skip-the-tag-altogether">
+<h3>Method 2: Skip the Tag Altogether<a class="headerlink" href="#method-2-skip-the-tag-altogether" title="Permalink to this headline">¶</a></h3>
+<p>If the tag can’t be called using regular Python, take a look at the third-party code. What does the tag actually do?  In most libraries, tags are just fronts for regular library functions (since Django doesn’t allow direct Python in templates–talk about a manufactured problem…). If so, you can skip the tag and call the embedded function directly.</p>
+<p>Even when third-party tags contain functionality directly, libraries usually provide mirror functions for calling from regular Python views.</p>
+<p>For example, to use the <a class="reference external" href="http://django-crispy-forms.readthedocs.io/">Crispy Form library</a>, simply import and call its <code class="docutils literal notranslate"><span class="pre">render_crispy_form</span></code> function directly:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="51%" />
+<col width="49%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>Crispy Forms in a Django template</td>
+<td>Crispy Forms in a DMP template</td>
+</tr>
+<tr class="row-even"><td><div class="first last highlight-django notranslate"><div class="highlight"><pre><span></span><span class="cp">{%</span> <span class="k">load</span> <span class="nv">crispy_forms_tags</span> <span class="cp">%}</span><span class="x"></span>
+
+<span class="x">&lt;form method=&quot;post&quot;&gt;</span>
+<span class="x">    </span><span class="cp">{{</span> <span class="nv">form</span> <span class="o">|</span> <span class="nf">crispy</span> <span class="cp">}}</span><span class="x"></span>
+<span class="x">&lt;/form&gt;</span>
+</pre></div>
+</div>
+</td>
+<td><div class="first last highlight-html+mako notranslate"><div class="highlight"><pre><span></span><span class="cp">&lt;%!</span> <span class="kn">from</span> <span class="nn">crispy_forms.utils</span> <span class="kn">import</span> <span class="n">render_crispy_form</span> <span class="cp">%&gt;</span>
+
+<span class="p">&lt;</span><span class="nt">form</span> <span class="na">method</span><span class="o">=</span><span class="s">&quot;post&quot;</span><span class="p">&gt;</span>
+    <span class="cp">${</span> <span class="n">render_crispy_form</span><span class="p">(</span><span class="n">form</span><span class="p">)</span> <span class="cp">}</span>
+<span class="p">&lt;/</span><span class="nt">form</span><span class="p">&gt;</span>
+</pre></div>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+<p>If you call a function like <code class="docutils literal notranslate"><span class="pre">render_crispy_form</span></code> often, you may want to <a class="reference external" href="topics_modules.html">add it as a global template import</a>.</p>
+</div>
+<div class="section" id="method-3-use-as-directed-django-syntax">
+<h3>Method 3: Use as Directed…Django Syntax<a class="headerlink" href="#method-3-use-as-directed-django-syntax" title="Permalink to this headline">¶</a></h3>
+<p>There may be times when you have no choice but to call a third-party tag the way it was designed: with Django syntax. DMP templates can include Django syntax blocks, even though it’s a little kludgy to do so. But be assured that when needed, tags can be used exactly as the third-party documentation describes.</p>
+<p>Venture over to <a class="reference external" href="/topics_other_syntax.html">Django Syntax and Tags</a> to get schooled.</p>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="topics_paths.html" class="btn btn-neutral float-right" title="Inheritance Paths and Template Location" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="topics_modules.html" class="btn btn-neutral" title="Python Imports in Templates" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Conan C. Albrecht
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+    
+
+  
+
+  <script type="text/javascript" src="_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

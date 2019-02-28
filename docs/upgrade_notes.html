@@ -1,0 +1,433 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Upgrade Notes &mdash; Django-Mako-Plus  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/dmp.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Installation" href="install.html" />
+    <link rel="prev" title="Comparison with Django" href="compare.html" /> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> Django-Mako-Plus
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="compare.html">Comparison with Django</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Upgrade Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="topics.html">Basic Concepts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="converters.html">Parameter Conversion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="static.html">Static Files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="deploy.html">Deployment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="editors.html">Editors</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Django-Mako-Plus</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Upgrade Notes</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="upgrade-notes">
+<span id="id1"></span><h1>Upgrade Notes<a class="headerlink" href="#upgrade-notes" title="Permalink to this headline">¶</a></h1>
+<p>This document contains upgrade notes for those already using DMP.  We started the document at version 4.3.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">5.10:</th><td class="field-body"><p class="first">Significant refactoring of dmp-common.js to make webpack bundling work correctly. The file is now programmed in ES6, with babel being used to backport it. You can also import the file from the npm repository instead of including it normally.</p>
+<p>The only API change in the dmp-common file is <code class="docutils literal notranslate"><span class="pre">getAll</span></code>, which now returns full context objects rather than just values. This isn’t in the docs anywhere, so these changes shouldn’t affect the userbase.</p>
+<p>tl;dr is none of this version’s changes should matter to you.</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">5.9:</th><td class="field-body"><p class="first">Refactored the providers based on feedback from users. This especially affects the <code class="docutils literal notranslate"><span class="pre">ProviderRun</span></code> class, but the changes shouldn’t affect existing sites because these areas aren’t generally used.</p>
+<p>The docs for the providers was fully rewritten to be more clear.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">5.8:</th><td class="field-body"><p class="first">The changes you need to worry about:</p>
+<ol class="arabic simple">
+<li>Rerun <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">manage.py</span> <span class="pre">dmp_webpack</span> <span class="pre">--overwrite</span></code> to generate the altered entry file syntax.</li>
+<li>Remove <code class="docutils literal notranslate"><span class="pre">django_mako_plus.WebpackJsCallProvider</span></code> from your settings.py. This functionality is now in the webpack link provider.</li>
+<li>Remove <code class="docutils literal notranslate"><span class="pre">django_mako_plus.WebpackCssLinkProvider</span></code> from your settings.py. This functionality represents a very specialized use case, and it’s better left to individual projects to do.</li>
+<li><cite>version_id</cite> is now calculated automatically for static files. It has been removed from the links(self) signature.</li>
+</ol>
+<p>The changes you probably don’t need to worry about:</p>
+<ol class="arabic simple">
+<li>Refactored the webpack features to be cleaner. Created a much better tutorial on using webpack with DMP.</li>
+<li>Refactored to simplify the providers. If you created custom provider classes, you may need some slight changes. See the examples in the source code.</li>
+<li>Removed the <cite>version_id</cite> parameter from providers. This has been deprecated for a <em>long</em> time.</li>
+</ol>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">5.7:</th><td class="field-body"><p class="first">Changed autoescaping to be ON by default. This now matches Django’s default.</p>
+<ol class="arabic simple">
+<li>Anywhere you use expressions ${…} and need them to be literal, change them from <code class="docutils literal notranslate"><span class="pre">${</span> <span class="pre">something</span> <span class="pre">}</span></code> to <code class="docutils literal notranslate"><span class="pre">${</span> <span class="pre">something</span> <span class="pre">|</span> <span class="pre">n</span> <span class="pre">}</span></code>.</li>
+<li><em>Important: Erase the cached templates.</em> Run <code class="docutils literal notranslate"><span class="pre">python3</span> <span class="pre">manage.py</span> <span class="pre">dmp_cleanup</span></code>.</li>
+</ol>
+<p>Read more ways to enable/disable autoescaping at <a class="reference external" href="/basics_escaping.html">Escaping Special Characters</a>.</p>
+<p>If you would like things back to the old way, set autoescaping to False in your project settings file:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">TEMPLATES</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">{</span>
+        <span class="s1">&#39;NAME&#39;</span><span class="p">:</span> <span class="s1">&#39;django_mako_plus&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;BACKEND&#39;</span><span class="p">:</span> <span class="s1">&#39;django_mako_plus.MakoTemplates&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;OPTIONS&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="c1"># I liked things the old way...now quit messin&#39; with &#39;em</span>
+            <span class="s1">&#39;AUTOESCAPE&#39;</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
+            <span class="o">...</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+<p>As with the last change, apologies for backward-breaking changes. I decided to add this now since 5.6 <em>just</em> came out, and users can make the modifications for 5.6 and 5.7 together.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">5.6:</th><td class="field-body"><ol class="first arabic simple">
+<li>Changed the management command format to the way it used to be.  Sorry for the change, everyone!  Doing subcommands the way we were required tying to internal Django classes.  When Django changed things in 2.1, it broke subcommands. It was going to be quite difficult to support both 2.0 and 2.1 at the same time.  Plus I probably shouldn’t have tied to internal stuff more than needed anyway. So back to old style.</li>
+</ol>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># If you previously typed:</span>
+<span class="n">python</span> <span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">dmp</span> <span class="n">startapp</span> <span class="n">homepage</span>
+
+<span class="c1"># you now type:</span>
+<span class="n">python</span> <span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">dmp_startapp</span> <span class="n">homepage</span>
+</pre></div>
+</div>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">5.5:</th><td class="field-body"><ol class="first arabic simple">
+<li>The universal <code class="docutils literal notranslate"><span class="pre">route_request</span></code> function was removed.  DMP now plugs into Django as a regular URL resolver.  This means the view function is no longer shadowed behind <code class="docutils literal notranslate"><span class="pre">route_request</span></code> but is instead directly used.  One benefit of this change is decorators like <code class="docutils literal notranslate"><span class="pre">&#64;csrf_exempt</span></code> work now.</li>
+</ol>
+<p>This caused a few backwards-compatible changes.  Do a search and replace for the following:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="48%" />
+<col width="52%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Old</th>
+<th class="head">New</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td><cite>request.dmp.function_obj</cite></td>
+<td><cite>request.dmp.callable</cite></td>
+</tr>
+<tr class="row-odd"><td><cite>request.dmp.class_obj</cite></td>
+<td><cite>request.dmp.callable.view_class</cite></td>
+</tr>
+</tbody>
+</table>
+<p>A new variable, <code class="docutils literal notranslate"><span class="pre">request.dmp.view_type</span></code> gives information about the type of view function being rendered.</p>
+<ol class="arabic simple" start="2">
+<li>If you are using DMP’s built-in <code class="docutils literal notranslate"><span class="pre">urls.py</span></code> file –<code class="docutils literal notranslate"><span class="pre">url('',</span> <span class="pre">include('django_mako_plus.urls')),</span></code> – no other changes are necessary.</li>
+</ol>
+<p>If you have custom URLs, you need to change <code class="docutils literal notranslate"><span class="pre">re_path</span></code> to <code class="docutils literal notranslate"><span class="pre">dmp_path</span></code> in your urls.  See DMP’s <code class="docutils literal notranslate"><span class="pre">urls.py</span></code> file on GitHub as well as the rewritten Installation section of the docs for an example.</p>
+<ol class="arabic simple" start="3">
+<li>Some functions were moved from the template engine to the django_mako_plus app config.  What used to be <code class="docutils literal notranslate"><span class="pre">engine.is_dmp_app</span></code> is now <code class="docutils literal notranslate"><span class="pre">apps.get_app_config('django_mako_plus').is_registered_app</span></code>.</li>
+</ol>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">5.4:</th><td class="field-body"><p class="first">The converters and <code class="docutils literal notranslate"><span class="pre">view_function</span></code> decorator were refactored.  If you’re just using the standard DMP system, these changes won’t affect you.</p>
+<p>If you were using custom converters and/or a custom view_function decorator, see the docs on parameter conversion.</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">5.3:</th><td class="field-body"><p class="first">The DMP management commands have been refactored.  The sass cleanup command is removed.</p>
+<p>The remaining commands are now subcommands.  If before you typed <code class="docutils literal notranslate"><span class="pre">python3</span> <span class="pre">manage.py</span> <span class="pre">dmp_startapp</span></code>, now type <code class="docutils literal notranslate"><span class="pre">python3</span> <span class="pre">manage.py</span> <span class="pre">dmp</span> <span class="pre">startapp</span></code>.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">5.2:</th><td class="field-body"><p class="first">I continued refactoring the webpack providers and workflow.  While doing this, I updated how DMP calculates the <code class="docutils literal notranslate"><span class="pre">version_id</span></code> on static files. It now uses the file modification time PLUS contents checksum.  This method is fast and automatic.</p>
+<p>If you are explicitly setting <code class="docutils literal notranslate"><span class="pre">version_id</span></code> in your call to links, as in <code class="docutils literal notranslate"><span class="pre">${</span> <span class="pre">django_mako_plus.links(self,</span> <span class="pre">version_id=...)</span> <span class="pre">}</span></code>, remove the <code class="docutils literal notranslate"><span class="pre">version_id</span></code> parameter.</p>
+<p>If you really need to set this, extend the <code class="docutils literal notranslate"><span class="pre">JsLinkProvider</span></code> and/or <code class="docutils literal notranslate"><span class="pre">CssLinkProvider</span></code> classes with your custom behavior.  It’s a very special-case need, so it made sense to automate this for the 99%.</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">5.1:</th><td class="field-body"><p class="first">I refactored the webpack providers and workflow, but I doubt anyone is using them yet.  If you happen to have jumped on this in the past three weeks that 5.0 was out, be sure to read the webpack page and change your settings appropriately.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">5.0:</th><td class="field-body"><ol class="first arabic simple">
+<li>The DMP options in settings.py has changed a little.  We recommend comparing your settings.py file against the current template (see file django_mako_plus/defaults.py on GitHub).</li>
+<li>The biggest change is the variables DMP attaches to the request have been moved to an object, available as <cite>request.dmp</cite>.  This causes less namespace pollution of the request and allows easier changes going forward.  The following are the old to new adjustments you may need.  We recommend moving from <cite>urlparams</cite> to automatic view parameter conversion, although this is likely a significant change (there are no plans to remove <cite>urlparams</cite>, so this isn’t required).</li>
+</ol>
+<table border="1" class="docutils">
+<colgroup>
+<col width="50%" />
+<col width="50%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Old</th>
+<th class="head">New (DMP 4.4)</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td><cite>request.dmp_router_app</cite></td>
+<td><cite>request.dmp.app</cite></td>
+</tr>
+<tr class="row-odd"><td><cite>request.dmp_router_page</cite></td>
+<td><cite>request.dmp.page</cite></td>
+</tr>
+<tr class="row-even"><td><cite>request.dmp_router_function</cite></td>
+<td><cite>request.dmp.function</cite></td>
+</tr>
+<tr class="row-odd"><td><cite>request.dmp_router_module</cite></td>
+<td><cite>request.dmp.module</cite></td>
+</tr>
+<tr class="row-even"><td><cite>request.dmp_router_class</cite></td>
+<td><cite>request.dmp.class_obj</cite></td>
+</tr>
+<tr class="row-odd"><td><cite>request._dmp_router_function</cite></td>
+<td><cite>request.dmp.function_obj</cite></td>
+</tr>
+<tr class="row-even"><td><cite>request.urlparams</cite></td>
+<td><cite>request.dmp.urlparams</cite></td>
+</tr>
+<tr class="row-odd"><td><cite>request.dmp_render</cite></td>
+<td><cite>request.dmp.render</cite></td>
+</tr>
+<tr class="row-even"><td><cite>request.dmp_render_to_string</cite></td>
+<td><cite>request.dmp.render_to_string</cite></td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<div><p><em>Important:</em> As noted in the table above, search your codebase for <code class="docutils literal notranslate"><span class="pre">request.dmp_render</span></code> and replace with <code class="docutils literal notranslate"><span class="pre">request.dmp.render</span></code>.</p>
+</div></blockquote>
+<ol class="arabic simple" start="3">
+<li>Static files (CSS/JS): MakoCssProvider, MakoJsProvider, link_css, link_js, link_template_css, link_template_js are removed.  Instad, use ${ django_mako_plus.links(self) } once in the &lt;head&gt; section of your base page.</li>
+<li>RedirectException: Optional parameters ‘permanent’ and ‘as_javascript’ are removed.  Use the subclasses by these names instead.</li>
+<li>SCSS Compiling: The entire sass.py file is removed, including functions check_template_scss, compile_scss_file, compile_scssm_file.  Instead, use the Sass compile provider.  See providers in the static files docs for more information.</li>
+<li>The named parameters in urls.py has changed.  You only need to adjust your urls.py if you have custom patterns.  For those doing it the normal way (including DMP’s urls.py), no change is necessary.</li>
+</ol>
+<table border="1" class="docutils">
+<colgroup>
+<col width="56%" />
+<col width="44%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Old</th>
+<th class="head">New (DMP 4.4)</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td><cite>dmp_router_app</cite></td>
+<td><cite>dmp_app</cite></td>
+</tr>
+<tr class="row-odd"><td><cite>dmp_router_page</cite></td>
+<td><cite>dmp_page</cite></td>
+</tr>
+<tr class="row-even"><td><cite>dmp_router_function</cite></td>
+<td><cite>dmp_function</cite></td>
+</tr>
+<tr class="row-odd"><td><cite>urlparams</cite></td>
+<td><cite>dmp_urlparams</cite></td>
+</tr>
+</tbody>
+</table>
+<ol class="arabic simple" start="7">
+<li>Rendering: render_to_string_shortcut_deprecated and render_to_response_shortcut_deprecated are removed, but this shouldn’t affect anyone because they are internal function.</li>
+</ol>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">4.3:</th><td class="field-body"><p class="first">tl;dr for existing projects:</p>
+<ol class="arabic simple">
+<li>Add <code class="docutils literal notranslate"><span class="pre">dmp-common.js</span></code> to your site’s base template (add above any DMP calls).</li>
+<li>Search for <code class="docutils literal notranslate"><span class="pre">django_mako_plus.link_css</span></code> and change to <code class="docutils literal notranslate"><span class="pre">django_mako_plus.links</span></code>.</li>
+<li>Search for <code class="docutils literal notranslate"><span class="pre">django_mako_plus.link_js</span></code> and simply remove.</li>
+<li>Search for <code class="docutils literal notranslate"><span class="pre">django_mako_plus.link_template_css</span></code> and change to <code class="docutils literal notranslate"><span class="pre">django_mako_plus.template_links</span></code>.</li>
+<li>Search for <code class="docutils literal notranslate"><span class="pre">django_mako_plus.link_template_js</span></code> and remove.</li>
+<li>(optional) Change deprecated <code class="docutils literal notranslate"><span class="pre">.cssm</span></code> files to <code class="docutils literal notranslate"><span class="pre">.css</span></code> and <code class="docutils literal notranslate"><span class="pre">.jsm</span></code> files to <code class="docutils literal notranslate"><span class="pre">.js</span></code>.  This one may take some work.  Be sure to read the docs on what needs to be done.</li>
+</ol>
+<p>We added provider classes, which creates a customizable system for linking static files.  Default settings for the providers will handle everything for you, but note that you can add <code class="docutils literal notranslate"><span class="pre">CONTENT_PROVIDERS</span></code> to your settings file to customize how links are created in templates.</p>
+<p>DMP now requires inclusion of <a class="reference external" href="https://github.com/doconix/django-mako-plus/tree/master/django_mako_plus/scripts">dmp-common.js</a> in your base template(s).  This is included in the base template of new projects, but existing projects need to link to the file.  See the installation guide for more info.</p>
+<p><code class="docutils literal notranslate"><span class="pre">link_css</span></code> and <code class="docutils literal notranslate"><span class="pre">link_js</span></code> functions are deprecated but still work for now.  Your base template should now have a single call to <code class="docutils literal notranslate"><span class="pre">django_mako_plus.links(self)</span></code> in the <code class="docutils literal notranslate"><span class="pre">&lt;head&gt;</span></code> section.  To switch over, simply replace <code class="docutils literal notranslate"><span class="pre">link_css</span></code> with <code class="docutils literal notranslate"><span class="pre">links</span></code> and delete the reference to <code class="docutils literal notranslate"><span class="pre">link_js</span></code>.  Both style and script links are returned by the new function because best practices no longer recommend placing scripts at the end of your page (async/defer in modern browsers make it unnecessary).</p>
+<p>In similar fashion, <code class="docutils literal notranslate"><span class="pre">link_template_css</span></code> and <code class="docutils literal notranslate"><span class="pre">link_template_js</span></code> is now one call to <code class="docutils literal notranslate"><span class="pre">template_links</span></code>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">*.cssm</span></code> files are deprecated but still work for now.  Few users seemed to use this.  If you are using them, move the dynamic parts to your templates and convert to a normal css file.</p>
+<p><code class="docutils literal notranslate"><span class="pre">*.jsm</span></code> files are deprecated but still work for now.  These were of great use to many, but <code class="docutils literal notranslate"><span class="pre">jscontext</span></code> gives a new, improved way to do “dynamic” JS.  Convert all <code class="docutils literal notranslate"><span class="pre">.jsm</span></code> files to regular <code class="docutils literal notranslate"><span class="pre">.js</span></code> files, and follow the pattern given in <a class="reference external" href="tutorial_css_js.html#javascript-in-context">the tutorial</a>.  The new method still allows you to easily send variables to your JS but doesn’t need any rendering.  You’ll need to convert code in your JS from <code class="docutils literal notranslate"><span class="pre">if</span> <span class="pre">(${</span> <span class="pre">somebool</span> <span class="pre">})</span></code> to <code class="docutils literal notranslate"><span class="pre">if</span> <span class="pre">(context.somebool)</span></code>.  Note that the Mako codes are gone, and the new code is pure JS that uses a context dictionary that exists in the JS namespace.</p>
+<p class="last">Compilation of Scss has been moved to a provider class, and a new provider for Less is now available.  In fact, the <code class="docutils literal notranslate"><span class="pre">CompileProvider</span></code> can compile any type of file (using the settings in <code class="docutils literal notranslate"><span class="pre">CONTENT_PROVIDERS</span></code>).  Check out the Transcrypt example in <a class="reference external" href="static.html">the topic on CSS and JS</a>.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="install.html" class="btn btn-neutral float-right" title="Installation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="compare.html" class="btn btn-neutral" title="Comparison with Django" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Conan C. Albrecht
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+    
+
+  
+
+  <script type="text/javascript" src="_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

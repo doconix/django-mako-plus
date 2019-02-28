@@ -1,0 +1,465 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>settings.py &mdash; Django-Mako-Plus  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/dmp.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Escaping Special Characters" href="topics_escaping.html" />
+    <link rel="prev" title="Basic Concepts" href="topics.html" /> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> Django-Mako-Plus
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="compare.html">Comparison with Django</a></li>
+<li class="toctree-l1"><a class="reference internal" href="upgrade_notes.html">Upgrade Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">FAQ</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="topics.html">Basic Concepts</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#"><code class="docutils literal notranslate"><span class="pre">settings.py</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#typical-settings">Typical Settings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#all-available-settings">All Available Settings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#default-app-default-page"><code class="docutils literal notranslate"><span class="pre">DEFAULT_APP</span></code>, <code class="docutils literal notranslate"><span class="pre">DEFAULT_PAGE</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#context-processors"><code class="docutils literal notranslate"><span class="pre">CONTEXT_PROCESSORS</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#templates-cache-dir"><code class="docutils literal notranslate"><span class="pre">TEMPLATES_CACHE_DIR</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#default-template-encoding"><code class="docutils literal notranslate"><span class="pre">DEFAULT_TEMPLATE_ENCODING</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#default-template-imports"><code class="docutils literal notranslate"><span class="pre">DEFAULT_TEMPLATE_IMPORTS</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#signals"><code class="docutils literal notranslate"><span class="pre">SIGNALS</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#content-providers"><code class="docutils literal notranslate"><span class="pre">CONTENT_PROVIDERS</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#webpack-providers"><code class="docutils literal notranslate"><span class="pre">WEBPACK_PROVIDERS</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#templates-dirs"><code class="docutils literal notranslate"><span class="pre">TEMPLATES_DIRS</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="topics_escaping.html">Escaping Special Characters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_variables.html">Metadata about the Request</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_modules.html">Python Imports in Templates</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_third_party.html">Using Third-Party Apps</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_paths.html">Inheritance Paths and Template Location</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_convenience.html">Convenience Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_redirecting.html">Redirecting the Browser</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_csrf.html">CSRF Tokens</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_class_views.html">Class-Based Views</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_django.html">Using the Django API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_responses.html">Lazy Rendering with <code class="docutils literal notranslate"><span class="pre">TemplateResponse</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_view_function.html">Customizing <code class="docutils literal notranslate"><span class="pre">&#64;view_function</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_partial_templates.html">Rendering Partial Templates for Ajax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_other_syntax.html">Combining Django and Mako Templates</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_signals.html">Signals in DMP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topics_translation.html">Internationalization</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="converters.html">Parameter Conversion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="static.html">Static Files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="deploy.html">Deployment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="editors.html">Editors</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Django-Mako-Plus</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="topics.html">Basic Concepts</a> &raquo;</li>
+        
+      <li><code class="docutils literal notranslate"><span class="pre">settings.py</span></code></li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="settings-py">
+<span id="topics-settings"></span><h1><code class="docutils literal notranslate"><span class="pre">settings.py</span></code><a class="headerlink" href="#settings-py" title="Permalink to this headline">¶</a></h1>
+<p>DMP is configurable with options in your <code class="docutils literal notranslate"><span class="pre">settings.py</span></code> file.</p>
+<div class="section" id="typical-settings">
+<h2>Typical Settings<a class="headerlink" href="#typical-settings" title="Permalink to this headline">¶</a></h2>
+<p>Normally, your settings file should contain the following:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">TEMPLATES</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">{</span>
+        <span class="s1">&#39;NAME&#39;</span><span class="p">:</span> <span class="s1">&#39;django_mako_plus&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;BACKEND&#39;</span><span class="p">:</span> <span class="s1">&#39;django_mako_plus.MakoTemplates&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;OPTIONS&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="p">},</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s1">&#39;NAME&#39;</span><span class="p">:</span> <span class="s1">&#39;django&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;BACKEND&#39;</span><span class="p">:</span> <span class="s1">&#39;django.template.backends.django.DjangoTemplates&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;DIRS&#39;</span><span class="p">:</span> <span class="p">[],</span>
+        <span class="s1">&#39;APP_DIRS&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s1">&#39;OPTIONS&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s1">&#39;context_processors&#39;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="s1">&#39;django.template.context_processors.debug&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;django.template.context_processors.request&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;django.contrib.auth.context_processors.auth&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;django.contrib.messages.context_processors.messages&#39;</span><span class="p">,</span>
+            <span class="p">],</span>
+        <span class="p">},</span>
+    <span class="p">},</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="all-available-settings">
+<h2>All Available Settings<a class="headerlink" href="#all-available-settings" title="Permalink to this headline">¶</a></h2>
+<p>The following are the full list of available options.  Each option is described in detail later in this document.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">shutil</span>
+
+<span class="c1"># this dict of options is merged with the current project&#39;s TEMPLATES entry for DMP</span>
+<span class="n">DEFAULT_OPTIONS</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="c1"># the default app and page to render in Mako when the url is too short</span>
+    <span class="c1"># if None (no default app), DMP will not capture short URLs</span>
+    <span class="s1">&#39;DEFAULT_APP&#39;</span><span class="p">:</span> <span class="s1">&#39;homepage&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;DEFAULT_PAGE&#39;</span><span class="p">:</span> <span class="s1">&#39;index&#39;</span><span class="p">,</span>
+
+    <span class="c1"># functions to automatically add variables to the params/context before templates are rendered</span>
+    <span class="s1">&#39;CONTEXT_PROCESSORS&#39;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="s1">&#39;django.template.context_processors.static&#39;</span><span class="p">,</span>            <span class="c1"># adds &quot;STATIC_URL&quot; from settings.py</span>
+        <span class="s1">&#39;django.template.context_processors.debug&#39;</span><span class="p">,</span>             <span class="c1"># adds debug and sql_queries</span>
+        <span class="s1">&#39;django.template.context_processors.request&#39;</span><span class="p">,</span>           <span class="c1"># adds &quot;request&quot; object</span>
+        <span class="s1">&#39;django.contrib.auth.context_processors.auth&#39;</span><span class="p">,</span>          <span class="c1"># adds &quot;user&quot; and &quot;perms&quot; objects</span>
+        <span class="s1">&#39;django.contrib.messages.context_processors.messages&#39;</span><span class="p">,</span>  <span class="c1"># adds messages from the messages framework</span>
+        <span class="s1">&#39;django_mako_plus.context_processors.settings&#39;</span><span class="p">,</span>         <span class="c1"># adds &quot;settings&quot; dictionary</span>
+    <span class="p">],</span>
+
+    <span class="c1"># identifies where the Mako template cache will be stored, relative to each template directory</span>
+    <span class="s1">&#39;TEMPLATES_CACHE_DIR&#39;</span><span class="p">:</span> <span class="s1">&#39;__dmpcache__&#39;</span><span class="p">,</span>
+
+    <span class="c1"># the default encoding of template files</span>
+    <span class="s1">&#39;DEFAULT_TEMPLATE_ENCODING&#39;</span><span class="p">:</span> <span class="s1">&#39;utf-8&#39;</span><span class="p">,</span>
+
+    <span class="c1"># imports for every template</span>
+    <span class="s1">&#39;DEFAULT_TEMPLATE_IMPORTS&#39;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="c1"># alternative syntax blocks within your Mako templates</span>
+        <span class="c1"># &#39;from django_mako_plus import django_syntax, jinja2_syntax, alternate_syntax&#39;,</span>
+
+        <span class="c1"># the next two lines are just examples of including common imports in templates</span>
+        <span class="c1"># &#39;from datetime import datetime&#39;,</span>
+        <span class="c1"># &#39;import os, os.path, re, json&#39;,</span>
+    <span class="p">],</span>
+
+    <span class="c1"># whether autoescaping of expressions is on or off</span>
+    <span class="s1">&#39;AUTOESCAPE&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+
+    <span class="c1"># the converter class to use for parameter conversion</span>
+    <span class="c1"># this should be ParameterConverter or a subclass of it</span>
+    <span class="s1">&#39;PARAMETER_CONVERTER&#39;</span><span class="p">:</span> <span class="s1">&#39;django_mako_plus.converter.ParameterConverter&#39;</span><span class="p">,</span>
+
+    <span class="c1"># whether to send the custom DMP signals -- set to False for a slight speed-up in router processing</span>
+    <span class="c1"># determines whether DMP will send its custom signals during the process</span>
+    <span class="s1">&#39;SIGNALS&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+
+    <span class="c1"># static file providers (see &quot;static file&quot; docs for full options here)</span>
+    <span class="s1">&#39;CONTENT_PROVIDERS&#39;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="c1"># adds JS context - this should normally be listed FIRST</span>
+        <span class="p">{</span> <span class="s1">&#39;provider&#39;</span><span class="p">:</span>   <span class="s1">&#39;django_mako_plus.JsContextProvider&#39;</span> <span class="p">},</span>
+
+        <span class="c1"># Sass compiler and link generator</span>
+        <span class="c1"># { &#39;provider&#39;:   &#39;django_mako_plus.CompileScssProvider&#39;,</span>
+        <span class="c1">#   &#39;sourcepath&#39;: lambda p: os.path.join(p.app_config.name, &#39;styles&#39;, p.template_relpath + &#39;.scss&#39;),</span>
+        <span class="c1">#   &#39;targetpath&#39;: lambda p: os.path.join(p.app_config.name, &#39;styles&#39;, p.template_relpath + &#39;.scss.css&#39;),</span>
+        <span class="c1">#   &#39;command&#39;:    lambda p: [ shutil.which(&#39;sass&#39;), f&#39;--load-path=&quot;{BASE_DIR}&quot;&#39;, p.sourcepath, p.targetpath ] },</span>
+        <span class="c1"># { &#39;provider&#39;:   &#39;django_mako_plus.CssLinkProvider&#39;,</span>
+        <span class="c1">#   &#39;filepath&#39;:   lambda p: os.path.join(p.app_config.name, &#39;styles&#39;, p.template_relpath + &#39;.scss.css&#39;) },</span>
+
+        <span class="c1"># Less compiler and link generator</span>
+        <span class="c1"># { &#39;provider&#39;:   &#39;django_mako_plus.CompileLessProvider&#39;,</span>
+        <span class="c1">#   &#39;sourcepath&#39;: lambda p: os.path.join(p.app_config.name, &#39;styles&#39;, p.template_relpath + &#39;.less&#39;),</span>
+        <span class="c1">#   &#39;targetpath&#39;: lambda p: os.path.join(p.app_config.name, &#39;styles&#39;, p.template_relpath + &#39;.less.css&#39;),</span>
+        <span class="c1">#   &#39;command&#39;:    lambda p: [ shutil.which(&#39;lessc&#39;), f&#39;--source-map&#39;, p.sourcepath, p.targetpath ] },</span>
+        <span class="c1"># { &#39;provider&#39;:   &#39;django_mako_plus.CssLinkProvider&#39;,</span>
+        <span class="c1">#   &#39;filepath&#39;:   lambda p: os.path.join(p.app_config.name, &#39;styles&#39;, p.template_relpath + &#39;.less.css&#39;) },</span>
+
+        <span class="c1"># generic compiler and link generator (see DMP docs, same options as other entries here)</span>
+        <span class="c1"># { &#39;provider&#39;:   &#39;django_mako_plus.CompileProvider&#39; },</span>
+        <span class="c1"># { &#39;provider&#39;:   &#39;django_mako_plus.LinkProvider&#39; },</span>
+
+        <span class="c1"># link generators for regular JS and CSS: app/scripts/*.js and app/styles/*.css</span>
+        <span class="p">{</span> <span class="s1">&#39;provider&#39;</span><span class="p">:</span>   <span class="s1">&#39;django_mako_plus.CssLinkProvider&#39;</span> <span class="p">},</span>
+        <span class="p">{</span> <span class="s1">&#39;provider&#39;</span><span class="p">:</span>   <span class="s1">&#39;django_mako_plus.JsLinkProvider&#39;</span> <span class="p">},</span>
+
+        <span class="c1"># link generators for app/scripts/__bundle__.js (webpack bundler)</span>
+        <span class="c1"># { &#39;provider&#39;:   &#39;django_mako_plus.WebpackJsLinkProvider&#39; },</span>
+    <span class="p">],</span>
+
+    <span class="c1"># webpack file discovery, used by `manage.py dmp_webpack` to generate __entry__.js files</span>
+    <span class="s1">&#39;WEBPACK_PROVIDERS&#39;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="c1"># finders for app/scripts/*.js and app/styles/*.css</span>
+        <span class="p">{</span> <span class="s1">&#39;provider&#39;</span><span class="p">:</span> <span class="s1">&#39;django_mako_plus.JsLinkProvider&#39;</span> <span class="p">},</span>
+        <span class="p">{</span> <span class="s1">&#39;provider&#39;</span><span class="p">:</span> <span class="s1">&#39;django_mako_plus.CssLinkProvider&#39;</span> <span class="p">},</span>
+    <span class="p">],</span>
+
+    <span class="c1"># additional template dirs to search</span>
+    <span class="s1">&#39;TEMPLATES_DIRS&#39;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="c1"># &#39;/var/somewhere/templates/&#39;,</span>
+    <span class="p">],</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="default-app-default-page">
+<h2><code class="docutils literal notranslate"><span class="pre">DEFAULT_APP</span></code>, <code class="docutils literal notranslate"><span class="pre">DEFAULT_PAGE</span></code><a class="headerlink" href="#default-app-default-page" title="Permalink to this headline">¶</a></h2>
+<p>When the url doesn’t contain the app and/or page, such as <code class="docutils literal notranslate"><span class="pre">http://www.yourserver.com/</span></code>, DMP uses the default app and page specified in your  settings.py variables: <code class="docutils literal notranslate"><span class="pre">DEFAULT_APP</span></code> and <code class="docutils literal notranslate"><span class="pre">DEFAULT_PAGE</span></code>.</p>
+<p>In the following table, the default app is set to <code class="docutils literal notranslate"><span class="pre">homepage</span></code> and your default page is set to <code class="docutils literal notranslate"><span class="pre">index.html</span></code>:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="40%" />
+<col width="13%" />
+<col width="17%" />
+<col width="30%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>URL</td>
+<td>App</td>
+<td>Page</td>
+<td>Notes</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">http://www.yourserver.com/</span></code></td>
+<td><code class="docutils literal notranslate"><span class="pre">homepage</span></code></td>
+<td><code class="docutils literal notranslate"><span class="pre">index.html</span></code></td>
+<td>&#160;</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">http://www.yourserver.com/account/</span></code></td>
+<td><code class="docutils literal notranslate"><span class="pre">account</span></code></td>
+<td><code class="docutils literal notranslate"><span class="pre">index.html</span></code></td>
+<td>&#160;</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">http://www.yourserver.com/login/</span></code></td>
+<td><code class="docutils literal notranslate"><span class="pre">login</span></code></td>
+<td><code class="docutils literal notranslate"><span class="pre">index.html</span></code></td>
+<td>If <code class="docutils literal notranslate"><span class="pre">login</span></code> <strong>is</strong> one of your apps</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">http://www.yourserver.com/login/</span></code></td>
+<td><code class="docutils literal notranslate"><span class="pre">homepage</span></code></td>
+<td><code class="docutils literal notranslate"><span class="pre">login.html</span></code></td>
+<td>If <code class="docutils literal notranslate"><span class="pre">login</span></code> <strong>is not</strong> one of your apps</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">http://www.yourserver.com/account/password/</span></code></td>
+<td><code class="docutils literal notranslate"><span class="pre">account</span></code></td>
+<td><code class="docutils literal notranslate"><span class="pre">password.html</span></code></td>
+<td>&#160;</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="context-processors">
+<h2><code class="docutils literal notranslate"><span class="pre">CONTEXT_PROCESSORS</span></code><a class="headerlink" href="#context-processors" title="Permalink to this headline">¶</a></h2>
+<p>The context is the dictionary of variables sent into <code class="docutils literal notranslate"><span class="pre">render()</span></code>.  When the context is created, it is run through several “processors” to add names like <code class="docutils literal notranslate"><span class="pre">STATIC_URL</span></code>, <code class="docutils literal notranslate"><span class="pre">request</span></code>, etc.</p>
+<p>Read more about context processors in Django’s <a class="reference external" href="https://docs.djangoproject.com/en/dev/ref/templates/api/#playing-with-context-objects">Template API documentation</a>.</p>
+</div>
+<div class="section" id="templates-cache-dir">
+<h2><code class="docutils literal notranslate"><span class="pre">TEMPLATES_CACHE_DIR</span></code><a class="headerlink" href="#templates-cache-dir" title="Permalink to this headline">¶</a></h2>
+<p>When a template is first rendered, the Mako engine generates a regular Python file out of it.  It is this generated Python file that actually runs to create your HTML.</p>
+<p>This option sets the directory where these cached, generated files are located.  It is relative to the <code class="docutils literal notranslate"><span class="pre">app/templates</span></code> directory of each app.</p>
+</div>
+<div class="section" id="default-template-encoding">
+<h2><code class="docutils literal notranslate"><span class="pre">DEFAULT_TEMPLATE_ENCODING</span></code><a class="headerlink" href="#default-template-encoding" title="Permalink to this headline">¶</a></h2>
+<p>DMP and the Mako engine will read your templates using this encoding.  Those who are coding their files with something other than <code class="docutils literal notranslate"><span class="pre">utf-8</span></code> should understand when and why it might need to be changed.</p>
+<p>If you change this setting, be sure to run <code class="docutils literal notranslate"><span class="pre">python3</span> <span class="pre">manage.py</span> <span class="pre">dmp_cleanup</span></code> so your cached templates get rebuilt.</p>
+</div>
+<div class="section" id="default-template-imports">
+<h2><code class="docutils literal notranslate"><span class="pre">DEFAULT_TEMPLATE_IMPORTS</span></code><a class="headerlink" href="#default-template-imports" title="Permalink to this headline">¶</a></h2>
+<p>Python’s standard libraries must be imported to be used within template code.  For example, to use the random module in a template, you’d place something like this at the top:</p>
+<dl class="docutils">
+<dt>::</dt>
+<dd><p class="first">&lt;%! import random %&gt;</p>
+<p class="last">A random number is ${ random.randint(1, 100) }.</p>
+</dd>
+</dl>
+<p>To automatically import the <code class="docutils literal notranslate"><span class="pre">random</span></code> module or any other Python module (including those from your project or installed via pip), add them in the <code class="docutils literal notranslate"><span class="pre">DEFAULT_TEMPLATE_IMPORTS</span></code> list.  When Mako renders your templates, it will include the imports automatically so you don’t have repeat yourself in every template.</p>
+<p>If you change this setting, be sure to run <code class="docutils literal notranslate"><span class="pre">python3</span> <span class="pre">manage.py</span> <span class="pre">dmp_cleanup</span></code> so your cached templates get rebuilt.</p>
+</div>
+<div class="section" id="signals">
+<h2><code class="docutils literal notranslate"><span class="pre">SIGNALS</span></code><a class="headerlink" href="#signals" title="Permalink to this headline">¶</a></h2>
+<p>This option sets whether DMP should trigger Django-style signals.  See <a class="reference external" href="topics_signals.html">Signals</a> for more information.</p>
+</div>
+<div class="section" id="content-providers">
+<h2><code class="docutils literal notranslate"><span class="pre">CONTENT_PROVIDERS</span></code><a class="headerlink" href="#content-providers" title="Permalink to this headline">¶</a></h2>
+<p>This is one of the primary functions of DMP.  It sets up autodiscovery of your static files, such as JS and CSS.  See <a class="reference external" href="static.html">Static Files</a> for more information on these options.</p>
+</div>
+<div class="section" id="webpack-providers">
+<h2><code class="docutils literal notranslate"><span class="pre">WEBPACK_PROVIDERS</span></code><a class="headerlink" href="#webpack-providers" title="Permalink to this headline">¶</a></h2>
+<p>This option works in connection with <code class="docutils literal notranslate"><span class="pre">python3</span> <span class="pre">manage.py</span> <span class="pre">dmp_webpack</span></code>.  See <a class="reference external" href="static_webpack.html">Bundling</a> for more information.</p>
+</div>
+<div class="section" id="templates-dirs">
+<h2><code class="docutils literal notranslate"><span class="pre">TEMPLATES_DIRS</span></code><a class="headerlink" href="#templates-dirs" title="Permalink to this headline">¶</a></h2>
+<p>In contrast with Django, DMP templates are closely connected to their apps.  If you need to search for templates in additional locations (a.k.a. the Django way), add folder paths to this list.  Django will search <code class="docutils literal notranslate"><span class="pre">someapp/templates/</span></code> first and then fall back to any directories you list here.</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="topics_escaping.html" class="btn btn-neutral float-right" title="Escaping Special Characters" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="topics.html" class="btn btn-neutral" title="Basic Concepts" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Conan C. Albrecht
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+    
+
+  
+
+  <script type="text/javascript" src="_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,631 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Webpack &mdash; Django-Mako-Plus  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/sphinx_tabs/tabs.css" type="text/css" />
+  <link rel="stylesheet" href="_static/sphinx_tabs/semantic-ui-2.2.10/segment.min.css" type="text/css" />
+  <link rel="stylesheet" href="_static/sphinx_tabs/semantic-ui-2.2.10/menu.min.css" type="text/css" />
+  <link rel="stylesheet" href="_static/sphinx_tabs/semantic-ui-2.2.10/tab.min.css" type="text/css" />
+  <link rel="stylesheet" href="_static/dmp.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="FAQ" href="static_faq.html" />
+    <link rel="prev" title="Sass, Less, &amp; More" href="static_compilers.html" /> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> Django-Mako-Plus
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="compare.html">Comparison with Django</a></li>
+<li class="toctree-l1"><a class="reference internal" href="upgrade_notes.html">Upgrade Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="topics.html">Basic Concepts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="converters.html">Parameter Conversion</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="static.html">Static Files</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="static_overview.html">Static Files Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="static_links.html">CSS and JS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="static_compilers.html">Sass, Less, &amp; More</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Webpack</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#creating-bundles">Creating Bundles</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tutorial">Tutorial</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#create-a-dmp-project">Create a DMP project</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#initialize-node">Initialize Node</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#create-the-entry-file">Create the Entry File</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#configure-and-run-webpack">Configure and Run Webpack</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#living-in-two-terminals">Living in Two Terminals</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#bundle-links-in-templates">Bundle Links in Templates</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#test-it">Test It!</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#building-for-production">Building for Production</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#further-questions">Further Questions?</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="static_faq.html">FAQ</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="deploy.html">Deployment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="editors.html">Editors</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Django-Mako-Plus</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="static.html">Static Files</a> &raquo;</li>
+        
+      <li>Webpack</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="webpack">
+<span id="static-webpack"></span><h1>Webpack<a class="headerlink" href="#webpack" title="Permalink to this headline">¶</a></h1>
+<p>As you know, DMP automatically creates links for your static files.  When you render <code class="docutils literal notranslate"><span class="pre">app/templates/mypage.html</span></code>, DMP creates a script tag for <code class="docutils literal notranslate"><span class="pre">app/scripts/mypage.js</span></code> and a style tag for <code class="docutils literal notranslate"><span class="pre">app/styles/mypage.css</span></code>.  This is the default configuration.</p>
+<p>Today’s production sites generally bundle scripts, styles, and other static assets into combined, optimized files that improve speed and enable better browser caching.  DMP comes with support for bundling with <a class="reference external" href="https://webpack.js.org/">Webpack</a>.</p>
+<p>These bundles can be created in at least two ways:</p>
+<ol class="arabic simple">
+<li>A bundle for each app.  If you have four DMP apps, you’ll have four bundles.  This approach is described below.</li>
+<li>A single bundle for your entire site.  If you have four DMP apps, you’ll have one bundle.  This approach is described near the end of this document.</li>
+</ol>
+<div class="section" id="creating-bundles">
+<h2>Creating Bundles<a class="headerlink" href="#creating-bundles" title="Permalink to this headline">¶</a></h2>
+<p>Lots of different Javascript files exist in a project.  Some are project-wide, such as <code class="docutils literal notranslate"><span class="pre">jQuery</span></code>.  Some are full apps, such as <code class="docutils literal notranslate"><span class="pre">React</span></code> or <code class="docutils literal notranslate"><span class="pre">Vue</span></code> apps.  These generally get bundled in their own ways and don’t need DMP’s involvement.</p>
+<p>DMP-style scripts are coupled with their templates.  They aren’t generally self-contained “apps” but add behavior to their templates (although they might start React apps or other components).  When <code class="docutils literal notranslate"><span class="pre">mypage.html</span></code> displays, we need <code class="docutils literal notranslate"><span class="pre">mypage.js</span></code> to run.</p>
+<p>Herein lies the issue that this provider solves: if we bundle several of these scripts together–such as all the scripts in an app–loading the bundle into a page will run not only <code class="docutils literal notranslate"><span class="pre">mypage.js</span></code>, but also <code class="docutils literal notranslate"><span class="pre">otherpage.js</span></code> and <code class="docutils literal notranslate"><span class="pre">otherpage2.js</span></code>.  Since the bundle contains scripts for many pages, we need to selectively run a small part of the bundle.</p>
+<p>This provider wraps each script inside a function inside the larger bundle.  Since the bundle is a map of template names to functions, the page scripts load but don’t run. DMP manually triggers the right ones for the current template.</p>
+<img alt="_images/webpack.png" class="align-center" src="_images/webpack.png" />
+</div>
+<div class="section" id="tutorial">
+<h2>Tutorial<a class="headerlink" href="#tutorial" title="Permalink to this headline">¶</a></h2>
+<p>Let’s create a “normal” Django/DMP project and then convert it to a “bundle-endabled” Django/DMP project.</p>
+<blockquote>
+<div>A note before continuing: JS bundling can be difficult for Python developers at first because it’s based in fundamentally different thinking than the Python world is. Python compiles .py files to .pyc, but otherwise keeps the source structure at runtime. Bundling requires setting up npm, <code class="docutils literal notranslate"><span class="pre">node_modules</span></code>, and multiple config files. As of 2018, Javascript’s import landscape is a battleground of similar-looking but quite different standards and libraries: &lt;script src=&gt;, jQuery plugins, CommonJS,AMD, RequireJS, npm, yarn, ES6 import standards, and dynamic imports. For Python devs who are used to a benevolent dictator solving divisive issues (like Guido did with the <code class="docutils literal notranslate"><span class="pre">m</span> <span class="pre">if</span> <span class="pre">x</span> <span class="pre">else</span> <span class="pre">n</span></code> debate), the chaotic and evolving JS ecosystem can be overwhelming. If you are new to bundling, take the time to read the documentation on <code class="docutils literal notranslate"><span class="pre">npm</span></code> and <code class="docutils literal notranslate"><span class="pre">webpack</span></code> and create a small Node JS web site.</div></blockquote>
+<div class="section" id="create-a-dmp-project">
+<h3>Create a DMP project<a class="headerlink" href="#create-a-dmp-project" title="Permalink to this headline">¶</a></h3>
+<p>The installation steps for DMP are given elsewhere in these documents, so <a class="reference external" href="/install_new.html">take a detour if you need detailed instructions</a>. Here’s a review for those need a quick summary:</p>
+<div class="sphinx-tabs docutils container">
+<div class="ui top attached tabular menu sphinx-menu docutils container">
+<div class="active item sphinx-data-tab-TGludXgvTWFj docutils container">
+<div class="docutils container">
+Linux/Mac</div>
+</div>
+<div class="item sphinx-data-tab-V2luZG93cw== docutils container">
+<div class="docutils container">
+Windows</div>
+</div>
+</div>
+<div class="ui bottom attached sphinx-tab tab segment sphinx-data-tab-TGludXgvTWFj active docutils container">
+<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip3</span> <span class="n">install</span> <span class="o">--</span><span class="n">upgrade</span> <span class="n">django</span><span class="o">-</span><span class="n">mako</span><span class="o">-</span><span class="n">plus</span>
+<span class="n">python3</span> <span class="o">-</span><span class="n">m</span> <span class="n">django_mako_plus</span> <span class="n">dmp_startproject</span> <span class="n">mysite</span>
+<span class="n">cd</span> <span class="n">mysite</span>
+<span class="n">python3</span> <span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">migrate</span>
+<span class="n">python3</span> <span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">createsuperuser</span>
+<span class="n">python3</span> <span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">dmp_startapp</span> <span class="n">homepage</span>
+<span class="c1"># Finally, open settings.py and add &quot;homepage&quot; to your INSTALLED_APPS</span>
+</pre></div>
+</div>
+</div>
+<div class="ui bottom attached sphinx-tab tab segment sphinx-data-tab-V2luZG93cw== docutils container">
+<div class="code powershell highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="o">--</span><span class="n">upgrade</span> <span class="n">django</span><span class="o">-</span><span class="n">mako</span><span class="o">-</span><span class="n">plus</span>
+<span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">django_mako_plus</span> <span class="n">dmp_startproject</span> <span class="n">mysite</span>
+<span class="n">cd</span> <span class="n">mysite</span>
+<span class="n">python</span> <span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">migrate</span>
+<span class="n">python</span> <span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">createsuperuser</span>
+<span class="n">python</span> <span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">dmp_startapp</span> <span class="n">homepage</span>
+<span class="c1"># Finally, open settings.py and add &quot;homepage&quot; to your INSTALLED_APPS</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Run your project, and ensure the “Welcome to DMP” page comes up. If not, head over to the DMP installation pages for ideas.</p>
+<p>Note that your new project already contains <code class="docutils literal notranslate"><span class="pre">homepage/scripts/index.js</span></code>. The tutorial showed how this anonymous, self-invoking function was called. In webpack, however, we do things a little differently. Modify the <code class="docutils literal notranslate"><span class="pre">index.js</span></code> file to export a default function:</p>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="c1">// homepage/scripts/index.js</span>
+<span class="kr">export</span> <span class="k">default</span> <span class="kd">function</span><span class="p">(</span><span class="nx">context</span><span class="p">)</span> <span class="p">{</span>
+    <span class="c1">// utc_epoch comes from index.py</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;Current epoch in UTC is &#39;</span> <span class="o">+</span> <span class="nx">context</span><span class="p">.</span><span class="nx">utc_epoch</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Let’s also add <code class="docutils literal notranslate"><span class="pre">base.js</span></code> to see inheritance working:</p>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="c1">// homepage/scripts/base.js:</span>
+<span class="kr">export</span> <span class="k">default</span> <span class="kd">function</span><span class="p">(</span><span class="nx">context</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;In base.js!&#39;</span><span class="p">)</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>You should now have two JS files: <code class="docutils literal notranslate"><span class="pre">index.js</span></code> and <code class="docutils literal notranslate"><span class="pre">base.js</span></code>. Since template <code class="docutils literal notranslate"><span class="pre">index.html</span></code> inherits from template <code class="docutils literal notranslate"><span class="pre">base.html</span></code>, both JS files should run when we view <code class="docutils literal notranslate"><span class="pre">index.html</span></code>.</p>
+</div>
+<div class="section" id="initialize-node">
+<h3>Initialize Node<a class="headerlink" href="#initialize-node" title="Permalink to this headline">¶</a></h3>
+<p>Install Node from <a class="reference external" href="https://nodejs.org/">https://nodejs.org</a>. After installation, open a terminal and ensure you can run <code class="docutils literal notranslate"><span class="pre">npm</span></code> from the command line.</p>
+<div class="sphinx-tabs docutils container">
+<div class="ui top attached tabular menu sphinx-menu docutils container">
+<div class="active item sphinx-data-tab-TGludXgvTWFj docutils container">
+<div class="docutils container">
+Linux/Mac</div>
+</div>
+<div class="item sphinx-data-tab-V2luZG93cw== docutils container">
+<div class="docutils container">
+Windows</div>
+</div>
+</div>
+<div class="ui bottom attached sphinx-tab tab segment sphinx-data-tab-TGludXgvTWFj active docutils container">
+<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">npm</span> <span class="o">--</span><span class="n">version</span>
+</pre></div>
+</div>
+</div>
+<div class="ui bottom attached sphinx-tab tab segment sphinx-data-tab-V2luZG93cw== docutils container">
+<div class="code powershell highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">npm</span> <span class="o">--</span><span class="n">version</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Initialize the npm repository and install webpack. When asked, just accept the defaults for package name, version, etc.</p>
+<div class="sphinx-tabs docutils container">
+<div class="ui top attached tabular menu sphinx-menu docutils container">
+<div class="active item sphinx-data-tab-TGludXgvTWFj docutils container">
+<div class="docutils container">
+Linux/Mac</div>
+</div>
+<div class="item sphinx-data-tab-V2luZG93cw== docutils container">
+<div class="docutils container">
+Windows</div>
+</div>
+</div>
+<div class="ui bottom attached sphinx-tab tab segment sphinx-data-tab-TGludXgvTWFj active docutils container">
+<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="n">mysite</span><span class="o">/</span>
+<span class="n">npm</span> <span class="n">init</span>
+<span class="n">npm</span> <span class="n">install</span> <span class="o">--</span><span class="n">save</span><span class="o">-</span><span class="n">dev</span> <span class="n">webpack</span> <span class="n">webpack</span><span class="o">-</span><span class="n">cli</span> <span class="n">style</span><span class="o">-</span><span class="n">loader</span> <span class="n">css</span><span class="o">-</span><span class="n">loader</span> <span class="n">glob</span>
+<span class="c1"># if using git, add &quot;node_modules/&quot; and &quot;.cache&quot; to your .gitignore file</span>
+</pre></div>
+</div>
+</div>
+<div class="ui bottom attached sphinx-tab tab segment sphinx-data-tab-V2luZG93cw== docutils container">
+<div class="code powershell highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="n">mysite</span><span class="o">/</span>
+<span class="n">npm</span> <span class="n">init</span>
+<span class="n">npm</span> <span class="n">install</span> <span class="o">--</span><span class="n">save</span><span class="o">-</span><span class="n">dev</span> <span class="n">webpack</span> <span class="n">webpack</span><span class="o">-</span><span class="n">cli</span> <span class="n">style</span><span class="o">-</span><span class="n">loader</span> <span class="n">css</span><span class="o">-</span><span class="n">loader</span> <span class="n">glob</span>
+<span class="c1"># if using git, add &quot;node_modules/&quot; and &quot;.cache&quot; to your .gitignore file</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>The above commands changed your project a little:</p>
+<ol class="arabic simple">
+<li>The <code class="docutils literal notranslate"><span class="pre">node_modules</span></code> directory exists in your project root and contains dozens of Javascript packages, including core Node packages and webpack-related dependencies. This directory is the Javascript equivalent to <code class="docutils literal notranslate"><span class="pre">pip3</span></code>, a virtual environment, and python site-packages. This directory can be recreated anytime by running <code class="docutils literal notranslate"><span class="pre">npm</span> <span class="pre">install</span></code>.</li>
+<li>The <code class="docutils literal notranslate"><span class="pre">package.json</span></code> file in your project root contains a list of npm package dependencies. If you open the file, you’ll notice that <code class="docutils literal notranslate"><span class="pre">webpack</span></code> is listed as a development dependency (it isn’t needed at production, so it’s in “devDependencies”).</li>
+</ol>
+<p>Let’s create some shortcut comands to make running webpack easier. These are defined in <code class="docutils literal notranslate"><span class="pre">package.json</span></code> under the <code class="docutils literal notranslate"><span class="pre">scripts</span></code> key, like this:</p>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="p">...,</span>
+    <span class="s2">&quot;scripts&quot;</span><span class="o">:</span> <span class="p">{</span>
+        <span class="s2">&quot;watch&quot;</span><span class="o">:</span> <span class="s2">&quot;webpack --mode development --watch&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;build&quot;</span><span class="o">:</span> <span class="s2">&quot;webpack --mode production&quot;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>The above two scripts can be run with <code class="docutils literal notranslate"><span class="pre">npm</span> <span class="pre">run</span> <span class="pre">watch</span></code> and <code class="docutils literal notranslate"><span class="pre">npm</span> <span class="pre">run</span> <span class="pre">build</span></code>, but we’re not quite ready to run them yet. So hold up, Tex.</p>
+</div>
+<div class="section" id="create-the-entry-file">
+<h3>Create the Entry File<a class="headerlink" href="#create-the-entry-file" title="Permalink to this headline">¶</a></h3>
+<p>Webpack requires one or more “entry” files as starting points for its bundles. In Node applications and single-page webapps, a “main” JS file runs everything. Multi-page, Django-style web sites are different: each page is essentially an “app” that requires a new bundle.</p>
+<p>That means our Django/DMP projects have <strong>lots of entry points</strong>: the login page, password change page, user information page, and so forth. We don’t really have an “entry” page to point webpack at.</p>
+<p>That’s where DMP comes in. DMP understands your project structure, including how <code class="docutils literal notranslate"><span class="pre">templates</span></code>, <code class="docutils literal notranslate"><span class="pre">scripts</span></code>, and <code class="docutils literal notranslate"><span class="pre">styles</span></code> directories are connected. DMP will create <code class="docutils literal notranslate"><span class="pre">homepage/scripts/__entry__.js</span></code> as the “entry” file for our <code class="docutils literal notranslate"><span class="pre">homepage</span></code> app.</p>
+<p>Run the following to create the <code class="docutils literal notranslate"><span class="pre">__entry__.js</span></code> file:</p>
+<div class="sphinx-tabs docutils container">
+<div class="ui top attached tabular menu sphinx-menu docutils container">
+<div class="active item sphinx-data-tab-TGludXgvTWFj docutils container">
+<div class="docutils container">
+Linux/Mac</div>
+</div>
+<div class="item sphinx-data-tab-V2luZG93cw== docutils container">
+<div class="docutils container">
+Windows</div>
+</div>
+</div>
+<div class="ui bottom attached sphinx-tab tab segment sphinx-data-tab-TGludXgvTWFj active docutils container">
+<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python3</span> <span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">dmp_webpack</span> <span class="o">--</span><span class="n">overwrite</span>
+</pre></div>
+</div>
+</div>
+<div class="ui bottom attached sphinx-tab tab segment sphinx-data-tab-V2luZG93cw== docutils container">
+<div class="code powershell highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">dmp_webpack</span> <span class="o">--</span><span class="n">overwrite</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>When the command finishes, you’ll have a new file, <code class="docutils literal notranslate"><span class="pre">homepage/scripts/__entry__.js</span></code>, that points to the scripts and styles in the app. Check out the file to see what DMP created.</p>
+<p>Now that you’ve seen the result, let’s rewind and detail the discovery process:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li>DMP deep searches the templates directory <code class="docutils literal notranslate"><span class="pre">homepage/templates/</span></code> for all files (except those starting with double-underscores, like <code class="docutils literal notranslate"><span class="pre">__dmpcache__</span></code>. DMP finds three files:</li>
+</ol>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>homepage/templates/base_ajax.htm
+homepage/templates/base.htm
+homepage/templates/index.html
+</pre></div>
+</div>
+<ol class="arabic simple" start="2">
+<li>DMP loads each file as a template object (as if it were about to be rendered) and runs its <a class="reference external" href="/static_providers.html">Providers</a>, <code class="docutils literal notranslate"><span class="pre">CssLinkProvider</span></code> and <code class="docutils literal notranslate"><span class="pre">JsLinkProvider</span></code>.  These two providers are the defaults, but you can <a class="reference external" href="/basics_settings.html">customize them in settings.py</a> (see <code class="docutils literal notranslate"><span class="pre">WEBPACK_PROVIDERS</span></code>).</li>
+</ol>
+<p>Since providers are built to discover the script and style files that are associated with templates, DMP uses them to find the files needed for our bundle:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>homepage/templates/base_ajax.htm    <span class="c1"># has no scripts or styles, so DMP skips it</span>
+homepage/templates/base.htm         <span class="c1"># DMP finds base.js and base.css</span>
+homepage/templates/index.html       <span class="c1"># DMP finds index.js and index.css</span>
+</pre></div>
+</div>
+<p>The providers yield four files, shown here as a list relative to the scripts directory:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">[</span> <span class="s2">&quot;./base.js&quot;</span><span class="p">,</span> <span class="s2">&quot;../styles/base.css&quot;</span><span class="p">,</span> <span class="s2">&quot;./index.js&quot;</span><span class="p">,</span> <span class="s2">&quot;../styles/index.css&quot;</span> <span class="p">]</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="3">
+<li>DMP creates <code class="docutils literal notranslate"><span class="pre">homepage/scripts/__entry__.js</span></code>, which it will use later as Webpack’s entry point. This file contains a number of ES6 dynamic import statements surrounded by function closures:</li>
+</ol>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="nx">DMP_CONTEXT</span><span class="p">.</span><span class="nx">loadBundle</span><span class="p">({</span>
+    <span class="s2">&quot;homepage/index&quot;</span><span class="o">:</span> <span class="p">()</span> <span class="p">=&gt;</span> <span class="p">[</span>
+        <span class="kr">import</span><span class="p">(</span><span class="cm">/* webpackMode: &quot;eager&quot; */</span> <span class="s2">&quot;./index.js&quot;</span><span class="p">),</span>
+        <span class="kr">import</span><span class="p">(</span><span class="cm">/* webpackMode: &quot;eager&quot; */</span> <span class="s2">&quot;./../styles/index.scss&quot;</span><span class="p">),</span>
+    <span class="p">],</span>
+    <span class="s2">&quot;homepage/base&quot;</span><span class="o">:</span> <span class="p">()</span> <span class="p">=&gt;</span> <span class="p">[</span>
+        <span class="kr">import</span><span class="p">(</span><span class="cm">/* webpackMode: &quot;eager&quot; */</span> <span class="s2">&quot;./base.js&quot;</span><span class="p">),</span>
+        <span class="kr">import</span><span class="p">(</span><span class="cm">/* webpackMode: &quot;eager&quot; */</span> <span class="s2">&quot;./../styles/base.scss&quot;</span><span class="p">),</span>
+    <span class="p">],</span>
+<span class="p">})</span>
+</pre></div>
+</div>
+<p>The “eager” hint tells webpack to keep these imports in the parent bundle.</p>
+</div></blockquote>
+</div>
+<div class="section" id="configure-and-run-webpack">
+<h3>Configure and Run Webpack<a class="headerlink" href="#configure-and-run-webpack" title="Permalink to this headline">¶</a></h3>
+<p>We need to tell webpack to start with our entry file. Create a file in your project root called <code class="docutils literal notranslate"><span class="pre">webpack.config.js</span></code>:</p>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="kr">const</span> <span class="nx">path</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;path&#39;</span><span class="p">);</span>
+<span class="kr">const</span> <span class="nx">glob</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;glob&#39;</span><span class="p">);</span>
+
+<span class="c1">// map the entry files: { app: entry file, ... }</span>
+<span class="kr">const</span> <span class="nx">entries</span> <span class="o">=</span> <span class="nx">glob</span><span class="p">.</span><span class="nx">sync</span><span class="p">(</span><span class="s2">&quot;./*/scripts/__entry__.js&quot;</span><span class="p">).</span><span class="nx">reduce</span><span class="p">((</span><span class="nx">acc</span><span class="p">,</span> <span class="nx">fp</span><span class="p">)</span> <span class="p">=&gt;</span> <span class="p">{</span>
+    <span class="nx">acc</span><span class="p">[</span><span class="nx">fp</span><span class="p">.</span><span class="nx">split</span><span class="p">(</span><span class="nx">path</span><span class="p">.</span><span class="nx">sep</span><span class="p">)[</span><span class="mi">1</span><span class="p">]]</span> <span class="o">=</span> <span class="nx">fp</span><span class="p">;</span>
+    <span class="k">return</span> <span class="nx">acc</span><span class="p">;</span>
+<span class="p">},</span> <span class="p">{});</span>
+
+<span class="c1">// print our findings (just for this tutorial)</span>
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">entries</span><span class="p">);</span>
+
+<span class="c1">// webpack config</span>
+<span class="nx">module</span><span class="p">.</span><span class="nx">exports</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="nx">entry</span><span class="o">:</span> <span class="nx">entries</span><span class="p">,</span>
+    <span class="nx">output</span><span class="o">:</span> <span class="p">{</span>
+        <span class="nx">path</span><span class="o">:</span> <span class="nx">path</span><span class="p">.</span><span class="nx">resolve</span><span class="p">(</span><span class="nx">__dirname</span><span class="p">),</span>
+        <span class="nx">filename</span><span class="o">:</span> <span class="s1">&#39;[name]/scripts/__bundle__.js&#39;</span>
+    <span class="p">},</span>
+    <span class="nx">module</span><span class="o">:</span> <span class="p">{</span>
+        <span class="nx">rules</span><span class="o">:</span> <span class="p">[{</span>
+            <span class="nx">test</span><span class="o">:</span> <span class="sr">/\.css$/</span><span class="p">,</span>
+            <span class="nx">use</span><span class="o">:</span> <span class="p">[</span>
+                <span class="p">{</span> <span class="nx">loader</span><span class="o">:</span> <span class="s1">&#39;style-loader&#39;</span> <span class="p">},</span>
+                <span class="p">{</span> <span class="nx">loader</span><span class="o">:</span> <span class="s1">&#39;css-loader&#39;</span> <span class="p">}</span>
+            <span class="p">]</span>
+        <span class="p">}]</span>
+    <span class="p">}</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+<p>Thanks to the magic of globs, the above config finds all entry files in your project.</p>
+<blockquote>
+<div>You can set the destination to be anywhere you want (such as a <code class="docutils literal notranslate"><span class="pre">dist/</span></code> folder), but it’s just fine to put them right in your <code class="docutils literal notranslate"><span class="pre">app/scripts/</span></code> folder.  DMP only puts <strong>template-related</strong> scripts into <code class="docutils literal notranslate"><span class="pre">__entry__.js</span></code>, so you won’t get infinite bundling recursion by putting the bundle in the same directory. If you decide to change the location, be sure to modify the <a class="reference external" href="/basics_settings.html">provider filepath settings</a> to match.</div></blockquote>
+<p>Let’s run webpack in development (watch) mode. After creating our initial bundle, webpack continues watching the linked files for changes. Whenever we change the entry file, script files, or style files, webpack recreates the bundle automatically. Run the following:</p>
+<div class="sphinx-tabs docutils container">
+<div class="ui top attached tabular menu sphinx-menu docutils container">
+<div class="active item sphinx-data-tab-TGludXgvTWFj docutils container">
+<div class="docutils container">
+Linux/Mac</div>
+</div>
+<div class="item sphinx-data-tab-V2luZG93cw== docutils container">
+<div class="docutils container">
+Windows</div>
+</div>
+</div>
+<div class="ui bottom attached sphinx-tab tab segment sphinx-data-tab-TGludXgvTWFj active docutils container">
+<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">npm</span> <span class="n">run</span> <span class="n">watch</span>
+</pre></div>
+</div>
+</div>
+<div class="ui bottom attached sphinx-tab tab segment sphinx-data-tab-V2luZG93cw== docutils container">
+<div class="code powershell highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">npm</span> <span class="n">run</span> <span class="n">watch</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Assuming webpack runs successfully, you now have <code class="docutils literal notranslate"><span class="pre">homepage/scripts/__bundle__.js</span></code>. If you open it up, you’ll find our JS near the end of the file.</p>
+</div>
+<div class="section" id="living-in-two-terminals">
+<h3>Living in Two Terminals<a class="headerlink" href="#living-in-two-terminals" title="Permalink to this headline">¶</a></h3>
+<p>Now that you’re using bundles, you need TWO terminals running during development. The following should be running in their own terminal windows:</p>
+<ol class="arabic simple">
+<li><code class="docutils literal notranslate"><span class="pre">python3</span> <span class="pre">manage.py</span> <span class="pre">runserver</span></code> is your normal Django web server.</li>
+<li><code class="docutils literal notranslate"><span class="pre">npm</span> <span class="pre">run</span> <span class="pre">watch</span></code> recreates bundles you modify the support files.</li>
+</ol>
+</div>
+<div class="section" id="bundle-links-in-templates">
+<h3>Bundle Links in Templates<a class="headerlink" href="#bundle-links-in-templates" title="Permalink to this headline">¶</a></h3>
+<p>As you learned in other sections, DMP automatically creates <code class="docutils literal notranslate"><span class="pre">&lt;script&gt;</span></code> and <code class="docutils literal notranslate"><span class="pre">&lt;style&gt;</span></code> links in your html templates. In our project, this happens in <code class="docutils literal notranslate"><span class="pre">base.htm</span></code>, during the call to <code class="docutils literal notranslate"><span class="pre">${</span> <span class="pre">django_mako_plus.links(self)</span> <span class="pre">}</span></code>. By default, DMP uses <em>Providers</em> to generate old-style script and style tags directly to the respective files.</p>
+<p>We need swap the default Providers with bundle-basd Providers link to <code class="docutils literal notranslate"><span class="pre">homepage/scripts/__bundle__.js</span></code>. This is done by setting <code class="docutils literal notranslate"><span class="pre">CONTENT_PROVIDERS</span></code> in <code class="docutils literal notranslate"><span class="pre">settings.py</span></code>:</p>
+<div class="code python highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">TEMPLATES</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">{</span>
+        <span class="s1">&#39;NAME&#39;</span><span class="p">:</span> <span class="s1">&#39;django_mako_plus&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;BACKEND&#39;</span><span class="p">:</span> <span class="s1">&#39;django_mako_plus.MakoTemplates&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;OPTIONS&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="c1"># providers - these provide the &lt;link&gt; and &lt;script&gt; tags that the webpack providers make</span>
+            <span class="s1">&#39;CONTENT_PROVIDERS&#39;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span> <span class="s1">&#39;provider&#39;</span><span class="p">:</span> <span class="s1">&#39;django_mako_plus.JsContextProvider&#39;</span> <span class="p">},</span>
+                <span class="p">{</span> <span class="s1">&#39;provider&#39;</span><span class="p">:</span> <span class="s1">&#39;django_mako_plus.WebpackJsLinkProvider&#39;</span> <span class="p">},</span>
+            <span class="p">],</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+<p>These new Providers give the following behavior:</p>
+<ol class="arabic simple">
+<li><code class="docutils literal notranslate"><span class="pre">JsContextProvider</span></code> is the same as before. <a class="reference external" href="/static_context.html">It sets values from the view into the JS context</a>.</li>
+<li><code class="docutils literal notranslate"><span class="pre">WebpackJsLinkProider</span></code> creates the link for the bundle: <code class="docutils literal notranslate"><span class="pre">&lt;script</span> <span class="pre">src=&quot;/static/homepage/scripts/__bundle__.js&quot;&gt;</span></code> and calls the bundle functions for the current template.</li>
+<li>If you prefer to bundle CSS and JS separately, enable code splitting in webpack’s config and add <code class="docutils literal notranslate"><span class="pre">django_mako_plus.WebpackCssLinkProvider</span></code> to the content providers list. This tutorial puts everything in the JS bundle for simplicity.</li>
+</ol>
+</div>
+<div class="section" id="test-it">
+<h3>Test It!<a class="headerlink" href="#test-it" title="Permalink to this headline">¶</a></h3>
+<p>We’ve configured webpack, created the entry file and output bundle, and set DMP to link correctly. The only thing remaining is to run the Django server and see the benefits of your work!</p>
+<div class="sphinx-tabs docutils container">
+<div class="ui top attached tabular menu sphinx-menu docutils container">
+<div class="active item sphinx-data-tab-TGludXgvTWFj docutils container">
+<div class="docutils container">
+Linux/Mac</div>
+</div>
+<div class="item sphinx-data-tab-V2luZG93cw== docutils container">
+<div class="docutils container">
+Windows</div>
+</div>
+</div>
+<div class="ui bottom attached sphinx-tab tab segment sphinx-data-tab-TGludXgvTWFj active docutils container">
+<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># in terminal 1:</span>
+<span class="n">python3</span> <span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">runserver</span>
+
+<span class="c1"># in terminal 2:</span>
+<span class="n">npm</span> <span class="n">run</span> <span class="n">watch</span>
+</pre></div>
+</div>
+</div>
+<div class="ui bottom attached sphinx-tab tab segment sphinx-data-tab-V2luZG93cw== docutils container">
+<div class="code powershell highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># in terminal 1:</span>
+<span class="n">python</span> <span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">runserver</span>
+
+<span class="c1"># in terminal 2:</span>
+<span class="n">npm</span> <span class="n">run</span> <span class="n">watch</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Grab some popcorn and a drink, and take your browser to <code class="docutils literal notranslate"><span class="pre">http://localhost:8000/</span></code>. Be sure to check the following:</p>
+<ul class="simple">
+<li>Right-click and Inspect to view the JS console. The messages in our .js files and/or any errors will show there.</li>
+<li>Also in the inspector, check out the CSS rules (which are now coming from the bundle).</li>
+<li>Right-click and view the page source. You’ll see the links that DMP created. If you see the old <code class="docutils literal notranslate"><span class="pre">&lt;script&gt;</span></code> and <code class="docutils literal notranslate"><span class="pre">&lt;style&gt;</span></code> links, check your settings file.</li>
+</ul>
+</div>
+</div>
+<div class="section" id="building-for-production">
+<h2>Building for Production<a class="headerlink" href="#building-for-production" title="Permalink to this headline">¶</a></h2>
+<p>To create a production bundle, issue webpack a build command:</p>
+<div class="sphinx-tabs docutils container">
+<div class="ui top attached tabular menu sphinx-menu docutils container">
+<div class="active item sphinx-data-tab-TGludXgvTWFj docutils container">
+<div class="docutils container">
+Linux/Mac</div>
+</div>
+<div class="item sphinx-data-tab-V2luZG93cw== docutils container">
+<div class="docutils container">
+Windows</div>
+</div>
+</div>
+<div class="ui bottom attached sphinx-tab tab segment sphinx-data-tab-TGludXgvTWFj active docutils container">
+<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">npm</span> <span class="n">run</span> <span class="n">build</span>
+</pre></div>
+</div>
+</div>
+<div class="ui bottom attached sphinx-tab tab segment sphinx-data-tab-V2luZG93cw== docutils container">
+<div class="code powershell highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">npm</span> <span class="n">run</span> <span class="n">build</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>If you look at the generated bundle file, you’ll find it is minified and ready for deployment.</p>
+</div>
+<div class="section" id="further-questions">
+<h2>Further Questions?<a class="headerlink" href="#further-questions" title="Permalink to this headline">¶</a></h2>
+<p>The <a class="reference internal" href="static_faq.html#static-faq"><span class="std std-ref">FAQ</span></a> goes over several different situations.</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="static_faq.html" class="btn btn-neutral float-right" title="FAQ" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="static_compilers.html" class="btn btn-neutral" title="Sass, Less, &amp; More" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Conan C. Albrecht
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/sphinx_tabs/tabs.js"></script>
+        <script type="text/javascript" src="_static/sphinx_tabs/semantic-ui-2.2.10/tab.min.js"></script>
+    
+
+  
+
+  <script type="text/javascript" src="_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
