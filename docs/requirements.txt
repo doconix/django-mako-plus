@@ -1,1 +1,2 @@
+sphinx==1.8.2
 sphinx-tabs==1.1.10
