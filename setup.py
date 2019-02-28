@@ -105,7 +105,7 @@ setup(
   version=VERSION,
   author='Conan Albrecht',
   author_email='doconix@gmail.com',
-  url="http://django-mako-plus.readthedocs.io/",
+  url="http://doconix.github.io/django-mako-plus/",
   download_url="https://github.com/doconix/django-mako-plus/archive/master.zip",
   packages=packages,
   package_data = {

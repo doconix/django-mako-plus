@@ -34,13 +34,16 @@ with open(DMP_COMMON, 'w') as fout:
 
 # backport and minify dmp-common.src.js
 print('Backporting and minifying JS...')
-
 run_command('npm', 'run', 'build', cwd='./django_mako_plus/webroot/')
 
 # update the archives
 print('Creating the archives...')
 shutil.make_archive('app_template', 'zip', root_dir='./django_mako_plus/app_template')
 shutil.make_archive('project_template', 'zip', root_dir='./django_mako_plus/project_template')
+
+# make the documentation, since GitHub Pages reads it as static HTML
+print('Making the documentation...')
+run_command('make', 'html', cwd='./docs-src')
 
 # run the setup and upload
 print()

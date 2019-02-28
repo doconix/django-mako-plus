@@ -16,10 +16,15 @@ Django-Mako-Plus
 
 *Routing Django to Mako since 2013*
 
-Code
--------------------------
+:Documentation:
 
-https://github.com/doconix/django-mako-plus
+    http://doconix.github.io/django-mako-plus/
+
+
+:Code:
+
+    https://github.com/doconix/django-mako-plus
+
 
 Features
 --------------------------
