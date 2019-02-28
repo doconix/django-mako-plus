@@ -1,2 +1,4 @@
-sphinx==1.8.2
+Sphinx==1.8.2
+sphinx-rtd-theme==0.4.2
 sphinx-tabs==1.1.10
+sphinxcontrib-websupport==1.1.0
