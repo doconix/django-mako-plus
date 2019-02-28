@@ -20,3 +20,4 @@ help:
 html: Makefile
 	@python3 make_page_labels.py
 	@$(SPHINXBUILD) "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
+	@touch ${BUILDDIR}.nojekyll
