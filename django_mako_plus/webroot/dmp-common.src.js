@@ -3,7 +3,7 @@ if (!window["DMP_CONTEXT"]) {
     /** Main DMP class - a single instance of this class is set as window.DMP_CONTEXT */
     class DMP {
         constructor() {
-            this.__version__ = '5.10.11';    // DMP version to check for mismatches
+            this.__version__ = '5.10.12';    // DMP version to check for mismatches
             this.contexts = {};             // id -> context1
             this.templates = {};            // app/template -> info
             this.lastContext = null;        // last inserted context (see getAll() below)
@@ -47,8 +47,8 @@ if (!window["DMP_CONTEXT"]) {
 
         /*
             Convenience method to retrieve context values. If multiple script contexts are found,
-            such as when ajax retrieves the same template snippet multiple times, the last one is
-            returned. This method does not return the full context objects but rather the values dictionary.
+            such as when ajax retrieves the same template snippet multiple times, the first "previously unreturned"
+            one is returned. This method does not return the full context objects but rather the values dictionary.
 
                 DMP_CONTEXT.get()                                           // values for the currently-executing script
                 DMP_CONTEXT.get('myapp/mytemplate')                         // values for the app/template
@@ -57,10 +57,18 @@ if (!window["DMP_CONTEXT"]) {
         */
         get(option) {
             let contexts = this.getAll(option);
-            if (contexts.length == 0) {
-                return undefined;
+            // step through the contexts and return the first one that hasn't ever been returned.
+            // this way if the script content has been disconnected from the <script> tag (jQuery, I'm looking at you),
+            // we return the contexts in the best order possible.
+            for (let i = 0; i < contexts.length; i++) {
+                let context = contexts[i];
+                if (!context.returnedByGet || i == contexts.length - 1) {   // if at last context, return it anyway
+                    context.returnedByGet = true;
+                    return context.values;
+                }
             }
-            return contexts[contexts.length - 1].values;
+            // if we get here, the list was empty
+            return undefined;
         }
 
         /*
