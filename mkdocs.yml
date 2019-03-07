@@ -1,2 +1,8 @@
 site_name: Django-Mako-Plus
+site_name: Django-Mako-Plus
+site_url: http://doconix.github.io/django-mako-plus/
+site_description: Routing Django to Mako since 2013
+site_author: Conan C. Albrecht
+
+
 docs_dir: docs-rtd
