@@ -48,5 +48,5 @@
         "build": "./node_modules/.bin/webpack --mode development && ./node_modules/.bin/webpack --mode production",
         "watch": "./node_modules/.bin/webpack --mode development --watch"
     },
-    "version": "5.10.12"
+    "version": "5.11.1"
 }

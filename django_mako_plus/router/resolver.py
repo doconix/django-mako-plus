@@ -198,7 +198,9 @@ class PagePattern(URLPattern):
                     RequestViewWrapper(routing_data),
                     match.args,
                     match.kwargs,
-                    match.url_name,
+                    url_name=match.url_name,
+                    app_names=routing_data.app,
+                    route=str(self.pattern),
                 )
             except ViewDoesNotExist as vdne:
                 # we had a pattern match, but we couldn't get a callable using kwargs from the pattern
@@ -212,7 +214,7 @@ class PagePattern(URLPattern):
                     'tried': [[ PatternStub(match.url_name, msg, PatternStub(match.url_name, msg, None)) ]],
                     'path': path,
                 })
-
+        raise Resolver404({'path': path})
 
 
 from collections import namedtuple
