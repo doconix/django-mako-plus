@@ -1,3 +1,4 @@
+from django import VERSION
 from django.apps import apps
 from django.core.exceptions import ViewDoesNotExist
 from django.http import Http404
@@ -194,14 +195,23 @@ class PagePattern(URLPattern):
                     match.kwargs.pop('dmp_function', None) or 'process_request',
                     match.kwargs.pop('dmp_urlparams', '').strip(),
                 )
-                return ResolverMatch(
-                    RequestViewWrapper(routing_data),
-                    match.args,
-                    match.kwargs,
-                    url_name=match.url_name,
-                    app_names=routing_data.app,
-                    route=str(self.pattern),
-                )
+                if VERSION < (2, 2):
+                    return ResolverMatch(
+                        RequestViewWrapper(routing_data),
+                        match.args,
+                        match.kwargs,
+                        url_name=match.url_name,
+                        app_names=routing_data.app,
+                    )
+                else:
+                    return ResolverMatch(
+                        RequestViewWrapper(routing_data),
+                        match.args,
+                        match.kwargs,
+                        url_name=match.url_name,
+                        app_names=routing_data.app,
+                        route=str(self.pattern),
+                    )
             except ViewDoesNotExist as vdne:
                 # we had a pattern match, but we couldn't get a callable using kwargs from the pattern
                 # create a "pattern" so the programmer can see what happened
