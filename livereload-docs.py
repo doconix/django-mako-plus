@@ -30,7 +30,7 @@ class Runner:
             return stdout
 
 server = Server()
-server.watch('docs-src/*.rst', Runner(['make', 'html', '--always-make' ], cwd='docs'))
-server.watch('docs-src/_static/*.css', Runner(['make', 'html', '--always-make' ], cwd='docs'))
+server.watch('docs-src/*.rst', Runner(['make', 'html', '--always-make' ], cwd='docs-src'))
+server.watch('docs-src/_static/*.css', Runner(['make', 'html', '--always-make' ], cwd='docs-src'))
 print('PORT IS 5500')
 server.serve(root='docs/', restart_delay=1)

@@ -1,7 +1,7 @@
 .. _install_as_renderer:
 
-Using DMP to Render Mako Templates
-=======================================
+Rendering Mako Templates (vanilla Django)
+======================================================================
 
 The following shows how to use DMP to render Mako templates only -- without any of DMP's other features.  It uses DMP as a normal template engine within a vanilla Django project.
 
@@ -70,6 +70,18 @@ Create a Vanilla Django Project
     ]
 
 
+5. Add to ``INSTALLED_APPS``:
+
+In settings.py, be sure you've added ``polls`` to your installed apps.
+
+.. code-block:: python
+
+    INSTALLED_APPS = [
+        ...
+        'polls',
+    ]
+
+
 Run the project and go to `http://localhost:8000/ <http://localhost:8000/>`_.  Note that everything above is a normal Django project -- DMP isn't in play yet.
 
 
@@ -86,7 +98,7 @@ Enable the DMP Template Engine
         'polls',
     ]
 
-2. Add the DMP template engine in ``settings.py``.
+2. Add the DMP template engine in ``settings.py``.  You've already got a ``TEMPLATES`` list in settings, so replace or modify it with the following:
 
 .. code-block:: python
 
@@ -172,31 +184,31 @@ Let's create a new endpoint that uses the Mako engine.  We'll leave the ``index`
 
     <html>
     <body>
-        The current time is ${ now.strftime('c') }
+        The current time is ${ now.strftime('%c') }
     </body>
     </html>
 
-Note that your two templates are in **different folders**:
-
-* ``mysite/polls/templates/polls/index.html``
-* ``mysite/polls/templates/another.html``
-
-See how the extra ``polls`` is missing in the DMP template?  That's because DMP template discovery algorithm is "app-aware".  When the view function specifies ``polls/another.html``, DMP interprets it using the pattern ``appname/templatename``.
-
-The following code instructs DMP to go to the ``polls`` app and look for the ``another.html`` template.  Where Django would enumerate all your apps in search of the file, DMP looks for exactly one file path.
+Note that your two templates are in **different folders**: ``another.html`` is in the main templates directory, while ``index.html`` is in the polls subdirectory. This difference is a result of the differing algorithms that Django and DMP use to find templates. When we render ``polls/another.html``, we're explicitly telling DMP to 1) go to the ``polls`` app and 2) load the ``another.html`` template.
 
 .. code-block:: python
 
-    # goes directly to `polls/templates/another.html`
-    render(request, 'polls/another.html', context)
+    mysite/
+        polls/
+            ...
+            views.py
+            templates/
+                another.html
+                polls/
+                    index.html
 
-We could adjust the DMP algorithm to match Django's locations, but the difference gives a nice separation when both Mako and Django templates exist in the same project.
+Double-check your project to ensure the template files exist in the locations shows above.
 
 
-3. Add a path in ``mysite/mysite/urls.py``:
+3. Add a path in ``mysite/mysite/urls.py``, and register ``polls`` as a DMP app:
 
 .. code-block:: python
 
+    from django.apps import apps
     from django.urls import path
     from polls import views
 
@@ -206,7 +218,12 @@ We could adjust the DMP algorithm to match Django's locations, but the differenc
         path('another', views.another, name='another'),
     ]
 
+    # manually register the polls app with DMP
+    apps.get_app_config('django_mako_plus').register_app('polls')
 
-Run the project and go to `http://localhost:8000/another <http://localhost:8000/another>`_.
+Since DMP routes by convention, it could potentially "take over" template rendering--pushing out the normal Django router. In a vanilla Django project, this is probably not what you want to happen. Therefore, apps must be explicitly registered (as above) so DMP knows its app limits.
+
+
+Run the project and go to `http://localhost:8000/polls/another <http://localhost:8000/polls/another>`_.
 
 Congratulations.  You've got a standard Django project that can render Mako syntax.

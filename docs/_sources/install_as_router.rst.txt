@@ -1,6 +1,6 @@
 .. _install_as_router:
 
-Using DMP to Route by Convention
+Routing by Convention
 ======================================
 
 One of DMP's primary missions is to fix Django's need to have every. endpoint. in. your. system. listed. in. urls.py.  The following shows how to use DMP to route by convention -- essentially shrinking your ``urls.py`` file to only a few lines.

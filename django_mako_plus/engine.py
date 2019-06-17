@@ -115,7 +115,6 @@ class MakoTemplates(BaseEngine):
             raise TemplateDoesNotExist("Cannot locate loader when app is None")
         if not isinstance(app, AppConfig):
             app = apps.get_app_config(app)
-
         # get the loader with the path of this app+subdir
         path = os.path.join(app.path, subdir)
 

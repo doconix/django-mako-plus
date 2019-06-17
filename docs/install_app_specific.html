@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Limiting DMP to Specific Apps &mdash; Django-Mako-Plus  documentation</title>
+  <title>Limiting to Specific Apps &mdash; Django-Mako-Plus  documentation</title>
   
 
   
@@ -30,7 +30,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Custom URL Patterns" href="install_custom_urls.html" />
-    <link rel="prev" title="Using DMP to Route by Convention" href="install_as_router.html" /> 
+    <link rel="prev" title="Routing by Convention" href="install_as_router.html" /> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -87,9 +87,9 @@
 <li class="toctree-l2"><a class="reference internal" href="install_new.html">New Project</a></li>
 <li class="toctree-l2"><a class="reference internal" href="install_existing.html">Existing Project</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="install.html#minimal-dmp">Minimal DMP</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="install_as_renderer.html">Using DMP to Render Mako Templates</a></li>
-<li class="toctree-l3"><a class="reference internal" href="install_as_router.html">Using DMP to Route by Convention</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">Limiting DMP to Specific Apps</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="install_as_renderer.html">Rendering Mako Templates (vanilla Django)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="install_as_router.html">Routing by Convention</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Limiting to Specific Apps</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#an-example">An Example</a></li>
 </ul>
 </li>
@@ -152,7 +152,7 @@
         
           <li><a href="install.html">Installation</a> &raquo;</li>
         
-      <li>Limiting DMP to Specific Apps</li>
+      <li>Limiting to Specific Apps</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -169,8 +169,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="limiting-dmp-to-specific-apps">
-<span id="install-app-specific"></span><h1>Limiting DMP to Specific Apps<a class="headerlink" href="#limiting-dmp-to-specific-apps" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="limiting-to-specific-apps">
+<span id="install-app-specific"></span><h1>Limiting to Specific Apps<a class="headerlink" href="#limiting-to-specific-apps" title="Permalink to this headline">¶</a></h1>
 <p>DMP normally registers patterns for all “local” apps in your project.  That’s the apps that are located beneath your project root.</p>
 <p>This happens when you include DMP’s URL file in your project. DMP iterates your local apps, and it adds patterns for each using <code class="docutils literal notranslate"><span class="pre">app_resolver()</span></code>.  See these <a class="reference external" href="http://github.com/doconix/django-mako-plus/blob/master/django_mako_plus/router/resolver.py">methods (especially _dmp_paths_for_app()) in the source</a>.</p>
 <p>You can disable the automatic registration of apps with DMP by removing the <code class="docutils literal notranslate"><span class="pre">include('',</span> <span class="pre">'django_mako_plus')</span></code> line from <code class="docutils literal notranslate"><span class="pre">urls.py</span></code>.  With this line removed, DMP won’t inject any convention-based patterns into your project.</p>
@@ -181,7 +181,6 @@
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.apps</span> <span class="kn">import</span> <span class="n">apps</span>
 <span class="kn">from</span> <span class="nn">django.conf.urls</span> <span class="kn">import</span> <span class="n">url</span><span class="p">,</span> <span class="n">include</span>
 <span class="kn">from</span> <span class="nn">django.views.static</span> <span class="kn">import</span> <span class="n">serve</span>
-<span class="kn">from</span> <span class="nn">django_mako_plus</span> <span class="kn">import</span> <span class="n">app_resolver</span>
 
 <span class="kn">import</span> <span class="nn">os</span>
 
@@ -196,8 +195,8 @@
     <span class="p">),</span>
 
     <span class="c1"># manually register the polls and account apps</span>
-    <span class="n">app_resolver</span><span class="p">(</span><span class="s1">&#39;polls&#39;</span><span class="p">),</span>
-    <span class="n">app_resolver</span><span class="p">(</span><span class="s1">&#39;account&#39;</span><span class="p">),</span>
+    <span class="n">apps</span><span class="o">.</span><span class="n">get_app_config</span><span class="p">(</span><span class="s1">&#39;django_mako_plus&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">register_app</span><span class="p">(</span><span class="s1">&#39;polls&#39;</span><span class="p">)</span>
+    <span class="n">apps</span><span class="o">.</span><span class="n">get_app_config</span><span class="p">(</span><span class="s1">&#39;django_mako_plus&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">register_app</span><span class="p">(</span><span class="s1">&#39;account&#39;</span><span class="p">)</span>
 
 <span class="p">]</span>
 </pre></div>
@@ -216,7 +215,7 @@
         <a href="install_custom_urls.html" class="btn btn-neutral float-right" title="Custom URL Patterns" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="install_as_router.html" class="btn btn-neutral" title="Using DMP to Route by Convention" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="install_as_router.html" class="btn btn-neutral" title="Routing by Convention" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

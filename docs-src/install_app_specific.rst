@@ -1,6 +1,6 @@
 .. _install_app_specific:
 
-Limiting DMP to Specific Apps
+Limiting to Specific Apps
 =======================================================
 
 DMP normally registers patterns for all "local" apps in your project.  That's the apps that are located beneath your project root.
@@ -21,7 +21,6 @@ The following ``urls.py`` file enables DMP-style patterns on just two apps: ``po
     from django.apps import apps
     from django.conf.urls import url, include
     from django.views.static import serve
-    from django_mako_plus import app_resolver
 
     import os
 
@@ -36,7 +35,7 @@ The following ``urls.py`` file enables DMP-style patterns on just two apps: ``po
         ),
 
         # manually register the polls and account apps
-        app_resolver('polls'),
-        app_resolver('account'),
+        apps.get_app_config('django_mako_plus').register_app('polls')
+        apps.get_app_config('django_mako_plus').register_app('account')
 
     ]

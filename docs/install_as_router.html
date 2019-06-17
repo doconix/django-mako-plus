@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Using DMP to Route by Convention &mdash; Django-Mako-Plus  documentation</title>
+  <title>Routing by Convention &mdash; Django-Mako-Plus  documentation</title>
   
 
   
@@ -29,8 +29,8 @@
   <link rel="stylesheet" href="_static/dmp.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Limiting DMP to Specific Apps" href="install_app_specific.html" />
-    <link rel="prev" title="Using DMP to Render Mako Templates" href="install_as_renderer.html" /> 
+    <link rel="next" title="Limiting to Specific Apps" href="install_app_specific.html" />
+    <link rel="prev" title="Rendering Mako Templates (vanilla Django)" href="install_as_renderer.html" /> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -87,14 +87,14 @@
 <li class="toctree-l2"><a class="reference internal" href="install_new.html">New Project</a></li>
 <li class="toctree-l2"><a class="reference internal" href="install_existing.html">Existing Project</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="install.html#minimal-dmp">Minimal DMP</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="install_as_renderer.html">Using DMP to Render Mako Templates</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">Using DMP to Route by Convention</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="install_as_renderer.html">Rendering Mako Templates (vanilla Django)</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Routing by Convention</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#install-django-mako-and-dmp">Install Django, Mako, and DMP</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#create-a-vanilla-django-project">Create a Vanilla Django Project</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#create-an-endpoint">Create an Endpoint</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="install_app_specific.html">Limiting DMP to Specific Apps</a></li>
+<li class="toctree-l3"><a class="reference internal" href="install_app_specific.html">Limiting to Specific Apps</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="install.html#customizations">Customizations</a></li>
@@ -154,7 +154,7 @@
         
           <li><a href="install.html">Installation</a> &raquo;</li>
         
-      <li>Using DMP to Route by Convention</li>
+      <li>Routing by Convention</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -171,8 +171,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="using-dmp-to-route-by-convention">
-<span id="install-as-router"></span><h1>Using DMP to Route by Convention<a class="headerlink" href="#using-dmp-to-route-by-convention" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="routing-by-convention">
+<span id="install-as-router"></span><h1>Routing by Convention<a class="headerlink" href="#routing-by-convention" title="Permalink to this headline">¶</a></h1>
 <p>One of DMP’s primary missions is to fix Django’s need to have every. endpoint. in. your. system. listed. in. urls.py.  The following shows how to use DMP to route by convention – essentially shrinking your <code class="docutils literal notranslate"><span class="pre">urls.py</span></code> file to only a few lines.</p>
 <p>DMP still uses <code class="docutils literal notranslate"><span class="pre">urls.py</span></code>, but it adds another URL resolver to Django’s built in ones (such as the regex and path resolvers).  As explained in the tutorial, DMP resolves a url like <code class="docutils literal notranslate"><span class="pre">/homepage/index/</span></code> as follows:</p>
 <ul class="simple">
@@ -297,10 +297,10 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="install_app_specific.html" class="btn btn-neutral float-right" title="Limiting DMP to Specific Apps" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="install_app_specific.html" class="btn btn-neutral float-right" title="Limiting to Specific Apps" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="install_as_renderer.html" class="btn btn-neutral" title="Using DMP to Render Mako Templates" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="install_as_renderer.html" class="btn btn-neutral" title="Rendering Mako Templates (vanilla Django)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
