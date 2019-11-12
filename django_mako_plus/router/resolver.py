@@ -193,7 +193,7 @@ class PagePattern(URLPattern):
                     match.kwargs.pop('dmp_app', None) or self.dmp.options['DEFAULT_APP'],
                     match.kwargs.pop('dmp_page', None) or self.dmp.options['DEFAULT_PAGE'],
                     match.kwargs.pop('dmp_function', None) or 'process_request',
-                    match.kwargs.pop('dmp_urlparams', '').strip(),
+                    (match.kwargs.pop('dmp_urlparams', None) or '').strip(),
                 )
                 if VERSION < (2, 2):
                     return ResolverMatch(
