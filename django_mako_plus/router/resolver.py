@@ -218,7 +218,7 @@ class PagePattern(URLPattern):
                 # this is a hack, but the resolver error page doesn't give other options.
                 # the sad face is to catch the dev's attention in Django's printout
                 msg = "◉︵◉ Pattern matched, but discovery failed: {}".format(vdne)
-                log.debug("%s %s", match.url_name, msg)
+                log.exception("%s %s", match.url_name, msg)
                 raise Resolver404({
                     # this is a bit convoluted, but it makes the PatternStub work with Django 1.x and 2.x
                     'tried': [[ PatternStub(match.url_name, msg, PatternStub(match.url_name, msg, None)) ]],
