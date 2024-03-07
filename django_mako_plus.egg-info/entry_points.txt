@@ -1,0 +1,2 @@
+[console_scripts]
+django_mako_plus = django_mako_plus.__main__:main

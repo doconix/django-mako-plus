@@ -1,0 +1,24 @@
+Metadata-Version: 2.1
+Name: django-mako-plus
+Version: 5.11.2
+Summary: Django+Mako: Routing by Convention, Python-Centric Template Language
+Home-page: http://doconix.github.io/django-mako-plus/
+Download-URL: https://github.com/doconix/django-mako-plus/archive/master.zip
+Author: Conan Albrecht
+Author-email: doconix@gmail.com
+License: Apache 2.0
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Programming Language :: Python :: 3 :: Only
+Classifier: Framework :: Django
+Classifier: Framework :: Django :: 1.11
+Classifier: Framework :: Django :: 1.10
+Classifier: Framework :: Django :: 1.9
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: Apache Software License
+Classifier: Operating System :: OS Independent
+Classifier: Topic :: Software Development
+License-File: license.txt
+Requires-Dist: django>=1.9.0
+Requires-Dist: mako>=1.0.0
+
+Django+Mako: Routing by Convention, Python-Centric Template Language

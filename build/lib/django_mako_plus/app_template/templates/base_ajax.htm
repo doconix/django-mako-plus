@@ -1,0 +1,11 @@
+## this is the skeleton of all *ajax* pages on our site - page snippets that are retrieved with Ajax.
+## it's primary function is to insert the CSS and JS for the ajax file template inheritance
+
+## render the static file links with the same name as this template
+${ django_mako_plus.links(self) }
+
+## render the ajax content
+<%block name="content">
+    Sub-templates should place their ajax content here.
+</%block>
+

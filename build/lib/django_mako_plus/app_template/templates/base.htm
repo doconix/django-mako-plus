@@ -1,0 +1,36 @@
+## this is the skeleton of all pages on in this app - it defines the basic html tags
+<!DOCTYPE html>
+<html>
+    <meta charset="UTF-8">
+    <head>
+
+        <title>DMP</title>
+
+        ## add any site-wide scripts or CSS here; for example, jquery:
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+        ## render the static file links with the same name as this template
+        <script src="/django_mako_plus/dmp-common.min.js"></script>
+        ${ django_mako_plus.links(self) }
+
+    </head>
+    <body>
+
+        <header>
+            <img src="${ STATIC_URL }homepage/media/python.png" alt="python" />
+            <div class="title">Welcome to <br/> DMP!</div>
+        </header>
+
+        <main>
+            <%block name="content">
+                Site content goes here in sub-templates.
+            </%block>
+        </main>
+
+        <footer>
+            <div><a href="http://doconix.github.io/django-mako-plus/">Online Documentation</a></div>
+            <div><a href="https://github.com/doconix/django-mako-plus/">DMP on GitHub</a></div>
+        </footer>
+
+    </body>
+</html>
