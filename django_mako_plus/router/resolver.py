@@ -12,7 +12,6 @@ try:
 except ImportError:
     from django.conf.urls import url as re_path  # Django 1.x
     from django.urls import RegexURLPattern as URLPattern
-    from django.conf.urls import include
     RegexPattern = None
 
 from ..util import merge_dicts, log

@@ -1,6 +1,6 @@
-from django.conf.urls import url, include
+from django.urls import include, path
 
 urlpatterns = [
     # adds all DMP-enabled apps
-    url('', include('django_mako_plus.urls')),
+    path('', include('django_mako_plus.urls')),
 ]

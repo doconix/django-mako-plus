@@ -1,0 +1,9 @@
+django_mako_plus
+django_mako_plus\converter
+django_mako_plus\management
+django_mako_plus\management\commands
+django_mako_plus\provider
+django_mako_plus\router
+django_mako_plus\template
+django_mako_plus\templatetags
+django_mako_plus\util

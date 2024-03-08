@@ -152,17 +152,17 @@ In the installation procedures above, you set your urls.py file to look somethin
 
 .. code-block:: python
 
-    from django.conf.urls import url, include
+    from django.urls import include, path, re_path
     from django.contrib import admin
 
     urlpatterns = [
         # the built-in Django administrator
-        url(r'^admin/', admin.site.urls),
+        re_path(r'^admin/', admin.site.urls),
 
         # urls for any third-party apps go here
 
-        # adds all DMP-enabled apps
-        url('', include('django_mako_plus.urls')),
+        # the DMP router - this should normally be the last URL listed
+        path('', include('django_mako_plus.urls')),
     ]
 
 Rather than listing every. single. page. on. your. site. in the ``urls.py`` file, the router figures out the destination via a convention. The first url part is taken as the app to go to, and the second url part is taken as the view to call. See the advanced topics if you want to customize this behavior.

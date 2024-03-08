@@ -86,7 +86,7 @@ This document contains upgrade notes for those already using DMP.  We started th
 
     A new variable, ``request.dmp.view_type`` gives information about the type of view function being rendered.
 
-    2. If you are using DMP's built-in ``urls.py`` file --``url('', include('django_mako_plus.urls')),`` -- no other changes are necessary.
+    2. If you are using DMP's built-in ``urls.py`` file --``path('', include('django_mako_plus.urls')),`` -- no other changes are necessary.
 
     If you have custom URLs, you need to change ``re_path`` to ``dmp_path`` in your urls.  See DMP's ``urls.py`` file on GitHub as well as the rewritten Installation section of the docs for an example.
 

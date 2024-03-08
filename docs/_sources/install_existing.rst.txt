@@ -145,10 +145,10 @@ Add the Django-Mako-Plus router in your ``urls.py`` file (the default admin is a
 
 .. code-block:: python
 
-    from django.conf.urls import url, include
+    from django.urls import include, path, re_path
 
     urlpatterns = [
-        url('', include('django_mako_plus.urls')),
+        path('', include('django_mako_plus.urls')),
     ]
 
 

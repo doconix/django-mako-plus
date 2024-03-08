@@ -1,0 +1,52 @@
+{
+    "author": "Conan Albrecht",
+    "babel": {
+        "presets": [
+            [
+                "@babel/env",
+                {
+                    "loose": false,
+                    "modules": false,
+                    "targets": {
+                        "chrome": "58",
+                        "ie": "10"
+                    },
+                    "useBuiltIns": "usage"
+                }
+            ]
+        ],
+        "sourceMaps": "inline"
+    },
+    "bugs": {
+        "url": "https://github.com/doconix/django-mako-plus/issues"
+    },
+    "dependencies": {
+        "@babel/polyfill": "^7.2.5"
+    },
+    "description": "Django Mako Plus helper script",
+    "devDependencies": {
+        "@babel/cli": "^7.2.3",
+        "@babel/core": "^7.2.2",
+        "@babel/preset-env": "^7.3.1",
+        "babel-loader": "^8.0.5",
+        "webpack": "^4.29.2",
+        "webpack-cli": "^3.2.3"
+    },
+    "directories": {
+        "doc": "docs"
+    },
+    "homepage": "https://github.com/doconix/django-mako-plus#readme",
+    "license": "Apache-2.0",
+    "main": "./dmp-common.js",
+    "name": "django-mako-plus",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/doconix/django-mako-plus.git"
+    },
+    "scripts": {
+        "babel": "./node_modules/.bin/babel ./dmp-common.src.js --out-file ./dmp-common.js",
+        "build": "./node_modules/.bin/webpack --mode development && ./node_modules/.bin/webpack --mode production",
+        "watch": "./node_modules/.bin/webpack --mode development --watch"
+    },
+    "version": "5.11.2"
+}
